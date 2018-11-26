@@ -11,7 +11,7 @@
 #include "VGraphicsElement.h"
 #include "VSimTriangle.h"
 
-class VGraphicsTriangle: protected VGraphicsElement {
+class VGraphicsTriangle: public VGraphicsElement {
 public: 
     
 /**

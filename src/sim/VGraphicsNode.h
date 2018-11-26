@@ -13,7 +13,7 @@
 #include "VSimNode.h"
 
 
-class VGraphicsNode: protected VGraphicsElement {
+class VGraphicsNode: public VGraphicsElement {
 public: 
     
 /**

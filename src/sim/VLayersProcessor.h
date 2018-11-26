@@ -14,7 +14,7 @@
 #include "VSimulator.h"
 
 
-class VLayersProcessor: protected VSimulationClass {
+class VLayersProcessor: public VSimulationClass {
 public: 
     typedef std::shared_ptr<VLayersProcessor> ptr;
     typedef std::shared_ptr<const VLayersProcessor> const_ptr;

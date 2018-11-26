@@ -7,8 +7,8 @@
 #ifndef _VSIMELEMENT_H
 #define _VSIMELEMENT_H
 
-#include <VMaterial.h>
 #include <QColor>
+#include "VMaterial.h"
 
 class VSimElement {
 public: 
@@ -29,6 +29,7 @@ void setVisible(bool visible) noexcept;
 bool isVisible() const noexcept;
 const QColor& getColor() const noexcept;
 virtual void reset() = 0;
+protected:
     const VCloth::const_ptr m_pMaterial;
 private: 
     bool m_visible;

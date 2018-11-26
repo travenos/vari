@@ -5,14 +5,24 @@
 
 
 #include "VSimulationFacade.h"
+#include <Inventor/Qt/SoQt.h>
 
 /**
  * VSimulationFacade implementation
  */
 
 
-VSimulationFacade::VSimulationFacade(){
-
+VSimulationFacade::VSimulationFacade(QWidget *parent):
+    m_pSimulator(new VSimulator()),
+    m_pLayersProcessor(new VLayersProcessor(m_pSimulator))
+{
+    SoQt::init(parent);
+    m_pGraphicsViewer.reset(new VGraphicsViewer(parent, m_pSimulator));
+    std::shared_ptr<std::mutex> p_nodesLock(new std::mutex);
+    std::shared_ptr<std::mutex> p_trianglesLock(new std::mutex);
+    m_pSimulator->setMutexes(p_nodesLock, p_trianglesLock);
+    m_pGraphicsViewer->setMutexes(p_nodesLock, p_trianglesLock);
+    m_pLayersProcessor->setMutexes(p_nodesLock, p_trianglesLock);
 }
 
 void VSimulationFacade::startSimulation() noexcept {
@@ -79,7 +89,7 @@ void VSimulationFacade::setMaterial(unsigned int layer, const VCloth &material) 
 }
 
 void VSimulationFacade::draw() noexcept {
-
+    m_pGraphicsViewer->render();
 }
 
 /**

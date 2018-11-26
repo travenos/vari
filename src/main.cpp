@@ -1,5 +1,6 @@
 #include "v_main_window.h"
 #include <QApplication>
+#include <Inventor/Qt/SoQt.h>
 
 int main(int argc, char *argv[])
 {

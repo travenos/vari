@@ -20,8 +20,8 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QWidget" name="widget" native="true"/>
-      <widget class="QWidget" name="widget_2" native="true">
+      <widget class="QWidget" name="viewerWidget" native="true"/>
+      <widget class="QWidget" name="controlWidget" native="true">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="QPushButton" name="pushButton">

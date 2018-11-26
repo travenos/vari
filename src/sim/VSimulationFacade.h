@@ -13,10 +13,12 @@
 #include "VLayersProcessor.h"
 #include "VGraphicsViewer.h"
 
+class QWidget;
+
 class VSimulationFacade {
 public: 
     
-VSimulationFacade();
+VSimulationFacade(QWidget *parent);
 void startSimulation() noexcept;
 void stopSimulation() noexcept;
 void resetSimulation() noexcept;
@@ -67,9 +69,8 @@ void newModel() noexcept;
  * @param filename
  */
 void loadFromFile(const QString &filename) noexcept ;
-private: 
-    //VSimulationClass::mutex_ptr m_pNodesLock;    //TODO: Not make mutexes members of class
-    //VSimulationClass::mutex_ptr m_pTrianglesLock;
+
+private:
     VSimulator::ptr m_pSimulator;
     VGraphicsViewer::ptr m_pGraphicsViewer;
     VLayersProcessor::ptr m_pLayersProcessor;

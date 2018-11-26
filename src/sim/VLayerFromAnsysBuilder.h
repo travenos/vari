@@ -10,7 +10,7 @@
 #include "VLayerFromFileBuilder.h"
 #include <QString>
 
-class VLayerFromAnsysBuilder: protected VLayerFromFileBuilder {
+class VLayerFromAnsysBuilder: public VLayerFromFileBuilder {
 public: 
     
 /**

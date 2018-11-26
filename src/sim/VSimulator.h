@@ -15,7 +15,7 @@
 #include "VSimTriangle.h"
 #include "VLayer.h"
 
-class VSimulator: protected VSimulationClass {
+class VSimulator: public VSimulationClass {
 public: 
     typedef std::shared_ptr<VSimulator> ptr;
     typedef std::shared_ptr<const VSimulator> const_ptr;

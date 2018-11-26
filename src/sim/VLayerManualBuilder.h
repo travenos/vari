@@ -10,7 +10,7 @@
 #include "VLayerAbstractBuilder.h"
 
 
-class VLayerManualBuilder: protected VLayerAbstractBuilder {
+class VLayerManualBuilder: public VLayerAbstractBuilder {
 public: 
     
 VLayer::ptr build() noexcept;

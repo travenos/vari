@@ -13,7 +13,7 @@
 #include "VSimTriangle.h"
 #include "VSimulationParametres.h"
 
-class VLayerFromFileBuilder: protected VLayerAbstractBuilder {
+class VLayerFromFileBuilder: public VLayerAbstractBuilder {
 public: 
     
 /**
