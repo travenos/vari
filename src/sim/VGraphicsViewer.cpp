@@ -18,22 +18,22 @@ VGraphicsViewer::VGraphicsViewer(VSimulator::ptr simulator) {
 
 }
 
-void VGraphicsViewer::updateConfiguration() {
+void VGraphicsViewer::updateConfiguration() noexcept {
 
 }
 
-void VGraphicsViewer::updateTriangleColors() {
+void VGraphicsViewer::updateTriangleColors() noexcept {
 
 }
 
-void VGraphicsViewer::clearNodes() {
+void VGraphicsViewer::clearNodes() noexcept {
 
 }
 
-void VGraphicsViewer::clearTriangles() {
+void VGraphicsViewer::clearTriangles() noexcept {
 
 }
 
-void VGraphicsViewer::clearAll() {
+void VGraphicsViewer::clearAll() noexcept {
 
 }

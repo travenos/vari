@@ -12,16 +12,16 @@
 
 class VSimulationClass {
 public: 
-    typedef std::shared_::ptr<std::mutex> mutex_::ptr;
+    typedef std::shared_ptr<std::mutex> mutex_ptr;
 /**
  * @param nodesLock
  * @param trianglesLock
  */
-setMutexes(mutex_::ptr nodesLock, mutex_::ptr trianglesLock) noexcept;
+void setMutexes(mutex_ptr nodesLock, mutex_ptr trianglesLock) noexcept;
 
 protected:
-    mutable mutex_::ptr m_pNodesLock;
-    mutable mutex_::ptr m_::ptrianglesLock;
+    mutable mutex_ptr m_pNodesLock;
+    mutable mutex_ptr m_pTrianglesLock;
 };
 
 #endif //_VSIMULATIONCLASS_H

@@ -10,14 +10,14 @@
 #include <vector>
 #include <memory>
 #include <Inventor/Qt/viewers/SoQtExaminerViewer.h>
-#include "VSimulationClass.h"
 #include "VGraphicsNode.h"
 #include "VGraphicsTriangle.h"
+#include "VSimulator.h"
 
 class VGraphicsViewer: public SoQtExaminerViewer, protected VSimulationClass {
 public: 
-    typedef std::shared_::ptr<VGraphicsViewer> ::ptr;
-    typedef std::shared_::ptr<const VGraphicsViewer> const_::ptr;
+    typedef std::shared_ptr<VGraphicsViewer> ptr;
+    typedef std::shared_ptr<const VGraphicsViewer> const_ptr;
     /**
      * @param simulator
      */

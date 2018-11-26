@@ -16,36 +16,38 @@
  * @param p_material
  * @param p_param
  */
-VSimNode::VSimNode(QVector3D& pos, VMaterial::const_ptr p_material, VSimulationParametres::const_ptr p_param) {
+VSimNode::VSimNode(QVector3D& pos, VCloth::const_ptr p_material, VSimulationParametres::const_ptr p_param):
+    VSimElement(p_material)
+{
 
 }
 
 /**
  * @param role
  */
-void VSimNode::setRole(VNodeRole role) {
+void VSimNode::setRole(VNodeRole role) noexcept {
 
 }
 
 /**
  * @return VNodeRole
  */
-VSimNode::VNodeRole VSimNode::getRole() const {
+VSimNode::VNodeRole VSimNode::getRole() const noexcept {
     return m_role;
 }
 
-void VSimNode::calculate() {
+void VSimNode::calculate() noexcept {
 
 }
 
-void VSimNode::commit() {
+void VSimNode::commit() noexcept {
 
 }
 
 /**
  * @return double
  */
-double VSimNode::getPressure() const {
+double VSimNode::getPressure() const noexcept {
     return m_currentPressure;
 }
 
@@ -53,35 +55,35 @@ double VSimNode::getPressure() const {
  * @param neighbour
  * @param layer
  */
-void VSimNode::addNeighbour(const_ptr, VLayerSequence layer) {
+void VSimNode::addNeighbour(const_ptr, VLayerSequence layer) noexcept {
 
 }
 
-void VSimNode::clearAllNeighbours() {
+void VSimNode::clearAllNeighbours() noexcept {
 
 }
 
 /**
  * @param layer
  */
-void VSimNode::clearNeighbours(VLayerSequence layer) {
+void VSimNode::clearNeighbours(VLayerSequence layer) noexcept {
 
 }
 
 /**
  * @return const QVector3D&
  */
-const QVector3D& VSimNode::getPosition() const {
+const QVector3D& VSimNode::getPosition() const noexcept {
     return m_position;
 }
 
 /**
  * @return double
  */
-double VSimNode::getMedianDistance() const{
+double VSimNode::getMedianDistance() const noexcept{
     return 0.0;
 }
 
-void VSimNode::reset() {
+void VSimNode::reset() noexcept {
 
 }

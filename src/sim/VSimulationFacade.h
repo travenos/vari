@@ -43,8 +43,8 @@ void enableLayer(unsigned int disabledLayer) noexcept;
  * @param layer
  * @param material
  */
-void setMaterial(unsigned int layer, const VMaterial& material) noexcept;
-void draw();    
+void setMaterial(unsigned int layer, const VCloth& material) noexcept;
+void draw() noexcept;
 /**
  * @param pressure
  */
@@ -66,14 +66,14 @@ void newModel() noexcept;
 /**
  * @param filename
  */
-void loadFromFile(const QString &filename);
+void loadFromFile(const QString &filename) noexcept ;
 private: 
-    VSimulator::mutex_::ptr m_pNodesLock;
-    VSimulator::mutex_::ptr m_::ptrianglesLock;
-    VSimulator::::ptr m_pSimulator;
-    VGraphicsViewer::::ptr m_pGraphicsViewer;
-    VLayersProcessor::::ptr m_pLayersProcessor;
-    VSimulationParametres::::ptr m_pParametres;
+    //VSimulationClass::mutex_ptr m_pNodesLock;    //TODO: Not make mutexes members of class
+    //VSimulationClass::mutex_ptr m_pTrianglesLock;
+    VSimulator::ptr m_pSimulator;
+    VGraphicsViewer::ptr m_pGraphicsViewer;
+    VLayersProcessor::ptr m_pLayersProcessor;
+    VSimulationParametres::ptr m_pParametres;
 };
 
 #endif //_VSIMULATIONFACADE_H

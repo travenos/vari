@@ -19,12 +19,12 @@ public:
 /**
  * @param simNode
  */
-VGraphicsNode(VNode::ptr simNode);
+VGraphicsNode(VSimNode::const_ptr simNode);
 void updatePosition() noexcept;
 private: 
-    SoTranslation* m_::ptranslation;
+    SoTranslation* m_pTranslation;
     SoCube* m_pCube;
-    VNode::ptr m_pSimNode;
+    VSimNode::const_ptr m_pSimNode;
 };
 
 #endif //_VGRAPHICSNODE_H

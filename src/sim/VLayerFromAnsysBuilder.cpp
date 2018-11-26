@@ -12,17 +12,19 @@
 
 
 /**
- * @param filename
- * @param param VSimParam::ptr
+ * @param filename const QString
+ * @param param VSimulationParametres::const_ptr
  */
-VLayerFromAnsysBuilder::VLayerFromAnsysBuilder(const QString &filename, VSimParam::ptr simParam) {
+VLayerFromAnsysBuilder::VLayerFromAnsysBuilder(const QString &filename, VSimulationParametres::const_ptr simParam):
+    VLayerFromFileBuilder(filename, simParam)
+{
 
 }
 
-void VLayerFromAnsysBuilder::importNodes() {
+void VLayerFromAnsysBuilder::importNodes()  noexcept {
 
 }
 
-void VLayerFromAnsysBuilder::importConnections() {
+void VLayerFromAnsysBuilder::importConnections()  noexcept {
 
 }

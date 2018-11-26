@@ -17,7 +17,7 @@
  * @param p_node1
  * @param p_node2
  */
-VSimTriangle::VSimTriangle(VMaterial::const_ptr p_material,
+VSimTriangle::VSimTriangle(VCloth::const_ptr p_material,
                            VSimNode::const_ptr p_node0,
                            VSimNode::const_ptr p_node1,
                            VSimNode::const_ptr p_node2) :
@@ -30,21 +30,21 @@ VSimTriangle::VSimTriangle(VMaterial::const_ptr p_material,
 /**
  * @return std::vector<QVector3D>
  */
-std::vector<QVector3D> VSimTriangle::getVertices() const{
+std::vector<QVector3D> VSimTriangle::getVertices() const noexcept {
     return {
-        m_pNodes[0]->getPosition(),
-        m_pNodes[1]->getPosition(),
-        m_pNodes[2]->getPosition()
+        m_pNodes[0].lock()->getPosition(),
+        m_pNodes[1].lock()->getPosition(),
+        m_pNodes[2].lock()->getPosition()
     };
 }
 
-void VSimTriangle::updateColor() {
+void VSimTriangle::updateColor() noexcept {
 
 }
 
 /**
  * @return QColor&
  */
-const QColor &VSimTriangle::getColor() const {
+const QColor &VSimTriangle::getColor() const noexcept {
     return m_color;
 }

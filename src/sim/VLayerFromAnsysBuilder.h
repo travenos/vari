@@ -14,10 +14,10 @@ class VLayerFromAnsysBuilder: protected VLayerFromFileBuilder {
 public: 
     
 /**
- * @param filename
- * @param param VSimParam::ptr
+ * @param filename const QString
+ * @param param VSimulationParametres::const_ptr
  */
-VLayerFromAnsysBuilder(const QString &filename, VSimParam::ptr simParam);
+VLayerFromAnsysBuilder(const QString &filename, VSimulationParametres::const_ptr simParam);
 void importNodes() noexcept;
 void importConnections() noexcept;
 };

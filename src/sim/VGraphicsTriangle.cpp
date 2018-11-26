@@ -14,10 +14,12 @@
 /**
  * @param simTriangle
  */
-VGraphicsTriangle::VGraphicsTriangle(VTriangle::ptr simTriangle) {
+VGraphicsTriangle::VGraphicsTriangle(VSimTriangle::const_ptr simTriangle):
+VGraphicsElement(std::dynamic_pointer_cast<const VSimElement>(simTriangle))
+{
 
 }
 
-void VGraphicsTriangle::updatePosition() {
+void VGraphicsTriangle::updatePosition() noexcept {
 
 }

@@ -17,11 +17,11 @@ public:
 /**
  * @param simTriangle
  */
-VGraphicsTriangle(VTriangle::ptr simTriangle);
+VGraphicsTriangle(VSimTriangle::const_ptr simTriangle);
 void updatePosition() noexcept;
 private: 
-    SoCoordinate3* m_::ptriangleCoordinates;
-    VTriangle::ptr m_pSimTriangle;
+    SoCoordinate3* m_pTtriangleCoordinates;
+    VSimTriangle::const_ptr m_pSimTriangle;
 };
 
 #endif //_VGRAPHICSTRIANGLE_H

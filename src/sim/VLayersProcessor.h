@@ -11,12 +11,13 @@
 #include "VLayerAbstractBuilder.h"
 #include "VLayer.h"
 #include "VSimulationParametres.h"
+#include "VSimulator.h"
 
 
 class VLayersProcessor: protected VSimulationClass {
 public: 
-    typedef std::shared_::ptr<VLayersProcessor> ::ptr;
-    typedef std::shared_::ptr<const VLayersProcessor> const_::ptr;
+    typedef std::shared_ptr<VLayersProcessor> ptr;
+    typedef std::shared_ptr<const VLayersProcessor> const_ptr;
 /**
  * @param simulator
  */
@@ -54,7 +55,7 @@ void enableLayer(unsigned int disabledLayer) noexcept;
  * @param layer
  * @param material
  */
-void setMaterial(unsigned int layer, VMaterial& material) noexcept;
+void setMaterial(unsigned int layer, VCloth& material) noexcept;
     
 /**
  * @param parametres

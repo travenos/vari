@@ -17,8 +17,8 @@
 
 class VSimulator: protected VSimulationClass {
 public: 
-    typedef std::shared_::ptr<VSimulator> ::ptr;
-    typedef std::shared_::ptr<const VSimulator> const_::ptr;
+    typedef std::shared_ptr<VSimulator> ptr;
+    typedef std::shared_ptr<const VSimulator> const_ptr;
 
     struct VSimulationInfo
     {
@@ -47,24 +47,24 @@ void reset() noexcept;
  * Update an information about active nodes and triangles (m_activeNodes, m_triangles)
  * @param layers
  */
-void setActiveNodes(std::vector<VLayer::::ptr>& layers) noexcept;
+void setActiveNodes(std::vector<VLayer::ptr>& layers) noexcept(false);
 void getSimulationInfo(VSimulationInfo &info) const noexcept;
-void createGraphicsNodes() noexcept;
+void createGraphicsNodes() noexcept (false);
 int getIterationNumber() const noexcept;
 
 private: 
     /**
  * Vector of pointers to all nodes which can be processed
  */
-std::vector<VSimNode::::ptr> m_activeNodes;
+std::vector<VSimNode::ptr> m_activeNodes;
     /**
  * Vector of all triangles which can be processed
  */
-std::vector<VSimTriangle::::ptr> m_triangles;
+std::vector<VSimTriangle::ptr> m_triangles;
     /**
  * A thread, where simulation cycle is being processed
  */
-std::unique_::ptr<std::thread> m_pSimulationThread;
+std::unique_ptr<std::thread> m_pSimulationThread;
     /**
  * Flag, representing if the simulation process is currently active
  */
@@ -74,20 +74,17 @@ std::atomic<bool> m_simulatingFlag;
  */
 std::atomic<bool> m_stopFlag;
     std::atomic<int> m_iteration;
-    std::vector<VNode::ptr> m_activeNodes;
     
 /**
  * A function, which is being executed in the simulation thread
  */
-void simulationCycle();
+void simulationCycle()  noexcept;
     
-void calculateNodes();
+void calculateNodes() noexcept;
     
-void commitNodes();
+void commitNodes() noexcept;
     
-void setTriangleColors();
+void setTriangleColors() noexcept;
 };
-
-typedef VSimulator::ptr std::shared_::ptr<VSimulator>;
 
 #endif //_VSIMULATOR_H

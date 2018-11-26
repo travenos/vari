@@ -12,6 +12,7 @@ SET(HEADER_FILES
     VLayer.h
     VLayerManualBuilder.h
     VLayersProcessor.h
+    VMaterial.h
     VSimElement.h
     VSimNode.h
     VSimTriangle.h

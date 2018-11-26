@@ -16,49 +16,49 @@
  * @param triangles
  * @param material
  */
-VLayer::VLayer(std::vector<VNode::ptr> &nodes, std::vector<VTriangle::ptr> &triangles, const VMaterial& material) {
+VLayer::VLayer(std::vector<VSimNode::ptr> &nodes, std::vector<VSimTriangle::ptr> &triangles, const VCloth& material) {
 
 }
 
 /**
  * @param visible
  */
-void VLayer::setVisible(bool visible) {
+void VLayer::setVisible(bool visible) noexcept {
 
 }
 
 /**
  * @return bool
  */
-bool VLayer::isVisible() const {
+bool VLayer::isVisible() const noexcept {
     return false;
 }
 
 /**
  * @return double
  */
-double VLayer::getMedianDistance() const{
+double VLayer::getMedianDistance() const  noexcept{
     return 0.0;
 }
 
 /**
  * @return vector<&VNode::ptr>
  */
-std::vector<VNode::ptr> &VLayer::getNodes() {
-    return null::ptr;
+std::vector<VSimNode::ptr> &VLayer::getNodes() noexcept {
+    //return NULL;
 }
 
 /**
  * @return vector<&VTriangle::ptr>
  */
-std::vector<VTriangle::ptr> &VLayer::getTriangles() {
-    return null::ptr;
+std::vector<VSimTriangle::ptr> &VLayer::getTriangles() noexcept {
+    //return NULL;
 }
 
-void VLayer::setMateial(const VMaterial &material){
+void VLayer::setMateial(const VCloth &material) noexcept {
 
 }
 
-void VLayer::reset() {
+void VLayer::reset() noexcept {
 
 }

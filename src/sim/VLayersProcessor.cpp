@@ -8,8 +8,6 @@
 
 /**
  * VLayersProcessor implementation
- * 
- * Typedef of std::vector<VLayer>
  */
 
 
@@ -23,28 +21,28 @@ VLayersProcessor::VLayersProcessor(VSimulator::ptr simulator) {
 /**
  * @return size_type
  */
-size_t VLayersProcessor::getLayersNumber() const {
-    return null;
+size_t VLayersProcessor::getLayersNumber() const noexcept {
+
 }
 
 /**
  * @return size_type
  */
-size_t VLayersProcessor::getInactiveLayersNumber() const {
-    return null;
+size_t VLayersProcessor::getInactiveLayersNumber() const noexcept {
+
 }
 
 /**
  * @param builder
  */
-void VLayersProcessor::addLayer(VLayerAbstractBuilder& builder) {
+void VLayersProcessor::addLayer(VLayerAbstractBuilder& builder) noexcept {
 
 }
 
 /**
  * @param layer
  */
-void VLayersProcessor::removeLayer(unsigned int layer) {
+void VLayersProcessor::removeLayer(unsigned int layer) noexcept {
 
 }
 
@@ -52,21 +50,21 @@ void VLayersProcessor::removeLayer(unsigned int layer) {
  * @param layer
  * @param visible
  */
-void VLayersProcessor::setVisibleLayer(unsigned int layer, bool visible) {
+void VLayersProcessor::setVisibleLayer(unsigned int layer, bool visible) noexcept {
 
 }
 
 /**
  * @param layer
  */
-void VLayersProcessor::disableLayer(unsigned int layer) {
+void VLayersProcessor::disableLayer(unsigned int layer) noexcept {
 
 }
 
 /**
  * @param disabledLayer
  */
-void VLayersProcessor::enableLayer(unsigned int disabledLayer) {
+void VLayersProcessor::enableLayer(unsigned int disabledLayer) noexcept {
 
 }
 
@@ -74,37 +72,29 @@ void VLayersProcessor::enableLayer(unsigned int disabledLayer) {
  * @param layer
  * @param material
  */
-void VLayersProcessor::setMaterial(unsigned int layer, VMaterial& material) {
+void VLayersProcessor::setMaterial(unsigned int layer, VCloth& material) noexcept {
 
 }
 
 /**
  * @param parametres
  */
-void VLayersProcessor::setParametres(VSimulationParametres& parametres) {
+void VLayersProcessor::setParametres(VSimulationParametres& parametres) noexcept {
 
 }
 
 /**
  * @return double
  */
-double VLayersProcessor::getMedianDistance() const {
+double VLayersProcessor::getMedianDistance() const noexcept {
     return 0.0;
 }
 
-void VLayersProcessor::reset() {
+void VLayersProcessor::reset() noexcept {
 
 }
 
-void VLayersProcessor::clear() {
-
-}
-
-/**
- * @param layer1
- * @param layer2
- */
-void VLayersProcessor::createConnections(unsigned int layer1, unsigned int layer2) {
+void VLayersProcessor::clear() noexcept {
 
 }
 
@@ -112,27 +102,35 @@ void VLayersProcessor::createConnections(unsigned int layer1, unsigned int layer
  * @param layer1
  * @param layer2
  */
-void VLayersProcessor::removeConnections(unsigned int layer1, unsigned int layer2) {
+void VLayersProcessor::createConnections(unsigned int layer1, unsigned int layer2) noexcept {
+
+}
+
+/**
+ * @param layer1
+ * @param layer2
+ */
+void VLayersProcessor::removeConnections(unsigned int layer1, unsigned int layer2) noexcept {
 
 }
 
 /**
  * @param layer
  */
-void VLayersProcessor::decreasePosition(unsigned int layer) {
+void VLayersProcessor::decreasePosition(unsigned int layer) noexcept {
 
 }
 
 /**
  * @param layer
  */
-void VLayersProcessor::increasePosition(unsigned int layer) {
+void VLayersProcessor::increasePosition(unsigned int layer) noexcept {
 
 }
 
 /**
  * @param layer
  */
-void VLayersProcessor::putOnTop(unsigned int layer) {
+void VLayersProcessor::putOnTop(unsigned int layer) noexcept {
 
 }

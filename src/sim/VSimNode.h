@@ -9,14 +9,19 @@
 
 #include <QVector3D>
 #include <vector>
-#include "VSimElement.h"
+#include <set>
+#include <memory>
 #include "VSimulationParametres.h"
-#include "VSimTriangle.h"
+#include "VSimElement.h"
 
-class VSimNode: protected VSimElement {
+class VSimTriangle;
+
+class VSimNode: public VSimElement {
 public: 
     typedef std::shared_ptr<VSimNode> ptr;
     typedef std::shared_ptr<const VSimNode> const_ptr;
+    typedef std::weak_ptr<VSimNode> weak_ptr;
+    typedef std::weak_ptr<const VSimNode> const_weak_ptr;
 
     enum VLayerSequence { PREVIOUS, CURRENT, NEXT };
     enum VNodeRole { NORMAL, INJECTION, VACUUM };
@@ -25,7 +30,7 @@ public:
  * @param p_material
  * @param p_param
  */
-VSimNode(QVector3D& pos, VMaterial::const_ptr p_material, VSimulationParametres::const_ptr p_param);
+VSimNode(QVector3D& pos, VCloth::const_ptr p_material, VSimulationParametres::const_ptr p_param);
     
 /**
  * @param role
@@ -53,16 +58,16 @@ private:
 
 struct VLayeredNeighbours
 {
-    std::vector<VSimNode::const_ptr> prevLayerNeighbours;
-    std::vector<VSimNode::const_ptr> currentLayerNeighbours;
-    std::vector<VSimNode::const_ptr> nextLayerNeighbours;
+    std::set<VSimNode::const_weak_ptr> prevLayerNeighbours;
+    std::set<VSimNode::const_weak_ptr> currentLayerNeighbours;
+    std::set<VSimNode::const_weak_ptr> nextLayerNeighbours;
 };
 
     VNodeRole m_role;
     double m_currentPressure;
     double m_newPressure;
     VLayeredNeighbours m_neighbours;
-    std::vector<VSimTriangle::ptr> m_pTriangles;
+    std::vector<std::weak_ptr<VSimTriangle>> m_pTriangles;
     QVector3D m_position;
     const VSimulationParametres::const_ptr m_pParam;
 };

@@ -9,6 +9,9 @@
 
 #include <map>
 #include "VLayerAbstractBuilder.h"
+#include "VSimNode.h"
+#include "VSimTriangle.h"
+#include "VSimulationParametres.h"
 
 class VLayerFromFileBuilder: protected VLayerAbstractBuilder {
 public: 
@@ -17,13 +20,13 @@ public:
  * @param filename
  * @param param VSimParam::ptr
  */
-VLayerFromFileBuilder(const QString &filename, VSimParam::ptr simParam);
+VLayerFromFileBuilder(const QString &filename, VSimulationParametres::const_ptr simParam);
 VLayer::ptr build() noexcept;
 
 protected: 
-    std::map<int, VNode::ptr> m_nodes;
-    std::map<int, VTriangle::ptr> m_triangles;
-    VSimParam::ptr m_param;
+    std::map<int, VSimNode::ptr> m_nodes;
+    std::map<int, VSimTriangle::ptr> m_triangles;
+    VSimulationParametres::ptr m_param;
     
 void addShapePart() noexcept;
 void createConnections() noexcept;

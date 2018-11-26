@@ -15,14 +15,16 @@
  * @param filename
  * @param param VSimParam::ptr
  */
-VLayerFromGmeshBuilder::VLayerFromGmeshBuilder(const QString &filename, VSimParam::ptr simParam) {
+VLayerFromGmeshBuilder::VLayerFromGmeshBuilder(const QString &filename, VSimulationParametres::const_ptr simParam):
+VLayerFromFileBuilder(filename, simParam)
+{
 
 }
 
-void VLayerFromGmeshBuilder::importNodes() {
+void VLayerFromGmeshBuilder::importNodes() noexcept {
 
 }
 
-void VLayerFromGmeshBuilder::importConnections() {
+void VLayerFromGmeshBuilder::importConnections() noexcept {
 
 }

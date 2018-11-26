@@ -21,14 +21,14 @@ VSimulator::VSimulator() {
 /**
  * Start the simulation thread
  */
-void VSimulator::startSimulation() {
+void VSimulator::startSimulation() noexcept {
 
 }
 
 /**
  * Finish the simulation using a flag m_stopFlag
  */
-void VSimulator::stopSimulation() {
+void VSimulator::stopSimulation() noexcept {
 
 }
 
@@ -36,11 +36,11 @@ void VSimulator::stopSimulation() {
  * Check if simulation thread is currently active
  * @return bool
  */
-bool VSimulator::isSimulating() const {
+bool VSimulator::isSimulating() const noexcept {
     return m_simulatingFlag.load();
 }
 
-void VSimulator::reset() {
+void VSimulator::reset() noexcept {
 
 }
 
@@ -48,40 +48,40 @@ void VSimulator::reset() {
  * Update an information about active nodes and triangles (m_activeNodes, m_triangles)
  * @param layers
  */
-void VSimulator::setActiveNodes(std::vector<VLayer::::ptr> &layers) {
+void VSimulator::setActiveNodes(std::vector<VLayer::ptr> &layers) noexcept(false) {
 
 }
 
-void VSimulator::getSimulationInfo(VSimulationInfo &info) const {
+void VSimulator::getSimulationInfo(VSimulationInfo &info) const noexcept {
 
 }
 
-void VSimulator::createGraphicsNodes() {
+void VSimulator::createGraphicsNodes() noexcept(false) {
 
 }
 
 /**
  * @return int
  */
-int VSimulator::getIterationNumber() const {
+int VSimulator::getIterationNumber() const  noexcept {
     return 0;
 }
 
 /**
  * A function, which is being executed in the simulation thread
  */
-void VSimulator::simulationCycle() {
+void VSimulator::simulationCycle() noexcept {
 
 }
 
-void VSimulator::calculateNodes() {
+void VSimulator::calculateNodes() noexcept {
 
 }
 
-void VSimulator::commitNodes() {
+void VSimulator::commitNodes() noexcept {
 
 }
 
-void VSimulator::setTriangleColors() {
+void VSimulator::setTriangleColors() noexcept {
 
 }

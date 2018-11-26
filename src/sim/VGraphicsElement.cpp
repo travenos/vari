@@ -14,14 +14,14 @@
 /**
  * @param simElement
  */
-VGraphicsElement::VGraphicsElement(VSimElem::ptr simElement) {
+VGraphicsElement::VGraphicsElement(VSimElement::const_ptr simElement) {
 
 }
 
-void VGraphicsElement::updateAll() {
+void VGraphicsElement::updateAll() noexcept {
 
 }
 
-void VGraphicsElement::updateColor() {
+void VGraphicsElement::updateColor() noexcept {
 
 }
