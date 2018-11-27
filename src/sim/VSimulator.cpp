@@ -15,7 +15,7 @@
  * Default constructor
  */
 VSimulator::VSimulator() {
-
+    m_newDataLock.lock();
 }
 
 /**
@@ -67,11 +67,21 @@ int VSimulator::getIterationNumber() const  noexcept {
     return 0;
 }
 
+void VSimulator::waitForNewData() const noexcept
+{
+    m_newDataLock.lock();
+}
+
+void VSimulator::cancelWaitingForNewData() const noexcept
+{
+    m_newDataLock.unlock();
+}
+
 /**
  * A function, which is being executed in the simulation thread
  */
 void VSimulator::simulationCycle() noexcept {
-
+    m_newDataLock.unlock();
 }
 
 void VSimulator::calculateNodes() noexcept {

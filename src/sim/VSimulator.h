@@ -51,6 +51,8 @@ void setActiveNodes(std::vector<VLayer::ptr>& layers) noexcept(false);
 void getSimulationInfo(VSimulationInfo &info) const noexcept;
 void createGraphicsNodes() noexcept (false);
 int getIterationNumber() const noexcept;
+void waitForNewData() const noexcept;
+void cancelWaitingForNewData() const noexcept;
 
 private: 
     /**
@@ -75,15 +77,13 @@ std::atomic<bool> m_simulatingFlag;
 std::atomic<bool> m_stopFlag;
     std::atomic<int> m_iteration;
     
+    mutable std::mutex m_newDataLock;
 /**
  * A function, which is being executed in the simulation thread
  */
-void simulationCycle()  noexcept;
-    
-void calculateNodes() noexcept;
-    
-void commitNodes() noexcept;
-    
+void simulationCycle()  noexcept;    
+void calculateNodes() noexcept;    
+void commitNodes() noexcept;    
 void setTriangleColors() noexcept;
 };
 

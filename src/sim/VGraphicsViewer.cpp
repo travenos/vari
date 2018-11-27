@@ -16,7 +16,6 @@
 
 #include <Inventor/nodes/SoText3.h>
 #include "VGraphicsViewer.h"
-
 /**
  * VGraphicsViewer implementation
  */
@@ -27,9 +26,22 @@
  */
 VGraphicsViewer::VGraphicsViewer(QWidget *parent, VSimulator::ptr simulator) :
     SoQtExaminerViewer (parent),
-    m_pSimulator(simulator)
+    m_pSimulator(simulator),
+    m_pRenderWaiter(new VRenderWaiter(this)),
+    m_pRenderWaiterThread(new QThread)
 {
     initGraph();
+    m_pRenderWaiter->moveToThread(m_pRenderWaiterThread);
+    connect(m_pRenderWaiter, SIGNAL(askForRender()), this, SLOT(doRender()));
+    connect(m_pRenderWaiterThread, SIGNAL(started()), m_pRenderWaiter, SLOT(process()));
+    connect(m_pRenderWaiter, SIGNAL(finished()), m_pRenderWaiterThread, SLOT(quit()));
+    connect(m_pRenderWaiter, SIGNAL(finished()), m_pRenderWaiter, SLOT(deleteLater()));
+    connect(m_pRenderWaiterThread, SIGNAL(finished()), m_pRenderWaiterThread, SLOT(deleteLater()));
+    m_pRenderWaiterThread->start();
+}
+
+VGraphicsViewer::~VGraphicsViewer(){
+    m_pRenderWaiter->stop();
 }
 
 void VGraphicsViewer::updateConfiguration() noexcept {
@@ -176,3 +188,39 @@ SoSeparator* VGraphicsViewer::make_line_sg() noexcept
     return sep;
 }
 */
+
+void VGraphicsViewer::doRender() noexcept
+{
+    setAutoRedraw(false);
+    updateTriangleColors();
+    render();
+    setAutoRedraw(true);
+    m_renderSuccessLock.unlock();
+}
+
+VRenderWaiter::VRenderWaiter(VGraphicsViewer *graphicsViewer):
+    m_pGraphicsViewer(graphicsViewer)
+{
+    m_stopFlag.store(false);
+}
+
+void VRenderWaiter::process() noexcept
+{
+    while(true)
+    {
+        m_pGraphicsViewer->m_pSimulator->waitForNewData();
+        m_pGraphicsViewer->m_renderSuccessLock.lock();
+        if (!m_stopFlag.load())
+            emit askForRender();
+        else
+            break;
+    }
+    emit finished();
+}
+
+void VRenderWaiter::stop() noexcept
+{
+    m_stopFlag.store(true);
+    m_pGraphicsViewer->m_pSimulator->cancelWaitingForNewData();
+    m_pGraphicsViewer->m_renderSuccessLock.unlock();
+}

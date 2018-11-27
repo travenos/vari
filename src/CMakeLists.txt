@@ -29,28 +29,46 @@ FIND_PACKAGE(Qt5Gui     REQUIRED)
 FIND_PACKAGE(Qt5Widgets     REQUIRED)
 FIND_PACKAGE(Qt5Sql     REQUIRED)
 
-FIND_PACKAGE(Coin REQUIRED)
-FIND_PACKAGE(SoQt REQUIRED)
-
 IF (${Qt5Core_FOUND})
     MESSAGE(STATUS "Found Qt 5 ${Qt5Core_VERSION}")
     MESSAGE(STATUS "Qt 5 Core Directory: ${Qt5Core_DIR}\n")
-ENDIF()
-IF (${Coin_FOUND})
-    MESSAGE(STATUS "Found Coin3D ${Coin_VERSION}")
-    MESSAGE(STATUS "Coin3D Directory: ${Coin_DIR}\n")
-ENDIF()
-IF (${SoQt_FOUND})
-    MESSAGE(STATUS "Found SoQt ${SoQt_VERSION}")
-    MESSAGE(STATUS "SoQt Directory: ${SoQt_DIR}\n")
 ENDIF()
 
 INCLUDE_DIRECTORIES(${Qt5Core_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${Qt5Gui_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${Qt5Widgets_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${Qt5Sql_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${Coin_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${SoQt_INCLUDE_DIRS})
+
+#Add user interface
+#CMAKE_POLICY(SET CMP0071 NEW)
+SET(CMAKE_AUTOMOC ON)
+SET(CMAKE_AUTOUIC ON)
+
+SET(QT_UI_FORMS
+    v_main_window.ui
+    v_materials_window.ui
+    )
+
+SET(QT_RESOURCES)
+
+SET(HEADER_FILES
+    v_main_window.h
+    v_materials_window.h
+    v_database_interactor.h
+    v_simulation_interactor.h
+    )
+
+SET(SOURCE_FILES
+    v_main_window.cpp
+    v_materials_window.cpp
+    v_database_interactor.cpp
+    v_simulation_interactor.cpp
+    )
+QT5_ADD_RESOURCES(GENERATED_QT_RESOURCES ${QT_RESOURCES})
+
+#Add simulator module
+SET(SIMULATOR_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/sim")
+ADD_SUBDIRECTORY(${SIMULATOR_DIRECTORY})
 
 #Set application version
 FIND_PACKAGE(Git REQUIRED)
@@ -68,46 +86,13 @@ ELSE()
 ENDIF()
 MESSAGE(STATUS "${PROJECT_NAME} version: ${GIT_VERSION_LONG}\n")
 
-#Add user interface
-#CMAKE_POLICY(SET CMP0071 NEW)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
-SET(QT_HEADER_FILES
-    v_main_window.h
-    v_materials_window.h
-    )
-
-SET(QT_UI_FORMS
-    v_main_window.ui
-    v_materials_window.ui
-    )
-
-SET(QT_RESOURCES)
-
-SET(HEADER_FILES
-    v_database_interactor.h
-    v_simulation_interactor.h
-    )
-
-SET(SOURCE_FILES
-    v_main_window.cpp
-    v_materials_window.cpp
-    v_database_interactor.cpp
-    v_simulation_interactor.cpp
-    )
-QT5_ADD_RESOURCES(GENERATED_QT_RESOURCES ${QT_RESOURCES})
-
-#Add simulator module
-SET(SIMULATOR_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/sim")
-ADD_SUBDIRECTORY(${SIMULATOR_DIRECTORY})
-
 #Create executable
 ADD_EXECUTABLE(${EXE_NAME}
     "main.cpp"
     ${HEADER_FILES}
     ${SOURCE_FILES}
-    ${QT_HEADER_FILES}
     ${GENERATED_QT_RESOURCES}
+    ${QT_UI_FORMS}
     )
 
 TARGET_LINK_LIBRARIES(${EXE_NAME} Qt5::Core)
