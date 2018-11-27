@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QDoubleValidator>
-#include "v_database_interactor.h"
+#include "VDatabaseInteractor.h"
 
 namespace Ui {
 class MaterialsWindow;

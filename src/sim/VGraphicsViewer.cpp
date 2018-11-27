@@ -45,27 +45,44 @@ VGraphicsViewer::~VGraphicsViewer(){
 }
 
 void VGraphicsViewer::updateConfiguration() noexcept {
-
+    clearAll();
+    m_pSimulator->createGraphicsElements(m_graphicsNodes, m_graphicsTriangles);
+    for (auto node: m_graphicsNodes)
+        m_root->addChild(node);
+    for (auto triangle: m_graphicsTriangles)
+        m_root->addChild(triangle);
 }
 
 void VGraphicsViewer::updateTriangleColors() noexcept {
-
+    std::lock_guard<std::mutex> lock(*m_pTrianglesLock);
+    for (auto &triangle : m_graphicsTriangles)
+        triangle->updateColor();
 }
 
-void VGraphicsViewer::clearNodes() noexcept {
-
+void VGraphicsViewer::clearNodes() noexcept
+{
+    for (auto node: m_graphicsNodes)
+        m_root->removeChild(node);
+    m_graphicsNodes.clear();
 }
 
-void VGraphicsViewer::clearTriangles() noexcept {
-
+void VGraphicsViewer::clearTriangles() noexcept
+{
+    for (auto triangle: m_graphicsTriangles)
+        m_root->removeChild(triangle);
+    m_graphicsTriangles.clear();
 }
 
-void VGraphicsViewer::clearAll() noexcept {
-
+void VGraphicsViewer::clearAll() noexcept
+{
+    m_root->removeAllChildren();
+    m_graphicsNodes.clear();
+    m_graphicsTriangles.clear();
 }
 
 void VGraphicsViewer::initGraph() noexcept
 {
+    //TODO!!!
     // Create a "scene graph"
     m_root = new SoSeparator;
     //root->ref();

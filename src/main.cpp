@@ -1,4 +1,4 @@
-#include "v_main_window.h"
+#include "VMainWindow.h"
 #include <QApplication>
 #include <Inventor/Qt/SoQt.h>
 

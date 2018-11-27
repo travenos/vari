@@ -1,6 +1,6 @@
 #include <QDebug> //TODO temporary
-#include "v_main_window.h"
-#include "ui_v_main_window.h"
+#include "VMainWindow.h"
+#include "ui_VMainWindow.h"
 #include "sim/VSimulationFacade.h"
 
 VMainWindow::VMainWindow(QWidget *parent) :

@@ -9,7 +9,7 @@
 
 #include <QVector3D>
 #include <vector>
-#include <set>
+#include <map>
 #include <memory>
 #include "VSimulationParametres.h"
 #include "VSimElement.h"
@@ -38,29 +38,33 @@ VSimNode(QVector3D& pos, VCloth::const_ptr p_material, VSimulationParametres::co
 void setRole(VNodeRole role) noexcept;
 VNodeRole getRole() const noexcept;
 void calculate() noexcept;
-void commit() noexcept;
+bool commit() noexcept;
 double getPressure() const noexcept;
 /**
  * @param neighbour
  * @param layer
  */
-void addNeighbour(VSimNode::const_ptr, VLayerSequence layer=CURRENT) noexcept;
+void addNeighbourMutually(VSimNode::ptr node, VLayerSequence layer=CURRENT) noexcept;
+void addNeighbour(VSimNode::const_ptr node, VLayerSequence layer=CURRENT) noexcept;
 void clearAllNeighbours() noexcept;
 /**
  * @param layer
  */
 void clearNeighbours(VLayerSequence layer) noexcept;
+
+double getDistance(VSimNode::const_ptr node) const noexcept;
 const QVector3D &getPosition() const noexcept;
-double getMedianDistance() const noexcept;
 void reset() noexcept;
+void getNeighbours(std::vector<const_ptr> &neighbours) const noexcept;
+int getNeighboursNumber() const noexcept;
 
 private: 
 
 struct VLayeredNeighbours
 {
-    std::set<VSimNode::const_weak_ptr> prevLayerNeighbours;
-    std::set<VSimNode::const_weak_ptr> currentLayerNeighbours;
-    std::set<VSimNode::const_weak_ptr> nextLayerNeighbours;
+    std::multimap<double, VSimNode::const_weak_ptr> previousLayerNeighbours;
+    std::multimap<double, VSimNode::const_weak_ptr> currentLayerNeighbours;
+    std::multimap<double, VSimNode::const_weak_ptr> nextLayerNeighbours;
 };
 
     VNodeRole m_role;
@@ -70,6 +74,7 @@ struct VLayeredNeighbours
     std::vector<std::weak_ptr<VSimTriangle>> m_pTriangles;
     QVector3D m_position;
     const VSimulationParametres::const_ptr m_pParam;
+    int m_neighboursNumber;
 };
 
 #endif //_VSIMNODE_H

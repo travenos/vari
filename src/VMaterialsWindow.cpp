@@ -1,6 +1,6 @@
-#include "v_materials_window.h"
-#include "ui_v_materials_window.h"
-#include "v_database_interactor.h"
+#include "VMaterialsWindow.h"
+#include "ui_VMaterialsWindow.h"
+#include "VDatabaseInteractor.h"
 #include <QMessageBox>
 #include <QFileDialog>
 #include <deque>

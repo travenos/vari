@@ -1,4 +1,3 @@
-#include "v_database_interactor.h"
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
@@ -6,22 +5,23 @@
 #include <QVariant>
 #include <QDir>
 #include <deque>
+#include "VDatabaseInteractor.h"
 
-static const QString OPEN_ERROR_STRING("Unable to open database");
-static const QString FILE_ERROR_STRING("Error processing file");
+const QString DatabaseInteractor::OPEN_ERROR_STRING("Unable to open database");
+const QString DatabaseInteractor::FILE_ERROR_STRING("Error processing file");
 
-static const QString HOSTNAME("127.0.0.1");
-static const QString DATABASENAME("vari");
-static const QString USERNAME("vari");
-static const QString PASSWORD("vari-password");
+const QString DatabaseInteractor::HOSTNAME("127.0.0.1");
+const QString DatabaseInteractor::DATABASENAME("vari");
+const QString DatabaseInteractor::USERNAME("vari");
+const QString DatabaseInteractor::PASSWORD("vari-password");
 
-static const QString GET_NAME_QUERY("SELECT name FROM materials;");
-static const QString GET_INFO_QUERY("SELECT id, cavityheight, permability, porosity FROM materials WHERE name='%1';");
-static const QString UPDATE_INFO_QUERY("UPDATE materials SET name='%1', cavityheight=%2, permability=%3, porosity=%4 WHERE id=%5;");
-static const QString INSERT_INFO_QUERY("INSERT INTO materials (name, cavityheight, permability, porosity) VALUES ('%1', %2, %3, %4);");
-static const QString DELETE_BY_ID_QUERY("DELETE FROM materials WHERE id=%1;");
-static const QString COPY_FROM_FILE_QUERY("COPY materials FROM '%1' DELIMITER ',' CSV;");
-static const QString COPY_TO_FILE_QUERY("COPY materials TO '%1' DELIMITER ',' CSV;");
+const QString DatabaseInteractor::GET_NAME_QUERY("SELECT name FROM materials;");
+const QString DatabaseInteractor::GET_INFO_QUERY("SELECT id, cavityheight, permability, porosity FROM materials WHERE name='%1';");
+const QString DatabaseInteractor::UPDATE_INFO_QUERY("UPDATE materials SET name='%1', cavityheight=%2, permability=%3, porosity=%4 WHERE id=%5;");
+const QString DatabaseInteractor::INSERT_INFO_QUERY("INSERT INTO materials (name, cavityheight, permability, porosity) VALUES ('%1', %2, %3, %4);");
+const QString DatabaseInteractor::DELETE_BY_ID_QUERY("DELETE FROM materials WHERE id=%1;");
+const QString DatabaseInteractor::COPY_FROM_FILE_QUERY("COPY materials FROM '%1' DELIMITER ',' CSV;");
+const QString DatabaseInteractor::COPY_TO_FILE_QUERY("COPY materials TO '%1' DELIMITER ',' CSV;");
 
 DatabaseInteractor::DatabaseInteractor():
     m_database(QSqlDatabase::addDatabase("QPSQL"))
@@ -32,7 +32,7 @@ DatabaseInteractor::DatabaseInteractor():
     m_database.setPassword(PASSWORD);
 }
 
-void DatabaseInteractor::getNames(std::deque<QString> &outputDeque, bool sort) noexcept(false)
+void DatabaseInteractor::getNames(std::deque<QString> &outputDeque, bool sort) const noexcept(false)
 {
     if (!m_database.isOpen() && m_database.open())
     {
@@ -57,7 +57,7 @@ void DatabaseInteractor::getNames(std::deque<QString> &outputDeque, bool sort) n
 }
 
 
-void DatabaseInteractor::materialInfo(const QString &name, int &id, float &cavityheight, float &permability, float &porosity) noexcept(false)
+void DatabaseInteractor::materialInfo(const QString &name, int &id, float &cavityheight, float &permability, float &porosity) const noexcept(false)
 {
     if (!m_database.isOpen() && m_database.open())
     {
@@ -84,7 +84,7 @@ void DatabaseInteractor::materialInfo(const QString &name, int &id, float &cavit
         throw DatabaseException(OPEN_ERROR_STRING);
 }
 
-void DatabaseInteractor::basicOperation(const QString &queryString) noexcept(false)
+void DatabaseInteractor::basicOperation(const QString &queryString) const noexcept(false)
 {
     if (!m_database.isOpen() && m_database.open())
     {
@@ -124,7 +124,7 @@ void DatabaseInteractor::loadFromFile(const QString &fileName) noexcept(false)
     basicOperation(COPY_FROM_FILE_QUERY.arg(fileName));
 }
 
-void DatabaseInteractor::saveToFile(const QString &fileName) noexcept(false)
+void DatabaseInteractor::saveToFile(const QString &fileName) const noexcept(false)
 {
     QString baseName = QFileInfo(fileName).fileName();
     QString tempFileName = QDir::cleanPath(QDir::tempPath() + QDir::separator() + baseName);

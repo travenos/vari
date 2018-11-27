@@ -13,6 +13,7 @@
 class VSimulationClass {
 public: 
     typedef std::shared_ptr<std::mutex> mutex_ptr;
+    VSimulationClass();
 /**
  * @param nodesLock
  * @param trianglesLock
