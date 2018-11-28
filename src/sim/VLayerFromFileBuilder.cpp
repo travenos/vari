@@ -13,7 +13,7 @@
 
 /**
  * @param filename
- * @param param VSimParam::ptr
+ * @param param VSimParam::const_ptr
  */
 VLayerFromFileBuilder::VLayerFromFileBuilder(const QString &filename, VSimulationParametres::const_ptr simParam) {
 

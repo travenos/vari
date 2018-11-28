@@ -14,35 +14,37 @@
 /**
  * @param simulator
  */
-VLayersProcessor::VLayersProcessor(VSimulator::ptr simulator) {
+VLayersProcessor::VLayersProcessor() {
 
 }
 
 /**
  * @return size_type
  */
-size_t VLayersProcessor::getLayersNumber() const noexcept {
-
+size_t VLayersProcessor::getLayersNumber() const noexcept
+{
+    return m_layers.size();
 }
 
 /**
  * @return size_type
  */
-size_t VLayersProcessor::getInactiveLayersNumber() const noexcept {
-
+size_t VLayersProcessor::getInactiveLayersNumber() const noexcept
+{
+    return m_inactiveLayers.size();
 }
 
 /**
  * @param builder
  */
-void VLayersProcessor::addLayer(VLayerAbstractBuilder& builder) noexcept {
+void VLayersProcessor::addLayer(VLayerAbstractBuilder& builder) noexcept(false) {
 
 }
 
 /**
  * @param layer
  */
-void VLayersProcessor::removeLayer(unsigned int layer) noexcept {
+void VLayersProcessor::removeLayer(unsigned int layer) noexcept(false) {
 
 }
 
@@ -50,21 +52,21 @@ void VLayersProcessor::removeLayer(unsigned int layer) noexcept {
  * @param layer
  * @param visible
  */
-void VLayersProcessor::setVisibleLayer(unsigned int layer, bool visible) noexcept {
+void VLayersProcessor::setVisibleLayer(unsigned int layer, bool visible) noexcept(false) {
 
 }
 
 /**
  * @param layer
  */
-void VLayersProcessor::disableLayer(unsigned int layer) noexcept {
+void VLayersProcessor::disableLayer(unsigned int layer) noexcept(false) {
 
 }
 
 /**
  * @param disabledLayer
  */
-void VLayersProcessor::enableLayer(unsigned int disabledLayer) noexcept {
+void VLayersProcessor::enableLayer(unsigned int disabledLayer) noexcept(false) {
 
 }
 
@@ -72,22 +74,11 @@ void VLayersProcessor::enableLayer(unsigned int disabledLayer) noexcept {
  * @param layer
  * @param material
  */
-void VLayersProcessor::setMaterial(unsigned int layer, VCloth& material) noexcept {
-
-}
-
-/**
- * @param parametres
- */
-void VLayersProcessor::setParametres(VSimulationParametres& parametres) noexcept {
-
-}
-
-/**
- * @return double
- */
-double VLayersProcessor::getMedianDistance() const noexcept {
-    return 0.0;
+void VLayersProcessor::setMaterial(unsigned int layer, const VCloth& material) noexcept(false)
+{
+    std::lock_guard<std::mutex> lock(*m_pNodesLock);
+    std::lock_guard<std::mutex> lockT(*m_pTrianglesLock);
+    m_layers[layer]->setMateial(material);
 }
 
 void VLayersProcessor::reset() noexcept {
@@ -102,7 +93,7 @@ void VLayersProcessor::clear() noexcept {
  * @param layer1
  * @param layer2
  */
-void VLayersProcessor::createConnections(unsigned int layer1, unsigned int layer2) noexcept {
+void VLayersProcessor::createConnections(unsigned int layer1, unsigned int layer2) noexcept(false) {
 
 }
 
@@ -110,27 +101,36 @@ void VLayersProcessor::createConnections(unsigned int layer1, unsigned int layer
  * @param layer1
  * @param layer2
  */
-void VLayersProcessor::removeConnections(unsigned int layer1, unsigned int layer2) noexcept {
+void VLayersProcessor::removeConnections(unsigned int layer1, unsigned int layer2) noexcept(false) {
 
 }
 
 /**
  * @param layer
  */
-void VLayersProcessor::decreasePosition(unsigned int layer) noexcept {
+void VLayersProcessor::decreasePosition(unsigned int layer) noexcept(false) {
 
 }
 
 /**
  * @param layer
  */
-void VLayersProcessor::increasePosition(unsigned int layer) noexcept {
+void VLayersProcessor::increasePosition(unsigned int layer) noexcept(false) {
 
 }
 
 /**
  * @param layer
  */
-void VLayersProcessor::putOnTop(unsigned int layer) noexcept {
+void VLayersProcessor::putOnTop(unsigned int layer) noexcept(false) {
 
+}
+
+const VSimNode::const_vector_ptr &VLayersProcessor::getActiveNodes() const noexcept
+{
+    return m_pActiveNodes;
+}
+const VSimTriangle::const_vector_ptr &VLayersProcessor::getActiveTriangles() const noexcept
+{
+    return m_pActiveTriangles;
 }

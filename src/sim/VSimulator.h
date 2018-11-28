@@ -24,9 +24,10 @@ public:
 
     struct VSimulationInfo
     {
-        double time;
-        double filledPercent;
-        double medianPressure;
+        double time = 0;
+        double filledPercent = 0;
+        double averagePressure = 0;
+        int iteration = 0;
     };
     /**
  * Default constructor
@@ -40,34 +41,31 @@ public:
     /**
  * Start the simulation thread
  */
-    void startSimulation() noexcept;
+    void start() noexcept;
     /**
  * Finish the simulation using a flag m_stopFlag
  */
-    void stopSimulation() noexcept;
+    void stop() noexcept;
     /**
  * Check if simulation thread is currently active
  */
     bool isSimulating() const noexcept;
     void reset() noexcept;
+    void clear() noexcept;
+    void resetInfo() noexcept;
     /**
  * Update an information about active nodes and triangles (m_activeNodes, m_triangles)
  * @param layers
  */
-    void setActiveNodes(std::vector<VLayer::ptr>& layers) noexcept(false);
+    void setActiveElements(VSimNode::const_vector_ptr nodes,
+                        VSimTriangle::const_vector_ptr triangles) noexcept(false);
     /**
  * Get the information about the current state of the simulation
  * @param info: output information about the current state of the simulation
  */
-    void getSimulationInfo(VSimulationInfo &info) const noexcept;
+    VSimulationInfo getSimulationInfo() const noexcept;
     /**
- * Create Graphic elements for VGraphicsView: nodes and triangles, connected to simulation elements
- * @param nodes_p
- * @param triangles_p
- */
-    void createGraphicsElements(std::vector<VGraphicsNode *>& nodes_p,
-                                std::vector<VGraphicsTriangle *>& triangles_p) const noexcept (false);
-    /**
+
  * Get number of current iteration
  * @return int
  */
@@ -80,6 +78,17 @@ public:
  * Make waiting thread stop waiting and make it think that the simulation state has changed
  */
     void cancelWaitingForNewData() const noexcept;
+
+    VSimulationParametres::const_ptr getSimulationParametres() const noexcept;
+
+    void setInjectionDiameter(double diameter) noexcept;
+    void setVacuumDiameter(double diameter) noexcept;
+    void setViscosity(double viscosity) noexcept;
+    void setVacuumPressure(double pressure) noexcept;
+    void setInjectionPressure(double pressure) noexcept;
+    void setQ(double q) noexcept;
+    void setR(double r) noexcept;
+    void setS(double s) noexcept;
 
 private:
     typedef void(*nodeFunc)(VSimNode::ptr& node);
@@ -102,11 +111,11 @@ private:
      /**
      * Vector of pointers to all nodes which can be processed
      */
-    std::vector<VSimNode::ptr> m_activeNodes;
+    VSimNode::const_vector_ptr m_pActiveNodes;
      /**
      * Vector of all triangles which can be processed
      */
-    std::vector<VSimTriangle::ptr> m_triangles;
+    VSimTriangle::const_vector_ptr m_pTriangles;
      /**
      * A thread, where simulation cycle is being processed
      */
@@ -122,7 +131,7 @@ private:
     /**
      * Number of the current iteration
      */
-    std::atomic<int> m_iteration;
+    //std::atomic<int> m_iteration; //TODO remove
     /**
     * This mutex is unlocked when the data is changed. It is needed for synchronization
     * with VGraphicsViewer. The methods waitForNewData() and cancelWaitingForNewData() are used.
@@ -132,6 +141,21 @@ private:
      * Vector used for storage of calculation threads
      */
     std::vector<std::thread> m_calculationThreads;
+
+    /**
+     * A struct, containing all parametres needed for simulation
+     */
+    VSimulationParametres::ptr m_pParam;
+
+    /**
+     * A struct, containing all parametres, which describe current simulation status
+     */
+    VSimulationInfo m_info;
+
+    /**
+     * Lock, used to get access to structure with simulation info
+     */
+    mutable std::mutex m_infoLock;
 
     /**
      * A function, which is being executed in the simulation thread
@@ -150,9 +174,9 @@ private:
     template<typename Callable>
     inline void trianglesAction(Callable &&func) noexcept;
 
-    template<typename T1, typename T2>
-    inline void createGraphicsElementsCore(std::vector<T1 *> &gaphics,
-                                           const std::vector< std::shared_ptr<T2> > &sim) const noexcept;
+    inline double timeDelta() const noexcept;
+    inline double calcAveragePermeability() const noexcept;
+    inline double calcAverageCellDistance() const noexcept;
 };
 
 #endif //_VSIMULATOR_H

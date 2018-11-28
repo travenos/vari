@@ -16,9 +16,9 @@ const QString DatabaseInteractor::USERNAME("vari");
 const QString DatabaseInteractor::PASSWORD("vari-password");
 
 const QString DatabaseInteractor::GET_NAME_QUERY("SELECT name FROM materials;");
-const QString DatabaseInteractor::GET_INFO_QUERY("SELECT id, cavityheight, permability, porosity FROM materials WHERE name='%1';");
-const QString DatabaseInteractor::UPDATE_INFO_QUERY("UPDATE materials SET name='%1', cavityheight=%2, permability=%3, porosity=%4 WHERE id=%5;");
-const QString DatabaseInteractor::INSERT_INFO_QUERY("INSERT INTO materials (name, cavityheight, permability, porosity) VALUES ('%1', %2, %3, %4);");
+const QString DatabaseInteractor::GET_INFO_QUERY("SELECT id, cavityheight, permeability, porosity FROM materials WHERE name='%1';");
+const QString DatabaseInteractor::UPDATE_INFO_QUERY("UPDATE materials SET name='%1', cavityheight=%2, permeability=%3, porosity=%4 WHERE id=%5;");
+const QString DatabaseInteractor::INSERT_INFO_QUERY("INSERT INTO materials (name, cavityheight, permeability, porosity) VALUES ('%1', %2, %3, %4);");
 const QString DatabaseInteractor::DELETE_BY_ID_QUERY("DELETE FROM materials WHERE id=%1;");
 const QString DatabaseInteractor::COPY_FROM_FILE_QUERY("COPY materials FROM '%1' DELIMITER ',' CSV;");
 const QString DatabaseInteractor::COPY_TO_FILE_QUERY("COPY materials TO '%1' DELIMITER ',' CSV;");
@@ -57,7 +57,7 @@ void DatabaseInteractor::getNames(std::deque<QString> &outputDeque, bool sort) c
 }
 
 
-void DatabaseInteractor::materialInfo(const QString &name, int &id, float &cavityheight, float &permability, float &porosity) const noexcept(false)
+void DatabaseInteractor::materialInfo(const QString &name, int &id, float &cavityheight, float &permeability, float &porosity) const noexcept(false)
 {
     if (!m_database.isOpen() && m_database.open())
     {
@@ -69,7 +69,7 @@ void DatabaseInteractor::materialInfo(const QString &name, int &id, float &cavit
             {
                 id = query.value(0).toInt();
                 cavityheight = query.value(1).toFloat();
-                permability = query.value(2).toFloat();
+                permeability = query.value(2).toFloat();
                 porosity = query.value(3).toFloat();
             }
             hadError = query.lastError().isValid();
@@ -104,13 +104,13 @@ void DatabaseInteractor::basicOperation(const QString &queryString) const noexce
         throw DatabaseException(OPEN_ERROR_STRING);
 }
 
-void DatabaseInteractor::saveMaterial(const QString &name, int id, float cavityheight, float permability, float porosity) noexcept(false)
+void DatabaseInteractor::saveMaterial(const QString &name, int id, float cavityheight, float permeability, float porosity) noexcept(false)
 {
     QString execString;
     if (id >= 0)
-        execString = UPDATE_INFO_QUERY.arg(name).arg(cavityheight).arg(permability).arg(porosity).arg(id);
+        execString = UPDATE_INFO_QUERY.arg(name).arg(cavityheight).arg(permeability).arg(porosity).arg(id);
     else
-        execString = INSERT_INFO_QUERY.arg(name).arg(cavityheight).arg(permability).arg(porosity);
+        execString = INSERT_INFO_QUERY.arg(name).arg(cavityheight).arg(permeability).arg(porosity);
     basicOperation(execString);
 }
 

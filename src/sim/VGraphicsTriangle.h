@@ -20,8 +20,8 @@ public:
 VGraphicsTriangle(VSimTriangle::const_ptr simTriangle);
 void updatePosition() noexcept;
 private: 
-    SoCoordinate3* m_pTtriangleCoordinates;
     VSimTriangle::const_ptr m_pSimTriangle;
+    SoCoordinate3* m_pTriangleCoordinates;
 };
 
 #endif //_VGRAPHICSTRIANGLE_H

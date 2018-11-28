@@ -11,7 +11,6 @@
 #include <vector>
 #include <map>
 #include <memory>
-#include "VSimulationParametres.h"
 #include "VSimElement.h"
 
 class VSimTriangle;
@@ -22,6 +21,8 @@ public:
     typedef std::shared_ptr<const VSimNode> const_ptr;
     typedef std::weak_ptr<VSimNode> weak_ptr;
     typedef std::weak_ptr<const VSimNode> const_weak_ptr;
+    typedef std::shared_ptr<std::vector<VSimNode::ptr> > vector_ptr;
+    typedef std::shared_ptr<const std::vector<VSimNode::ptr> > const_vector_ptr;
 
     enum VLayerSequence { PREVIOUS, CURRENT, NEXT };
     enum VNodeRole { NORMAL, INJECTION, VACUUM };
@@ -54,9 +55,12 @@ void clearNeighbours(VLayerSequence layer) noexcept;
 
 double getDistance(VSimNode::const_ptr node) const noexcept;
 const QVector3D &getPosition() const noexcept;
-void reset() noexcept;
+void reset() noexcept override;
 void getNeighbours(std::vector<const_ptr> &neighbours) const noexcept;
 int getNeighboursNumber() const noexcept;
+double getCavityHeight() const noexcept;
+double getPorosity() const noexcept;
+double getPermeability() const noexcept;
 
 private: 
 
@@ -73,7 +77,6 @@ struct VLayeredNeighbours
     VLayeredNeighbours m_neighbours;
     std::vector<std::weak_ptr<VSimTriangle>> m_pTriangles;
     QVector3D m_position;
-    const VSimulationParametres::const_ptr m_pParam;
     int m_neighboursNumber;
 };
 

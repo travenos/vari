@@ -4,6 +4,7 @@
  */
 
 
+#include <cmath>
 #include "VSimNode.h"
 
 /**
@@ -17,7 +18,7 @@
  * @param p_param
  */
 VSimNode::VSimNode(QVector3D& pos, VCloth::const_ptr p_material, VSimulationParametres::const_ptr p_param):
-    VSimElement(p_material),
+    VSimElement(p_material, p_param),
     m_neighboursNumber(0)
 {
 
@@ -26,8 +27,9 @@ VSimNode::VSimNode(QVector3D& pos, VCloth::const_ptr p_material, VSimulationPara
 /**
  * @param role
  */
-void VSimNode::setRole(VNodeRole role) noexcept {
-
+void VSimNode::setRole(VNodeRole role) noexcept
+{
+    m_role = role;
 }
 
 /**
@@ -38,7 +40,58 @@ VSimNode::VNodeRole VSimNode::getRole() const noexcept {
 }
 
 void VSimNode::calculate() noexcept {
+    if(m_role == NORMAL) //we don't need to calculate a new pressure if we have constant pressure cause it's an injection point
+    {
+        double _K = m_pParam->averagePermeability;
+        double K = m_pMaterial->permeability;
+        double m = m_neighboursNumber;
+        double phi = m_pMaterial->porosity;
+        double d = m_pMaterial->cavityHeight;
+        double _l = m_pParam->averageCellDistance;
+        double q = m_pParam->q;
+        double r = m_pParam->r;
+        double s = m_pParam->s;
+        double p_t = m_currentPressure;
 
+        double brace0 = pow(K/_K,q);
+
+        double sum=0;
+        double highestNeighborPressure = 0;
+        auto calcNeighbour = [d, phi, r, _l, s, p_t, &sum, &highestNeighborPressure]
+                (const std::pair<double, const_weak_ptr> &it)
+        {
+            const_ptr neighbor = it.second.lock();
+            double distance = it.first;
+            double d_i = neighbor->getCavityHeight();
+            double phi_i = neighbor->getPorosity();
+            double brace1 = pow(((d_i*phi_i)/(d*phi)),r);
+            double brace2 = pow(_l/distance,s);
+            double p_it = neighbor->getPressure();
+            double brace3 = p_it-p_t;
+            sum += (brace1*brace2*brace3);
+            if(p_it > highestNeighborPressure)
+            {
+                highestNeighborPressure = p_it;
+            }
+        };
+        for(auto &it: m_neighbours.currentLayerNeighbours)
+            calcNeighbour(it);
+        for(auto &it: m_neighbours.previousLayerNeighbours)
+            calcNeighbour(it);
+        for(auto &it: m_neighbours.nextLayerNeighbours)
+            calcNeighbour(it);
+
+        m_newPressure = p_t+(brace0/m)*sum;
+        if(m_newPressure < p_t)
+            m_newPressure = p_t;
+        if(m_newPressure >= m_pParam->injectionPressure)
+            m_newPressure = m_pParam->injectionPressure;
+
+        if(m_newPressure > highestNeighborPressure)
+        {
+            m_newPressure = highestNeighborPressure;
+        }
+    }
 }
 
 bool VSimNode::commit() noexcept {
@@ -49,6 +102,40 @@ bool VSimNode::commit() noexcept {
     }
     else
         return false;
+    //TODO make like in original program
+    /*
+    if(m_pressure != m_memorizedPressure)
+    {
+        m_pressure = m_memorizedPressure;
+        if(m_pressure > s_halfLimit)
+        {
+            if(m_pressure >= m_pSimulator->vacuumPressure())
+            {
+                if(getState() == SimNode::FULL)
+                {
+                    return FALSE;
+                }
+                else
+                {
+                    setState(FULL);
+                }
+            }
+            else
+            {
+                setState(HALF);
+            }
+        }
+        else
+        {
+            setState(EMPTY);
+        }
+        return TRUE;
+    }
+    else
+    {
+        return FALSE;
+    }
+    */
 }
 
 /**
@@ -145,9 +232,8 @@ const QVector3D& VSimNode::getPosition() const noexcept
 
 void VSimNode::reset() noexcept
 {
-    m_currentPressure = 0;
-    m_newPressure = 0;
-    //TODO assign value of defaultPressure from VSimulationParametres
+    m_currentPressure = m_pParam->vacuumPressure;
+    m_newPressure = m_pParam->vacuumPressure;
 }
 
 void VSimNode::getNeighbours(std::vector<const_ptr> &neighbours) const noexcept
@@ -165,4 +251,19 @@ void VSimNode::getNeighbours(std::vector<const_ptr> &neighbours) const noexcept
 int VSimNode::getNeighboursNumber() const noexcept
 {
     return m_neighboursNumber;
+}
+
+double VSimNode::getCavityHeight() const noexcept
+{
+    return m_pMaterial->cavityHeight;
+}
+
+double VSimNode::getPorosity() const noexcept
+{
+    return m_pMaterial->porosity;
+}
+
+double VSimNode::getPermeability() const noexcept
+{
+    return m_pMaterial->permeability;
 }

@@ -15,7 +15,7 @@ public:
     
 /**
  * @param filename
- * @param param VSimParam::ptr
+ * @param param VSimParam::const_ptr
  */
 VLayerFromGmeshBuilder(const QString &filename, VSimulationParametres::const_ptr simParam);
 void importNodes() noexcept;

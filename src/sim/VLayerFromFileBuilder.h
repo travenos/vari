@@ -18,7 +18,7 @@ public:
     
 /**
  * @param filename
- * @param param VSimParam::ptr
+ * @param param VSimParam::const_ptr
  */
 VLayerFromFileBuilder(const QString &filename, VSimulationParametres::const_ptr simParam);
 VLayer::ptr build() noexcept;

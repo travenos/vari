@@ -18,14 +18,14 @@ public:
  * @param simElement
  */
 VGraphicsElement(VSimElement::const_ptr simElement);
-void updateAll() noexcept;
-void updateColor() noexcept;
+virtual void updateAll() noexcept;
+virtual void updateColor() noexcept;
 virtual void updatePosition() = 0;
 
-protected: 
-    SoMaterial* m_pGraphicsMaterial;
 private: 
-    VSimElement::ptr m_pSimElement;
+    VSimElement::const_ptr m_pSimElement;
+protected:
+    SoMaterial* m_pGraphicsMaterial;
 };
 
 #endif //_VGRAPHICSELEMENT_H

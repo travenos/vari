@@ -126,7 +126,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="permabilityEdit">
+         <widget class="QLineEdit" name="permeabilityEdit">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -289,7 +289,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>permabilityEdit</sender>
+   <sender>permeabilityEdit</sender>
    <signal>returnPressed()</signal>
    <receiver>saveButton</receiver>
    <slot>click()</slot>

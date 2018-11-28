@@ -13,7 +13,7 @@ MaterialsWindow::MaterialsWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->cavityHeightEdit->setValidator( m_pValidator );
-    ui->permabilityEdit->setValidator( m_pValidator );
+    ui->permeabilityEdit->setValidator( m_pValidator );
     ui->porosityEdit->setValidator( m_pValidator );
 
     loadMaterials();
@@ -43,14 +43,14 @@ void MaterialsWindow::selectMaterial( )
             ui->materialsListWidget->currentIndex().isValid())
     {
         const QString &name = ui->materialsListWidget->currentItem()->text();
-        float cavityheight, permability, porosity;
+        float cavityheight, permeability, porosity;
         try
         {
-            m_databaseInteractor.materialInfo(name, m_currentId, cavityheight, permability, porosity);
+            m_databaseInteractor.materialInfo(name, m_currentId, cavityheight, permeability, porosity);
             ui->nameEdit->setText(name);
             ui->idLabel->setText(QString("ID: %1").arg(m_currentId));
             ui->cavityHeightEdit->setText(QString::number(cavityheight));
-            ui->permabilityEdit->setText(QString::number(permability));
+            ui->permeabilityEdit->setText(QString::number(permeability));
             ui->porosityEdit->setText(QString::number(porosity));
         }
         catch (DatabaseException &e)
@@ -68,7 +68,7 @@ void MaterialsWindow::saveMaterial( )
     bool ok;
     float cavityheight = ui->cavityHeightEdit->text().toFloat(&ok);
     convertOk &= ok;
-    float permability = ui->permabilityEdit->text().toFloat(&ok);
+    float permeability = ui->permeabilityEdit->text().toFloat(&ok);
     convertOk &= ok;
     float porosity = ui->porosityEdit->text().toFloat(&ok);
     convertOk &= ok;
@@ -79,7 +79,7 @@ void MaterialsWindow::saveMaterial( )
     }
     try
     {
-        m_databaseInteractor.saveMaterial(name, m_currentId, cavityheight, permability, porosity);
+        m_databaseInteractor.saveMaterial(name, m_currentId, cavityheight, permeability, porosity);
         loadMaterials();
         selectByName(name);
     }
@@ -94,7 +94,7 @@ void MaterialsWindow::newMaterial( )
     ui->materialsListWidget->clearSelection();
     ui->nameEdit->clear();
     ui->cavityHeightEdit->clear();
-    ui->permabilityEdit->clear();
+    ui->permeabilityEdit->clear();
     ui->porosityEdit->clear();
     ui->idLabel->clear();
     m_currentId = -1;
