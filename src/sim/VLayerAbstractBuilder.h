@@ -11,9 +11,14 @@
 
 class VLayerAbstractBuilder {
 public:     
-virtual VLayer::ptr build() = 0;
+VLayerAbstractBuilder(const VCloth &material,
+                      const VSimulationParametres::const_ptr &p_simParam);
+virtual ~VLayerAbstractBuilder();
+virtual const VLayer::ptr &build() = 0;
 protected:
-virtual VLayer::ptr createLayer() = 0;
+VLayer::ptr m_pLayer;
+const VCloth::ptr m_pMaterial;
+const VSimulationParametres::const_ptr m_pParam;
 };
 
 #endif //_VLAYERABSTRACTBUILDER_H

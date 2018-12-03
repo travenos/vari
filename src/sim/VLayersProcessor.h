@@ -22,13 +22,14 @@ public:
  * @param simulator
  */
 VLayersProcessor();
+//TODO remove operator= and copy constructor
 size_t getLayersNumber() const noexcept;
 size_t getInactiveLayersNumber() const noexcept;
     
 /**
  * @param builder
  */
-void addLayer(VLayerAbstractBuilder& builder) noexcept(false);
+void addLayer(VLayerAbstractBuilder *builder) noexcept(false);
     
 /**
  * @param layer

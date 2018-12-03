@@ -37,8 +37,11 @@ size_t VLayersProcessor::getInactiveLayersNumber() const noexcept
 /**
  * @param builder
  */
-void VLayersProcessor::addLayer(VLayerAbstractBuilder& builder) noexcept(false) {
-
+void VLayersProcessor::addLayer(VLayerAbstractBuilder *builder) noexcept(false)
+{
+    VLayer::ptr p_newLayer = builder->build();
+    //TODO put the layer on the highest position
+    m_layers.push_back(p_newLayer);
 }
 
 /**

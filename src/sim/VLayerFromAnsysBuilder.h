@@ -17,10 +17,10 @@ public:
  * @param filename const QString
  * @param param VSimulationParametres::const_ptr
  */
-VLayerFromAnsysBuilder(const QString &filename,
-                       const VSimulationParametres::const_ptr &simParam);
-void importNodes() noexcept;
-void importConnections() noexcept;
+VLayerFromAnsysBuilder(const QString &filename, const VCloth &material,
+                       const VSimulationParametres::const_ptr &p_simParam);
+bool importNodes() noexcept;
+bool importConnections() noexcept;
 };
 
 #endif //_VLAYERFROMANSYSBUILDER_H

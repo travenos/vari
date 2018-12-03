@@ -26,6 +26,7 @@ public:
      */
     VGraphicsViewer(QWidget* parent, const VSimulator::ptr &simulator);
     virtual ~VGraphicsViewer();
+    //TODO remove operator= and copy constructor
     void setGraphicsElements(const VSimNode::const_vector_ptr &nodes,
                              const VSimTriangle::const_vector_ptr &triangles) noexcept;
     void updateTriangleColors() noexcept;

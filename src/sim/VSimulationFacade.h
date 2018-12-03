@@ -19,6 +19,7 @@ class VSimulationFacade {
 public: 
     
 VSimulationFacade(QWidget *parent);
+//TODO remove operator= and copy constructor
 void startSimulation() noexcept;
 void stopSimulation() noexcept;
 void resetSimulation() noexcept;
@@ -75,7 +76,7 @@ void newModel() noexcept;
 /**
  * @param filename
  */
-void loadFromFile(const QString &filename) noexcept(false) ;
+void newLayerFromFile(const QString &filename, const VCloth &material) noexcept(false) ;
 
 private:
     void updateConfiguration() noexcept(false);

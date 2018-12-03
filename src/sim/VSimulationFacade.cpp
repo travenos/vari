@@ -4,8 +4,12 @@
  */
 
 
-#include "VSimulationFacade.h"
 #include <Inventor/Qt/SoQt.h>
+#include <QFile>
+#include "VSimulationFacade.h"
+#include "VLayerFromGmeshBuilder.h"
+#include "VLayerFromAnsysBuilder.h"
+#include "VExceptions.h"
 
 /**
  * VSimulationFacade implementation
@@ -170,9 +174,53 @@ void VSimulationFacade::newModel() noexcept
 /**
  * @param filename
  */
-void VSimulationFacade::loadFromFile(const QString &filename) noexcept(false)
+void VSimulationFacade::newLayerFromFile(const QString &filename, const VCloth &material) noexcept(false)
 {
-
+    QFile file(filename);
+    VLayerFromFileBuilder * p_layerBuilder = nullptr;
+    if (file.open(QIODevice::ReadOnly))
+    {
+        while (!file.atEnd())
+        {
+            QString line = file.readLine();
+            if(line.contains("$MeshFormat",Qt::CaseInsensitive))
+            {
+                p_layerBuilder = new VLayerFromGmeshBuilder(filename,
+                                                            material,
+                                                            m_pSimulator->getSimulationParametres());
+                break;
+            }
+            else if(line.contains("ANSYS",Qt::CaseInsensitive))
+            {
+                p_layerBuilder = new VLayerFromAnsysBuilder(filename,
+                                                            material,
+                                                            m_pSimulator->getSimulationParametres());
+                break;
+            }
+            else if(line.contains("VARISimulatorScene",Qt::CaseInsensitive))
+            {
+                //TODO
+                break;
+            }
+        }
+        file.close();
+    }
+    if (p_layerBuilder != nullptr)
+    {
+        try
+        {
+            m_pLayersProcessor->addLayer(p_layerBuilder);
+            delete p_layerBuilder;
+            updateConfiguration();
+        }
+        catch(VImportException &e)
+        {
+            delete p_layerBuilder;
+            throw e;
+        }
+    }
+    else
+        throw VImportException();
 }
 
 void VSimulationFacade::updateConfiguration() noexcept(false)

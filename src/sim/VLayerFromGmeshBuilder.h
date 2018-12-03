@@ -18,9 +18,10 @@ public:
  * @param param VSimParam::const_ptr
  */
 VLayerFromGmeshBuilder(const QString &filename,
-                       const VSimulationParametres::const_ptr &simParam);
-void importNodes() noexcept;
-void importConnections() noexcept;
+                       const VCloth &material,
+                       const VSimulationParametres::const_ptr &p_simParam);
+bool importNodes() noexcept;
+bool importConnections() noexcept;
 };
 
 #endif //_VLAYERFROMGMESHBUILDER_H

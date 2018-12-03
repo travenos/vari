@@ -18,6 +18,7 @@ public:
  * @param nodesLock
  * @param trianglesLock
  */
+    //TODO remove operator= and copy constructor
 void setMutexes(mutex_ptr nodesLock, mutex_ptr trianglesLock) noexcept;
 
 protected:

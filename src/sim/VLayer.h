@@ -22,22 +22,22 @@ public:
  * @param triangles
  * @param material
  */
-VLayer(std::vector<VSimNode::ptr> &nodes, std::vector<VSimTriangle::ptr> &triangles, const VCloth &material);
+VLayer(const VSimNode::vector_ptr &nodes, const VSimTriangle::vector_ptr &triangles, const VCloth::ptr &material);
     
 /**
  * @param visible
  */
 void setVisible(bool visible) noexcept;
 bool isVisible() const noexcept;
-std::vector<VSimNode::ptr> &getNodes() noexcept;
-std::vector<VSimTriangle::ptr> &getTriangles() noexcept;
+const VSimNode::vector_ptr &getNodes() noexcept;
+const VSimTriangle::vector_ptr &getTriangles() noexcept;
 void setMateial(const VCloth &material) noexcept;
 void reset() noexcept;
 
 private: 
-    std::vector<VSimNode::ptr> m_nodes;
-    std::vector<VSimTriangle::ptr> m_triangles;
-    VCloth::ptr m_pMaterial;
+    const VSimNode::vector_ptr m_pNodes;
+    const VSimTriangle::vector_ptr m_pTriangles;
+    const VCloth::ptr m_pMaterial;
     bool m_visible;
 };
 

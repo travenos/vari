@@ -16,11 +16,12 @@
  * @param triangles
  * @param material
  */
-VLayer::VLayer(std::vector<VSimNode::ptr> &nodes, std::vector<VSimTriangle::ptr> &triangles, const VCloth& material):
-    m_nodes(nodes),
-    m_triangles(triangles),
-    m_pMaterial(new VCloth(material))
-
+VLayer::VLayer(const VSimNode::vector_ptr &nodes,
+               const VSimTriangle::vector_ptr &triangles,
+               const VCloth::ptr &material):
+    m_pNodes(nodes),
+    m_pTriangles(triangles),
+    m_pMaterial(material)
 {
 
 }
@@ -30,9 +31,9 @@ VLayer::VLayer(std::vector<VSimNode::ptr> &nodes, std::vector<VSimTriangle::ptr>
  */
 void VLayer::setVisible(bool visible) noexcept
 {
-    for (auto &node : m_nodes)
+    for (auto &node : *m_pNodes)
         node->setVisible(visible);
-    for (auto &triangle : m_triangles)
+    for (auto &triangle : *m_pTriangles)
         triangle->setVisible(visible);
     m_visible = visible;
 }
@@ -47,17 +48,17 @@ bool VLayer::isVisible() const noexcept {
 /**
  * @return vector<&VNode::ptr>
  */
-std::vector<VSimNode::ptr> &VLayer::getNodes() noexcept
+const VSimNode::vector_ptr &VLayer::getNodes() noexcept
 {
-    return m_nodes;
+    return m_pNodes;
 }
 
 /**
  * @return vector<&VTriangle::ptr>
  */
-std::vector<VSimTriangle::ptr> &VLayer::getTriangles() noexcept
+const VSimTriangle::vector_ptr &VLayer::getTriangles() noexcept
 {
-    return m_triangles;
+    return m_pTriangles;
 }
 
 void VLayer::setMateial(const VCloth &material) noexcept
@@ -67,8 +68,8 @@ void VLayer::setMateial(const VCloth &material) noexcept
 
 void VLayer::reset() noexcept
 {
-    for (auto &node : m_nodes)
+    for (auto &node : *m_pNodes)
         node->reset();
-    for (auto &triangle : m_triangles)
+    for (auto &triangle : *m_pTriangles)
         triangle->reset();
 }

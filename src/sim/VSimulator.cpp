@@ -97,6 +97,11 @@ void VSimulator::clear() noexcept
     m_pTriangles.reset(new std::vector<VSimTriangle::ptr>);
 }
 
+VSimulationParametres::const_ptr VSimulator::getSimulationParametres() const noexcept
+{
+    return m_pParam;
+}
+
 /**
  * Update an information about active nodes and triangles (m_activeNodes, m_triangles)
  * @param layers
