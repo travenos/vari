@@ -101,8 +101,8 @@ void VSimulator::clear() noexcept
  * Update an information about active nodes and triangles (m_activeNodes, m_triangles)
  * @param layers
  */
-void VSimulator::setActiveElements(VSimNode::const_vector_ptr nodes,
-                                VSimTriangle::const_vector_ptr triangles) noexcept(false)
+void VSimulator::setActiveElements(const VSimNode::const_vector_ptr &nodes,
+                                const VSimTriangle::const_vector_ptr &triangles) noexcept(false)
 //TODO make shared ptrs instead of m_activeNodes, m_triangles and arguments of this function
 {
     if (!isSimulating())
@@ -169,6 +169,9 @@ void VSimulator::simulationCycle() noexcept
         bool madeChanges = node->commit();
         if(madeChanges && !madeChangesInCycle.load())
             madeChangesInCycle.store(true);
+        //TODO also measure fulled percent and simulation info.
+        //TODO store summary pressure and count of filled in array with length of N_THREADS
+
         /*
         if (madeChanges)
         {
@@ -293,7 +296,7 @@ inline double VSimulator::calcAverageCellDistance() const noexcept
 {
     double distance = 0;
     int counter = 0;
-    std::vector<VSimNode::const_ptr> neighbours;
+    std::vector<const VSimNode*> neighbours;
     for(auto &node : *m_pActiveNodes)
     {
         node->getNeighbours(neighbours);

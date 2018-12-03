@@ -20,7 +20,8 @@ public:
  * @param filename
  * @param param VSimParam::const_ptr
  */
-VLayerFromFileBuilder(const QString &filename, VSimulationParametres::const_ptr simParam);
+VLayerFromFileBuilder(const QString &filename,
+                      const VSimulationParametres::const_ptr &simParam);
 VLayer::ptr build() noexcept;
 
 protected: 

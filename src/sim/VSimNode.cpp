@@ -17,8 +17,11 @@
  * @param p_material
  * @param p_param
  */
-VSimNode::VSimNode(QVector3D& pos, VCloth::const_ptr p_material, VSimulationParametres::const_ptr p_param):
+VSimNode::VSimNode(const QVector3D& pos,
+                   const VCloth::const_ptr &p_material,
+                   const VSimulationParametres::const_ptr &p_param):
     VSimElement(p_material, p_param),
+    m_position(pos),
     m_neighboursNumber(0)
 {
 
@@ -58,9 +61,9 @@ void VSimNode::calculate() noexcept {
         double sum=0;
         double highestNeighborPressure = 0;
         auto calcNeighbour = [d, phi, r, _l, s, p_t, &sum, &highestNeighborPressure]
-                (const std::pair<double, const_weak_ptr> &it)
+                (const std::pair<double, const VSimNode* > &it)
         {
-            const_ptr neighbor = it.second.lock();
+            const VSimNode* neighbor = it.second;
             double distance = it.first;
             double d_i = neighbor->getCavityHeight();
             double phi_i = neighbor->getPorosity();
@@ -149,7 +152,7 @@ double VSimNode::getPressure() const noexcept {
  * @param node
  * @param layer
  */
-void VSimNode::addNeighbour(const_ptr node, VLayerSequence layer) noexcept
+void VSimNode::addNeighbour(const VSimNode* node, VLayerSequence layer) noexcept
 {
     double dist = getDistance(node);
     switch (layer)
@@ -167,7 +170,7 @@ void VSimNode::addNeighbour(const_ptr node, VLayerSequence layer) noexcept
     ++m_neighboursNumber;
 }
 
-void VSimNode::addNeighbourMutually(ptr node, VLayerSequence layer) noexcept
+void VSimNode::addNeighbourMutually(VSimNode* node, VLayerSequence layer) noexcept
 {
     addNeighbour(node, layer);
     VLayerSequence otherLayer;
@@ -183,7 +186,7 @@ void VSimNode::addNeighbourMutually(ptr node, VLayerSequence layer) noexcept
         otherLayer = PREVIOUS;
         break;
     }
-    node->addNeighbour(const_ptr(this), otherLayer);
+    node->addNeighbour(this, otherLayer);
 }
 
 void VSimNode::clearAllNeighbours() noexcept
@@ -217,7 +220,7 @@ void VSimNode::clearNeighbours(VLayerSequence layer) noexcept
             + m_neighbours.nextLayerNeighbours.size();
 }
 
-double VSimNode::getDistance(VSimNode::const_ptr node) const noexcept
+double VSimNode::getDistance(const VSimNode * node) const noexcept
 {
     return m_position.distanceToPoint(node->getPosition());
 }
@@ -236,16 +239,16 @@ void VSimNode::reset() noexcept
     m_newPressure = m_pParam->vacuumPressure;
 }
 
-void VSimNode::getNeighbours(std::vector<const_ptr> &neighbours) const noexcept
+void VSimNode::getNeighbours(std::vector<const VSimNode*> &neighbours) const noexcept
 {
     neighbours.clear();
     neighbours.reserve(getNeighboursNumber());
     for (auto &neighbour : m_neighbours.currentLayerNeighbours)
-        neighbours.push_back(neighbour.second.lock());
+        neighbours.push_back(neighbour.second);
     for (auto &neighbour : m_neighbours.previousLayerNeighbours)
-        neighbours.push_back(neighbour.second.lock());
+        neighbours.push_back(neighbour.second);
     for (auto &neighbour : m_neighbours.nextLayerNeighbours)
-        neighbours.push_back(neighbour.second.lock());
+        neighbours.push_back(neighbour.second);
 }
 
 int VSimNode::getNeighboursNumber() const noexcept

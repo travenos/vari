@@ -17,7 +17,8 @@ public:
  * @param filename const QString
  * @param param VSimulationParametres::const_ptr
  */
-VLayerFromAnsysBuilder(const QString &filename, VSimulationParametres::const_ptr simParam);
+VLayerFromAnsysBuilder(const QString &filename,
+                       const VSimulationParametres::const_ptr &simParam);
 void importNodes() noexcept;
 void importConnections() noexcept;
 };

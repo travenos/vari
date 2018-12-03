@@ -7,39 +7,32 @@
 #include <deque>
 #include "VDatabaseInteractor.h"
 
-const QString DatabaseInteractor::OPEN_ERROR_STRING("Unable to open database");
-const QString DatabaseInteractor::FILE_ERROR_STRING("Error processing file");
+const QString VDatabaseInteractor::OPEN_ERROR_STRING("Unable to open database");
+const QString VDatabaseInteractor::FILE_ERROR_STRING("Error processing file");
 
-const QString DatabaseInteractor::HOSTNAME("127.0.0.1");
-const QString DatabaseInteractor::DATABASENAME("vari");
-const QString DatabaseInteractor::USERNAME("vari");
-const QString DatabaseInteractor::PASSWORD("vari-password");
+const QString VDatabaseInteractor::GET_NAME_QUERY("SELECT name FROM %1;");
+const QString VDatabaseInteractor::DELETE_BY_ID_QUERY("DELETE FROM %1 WHERE id=%2;");
+const QString VDatabaseInteractor::COPY_FROM_FILE_QUERY("COPY %1 FROM '%2' DELIMITER ',' CSV;");
+const QString VDatabaseInteractor::COPY_TO_FILE_QUERY("COPY %1 TO '%2' DELIMITER ',' CSV;");
 
-const QString DatabaseInteractor::GET_NAME_QUERY("SELECT name FROM materials;");
-const QString DatabaseInteractor::GET_INFO_QUERY("SELECT id, cavityheight, permeability, porosity FROM materials WHERE name='%1';");
-const QString DatabaseInteractor::UPDATE_INFO_QUERY("UPDATE materials SET name='%1', cavityheight=%2, permeability=%3, porosity=%4 WHERE id=%5;");
-const QString DatabaseInteractor::INSERT_INFO_QUERY("INSERT INTO materials (name, cavityheight, permeability, porosity) VALUES ('%1', %2, %3, %4);");
-const QString DatabaseInteractor::DELETE_BY_ID_QUERY("DELETE FROM materials WHERE id=%1;");
-const QString DatabaseInteractor::COPY_FROM_FILE_QUERY("COPY materials FROM '%1' DELIMITER ',' CSV;");
-const QString DatabaseInteractor::COPY_TO_FILE_QUERY("COPY materials TO '%1' DELIMITER ',' CSV;");
-
-DatabaseInteractor::DatabaseInteractor():
-    m_database(QSqlDatabase::addDatabase("QPSQL"))
+VDatabaseInteractor::VDatabaseInteractor(const QString &tableName):
+    m_tableName(tableName)
 {
-    m_database.setHostName(HOSTNAME);
-    m_database.setDatabaseName(DATABASENAME);
-    m_database.setUserName(USERNAME);
-    m_database.setPassword(PASSWORD);
 }
 
-void DatabaseInteractor::getNames(std::deque<QString> &outputDeque, bool sort) const noexcept(false)
+VSqlDatabase* VDatabaseInteractor::databaseInstance() const noexcept
 {
-    if (!m_database.isOpen() && m_database.open())
+    return VSqlDatabase::getInstance();
+}
+
+void VDatabaseInteractor::getNames(std::deque<QString> &outputDeque, bool sort) const noexcept(false)
+{
+    if (!databaseInstance()->isOpen() && databaseInstance()->open())
     {
         bool hadError;
         QString errorString;
         {
-            QSqlQuery query(GET_NAME_QUERY);
+            QSqlQuery query(GET_NAME_QUERY.arg(m_tableName));
             while (query.next())
                 outputDeque.push_back(query.value(0).toString());
             if (sort)
@@ -48,7 +41,7 @@ void DatabaseInteractor::getNames(std::deque<QString> &outputDeque, bool sort) c
             if (hadError)
                 errorString = query.lastError().text();
         }
-        m_database.close();
+        databaseInstance()->close();
         if (hadError)
             throw DatabaseException(errorString);
     }
@@ -56,37 +49,9 @@ void DatabaseInteractor::getNames(std::deque<QString> &outputDeque, bool sort) c
         throw DatabaseException(OPEN_ERROR_STRING);
 }
 
-
-void DatabaseInteractor::materialInfo(const QString &name, int &id, float &cavityheight, float &permeability, float &porosity) const noexcept(false)
+void VDatabaseInteractor::basicOperation(const QString &queryString) const noexcept(false)
 {
-    if (!m_database.isOpen() && m_database.open())
-    {
-        bool hadError;
-        QString errorString;
-        {
-            QSqlQuery query(GET_INFO_QUERY.arg(name));
-            while (query.next())
-            {
-                id = query.value(0).toInt();
-                cavityheight = query.value(1).toFloat();
-                permeability = query.value(2).toFloat();
-                porosity = query.value(3).toFloat();
-            }
-            hadError = query.lastError().isValid();
-            if (hadError)
-                errorString = query.lastError().text();
-        }
-        m_database.close();
-        if (hadError)
-            throw DatabaseException(errorString);
-    }
-    else
-        throw DatabaseException(OPEN_ERROR_STRING);
-}
-
-void DatabaseInteractor::basicOperation(const QString &queryString) const noexcept(false)
-{
-    if (!m_database.isOpen() && m_database.open())
+    if (!databaseInstance()->isOpen() && databaseInstance()->open())
     {
         bool hadError;
         QString errorText;
@@ -96,7 +61,7 @@ void DatabaseInteractor::basicOperation(const QString &queryString) const noexce
             hadError = query.lastError().isValid();
             errorText = query.lastError().text();
         }
-        m_database.close();
+        databaseInstance()->close();
         if (hadError)
             throw DatabaseException(errorText);
     }
@@ -104,31 +69,21 @@ void DatabaseInteractor::basicOperation(const QString &queryString) const noexce
         throw DatabaseException(OPEN_ERROR_STRING);
 }
 
-void DatabaseInteractor::saveMaterial(const QString &name, int id, float cavityheight, float permeability, float porosity) noexcept(false)
+void VDatabaseInteractor::removeMaterial(int id) noexcept(false)
 {
-    QString execString;
-    if (id >= 0)
-        execString = UPDATE_INFO_QUERY.arg(name).arg(cavityheight).arg(permeability).arg(porosity).arg(id);
-    else
-        execString = INSERT_INFO_QUERY.arg(name).arg(cavityheight).arg(permeability).arg(porosity);
-    basicOperation(execString);
+    basicOperation(DELETE_BY_ID_QUERY.arg(m_tableName).arg(id));
 }
 
-void DatabaseInteractor::removeMaterial(int id) noexcept(false)
+void VDatabaseInteractor::loadFromFile(const QString &fileName) noexcept(false)
 {
-    basicOperation(DELETE_BY_ID_QUERY.arg(id));
+    basicOperation(COPY_FROM_FILE_QUERY.arg(m_tableName).arg(fileName));
 }
 
-void DatabaseInteractor::loadFromFile(const QString &fileName) noexcept(false)
-{
-    basicOperation(COPY_FROM_FILE_QUERY.arg(fileName));
-}
-
-void DatabaseInteractor::saveToFile(const QString &fileName) const noexcept(false)
+void VDatabaseInteractor::saveToFile(const QString &fileName) const noexcept(false)
 {
     QString baseName = QFileInfo(fileName).fileName();
     QString tempFileName = QDir::cleanPath(QDir::tempPath() + QDir::separator() + baseName);
-    basicOperation(COPY_TO_FILE_QUERY.arg(tempFileName));
+    basicOperation(COPY_TO_FILE_QUERY.arg(m_tableName).arg(tempFileName));
     QFile tempFile(tempFileName);
     QFile(fileName).remove();
     bool copyOk = tempFile.copy(fileName);

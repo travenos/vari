@@ -45,24 +45,32 @@ SET(CMAKE_AUTOMOC ON)
 SET(CMAKE_AUTOUIC ON)
 
 SET(QT_UI_FORMS
-    VMainWindow.ui
-    VMaterialsWindow.ui
+    VWindowMain.ui
+    VWindowMaterials.ui
     )
 
 SET(QT_RESOURCES)
 
 SET(HEADER_FILES
-    VMainWindow.h
-    VMaterialsWindow.h
+    VWindowMain.h
+    VWindowMaterials.h
+    VWindowCloth.h
+    VWindowResin.h
     VDatabaseInteractor.h
-    VSimulationInteractor.h
+    VDatabaseCloth.h
+    VDatabaseResin.h
+    VSqlDatabase.h
     )
 
 SET(SOURCE_FILES
-    VMainWindow.cpp
-    VMaterialsWindow.cpp
+    VWindowMain.cpp
+    VWindowMaterials.cpp
+    VWindowCloth.cpp
+    VWindowResin.cpp
     VDatabaseInteractor.cpp
-    VSimulationInteractor.cpp
+    VDatabaseCloth.cpp
+    VDatabaseResin.cpp
+    VSqlDatabase.cpp
     )
 QT5_ADD_RESOURCES(GENERATED_QT_RESOURCES ${QT_RESOURCES})
 

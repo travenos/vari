@@ -1,22 +1,22 @@
 #include <QDebug> //TODO temporary
-#include "VMainWindow.h"
-#include "ui_VMainWindow.h"
+#include "VWindowMain.h"
+#include "ui_VWindowMain.h"
 #include "sim/VSimulationFacade.h"
 
-VMainWindow::VMainWindow(QWidget *parent) :
+VWindowMain::VWindowMain(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::VMainWindow)
+    ui(new Ui::VWindowMain)
 {
     ui->setupUi(this);
     m_facade.reset(new VSimulationFacade(ui->viewerWidget));
 }
 
-VMainWindow::~VMainWindow()
+VWindowMain::~VWindowMain()
 {
     delete ui;
 }
 
-void VMainWindow::on_pushButton_clicked()
+void VWindowMain::on_pushButton_clicked()
 {
 
 }

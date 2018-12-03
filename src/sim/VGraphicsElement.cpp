@@ -14,7 +14,7 @@
 /**
  * @param simElement
  */
-VGraphicsElement::VGraphicsElement(VSimElement::const_ptr simElement):
+VGraphicsElement::VGraphicsElement(const VSimElement::const_ptr &simElement):
     m_pSimElement(simElement),
     m_pGraphicsMaterial(new SoMaterial)
 {

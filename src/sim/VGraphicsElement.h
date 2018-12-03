@@ -17,7 +17,7 @@ public:
 /**
  * @param simElement
  */
-VGraphicsElement(VSimElement::const_ptr simElement);
+VGraphicsElement(const VSimElement::const_ptr &simElement);
 virtual void updateAll() noexcept;
 virtual void updateColor() noexcept;
 virtual void updatePosition() = 0;

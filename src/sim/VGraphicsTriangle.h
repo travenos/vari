@@ -17,7 +17,7 @@ public:
 /**
  * @param simTriangle
  */
-VGraphicsTriangle(VSimTriangle::const_ptr simTriangle);
+VGraphicsTriangle(const VSimTriangle::const_ptr &simTriangle);
 void updatePosition() noexcept;
 private: 
     VSimTriangle::const_ptr m_pSimTriangle;

@@ -19,8 +19,6 @@ class VSimNode: public VSimElement {
 public: 
     typedef std::shared_ptr<VSimNode> ptr;
     typedef std::shared_ptr<const VSimNode> const_ptr;
-    typedef std::weak_ptr<VSimNode> weak_ptr;
-    typedef std::weak_ptr<const VSimNode> const_weak_ptr;
     typedef std::shared_ptr<std::vector<VSimNode::ptr> > vector_ptr;
     typedef std::shared_ptr<const std::vector<VSimNode::ptr> > const_vector_ptr;
 
@@ -31,7 +29,9 @@ public:
  * @param p_material
  * @param p_param
  */
-VSimNode(QVector3D& pos, VCloth::const_ptr p_material, VSimulationParametres::const_ptr p_param);
+VSimNode(const QVector3D &pos,
+         const VCloth::const_ptr &p_material,
+         const VSimulationParametres::const_ptr &p_param);
     
 /**
  * @param role
@@ -45,18 +45,18 @@ double getPressure() const noexcept;
  * @param neighbour
  * @param layer
  */
-void addNeighbourMutually(VSimNode::ptr node, VLayerSequence layer=CURRENT) noexcept;
-void addNeighbour(VSimNode::const_ptr node, VLayerSequence layer=CURRENT) noexcept;
+void addNeighbourMutually(VSimNode *node, VLayerSequence layer=CURRENT) noexcept;
+void addNeighbour(const VSimNode *node, VLayerSequence layer=CURRENT) noexcept;
 void clearAllNeighbours() noexcept;
 /**
  * @param layer
  */
 void clearNeighbours(VLayerSequence layer) noexcept;
 
-double getDistance(VSimNode::const_ptr node) const noexcept;
+double getDistance(const VSimNode* node) const noexcept;
 const QVector3D &getPosition() const noexcept;
 void reset() noexcept override;
-void getNeighbours(std::vector<const_ptr> &neighbours) const noexcept;
+void getNeighbours(std::vector<const VSimNode *> &neighbours) const noexcept;
 int getNeighboursNumber() const noexcept;
 double getCavityHeight() const noexcept;
 double getPorosity() const noexcept;
@@ -66,16 +66,16 @@ private:
 
 struct VLayeredNeighbours
 {
-    std::multimap<double, VSimNode::const_weak_ptr> previousLayerNeighbours;
-    std::multimap<double, VSimNode::const_weak_ptr> currentLayerNeighbours;
-    std::multimap<double, VSimNode::const_weak_ptr> nextLayerNeighbours;
+    std::multimap<double, const VSimNode*> previousLayerNeighbours;
+    std::multimap<double, const VSimNode*> currentLayerNeighbours;
+    std::multimap<double, const VSimNode*> nextLayerNeighbours;
 };
 
     VNodeRole m_role;
     double m_currentPressure;
     double m_newPressure;
     VLayeredNeighbours m_neighbours;
-    std::vector<std::weak_ptr<VSimTriangle>> m_pTriangles;
+    std::vector<const VSimTriangle*> m_pTriangles; // TODO Is it really necessary?
     QVector3D m_position;
     int m_neighboursNumber;
 };

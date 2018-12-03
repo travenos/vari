@@ -15,7 +15,8 @@
  * @param filename
  * @param param VSimParam::const_ptr
  */
-VLayerFromGmeshBuilder::VLayerFromGmeshBuilder(const QString &filename, VSimulationParametres::const_ptr simParam):
+VLayerFromGmeshBuilder::VLayerFromGmeshBuilder(const QString &filename,
+                                               const VSimulationParametres::const_ptr &simParam):
 VLayerFromFileBuilder(filename, simParam)
 {
 

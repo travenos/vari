@@ -14,7 +14,8 @@
 /**
  * @param material
  */
-VSimElement::VSimElement(VCloth::const_ptr p_material, VSimulationParametres::const_ptr p_param):
+VSimElement::VSimElement(const VCloth::const_ptr &p_material,
+                         const VSimulationParametres::const_ptr &p_param):
     m_pMaterial(p_material),
     m_pParam(p_param),
     m_visible(true)

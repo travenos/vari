@@ -14,7 +14,7 @@
 /**
  * @param simTriangle
  */
-VGraphicsTriangle::VGraphicsTriangle(VSimTriangle::const_ptr simTriangle):
+VGraphicsTriangle::VGraphicsTriangle(const VSimTriangle::const_ptr &simTriangle):
 VGraphicsElement(std::dynamic_pointer_cast<const VSimElement>(simTriangle)),
   m_pSimTriangle(simTriangle),
   m_pTriangleCoordinates(new SoCoordinate3)

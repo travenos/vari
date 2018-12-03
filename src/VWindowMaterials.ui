@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MaterialsWindow</class>
- <widget class="QMainWindow" name="MaterialsWindow">
+ <class>VWindowMaterials</class>
+ <widget class="QMainWindow" name="VWindowMaterials">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>905</width>
-    <height>510</height>
+    <height>569</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,6 +21,49 @@
     </sizepolicy>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="newMaterialButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Новый материал</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="importButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Импорт базы материалов</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="exportButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Экспорт базы материалов</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
     <item>
      <widget class="QLabel" name="materialsLabel">
       <property name="sizePolicy">
@@ -98,7 +141,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Толщина:</string>
+           <string>Толщина (м):</string>
           </property>
          </widget>
         </item>
@@ -113,7 +156,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="permabilityLabel">
+         <widget class="QLabel" name="permeabilityLabel">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -121,7 +164,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Проницаемость:</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Проницаемость (м&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
@@ -144,7 +187,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Пористость:</string>
+           <string>Пористость (от 0 до 1):</string>
           </property>
          </widget>
         </item>
@@ -160,6 +203,26 @@
            <set>Qt::ImhNone</set>
           </property>
          </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="viscosityLabel">
+          <property name="text">
+           <string>Вязкость (Па·с)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="viscosityEdit"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="tempcoefLabel">
+          <property name="text">
+           <string>Температурный коэффициент (Па·с)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="tempcoefEdit"/>
         </item>
         <item>
          <layout class="QHBoxLayout" name="saveRefreshHorizontalLayout">
@@ -208,43 +271,23 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QDialogButtonBox" name="buttonBox">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="text">
-         <string>Новый материал</string>
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="importButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+        <property name="standardButtons">
+         <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
         </property>
-        <property name="text">
-         <string>Импорт базы материалов</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="exportButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Экспорт базы материалов</string>
+        <property name="centerButtons">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -317,6 +360,38 @@
     <hint type="destinationlabel">
      <x>157</x>
      <y>325</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>viscosityEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>saveButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>197</x>
+     <y>346</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>287</x>
+     <y>376</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>tempcoefEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>saveButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>197</x>
+     <y>403</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>287</x>
+     <y>435</y>
     </hint>
    </hints>
   </connection>

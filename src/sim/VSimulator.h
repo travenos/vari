@@ -57,8 +57,8 @@ public:
  * Update an information about active nodes and triangles (m_activeNodes, m_triangles)
  * @param layers
  */
-    void setActiveElements(VSimNode::const_vector_ptr nodes,
-                        VSimTriangle::const_vector_ptr triangles) noexcept(false);
+    void setActiveElements(const VSimNode::const_vector_ptr &nodes,
+                        const VSimTriangle::const_vector_ptr &triangles) noexcept(false);
     /**
  * Get the information about the current state of the simulation
  * @param info: output information about the current state of the simulation

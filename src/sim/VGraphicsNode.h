@@ -20,7 +20,7 @@ public:
 /**
  * @param simNode
  */
-VGraphicsNode(VSimNode::const_ptr simNode);
+VGraphicsNode(const VSimNode::const_ptr &simNode);
 void updatePosition() noexcept;
 void setCubeSide(float side) noexcept;
 private:
