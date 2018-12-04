@@ -9,18 +9,28 @@ class QDoubleValidator;
 
 class VWindowCloth : public VWindowMaterials
 {
+    Q_OBJECT
 public:
     explicit VWindowCloth(QWidget *parent=nullptr);
-    ~VWindowCloth();
-public slots:
+    virtual ~VWindowCloth();
+
+protected:
     virtual void selectMaterial( );
     virtual void saveMaterial( );
+    virtual void accept();
+
 private:
     static const QString TITLE;
+
     virtual VDatabaseInteractor* databaseInteractor();
+    bool getInputs(QString &name, float &cavityheight, float &permeability, float &porosity);
+
     VDatabaseCloth* const m_pDatabaseCloth;
     QDoubleValidator * const m_pValidator;
     QDoubleValidator * const m_pPartValidator;
+
+signals:
+    void gotMaterial(const QString &name, float cavityheight, float permeability, float porosity);
 };
 
 #endif // _VWINDOWCLOTH_H

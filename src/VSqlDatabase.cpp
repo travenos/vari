@@ -25,6 +25,7 @@ void VSqlDatabase::deleteInstance()
     if (s_object != nullptr)
     {
         delete s_object;
+        s_object = nullptr;
     }
 }
 

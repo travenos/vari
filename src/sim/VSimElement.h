@@ -9,7 +9,7 @@
 
 #include <QColor>
 #include <vector>
-#include "VMaterial.h"
+#include "VCloth.h"
 #include "VSimulationParametres.h"
 
 class VSimElement {
@@ -29,7 +29,7 @@ VSimElement(const VCloth::const_ptr &p_material, const VSimulationParametres::co
  */
 void setVisible(bool visible) noexcept;
 bool isVisible() const noexcept;
-const QColor& getColor() const noexcept;
+virtual const QColor& getColor() const noexcept;
 virtual void reset() noexcept = 0;
 protected:
     const VCloth::const_ptr m_pMaterial;

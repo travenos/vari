@@ -29,6 +29,8 @@ VLayer(const VSimNode::vector_ptr &nodes, const VSimTriangle::vector_ptr &triang
  */
 void setVisible(bool visible) noexcept;
 bool isVisible() const noexcept;
+size_t getNodesNumber() const noexcept;
+size_t getTrianglesNumber() const noexcept;
 const VSimNode::vector_ptr &getNodes() noexcept;
 const VSimTriangle::vector_ptr &getTriangles() noexcept;
 void setMateial(const VCloth &material) noexcept;

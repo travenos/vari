@@ -1,6 +1,7 @@
 FIND_PACKAGE(Coin REQUIRED)
 FIND_PACKAGE(SoQt REQUIRED)
 FIND_PACKAGE(Qt5Core    REQUIRED)
+FIND_PACKAGE(Qt5Gui    REQUIRED)
 
 IF (${Coin_FOUND})
     MESSAGE(STATUS "Found Coin3D ${Coin_VERSION}")
@@ -12,6 +13,7 @@ IF (${SoQt_FOUND})
 ENDIF()
 
 INCLUDE_DIRECTORIES(${Qt5Core_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${Qt5Gui_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${SoQt_INCLUDE_DIRS})
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
@@ -34,7 +36,7 @@ SET(HEADER_FILES
     VLayer.h
     VLayerManualBuilder.h
     VLayersProcessor.h
-    VMaterial.h
+    VCloth.h
     VSimElement.h
     VSimNode.h
     VSimTriangle.h
@@ -70,7 +72,7 @@ ADD_MODULE(v_sim
     ${HEADER_FILES}
     ${SOURCE_FILES})
 
-TARGET_LINK_LIBRARIES(v_sim Qt5::Core)
+TARGET_LINK_LIBRARIES(v_sim Qt5::Core Qt5::Gui)
 IF(WIN32)
     TARGET_LINK_LIBRARIES(v_sim soqt1 coin4)
 ELSE()

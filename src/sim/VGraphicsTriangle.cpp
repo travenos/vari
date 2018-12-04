@@ -5,6 +5,7 @@
 
 
 #include "VGraphicsTriangle.h"
+#include <Inventor/nodes/SoTriangleStripSet.h>
 
 /**
  * VGraphicsTriangle implementation
@@ -21,6 +22,10 @@ VGraphicsElement(std::dynamic_pointer_cast<const VSimElement>(simTriangle)),
 {
     updatePosition();
     addChild(m_pTriangleCoordinates);
+    SoTriangleStripSet *strip = new SoTriangleStripSet;
+    int32_t numVerticesPerStripSet = m_pSimTriangle->VERTICES_NUMBER;
+    strip->numVertices.setValues(0, 1, &numVerticesPerStripSet);
+    addChild(strip);
 }
 
 void VGraphicsTriangle::updatePosition() noexcept

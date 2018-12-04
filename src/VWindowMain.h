@@ -8,6 +8,9 @@ namespace Ui {
 class VWindowMain;
 }
 class VSimulationFacade;
+class VWindowLayer;
+class VCloth;
+class VPolygon;
 
 class VWindowMain : public QMainWindow
 {
@@ -18,12 +21,23 @@ public:
     ~VWindowMain();
 
 private:
-    Ui::VWindowMain *ui;
-    std::unique_ptr<VSimulationFacade> m_facade;
+    static const QString IMPORT_FROM_FILE_ERROR;
+    static const QString IMPORT_WHEN_SIMULATING_ERROR;
 
+    void showWindowLayer();
+    void deleteWindowLayer();
+    void addLayerFromFile(const VCloth& material,const QString& filename);
+    void addLayerFromPolygon(const VCloth& material,const VPolygon& polygon);
+
+    Ui::VWindowMain *ui;
+    std::unique_ptr<VSimulationFacade> m_pFacade;
+    VWindowLayer * m_pWindowLayer;
 
 private slots:
-    void on_pushButton_clicked();
+    void m_on_layer_window_closed();
+    void m_on_layer_creation_from_file_available(const VCloth& material, const QString& filename);
+    void m_on_layer_creation_manual_available(const VCloth& material,const VPolygon& polygon);
+    void on_addLayerButton_clicked();
 };
 
 #endif // _VWINDOWMAIN_H

@@ -1,3 +1,6 @@
+#ifdef DEBUG_MODE
+#include <QDebug>
+#endif
 #include "VWindowMaterials.h"
 #include "ui_VWindowMaterials.h"
 #include "VDatabaseInteractor.h"
@@ -30,7 +33,7 @@ void VWindowMaterials::loadMaterials( )
     }
     catch (DatabaseException &e)
     {
-        QMessageBox::warning(this, "Error", e.what());
+        QMessageBox::warning(this, QStringLiteral("Error"), e.what());
     }
 }
 
@@ -40,7 +43,8 @@ void VWindowMaterials::removeMaterial( )
 {
     if (m_currentId >= 0)
     {
-        if (QMessageBox::question(this,"Remove?", ASK_FOR_REMOVE, QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes)
+        if (QMessageBox::question(this, QStringLiteral("Remove?"),
+                                  ASK_FOR_REMOVE, QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes)
         {
             try
             {
@@ -50,7 +54,7 @@ void VWindowMaterials::removeMaterial( )
             }
             catch (DatabaseException &e)
             {
-                QMessageBox::warning(this, "Error", e.what());
+                QMessageBox::warning(this, QStringLiteral("Error"), e.what());
             }
         }
     }
@@ -60,7 +64,9 @@ void VWindowMaterials::removeMaterial( )
 
 void VWindowMaterials::importMaterials()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, "Import file", QDir::homePath(), "Table data (*.csv);;All files (*)");
+    QString fileName = QFileDialog::getOpenFileName(this, QStringLiteral("Import file"),
+                                                    QDir::homePath(),
+                                                    QStringLiteral("Table data (*.csv);;All files (*)"));
     if (!fileName.isEmpty())
     {
         QString name;
@@ -74,14 +80,16 @@ void VWindowMaterials::importMaterials()
         }
         catch (DatabaseException &e)
         {
-            QMessageBox::warning(this, "Error", e.what());
+            QMessageBox::warning(this, QStringLiteral("Error"), e.what());
         }
     }
 }
 
 void VWindowMaterials::exportMaterials()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, "Export file", QDir::homePath(), "Table data (*.csv);;All files (*)");
+    QString fileName = QFileDialog::getSaveFileName(this, QStringLiteral("Export file"),
+                                                    QDir::homePath(),
+                                                    QStringLiteral("Table data (*.csv);;All files (*)"));
     if (!fileName.isEmpty())
     {
         try
@@ -90,7 +98,7 @@ void VWindowMaterials::exportMaterials()
         }
         catch (DatabaseException &e)
         {
-            QMessageBox::warning(this, "Error", e.what());
+            QMessageBox::warning(this, QStringLiteral("Error"), e.what());
         }
     }
 }
@@ -121,9 +129,23 @@ void VWindowMaterials::newMaterial( )
     m_currentId = -1;
 }
 
+void VWindowMaterials::cancelSelection()
+{
+    hide();
+    emit selectionCanceled();
+}
+
 VWindowMaterials::~VWindowMaterials()
 {
     delete ui;
+    #ifdef DEBUG_MODE
+        qDebug() << "VWindowMaterials destroyed";
+    #endif
+}
+
+void VWindowMaterials::closeEvent(QCloseEvent *)
+{
+    emit selectionCanceled();
 }
 
 void VWindowMaterials::on_materialsListWidget_itemSelectionChanged()
@@ -166,5 +188,15 @@ void VWindowMaterials::on_exportButton_clicked()
 
 void VWindowMaterials::on_buttonBox_rejected()
 {
-    hide();
+    cancelSelection();
+}
+
+void VWindowMaterials::on_buttonBox_accepted()
+{
+    accept();
+}
+
+void VWindowMaterials::on_materialsListWidget_doubleClicked(const QModelIndex &)
+{
+    accept();
 }

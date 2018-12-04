@@ -14,9 +14,7 @@ private:
 
 public:
     VDatabaseCloth();
-    //TODO struct "VMaterial"
     void materialInfo(const QString &name, int &id, float &cavityheight, float &permability, float &porosity) const noexcept(false);
-    //TODO struct "VMaterial"
     void saveMaterial(const QString &name, int id, float cavityheight, float permability, float porosity) noexcept(false);
 };
 

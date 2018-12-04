@@ -26,7 +26,8 @@ VSimulator::VSimulator():
     m_trianglesThreadPart(1),
     m_pActiveNodes(new std::vector<VSimNode::ptr>),
     m_pTriangles(new std::vector<VSimTriangle::ptr>),
-    m_pParam(new VSimulationParametres)
+    m_pParam(new VSimulationParametres),
+    m_simulatingFlag(false)
 {
     m_newDataLock.lock();
     m_calculationThreads.reserve(N_THREADS);
@@ -276,6 +277,7 @@ inline void VSimulator::trianglesAction(Callable&& func) noexcept
 
 inline double VSimulator::timeDelta() const noexcept
 {
+    std::lock_guard<std::mutex> lock(*m_pNodesLock);
     double n = m_pParam->viscosity;                             //[N*s/m2]
     double _l = m_pParam->averageCellDistance;                   //[m]
     double l_typ = (sqrt((double)m_pParam->numberOfNodes)*_l);   //[m]

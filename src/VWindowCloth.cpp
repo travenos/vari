@@ -1,3 +1,6 @@
+#ifdef DEBUG_MODE
+#include <QDebug>
+#endif
 #include <QMessageBox>
 #include <QDoubleValidator>
 #include "VWindowCloth.h"
@@ -46,32 +49,19 @@ void VWindowCloth::selectMaterial( )
         }
         catch (DatabaseException &e)
         {
-            QMessageBox::warning(this, "Error", e.what());
+            QMessageBox::warning(this, QStringLiteral("Error"), e.what());
         }
     }
 }
 
 void VWindowCloth::saveMaterial( )
 {
-    bool convertOk = true;
-    const QString &name = ui->nameEdit->text();
-    convertOk &= !name.isEmpty();
-    bool ok;
-    float cavityheight = ui->cavityHeightEdit->text().toFloat(&ok);
-    convertOk &= ok;
-    float permeability = ui->permeabilityEdit->text().toFloat(&ok);
-    convertOk &= ok;
-    QString porosityStr = ui->porosityEdit->text();
-    float porosity;
-    int pos = 0;
-    QValidator::State state = ui->porosityEdit->validator()->validate(porosityStr, pos);
-    if (state == QValidator::Acceptable)
-        porosity = porosityStr.toDouble(&ok);
-    else
-        convertOk = false;
-    if (!convertOk)
+    QString name;
+    float cavityheight, permeability, porosity;
+    bool result = getInputs(name, cavityheight, permeability, porosity);
+    if (!result)
     {
-        QMessageBox::warning(this, "Error", INVALID_PARAM_ERROR);
+        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
         return;
     }
     try
@@ -82,16 +72,55 @@ void VWindowCloth::saveMaterial( )
     }
     catch (DatabaseException &e)
     {
-        QMessageBox::warning(this, "Error", e.what());
+        QMessageBox::warning(this, QStringLiteral("Error"), e.what());
     }
+}
+
+void VWindowCloth::accept()
+{
+    QString name;
+    float cavityheight, permeability, porosity;
+    bool result = getInputs(name, cavityheight, permeability, porosity);
+    if (result)
+    {
+        hide();
+        emit gotMaterial(name, cavityheight, permeability, porosity);
+    }
+    else
+        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
 }
 
 VWindowCloth::~VWindowCloth()
 {
     delete m_pDatabaseCloth;
+    #ifdef DEBUG_MODE
+        qDebug() << "VWindowCloth destroyed";
+    #endif
 }
 
 VDatabaseInteractor* VWindowCloth::databaseInteractor()
 {
     return m_pDatabaseCloth;
+}
+
+bool VWindowCloth::getInputs(QString &name, float &cavityheight, float &permeability, float &porosity)
+{
+    name = ui->nameEdit->text();
+    if (name.isEmpty())
+        return false;
+    bool ok;
+    cavityheight = ui->cavityHeightEdit->text().toFloat(&ok);
+    if (!ok)
+        return false;
+    permeability = ui->permeabilityEdit->text().toFloat(&ok);
+    if (!ok)
+        return false;
+    QString porosityStr = ui->porosityEdit->text();
+    int pos = 0;
+    QValidator::State state = ui->porosityEdit->validator()->validate(porosityStr, pos);
+    if (state == QValidator::Acceptable)
+        porosity = porosityStr.toDouble(&ok);
+    else
+        return false;
+    return ok;
 }

@@ -73,3 +73,13 @@ void VLayer::reset() noexcept
     for (auto &triangle : *m_pTriangles)
         triangle->reset();
 }
+
+size_t VLayer::getNodesNumber() const noexcept
+{
+    return m_pNodes->size();
+}
+
+size_t VLayer::getTrianglesNumber() const noexcept
+{
+    return m_pTriangles->size();
+}

@@ -65,6 +65,8 @@ const VSimNode::const_vector_ptr &getActiveNodes() const noexcept;
 const VSimTriangle::const_vector_ptr &getActiveTriangles() const noexcept;
 
 private:
+    void updateActiveElementsVectors() noexcept;
+
     std::vector<VLayer::ptr> m_layers;
     std::vector<VLayer::ptr> m_inactiveLayers;
     VSimNode::const_vector_ptr m_pActiveNodes;

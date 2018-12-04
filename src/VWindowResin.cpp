@@ -1,3 +1,6 @@
+#ifdef DEBUG_MODE
+#include <QDebug>
+#endif
 #include <QMessageBox>
 #include <QDoubleValidator>
 #include "VWindowResin.h"
@@ -44,24 +47,19 @@ void VWindowResin::selectMaterial( )
         }
         catch (DatabaseException &e)
         {
-            QMessageBox::warning(this, "Error", e.what());
+            QMessageBox::warning(this, QStringLiteral("Error"), e.what());
         }
     }
 }
 
 void VWindowResin::saveMaterial( )
 {
-    bool convertOk = true;
-    const QString &name = ui->nameEdit->text();
-    convertOk &= !name.isEmpty();
-    bool ok;
-    float viscosity = ui->viscosityEdit->text().toFloat(&ok);
-    convertOk &= ok;
-    float tempcoef = ui->tempcoefEdit->text().toFloat(&ok);
-    convertOk &= ok;
-    if (!convertOk)
+    QString name;
+    float viscosity, tempcoef;
+    bool result = getInputs(name, viscosity, tempcoef);
+    if (!result)
     {
-        QMessageBox::warning(this, "Error", INVALID_PARAM_ERROR);
+        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
         return;
     }
     try
@@ -72,16 +70,46 @@ void VWindowResin::saveMaterial( )
     }
     catch (DatabaseException &e)
     {
-        QMessageBox::warning(this, "Error", e.what());
+        QMessageBox::warning(this, QStringLiteral("Error"), e.what());
     }
+}
+
+void VWindowResin::accept()
+{
+    QString name;
+    float viscosity, tempcoef;
+    bool result = getInputs(name, viscosity, tempcoef);
+    if (result)
+    {
+        hide();
+        emit gotMaterial(name, viscosity, tempcoef);
+    }
+    else
+        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
 }
 
 VWindowResin::~VWindowResin()
 {
     delete m_pDatabaseResin;
+    #ifdef DEBUG_MODE
+        qDebug() << "VWindowResin destroyed";
+    #endif
 }
 
 VDatabaseInteractor* VWindowResin::databaseInteractor()
 {
     return m_pDatabaseResin;
+}
+
+bool VWindowResin::getInputs(QString &name, float &viscosity, float &tempcoef)
+{
+    name = ui->nameEdit->text();
+    if (name.isEmpty())
+        return false;
+    bool ok;
+    viscosity = ui->viscosityEdit->text().toFloat(&ok);
+    if (!ok)
+        return false;
+    tempcoef = ui->tempcoefEdit->text().toFloat(&ok);
+    return ok;
 }

@@ -15,7 +15,7 @@
  * @param simulator
  */
 VLayersProcessor::VLayersProcessor() {
-
+    updateActiveElementsVectors();
 }
 
 /**
@@ -42,6 +42,7 @@ void VLayersProcessor::addLayer(VLayerAbstractBuilder *builder) noexcept(false)
     VLayer::ptr p_newLayer = builder->build();
     //TODO put the layer on the highest position
     m_layers.push_back(p_newLayer);
+    updateActiveElementsVectors();
 }
 
 /**
@@ -136,4 +137,28 @@ const VSimNode::const_vector_ptr &VLayersProcessor::getActiveNodes() const noexc
 const VSimTriangle::const_vector_ptr &VLayersProcessor::getActiveTriangles() const noexcept
 {
     return m_pActiveTriangles;
+}
+
+void VLayersProcessor::updateActiveElementsVectors() noexcept
+{
+    std::vector<VSimNode::ptr> * activeNodes = new std::vector<VSimNode::ptr>;
+    std::vector<VSimTriangle::ptr> * activeTriangles = new std::vector<VSimTriangle::ptr>;
+    size_t nodesSize = 0;
+    size_t trianglesSize = 0;
+    for (auto &layer : m_layers)
+    {
+        nodesSize += layer->getNodesNumber();
+        trianglesSize += layer->getTrianglesNumber();
+    }
+    activeNodes->reserve(nodesSize);
+    activeTriangles->reserve(trianglesSize);
+    for (auto &layer : m_layers)
+    {
+        VSimNode::vector_ptr nodes = layer->getNodes();
+        activeNodes->insert(activeNodes->end(), nodes->begin(), nodes->end());
+        VSimTriangle::vector_ptr triangles = layer->getTriangles();
+        activeTriangles->insert(activeTriangles->end(), triangles->begin(), triangles->end());
+    }
+    m_pActiveNodes.reset(activeNodes);
+    m_pActiveTriangles.reset(activeTriangles);
 }

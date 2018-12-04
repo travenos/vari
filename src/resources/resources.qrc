@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>img/start.png</file>
+        <file>img/stop.png</file>
+        <file>img/new.png</file>
+        <file>img/open.png</file>
+        <file>img/reset.png</file>
+        <file>img/save.png</file>
+        <file>img/wicron.png</file>
+    </qresource>
+</RCC>

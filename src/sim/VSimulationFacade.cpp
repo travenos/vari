@@ -174,7 +174,7 @@ void VSimulationFacade::newModel() noexcept
 /**
  * @param filename
  */
-void VSimulationFacade::newLayerFromFile(const QString &filename, const VCloth &material) noexcept(false)
+void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &filename) noexcept(false)
 {
     QFile file(filename);
     VLayerFromFileBuilder * p_layerBuilder = nullptr;

@@ -43,19 +43,25 @@ INCLUDE_DIRECTORIES(${Qt5Sql_INCLUDE_DIRS})
 #CMAKE_POLICY(SET CMP0071 NEW)
 SET(CMAKE_AUTOMOC ON)
 SET(CMAKE_AUTOUIC ON)
+SET(CMAKE_AUTORCC ON)
+
+SET(RESOURCES_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/resources)
+
+SET(QT_RESOURCES
+    ${RESOURCES_DIRECTORY}/resources.qrc)
 
 SET(QT_UI_FORMS
     VWindowMain.ui
     VWindowMaterials.ui
+    VWindowLayer.ui
     )
-
-SET(QT_RESOURCES)
 
 SET(HEADER_FILES
     VWindowMain.h
     VWindowMaterials.h
     VWindowCloth.h
     VWindowResin.h
+    VWindowLayer.h
     VDatabaseInteractor.h
     VDatabaseCloth.h
     VDatabaseResin.h
@@ -67,12 +73,12 @@ SET(SOURCE_FILES
     VWindowMaterials.cpp
     VWindowCloth.cpp
     VWindowResin.cpp
+    VWindowLayer.cpp
     VDatabaseInteractor.cpp
     VDatabaseCloth.cpp
     VDatabaseResin.cpp
     VSqlDatabase.cpp
     )
-QT5_ADD_RESOURCES(GENERATED_QT_RESOURCES ${QT_RESOURCES})
 
 #Add simulator module
 SET(SIMULATOR_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/sim")
@@ -99,8 +105,8 @@ ADD_EXECUTABLE(${EXE_NAME}
     "main.cpp"
     ${HEADER_FILES}
     ${SOURCE_FILES}
-    ${GENERATED_QT_RESOURCES}
     ${QT_UI_FORMS}
+    ${QT_RESOURCES}
     )
 
 TARGET_LINK_LIBRARIES(${EXE_NAME} Qt5::Core)

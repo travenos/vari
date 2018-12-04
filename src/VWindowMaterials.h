@@ -16,15 +16,6 @@ public:
     VWindowMaterials(QWidget *parent = nullptr);
     virtual ~VWindowMaterials();
 
-public slots:
-    virtual void selectMaterial( ) = 0;
-    virtual void saveMaterial( ) = 0;
-    void loadMaterials( );
-    void newMaterial( );
-    void removeMaterial( );
-    void importMaterials( );
-    void exportMaterials( );
-
 private slots:
     void on_materialsListWidget_itemSelectionChanged();
 
@@ -42,6 +33,10 @@ private slots:
 
     void on_newMaterialButton_clicked();
 
+    void on_buttonBox_accepted();
+
+    void on_materialsListWidget_doubleClicked(const QModelIndex &);
+
 protected:
     static const QString INVALID_PARAM_ERROR;
     static const QString ASK_FOR_REMOVE;
@@ -49,9 +44,22 @@ protected:
     Ui::VWindowMaterials *ui;
     int m_currentId;
 
+    virtual void selectMaterial( ) = 0;
+    virtual void saveMaterial( ) = 0;
+    virtual void accept() = 0;
+    virtual void closeEvent(QCloseEvent *);
+    void loadMaterials( );
+    void newMaterial( );
+    void removeMaterial( );
+    void importMaterials( );
+    void exportMaterials( );
     void selectByName( const QString &name );
+    void cancelSelection( );
 private:
     virtual VDatabaseInteractor* databaseInteractor() = 0;
+
+signals:
+    void selectionCanceled();
 };
 
 #endif // _VWINDOWMATERIALS_H

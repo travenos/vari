@@ -76,7 +76,7 @@ void newModel() noexcept;
 /**
  * @param filename
  */
-void newLayerFromFile(const QString &filename, const VCloth &material) noexcept(false) ;
+void newLayerFromFile(const VCloth &material, const QString &filename) noexcept(false) ;
 
 private:
     void updateConfiguration() noexcept(false);
