@@ -45,15 +45,15 @@ VSimNode::VNodeRole VSimNode::getRole() const noexcept {
 void VSimNode::calculate() noexcept {
     if(m_role == NORMAL) //we don't need to calculate a new pressure if we have constant pressure cause it's an injection point
     {
-        double _K = m_pParam->averagePermeability;
+        double _K = m_pParam->getAveragePermeability();
         double K = m_pMaterial->permeability;
         double m = m_neighboursNumber;
         double phi = m_pMaterial->porosity;
         double d = m_pMaterial->cavityHeight;
-        double _l = m_pParam->averageCellDistance;
-        double q = m_pParam->q;
-        double r = m_pParam->r;
-        double s = m_pParam->s;
+        double _l = m_pParam->getAverageCellDistance();
+        double q = m_pParam->getQ();
+        double r = m_pParam->getR();
+        double s = m_pParam->getS();
         double p_t = m_currentPressure;
 
         double brace0 = pow(K/_K,q);
@@ -87,8 +87,8 @@ void VSimNode::calculate() noexcept {
         m_newPressure = p_t+(brace0/m)*sum;
         if(m_newPressure < p_t)
             m_newPressure = p_t;
-        if(m_newPressure >= m_pParam->injectionPressure)
-            m_newPressure = m_pParam->injectionPressure;
+        if(m_newPressure >= m_pParam->getInjectionPressure())
+            m_newPressure = m_pParam->getInjectionPressure();
 
         if(m_newPressure > highestNeighborPressure)
         {
@@ -235,8 +235,8 @@ const QVector3D& VSimNode::getPosition() const noexcept
 
 void VSimNode::reset() noexcept
 {
-    m_currentPressure = m_pParam->vacuumPressure;
-    m_newPressure = m_pParam->vacuumPressure;
+    m_currentPressure = m_pParam->getVacuumPressure();
+    m_newPressure = m_pParam->getVacuumPressure();
 }
 
 void VSimNode::getNeighbours(std::vector<const VSimNode*> &neighbours) const noexcept

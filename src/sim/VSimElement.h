@@ -23,7 +23,7 @@ VSimElement(const VCloth::const_ptr &p_material, const VSimulationParametres::co
     typedef std::shared_ptr<const VSimElement> const_ptr;
     typedef std::shared_ptr<std::vector<VSimElement::ptr> > vector_ptr;
     typedef std::shared_ptr<const std::vector<VSimElement::ptr> > const_vector_ptr;
-
+virtual ~VSimElement();
 /**
  * @param visible
  */

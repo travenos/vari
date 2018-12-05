@@ -2,7 +2,6 @@
  * Project VARI
  * @author Alexey Barashkov
  */
-
 #include <functional>
 //#include <shared_mutex> //TODO
 #include "VSimulator.h"
@@ -26,8 +25,8 @@ VSimulator::VSimulator():
     m_trianglesThreadPart(1),
     m_pActiveNodes(new std::vector<VSimNode::ptr>),
     m_pTriangles(new std::vector<VSimTriangle::ptr>),
-    m_pParam(new VSimulationParametres),
-    m_simulatingFlag(false)
+    m_simulatingFlag(false),
+    m_pParam(new VSimulationParametres)
 {
     m_newDataLock.lock();
     m_calculationThreads.reserve(N_THREADS);
@@ -109,18 +108,16 @@ VSimulationParametres::const_ptr VSimulator::getSimulationParametres() const noe
  */
 void VSimulator::setActiveElements(const VSimNode::const_vector_ptr &nodes,
                                 const VSimTriangle::const_vector_ptr &triangles) noexcept(false)
-//TODO make shared ptrs instead of m_activeNodes, m_triangles and arguments of this function
 {
     if (!isSimulating())
     {
-        //COPY shared pointers to given nodes and triangles
         m_pActiveNodes = nodes;
         m_pTriangles = triangles;
         m_nodesThreadPart = m_pActiveNodes->size() / N_THREADS + 1;
         m_trianglesThreadPart = m_pTriangles->size() / N_THREADS + 1;
-        m_pParam->averagePermeability = calcAveragePermeability();
-        m_pParam->averageCellDistance = calcAverageCellDistance();
-        m_pParam->numberOfNodes = m_pActiveNodes->size();
+        m_pParam->setAveragePermeability(calcAveragePermeability());
+        m_pParam->setAverageCellDistance(calcAverageCellDistance());
+        m_pParam->setNumberOfNodes(m_pActiveNodes->size());
     }
     else
         throw VSimulatorException();
@@ -278,12 +275,12 @@ inline void VSimulator::trianglesAction(Callable&& func) noexcept
 inline double VSimulator::timeDelta() const noexcept
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
-    double n = m_pParam->viscosity;                             //[N*s/m2]
-    double _l = m_pParam->averageCellDistance;                   //[m]
-    double l_typ = (sqrt((double)m_pParam->numberOfNodes)*_l);   //[m]
-    double _K = m_pParam->averagePermeability;                   //[m^2]
-    double p_inj = m_pParam->injectionPressure;          //[N/m2]
-    double p_vac = m_pParam->vacuumPressure;                    //[N/m2]
+    double n = m_pParam->getViscosity();                             //[N*s/m2]
+    double _l = m_pParam->getAverageCellDistance();                   //[m]
+    double l_typ = (sqrt((double)m_pParam->getNumberOfNodes())*_l);   //[m]
+    double _K = m_pParam->getAveragePermeability();                   //[m^2]
+    double p_inj = m_pParam->getInjectionPressure();          //[N/m2]
+    double p_vac = m_pParam->getVacuumPressure();                    //[N/m2]
 
     double time = n*l_typ*_l/(_K*(p_inj-p_vac));
     return time;
@@ -321,42 +318,52 @@ inline double VSimulator::calcAverageCellDistance() const noexcept
 void VSimulator::setInjectionDiameter(double diameter) noexcept
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
-    m_pParam->injectionDiameter = diameter;
+    m_pParam->setInjectionDiameter(diameter);
 }
 void VSimulator::setVacuumDiameter(double diameter) noexcept
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
-    m_pParam->vacuumDiameter = diameter;
+    m_pParam->setVacuumDiameter(diameter);
 }
-void VSimulator::setViscosity(double viscosity) noexcept
+void VSimulator::setDefaultViscosity(double defaultViscosity) noexcept
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
-    m_pParam->viscosity = viscosity;
+    m_pParam->setDefaultViscosity(defaultViscosity);
+}
+void VSimulator::setTempcoef(double tempcoef) noexcept
+{
+    std::lock_guard<std::mutex> lock(*m_pNodesLock);
+    m_pParam->setTempcoef(tempcoef);
+}
+void VSimulator::setTemperature(double temperature) noexcept
+{
+    std::lock_guard<std::mutex> lock(*m_pNodesLock);
+    m_pParam->setTemperature(temperature);
 }
 void VSimulator::setVacuumPressure(double pressure) noexcept
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     std::lock_guard<std::mutex> lockT(*m_pTrianglesLock);
-    m_pParam->vacuumPressure = pressure;
+    m_pParam->setVacuumPressure(pressure);
 }
 void VSimulator::setInjectionPressure(double pressure) noexcept
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     std::lock_guard<std::mutex> lockT(*m_pTrianglesLock);
-    m_pParam->injectionPressure = pressure;
+    m_pParam->setInjectionPressure(pressure);
 }
 void VSimulator::setQ(double q) noexcept
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
-    m_pParam->q = q;
+    m_pParam->setQ(q);
 }
 void VSimulator::setR(double r) noexcept
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
-    m_pParam->r = r;
+    m_pParam->setR(r);
 }
 void VSimulator::setS(double s) noexcept
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
-    m_pParam->s = s;
+    m_pParam->setS(s);
 }

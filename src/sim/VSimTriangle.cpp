@@ -39,7 +39,8 @@ void VSimTriangle::getVertices(QVector3D vertices[VERTICES_NUMBER]) const noexce
 
 void VSimTriangle::updateColor() noexcept
 {
-    double filledPart = getAveragePressure() / (m_pParam->injectionPressure - m_pParam->vacuumPressure);
+    double filledPart = getAveragePressure() /
+            (m_pParam->getInjectionPressure() - m_pParam->getVacuumPressure());
     // TODO talk about this
     /*
     int colorValue = m_color.value();

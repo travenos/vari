@@ -55,6 +55,14 @@ int VSimulationFacade::getLayersNumber() const noexcept
 /**
  * @return int
  */
+int VSimulationFacade::getActiveLayersNumber() const noexcept
+{
+    return m_pLayersProcessor->getActiveLayersNumber();
+}
+
+/**
+ * @return int
+ */
 int VSimulationFacade::getInactiveLayersNumber() const noexcept
 {
     return m_pLayersProcessor->getInactiveLayersNumber();
@@ -84,18 +92,9 @@ void VSimulationFacade::removeLayer(unsigned int layer) noexcept(false)
 /**
  * @param layer
  */
-void VSimulationFacade::disableLayer(unsigned int layer) noexcept(false)
+void VSimulationFacade::enableLayer(unsigned int layer, bool enable) noexcept(false)
 {
-    m_pLayersProcessor->disableLayer(layer);
-    updateConfiguration();
-}
-
-/**
- * @param disabledLayer
- */
-void VSimulationFacade::enableLayer(unsigned int disabledLayer) noexcept(false)
-{
-    m_pLayersProcessor->enableLayer(disabledLayer);
+    m_pLayersProcessor->enableLayer(layer, enable);
     updateConfiguration();
 }
 
@@ -143,12 +142,21 @@ void VSimulationFacade::setVacuumDiameter(double diameter) noexcept
     m_pSimulator->setVacuumDiameter(diameter);
 }
 
-/**
- * @param viscosity
- */
-void VSimulationFacade::setViscosity(double viscosity) noexcept
+void VSimulationFacade::setDefaultViscosity(double defaultViscosity) noexcept
 {
-    m_pSimulator->setViscosity(viscosity);
+    m_pSimulator->setDefaultViscosity(defaultViscosity);
+}
+
+
+void VSimulationFacade::setTemperature(double temperature) noexcept
+{
+    m_pSimulator->setTemperature(temperature);
+}
+
+
+void VSimulationFacade::setTempcoef(double tempcoef) noexcept
+{
+    m_pSimulator->setTempcoef(tempcoef);
 }
 
 void VSimulationFacade::setQ(double q) noexcept
@@ -169,6 +177,26 @@ void VSimulationFacade::newModel() noexcept
     m_pSimulator->clear();
     m_pLayersProcessor->clear();
     m_pGraphicsViewer->clearAll();
+}
+
+VCloth::const_ptr VSimulationFacade::getMaterial(unsigned int layer) const noexcept(false)
+{
+    return m_pLayersProcessor->getMaterial(layer);
+}
+
+VSimulationParametres::const_ptr VSimulationFacade::getParametres() const noexcept
+{
+    return m_pSimulator->getSimulationParametres();
+}
+
+bool VSimulationFacade::isLayerVisible(unsigned int layer) const noexcept(false)
+{
+    return m_pLayersProcessor->isLayerVisible(layer);
+}
+
+bool VSimulationFacade::isLayerEnabled(unsigned int layer) const noexcept(false)
+{
+    return m_pLayersProcessor->isLayerEnabled(layer);
 }
 
 /**
@@ -197,11 +225,6 @@ void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &
                                                             m_pSimulator->getSimulationParametres());
                 break;
             }
-            else if(line.contains("VARISimulatorScene",Qt::CaseInsensitive))
-            {
-                //TODO
-                break;
-            }
         }
         file.close();
     }
@@ -212,6 +235,8 @@ void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &
             m_pLayersProcessor->addLayer(p_layerBuilder);
             delete p_layerBuilder;
             updateConfiguration();
+            m_pGraphicsViewer->viewAll();
+            m_pGraphicsViewer->saveHomePosition();
         }
         catch(VImportException &e)
         {

@@ -24,6 +24,7 @@ public:
 VLayersProcessor();
 //TODO remove operator= and copy constructor
 size_t getLayersNumber() const noexcept;
+size_t getActiveLayersNumber() const noexcept;
 size_t getInactiveLayersNumber() const noexcept;
     
 /**
@@ -45,12 +46,7 @@ void setVisibleLayer(unsigned int layer, bool visible) noexcept(false);
 /**
  * @param layer
  */
-void disableLayer(unsigned int layer) noexcept(false);
-    
-/**
- * @param disabledLayer
- */
-void enableLayer(unsigned int disabledLayer) noexcept(false);
+void enableLayer(unsigned int layer, bool enable) noexcept(false);
     
 /**
  * @param layer
@@ -61,14 +57,18 @@ void setMaterial(unsigned int layer, const VCloth &material) noexcept(false);
 void reset() noexcept;
 void clear() noexcept;
 
+VCloth::const_ptr getMaterial(unsigned int layer) const noexcept(false);
+
 const VSimNode::const_vector_ptr &getActiveNodes() const noexcept;
 const VSimTriangle::const_vector_ptr &getActiveTriangles() const noexcept;
+
+bool isLayerVisible(unsigned int layer) const noexcept(false);
+bool isLayerEnabled(unsigned int layer) const noexcept(false);
 
 private:
     void updateActiveElementsVectors() noexcept;
 
     std::vector<VLayer::ptr> m_layers;
-    std::vector<VLayer::ptr> m_inactiveLayers;
     VSimNode::const_vector_ptr m_pActiveNodes;
     VSimTriangle::const_vector_ptr m_pActiveTriangles;
     
@@ -87,12 +87,12 @@ void removeConnections(unsigned int layer1, unsigned int layer2) noexcept(false)
 /**
  * @param layer
  */
-void decreasePosition(unsigned int layer) noexcept(false);
+void decreasePositions(unsigned int fromLayer) noexcept(false);
     
 /**
  * @param layer
  */
-void increasePosition(unsigned int layer) noexcept(false);
+void increasePositions(unsigned int fromLayer) noexcept(false);
     
 /**
  * @param layer

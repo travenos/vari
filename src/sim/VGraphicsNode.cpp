@@ -13,7 +13,7 @@
  * VGraphicsNode implementation
  */
 
-const float VGraphicsNode::DEFAULT_CUBE_SIDE = 15.0;
+const float VGraphicsNode::DEFAULT_CUBE_SIDE = 1.5;
 
 /**
  * @param simNode
@@ -29,6 +29,11 @@ VGraphicsNode::VGraphicsNode(const VSimNode::const_ptr &simNode):
 
     setCubeSide(DEFAULT_CUBE_SIDE);
     addChild(m_pCube);
+}
+
+VGraphicsNode::~VGraphicsNode()
+{
+
 }
 
 void VGraphicsNode::updatePosition() noexcept

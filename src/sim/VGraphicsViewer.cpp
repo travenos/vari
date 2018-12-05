@@ -5,9 +5,9 @@
 
 #include <Inventor/actions/SoBoxHighlightRenderAction.h>
 #include <Inventor/nodes/SoBaseColor.h>
+#include <Inventor/nodes/SoShapeHints.h>
 #include <functional>
 
-#include <Inventor/nodes/SoText3.h> //TODO remove
 #include "VGraphicsViewer.h"
 /**
  * VGraphicsViewer implementation
@@ -20,10 +20,17 @@
  */
 VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulator) :
     SoQtExaminerViewer (parent),
-    m_pSimulator(simulator)
+    m_pSimulator(simulator),
+    m_pRoot(new SoSeparator),
+    m_renderStopFlag(false)
 {
-    initGraph();
-    m_renderStopFlag.store(false);
+    SoShapeHints *shapeHints = new SoShapeHints;
+    shapeHints->vertexOrdering = SoShapeHints::COUNTERCLOCKWISE;
+    m_pRoot->addChild(shapeHints);
+    m_pFigureRoot = new SoSeparator;
+    m_pRoot->addChild(m_pFigureRoot);
+    setSceneGraph(m_pRoot);
+
     connect(this, SIGNAL(askForRender()), this, SLOT(doRender()));
     m_pRenderWaiterThread.reset(new std::thread(std::bind(&VGraphicsViewer::process, this)));
 }
@@ -32,6 +39,9 @@ VGraphicsViewer::~VGraphicsViewer(){
     stopRender();
     m_pRenderWaiterThread->join();
     m_pRenderWaiterThread.reset();
+    m_pRoot->removeAllChildren();
+    setSceneGraph(NULL);
+    setCamera(NULL);
 }
 
 void VGraphicsViewer::setGraphicsElements(const VSimNode::const_vector_ptr &nodes,
@@ -40,9 +50,9 @@ void VGraphicsViewer::setGraphicsElements(const VSimNode::const_vector_ptr &node
     createGraphicsElements(&m_graphicsNodes, nodes);
     createGraphicsElements(&m_graphicsTriangles, triangles);
     for (auto node: m_graphicsNodes)
-        m_root->addChild(node);
+        m_pFigureRoot->addChild(node);
     for (auto triangle: m_graphicsTriangles)
-        m_root->addChild(triangle);
+        m_pFigureRoot->addChild(triangle);
 }
 
 void VGraphicsViewer::updateTriangleColors() noexcept {
@@ -54,39 +64,22 @@ void VGraphicsViewer::updateTriangleColors() noexcept {
 void VGraphicsViewer::clearNodes() noexcept
 {
     for (auto node: m_graphicsNodes)
-        m_root->removeChild(node);
+        m_pFigureRoot->removeChild(node);
     m_graphicsNodes.clear();
 }
 
 void VGraphicsViewer::clearTriangles() noexcept
 {
     for (auto triangle: m_graphicsTriangles)
-        m_root->removeChild(triangle);
+        m_pFigureRoot->removeChild(triangle);
     m_graphicsTriangles.clear();
 }
 
 void VGraphicsViewer::clearAll() noexcept
 {
-    m_root->removeAllChildren();
+    m_pFigureRoot->removeAllChildren();
     m_graphicsNodes.clear();
     m_graphicsTriangles.clear();
-}
-
-void VGraphicsViewer::initGraph() noexcept
-{
-    //TODO!!!
-    // Create a "scene graph"
-    m_root = new SoSeparator;
-    //root->ref();
-    // Set the RGB color. Yellow in this case
-    SoBaseColor *color = new SoBaseColor;
-    color->rgb = SbColor(1, 1, 0);
-    m_root->addChild(color);
-    // Create a text
-    SoText3 *text3D = new SoText3();
-    text3D->string.setValue("Hello SoQt");
-    m_root->addChild(text3D);
-    setSceneGraph(m_root);
 }
 
 void VGraphicsViewer::doRender() noexcept

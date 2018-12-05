@@ -7,9 +7,11 @@
 #ifndef _VGRAPHICSTRIANGLE_H
 #define _VGRAPHICSTRIANGLE_H
 
-#include <Inventor/nodes/SoCoordinate3.h>
 #include "VGraphicsElement.h"
 #include "VSimTriangle.h"
+
+class SoCoordinate3;
+class SoTriangleStripSet;
 
 class VGraphicsTriangle: public VGraphicsElement {
 public: 
@@ -22,6 +24,7 @@ void updatePosition() noexcept;
 private: 
     VSimTriangle::const_ptr m_pSimTriangle;
     SoCoordinate3* m_pTriangleCoordinates;
+    SoTriangleStripSet* m_pStrip;
 };
 
 #endif //_VGRAPHICSTRIANGLE_H

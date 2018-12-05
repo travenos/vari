@@ -83,7 +83,9 @@ public:
 
     void setInjectionDiameter(double diameter) noexcept;
     void setVacuumDiameter(double diameter) noexcept;
-    void setViscosity(double viscosity) noexcept;
+    void setDefaultViscosity(double defaultViscosity) noexcept;
+    void setTemperature(double temperature) noexcept;
+    void setTempcoef(double tempcoef) noexcept;
     void setVacuumPressure(double pressure) noexcept;
     void setInjectionPressure(double pressure) noexcept;
     void setQ(double q) noexcept;

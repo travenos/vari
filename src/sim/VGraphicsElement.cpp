@@ -3,7 +3,6 @@
  * @author Alexey Barashkov
  */
 
-
 #include "VGraphicsElement.h"
 
 /**
@@ -23,6 +22,11 @@ VGraphicsElement::VGraphicsElement(const VSimElement::const_ptr &simElement):
                                                   color.saturationF(),
                                                   color.valueF());
     addChild(m_pGraphicsMaterial);
+}
+
+VGraphicsElement::~VGraphicsElement()
+{
+
 }
 
 void VGraphicsElement::updateAll() noexcept

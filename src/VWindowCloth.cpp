@@ -85,6 +85,7 @@ void VWindowCloth::accept()
     {
         hide();
         emit gotMaterial(name, cavityheight, permeability, porosity);
+        close();
     }
     else
         QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);

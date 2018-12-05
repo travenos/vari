@@ -33,8 +33,7 @@ public:
     void clearNodes() noexcept;
     void clearTriangles() noexcept;
     void clearAll() noexcept;
-private: 
-    void initGraph() noexcept;
+private:
     void stopRender() noexcept;
     void process() noexcept;
     template<typename T1, typename T2>
@@ -46,7 +45,8 @@ private:
 
     VSimulator::ptr m_pSimulator;
 
-    SoSeparator*        m_root;
+    SoSeparator*        m_pRoot;
+    SoSeparator*        m_pFigureRoot;
 
     std::unique_ptr<std::thread> m_pRenderWaiterThread;
     std::mutex m_renderSuccessLock;

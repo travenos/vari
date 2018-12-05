@@ -24,6 +24,7 @@ void startSimulation() noexcept;
 void stopSimulation() noexcept;
 void resetSimulation() noexcept;
 int getLayersNumber() const noexcept;
+int getActiveLayersNumber() const noexcept;
 int getInactiveLayersNumber() const noexcept;
 /**
  * @param layer
@@ -34,14 +35,7 @@ void setVisible(unsigned int layer, bool visible) noexcept(false);
  * @param layer
  */
 void removeLayer(unsigned int layer) noexcept(false);
-/**
- * @param layer
- */
-void disableLayer(unsigned int layer) noexcept(false);
-/**
- * @param disabledLayer
- */
-void enableLayer(unsigned int disabledLayer) noexcept(false);
+void enableLayer(unsigned int layer, bool enable) noexcept(false);
 /**
  * @param layer
  * @param material
@@ -63,16 +57,20 @@ void setInjectionDiameter(double diameter) noexcept;
  * @param diameter
  */
 void setVacuumDiameter(double diameter) noexcept;
-    
-/**
- * @param viscosity
- */
-void setViscosity(double viscosity) noexcept;
+
+void setDefaultViscosity(double defaultViscosity) noexcept;
+void setTemperature(double temperature) noexcept;
+void setTempcoef(double tempcoef) noexcept;
 
 void setQ(double q) noexcept;
 void setR(double r) noexcept;
 void setS(double s) noexcept;
 void newModel() noexcept;
+
+VCloth::const_ptr getMaterial(unsigned int layer) const noexcept(false);
+VSimulationParametres::const_ptr getParametres() const noexcept;
+bool isLayerVisible(unsigned int layer) const noexcept(false);
+bool isLayerEnabled(unsigned int layer) const noexcept(false);
 /**
  * @param filename
  */

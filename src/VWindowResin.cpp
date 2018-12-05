@@ -83,6 +83,7 @@ void VWindowResin::accept()
     {
         hide();
         emit gotMaterial(name, viscosity, tempcoef);
+        close();
     }
     else
         QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);

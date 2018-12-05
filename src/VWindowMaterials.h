@@ -60,6 +60,7 @@ private:
 
 signals:
     void selectionCanceled();
+    void windowClosed();
 };
 
 #endif // _VWINDOWMATERIALS_H

@@ -14,10 +14,12 @@ const QString VWindowLayer::FILE_DIALOG_FORMATS("Файлы gmsh(*.msh *.iges *.
 const QString VWindowLayer::GEOMETRY_FROM_FILE_TEXT("Форма слоя будет импортирована из файла: %1");
 const QString VWindowLayer::GEOMETRY_MANUAL_TEXT("Форма слоя задана пользователем");
 const QString VWindowLayer::MATERIAL_NAME_TEXT("Выбран материал: %1");
-const QString VWindowLayer::MATERIAL_INFO_TEXT("Имя: %1;\n"
-                                               "Толщина: %2 м;\n"
-                                               "Проницаемость: %3 м^2;\n"
-                                               "Пористость: %4.");
+const QString VWindowLayer::MATERIAL_INFO_TEXT("<html><head/><body>"
+                                               "<p>Имя: &quot;%1&quot;</p>"
+                                               "<p>Толщина: %2 м</p>"
+                                               "<p>Проницаемость: %3 м<span style=\" vertical-align:super;\">2</span></p>"
+                                               "<p>Пористость: %4</p>"
+                                               "</body></html>");
 //const QString VWindowLayer::IMPORT_ERROR_TEXT("Невозможно импортировать форму слоя из файла"); //TODO remove
 
 const QColor VWindowLayer::DEFAULT_COLOR = QColor(255, 172, 172);
@@ -49,7 +51,6 @@ void VWindowLayer::reset()
     ui->materialStatusLabel->setText(NO_MATERIAL_TEXT);
     ui->geometryStatusLabel->setStyleSheet(QStringLiteral("QLabel { color : red; }"));
     ui->geometryStatusLabel->setText(NO_GEOMETRY_TEXT);
-    ui->materialInfoTextBrowser->clear();
     ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok)->setEnabled(false);
     m_material.baseColor = m_color;
     m_selectedMaterial = false;
@@ -121,9 +122,8 @@ void VWindowLayer::m_on_got_material(const QString &name, float cavityheight, fl
     m_material.cavityHeight = cavityheight;
     m_material.permeability = permeability;
     m_material.porosity = porosity;
-    ui->materialInfoTextBrowser->setText(MATERIAL_INFO_TEXT.arg(name).arg(cavityheight)
+    ui->materialStatusLabel->setText(MATERIAL_INFO_TEXT.arg(name).arg(cavityheight)
                                          .arg(permeability).arg(porosity));
-    ui->materialStatusLabel->setText(MATERIAL_NAME_TEXT.arg(name));
     ui->materialStatusLabel->setStyleSheet(QStringLiteral("QLabel { color : black; }"));
     m_selectedMaterial = true;
     tryToEnableAcceptButton();

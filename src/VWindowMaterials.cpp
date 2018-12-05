@@ -133,6 +133,7 @@ void VWindowMaterials::cancelSelection()
 {
     hide();
     emit selectionCanceled();
+    close();
 }
 
 VWindowMaterials::~VWindowMaterials()
@@ -145,7 +146,7 @@ VWindowMaterials::~VWindowMaterials()
 
 void VWindowMaterials::closeEvent(QCloseEvent *)
 {
-    emit selectionCanceled();
+    emit windowClosed();
 }
 
 void VWindowMaterials::on_materialsListWidget_itemSelectionChanged()

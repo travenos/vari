@@ -2,7 +2,9 @@
  * Project VARI
  * @author Alexey Barashkov
  */
-
+#ifdef DEBUG_MODE
+#include <QDebug>
+#endif
 
 #include "VLayer.h"
 
@@ -21,15 +23,31 @@ VLayer::VLayer(const VSimNode::vector_ptr &nodes,
                const VCloth::ptr &material):
     m_pNodes(nodes),
     m_pTriangles(triangles),
-    m_pMaterial(material)
+    m_pMaterial(material),
+    m_visible(true),
+    m_wasVisible(true),
+    m_active(true)
 {
 
+}
+
+VLayer::~VLayer()
+{
+    #ifdef DEBUG_MODE
+        qDebug() << "VLayer destroyed";
+    #endif
 }
 
 /**
  * @param visible
  */
 void VLayer::setVisible(bool visible) noexcept
+{
+    p_setVisible(visible);
+    m_wasVisible = visible;
+}
+
+void VLayer::p_setVisible(bool visible) noexcept
 {
     for (auto &node : *m_pNodes)
         node->setVisible(visible);
@@ -41,8 +59,30 @@ void VLayer::setVisible(bool visible) noexcept
 /**
  * @return bool
  */
-bool VLayer::isVisible() const noexcept {
+bool VLayer::isVisible() const noexcept
+{
     return m_visible;
+}
+
+void VLayer::markActive(bool active) noexcept
+{
+    if (active)
+    {
+        p_setVisible(m_wasVisible);
+    }
+    else
+    {
+        p_setVisible(false);
+    }
+    m_active = active;
+}
+
+/**
+ * @return bool
+ */
+bool VLayer::isActive() const noexcept
+{
+    return m_active;
 }
 
 /**
@@ -82,4 +122,9 @@ size_t VLayer::getNodesNumber() const noexcept
 size_t VLayer::getTrianglesNumber() const noexcept
 {
     return m_pTriangles->size();
+}
+
+VCloth::const_ptr VLayer::getMaterial() const noexcept
+{
+    return m_pMaterial;
 }
