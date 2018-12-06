@@ -156,6 +156,9 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="inputMethodHints">
+           <set>Qt::ImhFormattedNumbersOnly</set>
+          </property>
          </widget>
         </item>
         <item>
@@ -178,6 +181,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="inputMethodHints">
+           <set>Qt::ImhFormattedNumbersOnly</set>
           </property>
          </widget>
         </item>
@@ -203,7 +209,7 @@
            </sizepolicy>
           </property>
           <property name="inputMethodHints">
-           <set>Qt::ImhNone</set>
+           <set>Qt::ImhFormattedNumbersOnly</set>
           </property>
          </widget>
         </item>
@@ -215,7 +221,11 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="viscosityEdit"/>
+         <widget class="QLineEdit" name="viscosityEdit">
+          <property name="inputMethodHints">
+           <set>Qt::ImhFormattedNumbersOnly</set>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QLabel" name="tempcoefLabel">
@@ -225,7 +235,11 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="tempcoefEdit"/>
+         <widget class="QLineEdit" name="tempcoefEdit">
+          <property name="inputMethodHints">
+           <set>Qt::ImhFormattedNumbersOnly</set>
+          </property>
+         </widget>
         </item>
         <item>
          <layout class="QHBoxLayout" name="saveRefreshHorizontalLayout">

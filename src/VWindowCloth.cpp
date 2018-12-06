@@ -21,8 +21,10 @@ VWindowCloth::VWindowCloth(QWidget *parent):
     ui->tempcoefLabel->hide();
 
     m_pValidator->setBottom(0);
+    m_pValidator->setLocale(QLocale::C);
     m_pPartValidator->setBottom(0);
     m_pPartValidator->setTop(1);
+    m_pPartValidator->setLocale(QLocale::C);
     ui->cavityHeightEdit->setValidator( m_pValidator );
     ui->permeabilityEdit->setValidator( m_pValidator );
     ui->porosityEdit->setValidator( m_pPartValidator );

@@ -22,6 +22,7 @@ VWindowResin::VWindowResin(QWidget *parent):
     ui->cavityHeightLabel->hide();
 
     m_pValidator->setBottom(0);
+    m_pValidator->setLocale(QLocale::C);
     ui->viscosityEdit->setValidator( m_pValidator );
     ui->tempcoefEdit->setValidator( m_pValidator );
 
