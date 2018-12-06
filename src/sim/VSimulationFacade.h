@@ -20,64 +20,64 @@ public:
     
 VSimulationFacade(QWidget *parent);
 //TODO remove operator= and copy constructor
-void startSimulation() noexcept;
-void stopSimulation() noexcept;
-void resetSimulation() noexcept;
-int getLayersNumber() const noexcept;
-int getActiveLayersNumber() const noexcept;
-int getInactiveLayersNumber() const noexcept;
+void startSimulation() ;
+void stopSimulation() ;
+void resetSimulation() ;
+size_t getLayersNumber() const ;
+size_t getActiveLayersNumber() const ;
+size_t getInactiveLayersNumber() const ;
 /**
  * @param layer
  * @param visible
  */
-void setVisible(unsigned int layer, bool visible) noexcept(false);
+void setVisible(unsigned int layer, bool visible) ;
 /**
  * @param layer
  */
-void removeLayer(unsigned int layer) noexcept(false);
-void enableLayer(unsigned int layer, bool enable) noexcept(false);
+void removeLayer(unsigned int layer) ;
+void enableLayer(unsigned int layer, bool enable) ;
 /**
  * @param layer
  * @param material
  */
-void setMaterial(unsigned int layer, const VCloth& material) noexcept(false);
-void draw() noexcept;
+void setMaterial(unsigned int layer, const VCloth& material) ;
+void draw() ;
 /**
  * @param pressure
  */
-void setInjectionPressure(double pressure) noexcept;
+void setInjectionPressure(double pressure) ;
 /**
  * @param diameter
  */
 
-void setVacuumPressure(double pressure) noexcept;
+void setVacuumPressure(double pressure) ;
 
-void setInjectionDiameter(double diameter) noexcept;
+void setInjectionDiameter(double diameter) ;
 /**
  * @param diameter
  */
-void setVacuumDiameter(double diameter) noexcept;
+void setVacuumDiameter(double diameter) ;
 
-void setDefaultViscosity(double defaultViscosity) noexcept;
-void setTemperature(double temperature) noexcept;
-void setTempcoef(double tempcoef) noexcept;
+void setDefaultViscosity(double defaultViscosity) ;
+void setTemperature(double temperature) ;
+void setTempcoef(double tempcoef) ;
 
-void setQ(double q) noexcept;
-void setR(double r) noexcept;
-void setS(double s) noexcept;
-void newModel() noexcept;
+void setQ(double q) ;
+void setR(double r) ;
+void setS(double s) ;
+void newModel() ;
 
-VCloth::const_ptr getMaterial(unsigned int layer) const noexcept(false);
-VSimulationParametres::const_ptr getParametres() const noexcept;
-bool isLayerVisible(unsigned int layer) const noexcept(false);
-bool isLayerEnabled(unsigned int layer) const noexcept(false);
+VCloth::const_ptr getMaterial(unsigned int layer) const ;
+VSimulationParametres::const_ptr getParametres() const ;
+bool isLayerVisible(unsigned int layer) const ;
+bool isLayerEnabled(unsigned int layer) const ;
 /**
  * @param filename
  */
-void newLayerFromFile(const VCloth &material, const QString &filename) noexcept(false) ;
+void newLayerFromFile(const VCloth &material, const QString &filename)  ;
 
 private:
-    void updateConfiguration() noexcept(false);
+    void updateConfiguration() ;
 
     VSimulator::ptr m_pSimulator;
     VGraphicsViewer::ptr m_pGraphicsViewer;

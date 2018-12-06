@@ -30,7 +30,7 @@ VSimNode::VSimNode(const QVector3D& pos,
 /**
  * @param role
  */
-void VSimNode::setRole(VNodeRole role) noexcept
+void VSimNode::setRole(VNodeRole role) 
 {
     m_role = role;
 }
@@ -38,11 +38,11 @@ void VSimNode::setRole(VNodeRole role) noexcept
 /**
  * @return VNodeRole
  */
-VSimNode::VNodeRole VSimNode::getRole() const noexcept {
+VSimNode::VNodeRole VSimNode::getRole() const  {
     return m_role;
 }
 
-void VSimNode::calculate() noexcept {
+void VSimNode::calculate()  {
     if(m_role == NORMAL) //we don't need to calculate a new pressure if we have constant pressure cause it's an injection point
     {
         double _K = m_pParam->getAveragePermeability();
@@ -97,7 +97,7 @@ void VSimNode::calculate() noexcept {
     }
 }
 
-bool VSimNode::commit() noexcept {
+bool VSimNode::commit()  {
     if (m_newPressure != m_currentPressure)
     {
         m_currentPressure = m_newPressure;
@@ -144,7 +144,7 @@ bool VSimNode::commit() noexcept {
 /**
  * @return double
  */
-double VSimNode::getPressure() const noexcept {
+double VSimNode::getPressure() const  {
     return m_currentPressure;
 }
 
@@ -152,7 +152,7 @@ double VSimNode::getPressure() const noexcept {
  * @param node
  * @param layer
  */
-void VSimNode::addNeighbour(const VSimNode* node, VLayerSequence layer) noexcept
+void VSimNode::addNeighbour(const VSimNode* node, VLayerSequence layer) 
 {
     double dist = getDistance(node);
     switch (layer)
@@ -170,7 +170,7 @@ void VSimNode::addNeighbour(const VSimNode* node, VLayerSequence layer) noexcept
     ++m_neighboursNumber;
 }
 
-void VSimNode::addNeighbourMutually(VSimNode* node, VLayerSequence layer) noexcept
+void VSimNode::addNeighbourMutually(VSimNode* node, VLayerSequence layer) 
 {
     addNeighbour(node, layer);
     VLayerSequence otherLayer;
@@ -189,7 +189,7 @@ void VSimNode::addNeighbourMutually(VSimNode* node, VLayerSequence layer) noexce
     node->addNeighbour(this, otherLayer);
 }
 
-void VSimNode::clearAllNeighbours() noexcept
+void VSimNode::clearAllNeighbours() 
 {
     m_neighbours.currentLayerNeighbours.clear();
     m_neighbours.previousLayerNeighbours.clear();
@@ -200,7 +200,7 @@ void VSimNode::clearAllNeighbours() noexcept
 /**
  * @param layer
  */
-void VSimNode::clearNeighbours(VLayerSequence layer) noexcept
+void VSimNode::clearNeighbours(VLayerSequence layer) 
 {
     switch (layer)
     {
@@ -220,7 +220,7 @@ void VSimNode::clearNeighbours(VLayerSequence layer) noexcept
             + m_neighbours.nextLayerNeighbours.size();
 }
 
-double VSimNode::getDistance(const VSimNode * node) const noexcept
+double VSimNode::getDistance(const VSimNode * node) const 
 {
     return m_position.distanceToPoint(node->getPosition());
 }
@@ -228,18 +228,18 @@ double VSimNode::getDistance(const VSimNode * node) const noexcept
 /**
  * @return const QVector3D&
  */
-const QVector3D& VSimNode::getPosition() const noexcept
+const QVector3D& VSimNode::getPosition() const 
 {
     return m_position;
 }
 
-void VSimNode::reset() noexcept
+void VSimNode::reset() 
 {
     m_currentPressure = m_pParam->getVacuumPressure();
     m_newPressure = m_pParam->getVacuumPressure();
 }
 
-void VSimNode::getNeighbours(std::vector<const VSimNode*> &neighbours) const noexcept
+void VSimNode::getNeighbours(std::vector<const VSimNode*> &neighbours) const 
 {
     neighbours.clear();
     neighbours.reserve(getNeighboursNumber());
@@ -251,22 +251,22 @@ void VSimNode::getNeighbours(std::vector<const VSimNode*> &neighbours) const noe
         neighbours.push_back(neighbour.second);
 }
 
-int VSimNode::getNeighboursNumber() const noexcept
+size_t VSimNode::getNeighboursNumber() const
 {
     return m_neighboursNumber;
 }
 
-double VSimNode::getCavityHeight() const noexcept
+double VSimNode::getCavityHeight() const 
 {
     return m_pMaterial->cavityHeight;
 }
 
-double VSimNode::getPorosity() const noexcept
+double VSimNode::getPorosity() const 
 {
     return m_pMaterial->porosity;
 }
 
-double VSimNode::getPermeability() const noexcept
+double VSimNode::getPermeability() const 
 {
     return m_pMaterial->permeability;
 }

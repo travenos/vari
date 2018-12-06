@@ -30,16 +30,16 @@ protected:
     static const QString COPY_FROM_FILE_QUERY;
     static const QString COPY_TO_FILE_QUERY;
 
-    VSqlDatabase* databaseInstance() const noexcept;
+    VSqlDatabase* databaseInstance() const ;
 
-    void basicOperation(const QString &queryString) const noexcept(false);
+    void basicOperation(const QString &queryString) const ;
 
 public:
     VDatabaseInteractor(const QString &tableName);
-    void getNames(std::deque<QString> &outputDeque, bool sort = true) const noexcept(false);
-    void removeMaterial(int id) noexcept(false);
-    void saveToFile(const QString &fileName) const noexcept(false);
-    void loadFromFile(const QString &fileName) noexcept(false);
+    void getNames(std::deque<QString> &outputDeque, bool sort = true) const ;
+    void removeMaterial(int id) ;
+    void saveToFile(const QString &fileName) const ;
+    void loadFromFile(const QString &fileName) ;
 
 };
 

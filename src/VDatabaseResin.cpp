@@ -15,7 +15,7 @@ VDatabaseResin::VDatabaseResin():
 {
 }
 
-void VDatabaseResin::materialInfo(const QString &name, int &id, float &viscosity, float &tempcoef) const noexcept(false)
+void VDatabaseResin::materialInfo(const QString &name, int &id, float &viscosity, float &tempcoef) const 
 {
     if (!databaseInstance()->isOpen() && databaseInstance()->open())
     {
@@ -41,7 +41,7 @@ void VDatabaseResin::materialInfo(const QString &name, int &id, float &viscosity
         throw DatabaseException(OPEN_ERROR_STRING);
 }
 
-void VDatabaseResin::saveMaterial(const QString &name, int id, float viscosity, float tempcoef) noexcept(false)
+void VDatabaseResin::saveMaterial(const QString &name, int id, float viscosity, float tempcoef) 
 {
     QString execString;
     if (id >= 0)

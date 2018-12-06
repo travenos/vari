@@ -35,7 +35,7 @@ VSimElement::~VSimElement()
 /**
  * @param visible
  */
-void VSimElement::setVisible(bool visible) noexcept
+void VSimElement::setVisible(bool visible) 
 {
     m_visible = visible;
 }
@@ -43,7 +43,7 @@ void VSimElement::setVisible(bool visible) noexcept
 /**
  * @return bool
  */
-bool VSimElement::isVisible() const  noexcept
+bool VSimElement::isVisible() const  
 {
     return m_visible;
 }
@@ -51,7 +51,7 @@ bool VSimElement::isVisible() const  noexcept
 /**
  * @return QColor&
  */
-const QColor &VSimElement::getColor() const  noexcept
+const QColor &VSimElement::getColor() const  
 {
     return m_pMaterial->baseColor;
 }

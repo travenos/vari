@@ -19,8 +19,8 @@ public:
  */
 VLayerFromAnsysBuilder(const QString &filename, const VCloth &material,
                        const VSimulationParametres::const_ptr &p_simParam);
-bool importNodes() noexcept;
-bool importConnections() noexcept;
+bool importNodes() ;
+bool importConnections() ;
 };
 
 #endif //_VLAYERFROMANSYSBUILDER_H

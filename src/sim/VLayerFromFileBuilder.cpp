@@ -50,7 +50,7 @@ const VLayer::ptr &VLayerFromFileBuilder::build()
     return m_pLayer;
 }
 
-void VLayerFromFileBuilder::addShapePart(std::list<int>* connectionList)  noexcept
+void VLayerFromFileBuilder::addShapePart(std::list<int>* connectionList)  
 {
     if(connectionList->size() == 3)
     {
@@ -73,7 +73,7 @@ void VLayerFromFileBuilder::addShapePart(std::list<int>* connectionList)  noexce
     }
 }
 
-void VLayerFromFileBuilder::createConnections(std::list<int>* vertices) noexcept
+void VLayerFromFileBuilder::createConnections(std::list<int>* vertices) 
 {
     if(vertices->size() >= 2)
     {
@@ -89,14 +89,14 @@ void VLayerFromFileBuilder::createConnections(std::list<int>* vertices) noexcept
     }
 }
 
-void VLayerFromFileBuilder::addNode(int id, const QVector3D &pos) noexcept
+void VLayerFromFileBuilder::addNode(int id, const QVector3D &pos) 
 {
     VSimNode::ptr newNode(new VSimNode(pos, m_pMaterial, m_pParam));
     m_nodesMap.insert(std::make_pair(id, newNode));
     m_pNodes->push_back(newNode);
 }
 
-void VLayerFromFileBuilder::makeNeighbours(int nodeId, int neighborId) noexcept
+void VLayerFromFileBuilder::makeNeighbours(int nodeId, int neighborId) 
 {
     if(nodeId == neighborId)
         return;
@@ -108,7 +108,7 @@ void VLayerFromFileBuilder::makeNeighbours(int nodeId, int neighborId) noexcept
     }
 }
 
-void VLayerFromFileBuilder::addTriangle(int nodeId1, int nodeId2, int nodeId3) noexcept
+void VLayerFromFileBuilder::addTriangle(int nodeId1, int nodeId2, int nodeId3) 
 {
     VSimNode::const_ptr node1 = (m_nodesMap.find(nodeId1))->second;
     VSimNode::const_ptr node2 = (m_nodesMap.find(nodeId2))->second;
@@ -117,7 +117,7 @@ void VLayerFromFileBuilder::addTriangle(int nodeId1, int nodeId2, int nodeId3) n
     m_pTriangles->push_back(triangle);
 }
 
-inline void VLayerFromFileBuilder::addQuadrangle(int nodeId1, int nodeId2, int nodeId3, int nodeId4) noexcept
+inline void VLayerFromFileBuilder::addQuadrangle(int nodeId1, int nodeId2, int nodeId3, int nodeId4) 
 {
     addTriangle(nodeId1,nodeId2,nodeId3);
     addTriangle(nodeId3,nodeId4,nodeId1);

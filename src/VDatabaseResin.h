@@ -14,8 +14,8 @@ private:
 
 public:
     VDatabaseResin();
-    void materialInfo(const QString &name, int &id, float &viscosity, float &tempcoef) const noexcept(false);
-    void saveMaterial(const QString &name, int id, float viscosity, float tempcoef) noexcept(false);
+    void materialInfo(const QString &name, int &id, float &viscosity, float &tempcoef) const ;
+    void saveMaterial(const QString &name, int id, float viscosity, float tempcoef) ;
 };
 
 #endif // _VDATABASERESIN_H

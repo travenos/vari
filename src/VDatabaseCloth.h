@@ -14,8 +14,8 @@ private:
 
 public:
     VDatabaseCloth();
-    void materialInfo(const QString &name, int &id, float &cavityheight, float &permability, float &porosity) const noexcept(false);
-    void saveMaterial(const QString &name, int id, float cavityheight, float permability, float porosity) noexcept(false);
+    void materialInfo(const QString &name, int &id, float &cavityheight, float &permability, float &porosity) const ;
+    void saveMaterial(const QString &name, int id, float cavityheight, float permability, float porosity) ;
 };
 
 #endif // _VDATABASECLOTH_H

@@ -27,20 +27,20 @@ virtual ~VLayer();
 /**
  * @param visible
  */
-void setVisible(bool visible) noexcept;
-bool isVisible() const noexcept;
-void markActive(bool active) noexcept;
-bool isActive() const noexcept;
-size_t getNodesNumber() const noexcept;
-size_t getTrianglesNumber() const noexcept;
-const VSimNode::vector_ptr &getNodes() noexcept;
-const VSimTriangle::vector_ptr &getTriangles() noexcept;
-void setMateial(const VCloth &material) noexcept;
-void reset() noexcept;
-VCloth::const_ptr getMaterial() const noexcept;
+void setVisible(bool visible) ;
+bool isVisible() const ;
+void markActive(bool active) ;
+bool isActive() const ;
+size_t getNodesNumber() const ;
+size_t getTrianglesNumber() const ;
+const VSimNode::vector_ptr &getNodes() ;
+const VSimTriangle::vector_ptr &getTriangles() ;
+void setMateial(const VCloth &material) ;
+void reset() ;
+VCloth::const_ptr getMaterial() const ;
 
 private: 
-    void p_setVisible(bool visible) noexcept;
+    void p_setVisible(bool visible) ;
 
     const VSimNode::vector_ptr m_pNodes;
     const VSimTriangle::vector_ptr m_pTriangles;

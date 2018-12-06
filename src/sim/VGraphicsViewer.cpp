@@ -45,7 +45,7 @@ VGraphicsViewer::~VGraphicsViewer(){
 }
 
 void VGraphicsViewer::setGraphicsElements(const VSimNode::const_vector_ptr &nodes,
-                                          const VSimTriangle::const_vector_ptr &triangles) noexcept {
+                                          const VSimTriangle::const_vector_ptr &triangles)  {
     clearAll();
     createGraphicsElements(&m_graphicsNodes, nodes);
     createGraphicsElements(&m_graphicsTriangles, triangles);
@@ -55,34 +55,34 @@ void VGraphicsViewer::setGraphicsElements(const VSimNode::const_vector_ptr &node
         m_pFigureRoot->addChild(triangle);
 }
 
-void VGraphicsViewer::updateTriangleColors() noexcept {
+void VGraphicsViewer::updateTriangleColors()  {
     std::lock_guard<std::mutex> lock(*m_pTrianglesLock);
     for (auto &triangle : m_graphicsTriangles)
         triangle->updateColor();
 }
 
-void VGraphicsViewer::clearNodes() noexcept
+void VGraphicsViewer::clearNodes() 
 {
     for (auto node: m_graphicsNodes)
         m_pFigureRoot->removeChild(node);
     m_graphicsNodes.clear();
 }
 
-void VGraphicsViewer::clearTriangles() noexcept
+void VGraphicsViewer::clearTriangles() 
 {
     for (auto triangle: m_graphicsTriangles)
         m_pFigureRoot->removeChild(triangle);
     m_graphicsTriangles.clear();
 }
 
-void VGraphicsViewer::clearAll() noexcept
+void VGraphicsViewer::clearAll() 
 {
     m_pFigureRoot->removeAllChildren();
     m_graphicsNodes.clear();
     m_graphicsTriangles.clear();
 }
 
-void VGraphicsViewer::doRender() noexcept
+void VGraphicsViewer::doRender() 
 {
     setAutoRedraw(false);
     updateTriangleColors();
@@ -94,7 +94,7 @@ void VGraphicsViewer::doRender() noexcept
 
 template<typename T1, typename T2>
 inline void VGraphicsViewer::createGraphicsElements(std::vector<T1 *>* gaphics,
-                                                    const std::shared_ptr<const std::vector< std::shared_ptr<T2> > > &sim) noexcept
+                                                    const std::shared_ptr<const std::vector< std::shared_ptr<T2> > > &sim) 
 {
     gaphics->clear();
     gaphics->reserve(sim->size());
@@ -105,7 +105,7 @@ inline void VGraphicsViewer::createGraphicsElements(std::vector<T1 *>* gaphics,
     }
 }
 
-void VGraphicsViewer::process() noexcept
+void VGraphicsViewer::process() 
 {
     while(true)
     {
@@ -118,7 +118,7 @@ void VGraphicsViewer::process() noexcept
     }
 }
 
-void VGraphicsViewer::stopRender() noexcept
+void VGraphicsViewer::stopRender() 
 {
     m_renderStopFlag.store(true);
     m_pSimulator->cancelWaitingForNewData();

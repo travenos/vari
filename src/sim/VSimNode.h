@@ -36,31 +36,31 @@ VSimNode(const QVector3D &pos,
 /**
  * @param role
  */
-void setRole(VNodeRole role) noexcept;
-VNodeRole getRole() const noexcept;
-void calculate() noexcept;
-bool commit() noexcept;
-double getPressure() const noexcept;
+void setRole(VNodeRole role) ;
+VNodeRole getRole() const ;
+void calculate() ;
+bool commit() ;
+double getPressure() const ;
 /**
  * @param neighbour
  * @param layer
  */
-void addNeighbourMutually(VSimNode *node, VLayerSequence layer=CURRENT) noexcept;
-void addNeighbour(const VSimNode *node, VLayerSequence layer=CURRENT) noexcept;
-void clearAllNeighbours() noexcept;
+void addNeighbourMutually(VSimNode *node, VLayerSequence layer=CURRENT) ;
+void addNeighbour(const VSimNode *node, VLayerSequence layer=CURRENT) ;
+void clearAllNeighbours() ;
 /**
  * @param layer
  */
-void clearNeighbours(VLayerSequence layer) noexcept;
+void clearNeighbours(VLayerSequence layer) ;
 
-double getDistance(const VSimNode* node) const noexcept;
-const QVector3D &getPosition() const noexcept;
-void reset() noexcept override;
-void getNeighbours(std::vector<const VSimNode *> &neighbours) const noexcept;
-int getNeighboursNumber() const noexcept;
-double getCavityHeight() const noexcept;
-double getPorosity() const noexcept;
-double getPermeability() const noexcept;
+double getDistance(const VSimNode* node) const ;
+const QVector3D &getPosition() const ;
+void reset()  override;
+void getNeighbours(std::vector<const VSimNode *> &neighbours) const ;
+size_t getNeighboursNumber() const ;
+double getCavityHeight() const ;
+double getPorosity() const ;
+double getPermeability() const ;
 
 private: 
 
@@ -77,7 +77,7 @@ struct VLayeredNeighbours
     VLayeredNeighbours m_neighbours;
     std::vector<const VSimTriangle*> m_pTriangles; // TODO Is it really necessary?
     QVector3D m_position;
-    int m_neighboursNumber;
+    size_t m_neighboursNumber;
 };
 
 #endif //_VSIMNODE_H

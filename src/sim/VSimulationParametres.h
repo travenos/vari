@@ -18,46 +18,46 @@ public:
     static const double DEFAULT_TEMPERATURE;
     static const double KELVINS_IN_0_CELSIUS;
 
-    double getInjectionDiameter() const noexcept;
-    void setInjectionDiameter(double diameter) noexcept;
+    double getInjectionDiameter() const ;
+    void setInjectionDiameter(double diameter) ;
 
-    double getVacuumDiameter() const noexcept;
-    void setVacuumDiameter(double diameter) noexcept;
+    double getVacuumDiameter() const ;
+    void setVacuumDiameter(double diameter) ;
 
-    double getViscosity() const noexcept;
+    double getViscosity() const ;
 
-    double getDefaultViscosity() const noexcept;
-    void setDefaultViscosity(double viscosity) noexcept;
+    double getDefaultViscosity() const ;
+    void setDefaultViscosity(double viscosity) ;
 
-    double getTemperature() const noexcept;
-    void setTemperature(double temperature) noexcept;
+    double getTemperature() const ;
+    void setTemperature(double temperature) ;
 
-    double getTempcoef() const noexcept;
-    void setTempcoef(double tempcoef) noexcept;
+    double getTempcoef() const ;
+    void setTempcoef(double tempcoef) ;
 
-    double getInjectionPressure() const noexcept;
-    void setInjectionPressure(double pressure) noexcept;
+    double getInjectionPressure() const ;
+    void setInjectionPressure(double pressure) ;
 
-    double getVacuumPressure() const noexcept;
-    void setVacuumPressure(double pressure) noexcept;
+    double getVacuumPressure() const ;
+    void setVacuumPressure(double pressure) ;
 
-    double getQ() const noexcept;
-    void setQ(double q) noexcept;
+    double getQ() const ;
+    void setQ(double q) ;
 
-    double getR() const noexcept;
-    void setR(double r) noexcept;
+    double getR() const ;
+    void setR(double r) ;
 
-    double getS() const noexcept;
-    void setS(double s) noexcept;
+    double getS() const ;
+    void setS(double s) ;
 
-    double getAveragePermeability() const noexcept;
-    void setAveragePermeability(double averagePermeability) noexcept;
+    double getAveragePermeability() const ;
+    void setAveragePermeability(double averagePermeability) ;
 
-    double getAverageCellDistance() const noexcept;
-    void setAverageCellDistance(double averageCellDistance) noexcept;
+    double getAverageCellDistance() const ;
+    void setAverageCellDistance(double averageCellDistance) ;
 
-    unsigned int getNumberOfNodes() const noexcept;
-    void setNumberOfNodes(unsigned int numberOfNodes) noexcept;
+    size_t getNumberOfNodes() const ;
+    void setNumberOfNodes(size_t numberOfNodes) ;
 
 private:
     double m_injectionDiameter = 0;
@@ -78,9 +78,9 @@ private:
     double m_averagePermeability = 1;
     double m_averageCellDistance = 1;
 
-    unsigned int m_numberOfNodes = 1;
+    size_t m_numberOfNodes = 1;
 
-    double calculateViscosity() const noexcept;
+    double calculateViscosity() const ;
 };
 
 #endif //_VSIMULATIONPARAMETRES_H

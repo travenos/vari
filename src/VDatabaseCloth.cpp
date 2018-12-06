@@ -15,7 +15,7 @@ VDatabaseCloth::VDatabaseCloth():
 {
 }
 
-void VDatabaseCloth::materialInfo(const QString &name, int &id, float &cavityheight, float &permeability, float &porosity) const noexcept(false)
+void VDatabaseCloth::materialInfo(const QString &name, int &id, float &cavityheight, float &permeability, float &porosity) const 
 {
     if (!databaseInstance()->isOpen() && databaseInstance()->open())
     {
@@ -42,7 +42,7 @@ void VDatabaseCloth::materialInfo(const QString &name, int &id, float &cavityhei
         throw DatabaseException(OPEN_ERROR_STRING);
 }
 
-void VDatabaseCloth::saveMaterial(const QString &name, int id, float cavityheight, float permeability, float porosity) noexcept(false)
+void VDatabaseCloth::saveMaterial(const QString &name, int id, float cavityheight, float permeability, float porosity) 
 {
     QString execString;
     if (id >= 0)

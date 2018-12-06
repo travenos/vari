@@ -23,7 +23,7 @@ VLayerFromAnsysBuilder::VLayerFromAnsysBuilder(const QString &filename,
 
 }
 
-bool VLayerFromAnsysBuilder::importNodes()  noexcept
+bool VLayerFromAnsysBuilder::importNodes()  
 {
     QString line;
     while (!m_file.atEnd())
@@ -89,7 +89,7 @@ bool VLayerFromAnsysBuilder::importNodes()  noexcept
     return true;
 }
 
-bool VLayerFromAnsysBuilder::importConnections()  noexcept
+bool VLayerFromAnsysBuilder::importConnections()  
 {
     QString line;
     while (!m_file.atEnd())

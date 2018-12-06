@@ -36,13 +36,13 @@ VGraphicsNode::~VGraphicsNode()
 
 }
 
-void VGraphicsNode::updatePosition() noexcept
+void VGraphicsNode::updatePosition() 
 {
     const QVector3D& pos = m_pSimNode->getPosition();
     m_pTranslation->translation.setValue(pos.x(), pos.y(), pos.z());
 }
 
-void VGraphicsNode::setCubeSide(float side) noexcept
+void VGraphicsNode::setCubeSide(float side) 
 {
     m_pCube->width = side;
     m_pCube->height = side;
