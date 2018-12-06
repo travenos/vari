@@ -20,12 +20,12 @@ VDatabaseInteractor::VDatabaseInteractor(const QString &tableName):
 {
 }
 
-VSqlDatabase* VDatabaseInteractor::databaseInstance() const noexcept
+VSqlDatabase* VDatabaseInteractor::databaseInstance() const 
 {
     return VSqlDatabase::getInstance();
 }
 
-void VDatabaseInteractor::getNames(std::deque<QString> &outputDeque, bool sort) const noexcept(false)
+void VDatabaseInteractor::getNames(std::deque<QString> &outputDeque, bool sort) const 
 {
     if (!databaseInstance()->isOpen() && databaseInstance()->open())
     {
@@ -49,7 +49,7 @@ void VDatabaseInteractor::getNames(std::deque<QString> &outputDeque, bool sort) 
         throw DatabaseException(OPEN_ERROR_STRING);
 }
 
-void VDatabaseInteractor::basicOperation(const QString &queryString) const noexcept(false)
+void VDatabaseInteractor::basicOperation(const QString &queryString) const 
 {
     if (!databaseInstance()->isOpen() && databaseInstance()->open())
     {
@@ -69,17 +69,17 @@ void VDatabaseInteractor::basicOperation(const QString &queryString) const noexc
         throw DatabaseException(OPEN_ERROR_STRING);
 }
 
-void VDatabaseInteractor::removeMaterial(int id) noexcept(false)
+void VDatabaseInteractor::removeMaterial(int id) 
 {
     basicOperation(DELETE_BY_ID_QUERY.arg(m_tableName).arg(id));
 }
 
-void VDatabaseInteractor::loadFromFile(const QString &fileName) noexcept(false)
+void VDatabaseInteractor::loadFromFile(const QString &fileName) 
 {
     basicOperation(COPY_FROM_FILE_QUERY.arg(m_tableName).arg(fileName));
 }
 
-void VDatabaseInteractor::saveToFile(const QString &fileName) const noexcept(false)
+void VDatabaseInteractor::saveToFile(const QString &fileName) const 
 {
     QString baseName = QFileInfo(fileName).fileName();
     QString tempFileName = QDir::cleanPath(QDir::tempPath() + QDir::separator() + baseName);

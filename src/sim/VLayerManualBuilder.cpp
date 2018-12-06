@@ -14,6 +14,6 @@
 /**
  * @return VLayer::ptr
  */
-const VLayer::ptr &VLayerManualBuilder::build() noexcept {
-
+const VLayer::ptr &VLayerManualBuilder::build()  {
+    return VLayer::ptr();
 }

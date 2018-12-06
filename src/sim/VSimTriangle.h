@@ -30,14 +30,14 @@ VSimTriangle(const VCloth::const_ptr &p_material,
              const VSimNode::const_ptr &p_node1,
              const VSimNode::const_ptr &p_node2);
     
-void getVertices(QVector3D vertices[VERTICES_NUMBER]) const noexcept;
-void updateColor() noexcept;
-const QColor& getColor() const noexcept;
-double getAveragePressure() const noexcept;
-void reset() noexcept override;
+void getVertices(QVector3D vertices[VERTICES_NUMBER]) const ;
+void updateColor() ;
+const QColor& getColor() const ;
+double getAveragePressure() const ;
+void reset()  override;
 private:
-    const VSimNode * const m_pNodes[VERTICES_NUMBER];
     QColor m_color;
+    const std::vector<const VSimNode *>m_pNodes;
 
 };
 

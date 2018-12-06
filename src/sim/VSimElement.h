@@ -27,10 +27,10 @@ virtual ~VSimElement();
 /**
  * @param visible
  */
-void setVisible(bool visible) noexcept;
-bool isVisible() const noexcept;
-virtual const QColor& getColor() const noexcept;
-virtual void reset() noexcept = 0;
+void setVisible(bool visible) ;
+bool isVisible() const ;
+virtual const QColor& getColor() const ;
+virtual void reset()  = 0;
 protected:
     const VCloth::const_ptr m_pMaterial;
     const VSimulationParametres::const_ptr m_pParam;

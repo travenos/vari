@@ -28,10 +28,10 @@ VGraphicsElement(std::dynamic_pointer_cast<const VSimElement>(simTriangle)),
     addChild(m_pStrip);
 }
 
-void VGraphicsTriangle::updatePosition() noexcept
+void VGraphicsTriangle::updatePosition() 
 {
-    QVector3D vert[m_pSimTriangle->VERTICES_NUMBER];
+    QVector3D vert[VSimTriangle::VERTICES_NUMBER];
     m_pSimTriangle->getVertices(vert);
-    for (unsigned int i = 0; i < m_pSimTriangle->VERTICES_NUMBER; ++i)
+    for (unsigned int i = 0; i < VSimTriangle::VERTICES_NUMBER; ++i)
         m_pTriangleCoordinates->point.set1Value(i, vert[i].x(), vert[i].y(), vert[i].z());
 }

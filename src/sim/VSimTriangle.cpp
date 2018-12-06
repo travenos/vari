@@ -22,7 +22,7 @@ VSimTriangle::VSimTriangle(const VCloth::const_ptr &p_material,
                            const VSimNode::const_ptr &p_node1,
                            const VSimNode::const_ptr &p_node2) :
     VSimElement(p_material, p_param),
-    m_pNodes{p_node0.get(), p_node1.get(), p_node2.get()},
+    m_pNodes({p_node0.get(), p_node1.get(), p_node2.get()}),
     m_color(p_material->baseColor)
 {
 
@@ -31,13 +31,13 @@ VSimTriangle::VSimTriangle(const VCloth::const_ptr &p_material,
 /**
  * @return std::vector<QVector3D>
  */
-void VSimTriangle::getVertices(QVector3D vertices[VERTICES_NUMBER]) const noexcept
+void VSimTriangle::getVertices(QVector3D vertices[VERTICES_NUMBER]) const 
 {
     for (unsigned int i = 0; i < VERTICES_NUMBER; ++i)
         vertices[i] = m_pNodes[i]->getPosition();
 }
 
-void VSimTriangle::updateColor() noexcept
+void VSimTriangle::updateColor() 
 {
     double filledPart = getAveragePressure() /
             (m_pParam->getInjectionPressure() - m_pParam->getVacuumPressure());
@@ -56,12 +56,12 @@ void VSimTriangle::updateColor() noexcept
 /**
  * @return QColor&
  */
-const QColor &VSimTriangle::getColor() const noexcept
+const QColor &VSimTriangle::getColor() const 
 {
     return m_color;
 }
 
-double VSimTriangle::getAveragePressure() const noexcept
+double VSimTriangle::getAveragePressure() const 
 {
     double pressure = 0;
     for (unsigned int i = 0; i < VERTICES_NUMBER; ++i)
@@ -69,7 +69,7 @@ double VSimTriangle::getAveragePressure() const noexcept
     return pressure / VERTICES_NUMBER;
 }
 
-void VSimTriangle::reset() noexcept
+void VSimTriangle::reset() 
 {
     m_color = m_pMaterial->baseColor;
 }

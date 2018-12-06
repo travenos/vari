@@ -41,13 +41,13 @@ VLayer::~VLayer()
 /**
  * @param visible
  */
-void VLayer::setVisible(bool visible) noexcept
+void VLayer::setVisible(bool visible) 
 {
     p_setVisible(visible);
     m_wasVisible = visible;
 }
 
-void VLayer::p_setVisible(bool visible) noexcept
+void VLayer::p_setVisible(bool visible) 
 {
     for (auto &node : *m_pNodes)
         node->setVisible(visible);
@@ -59,12 +59,12 @@ void VLayer::p_setVisible(bool visible) noexcept
 /**
  * @return bool
  */
-bool VLayer::isVisible() const noexcept
+bool VLayer::isVisible() const 
 {
     return m_visible;
 }
 
-void VLayer::markActive(bool active) noexcept
+void VLayer::markActive(bool active) 
 {
     if (active)
     {
@@ -80,7 +80,7 @@ void VLayer::markActive(bool active) noexcept
 /**
  * @return bool
  */
-bool VLayer::isActive() const noexcept
+bool VLayer::isActive() const 
 {
     return m_active;
 }
@@ -88,7 +88,7 @@ bool VLayer::isActive() const noexcept
 /**
  * @return vector<&VNode::ptr>
  */
-const VSimNode::vector_ptr &VLayer::getNodes() noexcept
+const VSimNode::vector_ptr &VLayer::getNodes() 
 {
     return m_pNodes;
 }
@@ -96,17 +96,17 @@ const VSimNode::vector_ptr &VLayer::getNodes() noexcept
 /**
  * @return vector<&VTriangle::ptr>
  */
-const VSimTriangle::vector_ptr &VLayer::getTriangles() noexcept
+const VSimTriangle::vector_ptr &VLayer::getTriangles() 
 {
     return m_pTriangles;
 }
 
-void VLayer::setMateial(const VCloth &material) noexcept
+void VLayer::setMateial(const VCloth &material) 
 {
     (*m_pMaterial) = material;
 }
 
-void VLayer::reset() noexcept
+void VLayer::reset() 
 {
     for (auto &node : *m_pNodes)
         node->reset();
@@ -114,17 +114,17 @@ void VLayer::reset() noexcept
         triangle->reset();
 }
 
-size_t VLayer::getNodesNumber() const noexcept
+size_t VLayer::getNodesNumber() const 
 {
     return m_pNodes->size();
 }
 
-size_t VLayer::getTrianglesNumber() const noexcept
+size_t VLayer::getTrianglesNumber() const 
 {
     return m_pTriangles->size();
 }
 
-VCloth::const_ptr VLayer::getMaterial() const noexcept
+VCloth::const_ptr VLayer::getMaterial() const 
 {
     return m_pMaterial;
 }

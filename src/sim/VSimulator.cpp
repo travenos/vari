@@ -41,7 +41,7 @@ VSimulator::~VSimulator()
 /**
  * Start the simulation thread
  */
-void VSimulator::start() noexcept
+void VSimulator::start() 
 {
     if (!isSimulating())
     {
@@ -56,7 +56,7 @@ void VSimulator::start() noexcept
 /**
  * Finish the simulation using a flag m_stopFlag
  */
-void VSimulator::stop() noexcept
+void VSimulator::stop() 
 {
     m_stopFlag.store(true);
     if (m_pSimulationThread)
@@ -71,7 +71,7 @@ void VSimulator::stop() noexcept
  * Check if simulation thread is currently active
  * @return bool
  */
-bool VSimulator::isSimulating() const noexcept
+bool VSimulator::isSimulating() const 
 {
     return m_simulatingFlag.load();
 }
@@ -79,7 +79,7 @@ bool VSimulator::isSimulating() const noexcept
 /**
  * Stop the simulation if it is active and set the default state for all nodes
  */
-void VSimulator::reset() noexcept
+void VSimulator::reset() 
 {
     stop();
     nodesAction([](const VSimNode::ptr& node){node->reset();});
@@ -88,7 +88,7 @@ void VSimulator::reset() noexcept
     m_newDataLock.unlock();
 }
 
-void VSimulator::clear() noexcept
+void VSimulator::clear() 
 {
     stop();
     resetInfo();
@@ -96,7 +96,7 @@ void VSimulator::clear() noexcept
     m_pTriangles.reset(new std::vector<VSimTriangle::ptr>);
 }
 
-VSimulationParametres::const_ptr VSimulator::getSimulationParametres() const noexcept
+VSimulationParametres::const_ptr VSimulator::getSimulationParametres() const 
 {
     return m_pParam;
 }
@@ -106,7 +106,7 @@ VSimulationParametres::const_ptr VSimulator::getSimulationParametres() const noe
  * @param layers
  */
 void VSimulator::setActiveElements(const VSimNode::const_vector_ptr &nodes,
-                                const VSimTriangle::const_vector_ptr &triangles) noexcept(false)
+                                const VSimTriangle::const_vector_ptr &triangles) 
 {
     if (!isSimulating())
     {
@@ -126,7 +126,7 @@ void VSimulator::setActiveElements(const VSimNode::const_vector_ptr &nodes,
  * Get the information about the current state of the simulation
  * @param info: output information about the current state of the simulation
  */
-VSimulator::VSimulationInfo VSimulator::getSimulationInfo() const noexcept
+VSimulator::VSimulationInfo VSimulator::getSimulationInfo() const 
 {
     std::lock_guard<std::mutex> lock(m_infoLock);
     return m_info;
@@ -136,7 +136,7 @@ VSimulator::VSimulationInfo VSimulator::getSimulationInfo() const noexcept
  * Get number of current iteration
  * @return int
  */
-int VSimulator::getIterationNumber() const  noexcept
+int VSimulator::getIterationNumber() const  
 {
     std::lock_guard<std::mutex> lock(m_infoLock);
     return m_info.iteration;
@@ -144,14 +144,14 @@ int VSimulator::getIterationNumber() const  noexcept
 /**
  * Wait until some nodes state is changed
  */
-void VSimulator::waitForNewData() const noexcept
+void VSimulator::waitForNewData() const 
 {
     m_newDataLock.lock();
 }
 /**
  * Make waiting thread stop waiting and make it think that the simulation state has changed
  */
-void VSimulator::cancelWaitingForNewData() const noexcept
+void VSimulator::cancelWaitingForNewData() const 
 {
     m_newDataLock.unlock();
 }
@@ -159,7 +159,7 @@ void VSimulator::cancelWaitingForNewData() const noexcept
 /**
  * A function, which is being executed in the simulation thread
  */
-void VSimulator::simulationCycle() noexcept
+void VSimulator::simulationCycle() 
 {
     resetInfo();
     std::atomic<bool> madeChangesInCycle;
@@ -189,7 +189,7 @@ void VSimulator::simulationCycle() noexcept
     m_simulatingFlag.store(false);
 }
 
-void VSimulator::resetInfo() noexcept
+void VSimulator::resetInfo() 
 {
     std::lock_guard<std::mutex> lock(m_infoLock);
     m_info.averagePressure = 0;
@@ -203,7 +203,7 @@ void VSimulator::resetInfo() noexcept
  * @param func Describes an action for node
  */
 template <typename Callable>
-inline void VSimulator::nodesAction(Callable&& func) noexcept
+inline void VSimulator::nodesAction(Callable&& func) 
 {
     m_calculationThreads.clear();
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
@@ -229,7 +229,7 @@ inline void VSimulator::nodesAction(Callable&& func) noexcept
  * @param func Describes an action for triangle
  */
 template <typename Callable>
-inline void VSimulator::trianglesAction(Callable&& func) noexcept
+inline void VSimulator::trianglesAction(Callable&& func) 
 {
     m_calculationThreads.clear();
     std::lock_guard<std::mutex> lock(*m_pTrianglesLock);
@@ -250,7 +250,7 @@ inline void VSimulator::trianglesAction(Callable&& func) noexcept
         thread.join();
 }
 
-inline double VSimulator::timeDelta() const noexcept
+inline double VSimulator::timeDelta() const 
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     double n = m_pParam->getViscosity();                             //[N*s/m2]
@@ -264,7 +264,7 @@ inline double VSimulator::timeDelta() const noexcept
     return time;
 }
 
-inline double VSimulator::calcAveragePermeability() const noexcept
+inline double VSimulator::calcAveragePermeability() const 
 {
     double permeability = 0;
     for(auto &node : *m_pActiveNodes)
@@ -274,7 +274,7 @@ inline double VSimulator::calcAveragePermeability() const noexcept
     return permeability;
 }
 
-inline double VSimulator::calcAverageCellDistance() const noexcept
+inline double VSimulator::calcAverageCellDistance() const 
 {
     double distance = 0;
     int counter = 0;
@@ -293,54 +293,54 @@ inline double VSimulator::calcAverageCellDistance() const noexcept
     return distance;
 }
 
-void VSimulator::setInjectionDiameter(double diameter) noexcept
+void VSimulator::setInjectionDiameter(double diameter) 
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     m_pParam->setInjectionDiameter(diameter);
 }
-void VSimulator::setVacuumDiameter(double diameter) noexcept
+void VSimulator::setVacuumDiameter(double diameter) 
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     m_pParam->setVacuumDiameter(diameter);
 }
-void VSimulator::setDefaultViscosity(double defaultViscosity) noexcept
+void VSimulator::setDefaultViscosity(double defaultViscosity) 
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     m_pParam->setDefaultViscosity(defaultViscosity);
 }
-void VSimulator::setTempcoef(double tempcoef) noexcept
+void VSimulator::setTempcoef(double tempcoef) 
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     m_pParam->setTempcoef(tempcoef);
 }
-void VSimulator::setTemperature(double temperature) noexcept
+void VSimulator::setTemperature(double temperature) 
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     m_pParam->setTemperature(temperature);
 }
-void VSimulator::setVacuumPressure(double pressure) noexcept
+void VSimulator::setVacuumPressure(double pressure) 
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     std::lock_guard<std::mutex> lockT(*m_pTrianglesLock);
     m_pParam->setVacuumPressure(pressure);
 }
-void VSimulator::setInjectionPressure(double pressure) noexcept
+void VSimulator::setInjectionPressure(double pressure) 
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     std::lock_guard<std::mutex> lockT(*m_pTrianglesLock);
     m_pParam->setInjectionPressure(pressure);
 }
-void VSimulator::setQ(double q) noexcept
+void VSimulator::setQ(double q) 
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     m_pParam->setQ(q);
 }
-void VSimulator::setR(double r) noexcept
+void VSimulator::setR(double r) 
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     m_pParam->setR(r);
 }
-void VSimulator::setS(double s) noexcept
+void VSimulator::setS(double s) 
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     m_pParam->setS(s);

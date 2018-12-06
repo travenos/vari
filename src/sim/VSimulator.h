@@ -10,6 +10,7 @@
 #include <vector>
 #include <memory>
 #include <thread>
+#include <atomic>
 #include "VSimulationClass.h"
 #include "VSimNode.h"
 #include "VSimTriangle.h"
@@ -41,56 +42,56 @@ public:
     /**
  * Start the simulation thread
  */
-    void start() noexcept;
+    void start() ;
     /**
  * Finish the simulation using a flag m_stopFlag
  */
-    void stop() noexcept;
+    void stop() ;
     /**
  * Check if simulation thread is currently active
  */
-    bool isSimulating() const noexcept;
-    void reset() noexcept;
-    void clear() noexcept;
-    void resetInfo() noexcept;
+    bool isSimulating() const ;
+    void reset() ;
+    void clear() ;
+    void resetInfo() ;
     /**
  * Update an information about active nodes and triangles (m_activeNodes, m_triangles)
  * @param layers
  */
     void setActiveElements(const VSimNode::const_vector_ptr &nodes,
-                        const VSimTriangle::const_vector_ptr &triangles) noexcept(false);
+                        const VSimTriangle::const_vector_ptr &triangles) ;
     /**
  * Get the information about the current state of the simulation
  * @param info: output information about the current state of the simulation
  */
-    VSimulationInfo getSimulationInfo() const noexcept;
+    VSimulationInfo getSimulationInfo() const ;
     /**
 
  * Get number of current iteration
  * @return int
  */
-    int getIterationNumber() const noexcept;
+    int getIterationNumber() const ;
     /**
  * Wait until some nodes state is changed
  */
-    void waitForNewData() const noexcept;
+    void waitForNewData() const ;
     /**
  * Make waiting thread stop waiting and make it think that the simulation state has changed
  */
-    void cancelWaitingForNewData() const noexcept;
+    void cancelWaitingForNewData() const ;
 
-    VSimulationParametres::const_ptr getSimulationParametres() const noexcept;
+    VSimulationParametres::const_ptr getSimulationParametres() const ;
 
-    void setInjectionDiameter(double diameter) noexcept;
-    void setVacuumDiameter(double diameter) noexcept;
-    void setDefaultViscosity(double defaultViscosity) noexcept;
-    void setTemperature(double temperature) noexcept;
-    void setTempcoef(double tempcoef) noexcept;
-    void setVacuumPressure(double pressure) noexcept;
-    void setInjectionPressure(double pressure) noexcept;
-    void setQ(double q) noexcept;
-    void setR(double r) noexcept;
-    void setS(double s) noexcept;
+    void setInjectionDiameter(double diameter) ;
+    void setVacuumDiameter(double diameter) ;
+    void setDefaultViscosity(double defaultViscosity) ;
+    void setTemperature(double temperature) ;
+    void setTempcoef(double tempcoef) ;
+    void setVacuumPressure(double pressure) ;
+    void setInjectionPressure(double pressure) ;
+    void setQ(double q) ;
+    void setR(double r) ;
+    void setS(double s) ;
 
 private:
     typedef void(*nodeFunc)(VSimNode::ptr& node);
@@ -104,12 +105,12 @@ private:
     /**
      * Number of nodes, which are calculated in the same thread
      */
-    unsigned int m_nodesThreadPart;
+    size_t m_nodesThreadPart;
 
     /**
      * Number of triangles, which are calculated in the same thread
      */
-    unsigned int m_trianglesThreadPart;
+    size_t m_trianglesThreadPart;
      /**
      * Vector of pointers to all nodes which can be processed
      */
@@ -162,23 +163,23 @@ private:
     /**
      * A function, which is being executed in the simulation thread
      */
-    void simulationCycle()  noexcept;
+    void simulationCycle()  ;
     /**
      * Perform an action over all nodes
      * @param func Describes an action for node
      */
     template<typename Callable>
-    inline void nodesAction(Callable &&func) noexcept;
+    inline void nodesAction(Callable &&func) ;
     /**
      * Perform an action over all triangles
      * @param func Describes an action for triangle
      */
     template<typename Callable>
-    inline void trianglesAction(Callable &&func) noexcept;
+    inline void trianglesAction(Callable &&func) ;
 
-    inline double timeDelta() const noexcept;
-    inline double calcAveragePermeability() const noexcept;
-    inline double calcAverageCellDistance() const noexcept;
+    inline double timeDelta() const ;
+    inline double calcAveragePermeability() const ;
+    inline double calcAverageCellDistance() const ;
 };
 
 #endif //_VSIMULATOR_H

@@ -28,17 +28,17 @@ public:
     virtual ~VGraphicsViewer();
     //TODO remove operator= and copy constructor
     void setGraphicsElements(const VSimNode::const_vector_ptr &nodes,
-                             const VSimTriangle::const_vector_ptr &triangles) noexcept;
-    void updateTriangleColors() noexcept;
-    void clearNodes() noexcept;
-    void clearTriangles() noexcept;
-    void clearAll() noexcept;
+                             const VSimTriangle::const_vector_ptr &triangles) ;
+    void updateTriangleColors() ;
+    void clearNodes() ;
+    void clearTriangles() ;
+    void clearAll() ;
 private:
-    void stopRender() noexcept;
-    void process() noexcept;
+    void stopRender() ;
+    void process() ;
     template<typename T1, typename T2>
     inline void createGraphicsElements(std::vector<T1 *>* gaphics,
-                                       const std::shared_ptr<const std::vector< std::shared_ptr<T2> > > &sim) noexcept;
+                                       const std::shared_ptr<const std::vector< std::shared_ptr<T2> > > &sim) ;
 
     std::vector<VGraphicsNode*> m_graphicsNodes;
     std::vector<VGraphicsTriangle*> m_graphicsTriangles;
@@ -53,7 +53,7 @@ private:
     std::atomic<bool> m_renderStopFlag;
 
 private slots:
-    void doRender() noexcept;
+    void doRender() ;
 signals:
     void askForRender();
 };

@@ -13,48 +13,48 @@
 const double VSimulationParametres::DEFAULT_TEMPERATURE = 25;
 const double VSimulationParametres::KELVINS_IN_0_CELSIUS = 273.15;
 
-double VSimulationParametres::getInjectionDiameter() const noexcept
+double VSimulationParametres::getInjectionDiameter() const 
 {
     return m_injectionDiameter;
 }
-void VSimulationParametres::setInjectionDiameter(double diameter) noexcept
+void VSimulationParametres::setInjectionDiameter(double diameter) 
 {
     if (diameter < 0)
         diameter = 0;
     m_injectionDiameter = diameter;
 }
 
-double VSimulationParametres::getVacuumDiameter() const noexcept
+double VSimulationParametres::getVacuumDiameter() const 
 {
     return m_vacuumDiameter;
 }
-void VSimulationParametres::setVacuumDiameter(double diameter) noexcept
+void VSimulationParametres::setVacuumDiameter(double diameter) 
 {
     if (diameter < 0)
         diameter = 0;
     m_vacuumDiameter = diameter;
 }
 
-double VSimulationParametres::getViscosity() const noexcept
+double VSimulationParametres::getViscosity() const 
 {
     return m_viscosity;
 }
 
-double VSimulationParametres::getDefaultViscosity() const noexcept
+double VSimulationParametres::getDefaultViscosity() const 
 {
     return m_defaultViscosity;
 }
-void VSimulationParametres::setDefaultViscosity(double viscosity) noexcept
+void VSimulationParametres::setDefaultViscosity(double viscosity) 
 {
     m_defaultViscosity = viscosity;
     m_viscosity = calculateViscosity();
 }
 
-double VSimulationParametres::getTemperature() const noexcept
+double VSimulationParametres::getTemperature() const 
 {
     return m_temperature;
 }
-void VSimulationParametres::setTemperature(double temperature) noexcept
+void VSimulationParametres::setTemperature(double temperature) 
 {
     if (temperature < - KELVINS_IN_0_CELSIUS)
         temperature = - KELVINS_IN_0_CELSIUS + 1;
@@ -62,12 +62,12 @@ void VSimulationParametres::setTemperature(double temperature) noexcept
     m_viscosity = calculateViscosity();
 }
 
-double VSimulationParametres::getTempcoef() const noexcept
+double VSimulationParametres::getTempcoef() const 
 {
     return m_tempcoef;
 }
 
-void VSimulationParametres::setTempcoef(double tempcoef) noexcept
+void VSimulationParametres::setTempcoef(double tempcoef) 
 {
     if (tempcoef < 0)
         tempcoef = 0;
@@ -75,93 +75,93 @@ void VSimulationParametres::setTempcoef(double tempcoef) noexcept
     m_viscosity = calculateViscosity();
 }
 
-double VSimulationParametres::getInjectionPressure() const noexcept
+double VSimulationParametres::getInjectionPressure() const 
 {
     return m_injectionPressure;
 }
-void VSimulationParametres::setInjectionPressure(double pressure) noexcept
+void VSimulationParametres::setInjectionPressure(double pressure) 
 {
     if (pressure < 0)
         pressure = 0;
     m_injectionPressure = pressure;
 }
 
-double VSimulationParametres::getVacuumPressure() const noexcept
+double VSimulationParametres::getVacuumPressure() const 
 {
     return m_vacuumPressure;
 }
-void VSimulationParametres::setVacuumPressure(double pressure) noexcept
+void VSimulationParametres::setVacuumPressure(double pressure) 
 {
     if (pressure < 0)
         pressure = 0;
     m_vacuumPressure = pressure;
 }
 
-double VSimulationParametres::getQ() const noexcept
+double VSimulationParametres::getQ() const 
 {
     return m_q;
 }
-void VSimulationParametres::setQ(double q) noexcept
+void VSimulationParametres::setQ(double q) 
 {
     if (q < 1)
         q = 1;
     m_q = q;
 }
 
-double VSimulationParametres::getR() const noexcept
+double VSimulationParametres::getR() const 
 {
     return m_r;
 }
-void VSimulationParametres::setR(double r) noexcept
+void VSimulationParametres::setR(double r) 
 {
     if (r < 1)
         r = 1;
     m_r = r;
 }
 
-double VSimulationParametres::getS() const noexcept
+double VSimulationParametres::getS() const 
 {
     return m_s;
 }
-void VSimulationParametres::setS(double s) noexcept
+void VSimulationParametres::setS(double s) 
 {
     if (s < 1)
         s = 1;
     m_s = s;
 }
 
-double VSimulationParametres::getAveragePermeability() const noexcept
+double VSimulationParametres::getAveragePermeability() const 
 {
     return m_averagePermeability;
 }
-void VSimulationParametres::setAveragePermeability(double averagePermeability) noexcept
+void VSimulationParametres::setAveragePermeability(double averagePermeability) 
 {
     if (averagePermeability < 0)
         averagePermeability = 0;
     m_averagePermeability = averagePermeability;
 }
 
-double VSimulationParametres::getAverageCellDistance() const noexcept
+double VSimulationParametres::getAverageCellDistance() const 
 {
     return m_averageCellDistance;
 }
-void VSimulationParametres::setAverageCellDistance(double averageCellDistance) noexcept
+void VSimulationParametres::setAverageCellDistance(double averageCellDistance) 
 {
     if (averageCellDistance < 0)
         averageCellDistance = 0;
     m_averageCellDistance = averageCellDistance;
 }
 
-unsigned int VSimulationParametres::getNumberOfNodes() const noexcept
+size_t VSimulationParametres::getNumberOfNodes() const
 {
     return m_numberOfNodes;
 }
-void VSimulationParametres::setNumberOfNodes(unsigned int numberOfNodes) noexcept
+void VSimulationParametres::setNumberOfNodes(size_t numberOfNodes)
 {
     m_numberOfNodes = numberOfNodes;
 }
 
-double VSimulationParametres::calculateViscosity() const noexcept
+double VSimulationParametres::calculateViscosity() const 
 {
     double A = m_tempcoef;
     double mu0 = m_defaultViscosity;

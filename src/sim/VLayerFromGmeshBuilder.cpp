@@ -23,7 +23,7 @@ VLayerFromFileBuilder(filename, material, p_simParam)
 
 }
 
-bool VLayerFromGmeshBuilder::importNodes() noexcept
+bool VLayerFromGmeshBuilder::importNodes() 
 {
     QString line;
     while (!m_file.atEnd())
@@ -84,7 +84,7 @@ bool VLayerFromGmeshBuilder::importNodes() noexcept
     return true;
 }
 
-bool VLayerFromGmeshBuilder::importConnections() noexcept
+bool VLayerFromGmeshBuilder::importConnections() 
 {
     QString line;
     while (!m_file.atEnd())

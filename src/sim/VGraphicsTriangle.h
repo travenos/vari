@@ -20,7 +20,7 @@ public:
  * @param simTriangle
  */
 VGraphicsTriangle(const VSimTriangle::const_ptr &simTriangle);
-void updatePosition() noexcept;
+void updatePosition() ;
 private: 
     VSimTriangle::const_ptr m_pSimTriangle;
     SoCoordinate3* m_pTriangleCoordinates;

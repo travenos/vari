@@ -29,33 +29,27 @@ VSimulationFacade::VSimulationFacade(QWidget *parent):
     m_pLayersProcessor->setMutexes(p_nodesLock, p_trianglesLock);
 }
 
-void VSimulationFacade::startSimulation() noexcept
+void VSimulationFacade::startSimulation() 
 {
     m_pSimulator->start();
 }
 
-void VSimulationFacade::stopSimulation() noexcept
+void VSimulationFacade::stopSimulation() 
 {
     m_pSimulator->stop();
 }
 
-void VSimulationFacade::resetSimulation() noexcept
+void VSimulationFacade::resetSimulation() 
 {
     m_pSimulator->reset();
 }
 
-/**
- * @return int
- */
-int VSimulationFacade::getLayersNumber() const noexcept
+size_t VSimulationFacade::getLayersNumber() const
 {
     return m_pLayersProcessor->getLayersNumber();
 }
 
-/**
- * @return int
- */
-int VSimulationFacade::getActiveLayersNumber() const noexcept
+size_t VSimulationFacade::getActiveLayersNumber() const
 {
     return m_pLayersProcessor->getActiveLayersNumber();
 }
@@ -63,7 +57,7 @@ int VSimulationFacade::getActiveLayersNumber() const noexcept
 /**
  * @return int
  */
-int VSimulationFacade::getInactiveLayersNumber() const noexcept
+size_t VSimulationFacade::getInactiveLayersNumber() const
 {
     return m_pLayersProcessor->getInactiveLayersNumber();
 }
@@ -72,7 +66,7 @@ int VSimulationFacade::getInactiveLayersNumber() const noexcept
  * @param layer
  * @param visible
  */
-void VSimulationFacade::setVisible(unsigned int layer, bool visible) noexcept(false)
+void VSimulationFacade::setVisible(unsigned int layer, bool visible) 
 {
     m_pLayersProcessor->setVisibleLayer(layer, visible);
     VSimNode::const_vector_ptr nodes = m_pLayersProcessor->getActiveNodes();
@@ -83,7 +77,7 @@ void VSimulationFacade::setVisible(unsigned int layer, bool visible) noexcept(fa
 /**
  * @param layer
  */
-void VSimulationFacade::removeLayer(unsigned int layer) noexcept(false)
+void VSimulationFacade::removeLayer(unsigned int layer) 
 {
     m_pLayersProcessor->removeLayer(layer);
     updateConfiguration();
@@ -92,7 +86,7 @@ void VSimulationFacade::removeLayer(unsigned int layer) noexcept(false)
 /**
  * @param layer
  */
-void VSimulationFacade::enableLayer(unsigned int layer, bool enable) noexcept(false)
+void VSimulationFacade::enableLayer(unsigned int layer, bool enable) 
 {
     m_pLayersProcessor->enableLayer(layer, enable);
     updateConfiguration();
@@ -102,12 +96,12 @@ void VSimulationFacade::enableLayer(unsigned int layer, bool enable) noexcept(fa
  * @param layer
  * @param material
  */
-void VSimulationFacade::setMaterial(unsigned int layer, const VCloth &material) noexcept(false)
+void VSimulationFacade::setMaterial(unsigned int layer, const VCloth &material) 
 {
     m_pLayersProcessor->setMaterial(layer, material);
 }
 
-void VSimulationFacade::draw() noexcept
+void VSimulationFacade::draw() 
 {
     //TODO remove this method
     m_pGraphicsViewer->render();
@@ -116,12 +110,12 @@ void VSimulationFacade::draw() noexcept
 /**
  * @param pressure
  */
-void VSimulationFacade::setInjectionPressure(double pressure) noexcept
+void VSimulationFacade::setInjectionPressure(double pressure) 
 {
     m_pSimulator->setInjectionPressure(pressure);
 }
 
-void VSimulationFacade::setVacuumPressure(double pressure) noexcept
+void VSimulationFacade::setVacuumPressure(double pressure) 
 {
     m_pSimulator->setVacuumPressure(pressure);
 }
@@ -129,7 +123,7 @@ void VSimulationFacade::setVacuumPressure(double pressure) noexcept
 /**
  * @param diameter
  */
-void VSimulationFacade::setInjectionDiameter(double diameter) noexcept
+void VSimulationFacade::setInjectionDiameter(double diameter) 
 {
     m_pSimulator->setInjectionDiameter(diameter);
 }
@@ -137,64 +131,64 @@ void VSimulationFacade::setInjectionDiameter(double diameter) noexcept
 /**
  * @param diameter
  */
-void VSimulationFacade::setVacuumDiameter(double diameter) noexcept
+void VSimulationFacade::setVacuumDiameter(double diameter) 
 {
     m_pSimulator->setVacuumDiameter(diameter);
 }
 
-void VSimulationFacade::setDefaultViscosity(double defaultViscosity) noexcept
+void VSimulationFacade::setDefaultViscosity(double defaultViscosity) 
 {
     m_pSimulator->setDefaultViscosity(defaultViscosity);
 }
 
 
-void VSimulationFacade::setTemperature(double temperature) noexcept
+void VSimulationFacade::setTemperature(double temperature) 
 {
     m_pSimulator->setTemperature(temperature);
 }
 
 
-void VSimulationFacade::setTempcoef(double tempcoef) noexcept
+void VSimulationFacade::setTempcoef(double tempcoef) 
 {
     m_pSimulator->setTempcoef(tempcoef);
 }
 
-void VSimulationFacade::setQ(double q) noexcept
+void VSimulationFacade::setQ(double q) 
 {
     m_pSimulator->setQ(q);
 }
-void VSimulationFacade::setR(double r) noexcept
+void VSimulationFacade::setR(double r) 
 {
     m_pSimulator->setR(r);
 }
-void VSimulationFacade::setS(double s) noexcept
+void VSimulationFacade::setS(double s) 
 {
     m_pSimulator->setS(s);
 }
 
-void VSimulationFacade::newModel() noexcept
+void VSimulationFacade::newModel() 
 {
     m_pSimulator->clear();
     m_pLayersProcessor->clear();
     m_pGraphicsViewer->clearAll();
 }
 
-VCloth::const_ptr VSimulationFacade::getMaterial(unsigned int layer) const noexcept(false)
+VCloth::const_ptr VSimulationFacade::getMaterial(unsigned int layer) const 
 {
     return m_pLayersProcessor->getMaterial(layer);
 }
 
-VSimulationParametres::const_ptr VSimulationFacade::getParametres() const noexcept
+VSimulationParametres::const_ptr VSimulationFacade::getParametres() const 
 {
     return m_pSimulator->getSimulationParametres();
 }
 
-bool VSimulationFacade::isLayerVisible(unsigned int layer) const noexcept(false)
+bool VSimulationFacade::isLayerVisible(unsigned int layer) const 
 {
     return m_pLayersProcessor->isLayerVisible(layer);
 }
 
-bool VSimulationFacade::isLayerEnabled(unsigned int layer) const noexcept(false)
+bool VSimulationFacade::isLayerEnabled(unsigned int layer) const 
 {
     return m_pLayersProcessor->isLayerEnabled(layer);
 }
@@ -202,7 +196,7 @@ bool VSimulationFacade::isLayerEnabled(unsigned int layer) const noexcept(false)
 /**
  * @param filename
  */
-void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &filename) noexcept(false)
+void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &filename) 
 {
     QFile file(filename);
     VLayerFromFileBuilder * p_layerBuilder = nullptr;
@@ -248,7 +242,7 @@ void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &
         throw VImportException();
 }
 
-void VSimulationFacade::updateConfiguration() noexcept(false)
+void VSimulationFacade::updateConfiguration() 
 {
     VSimNode::const_vector_ptr nodes = m_pLayersProcessor->getActiveNodes();
     VSimTriangle::const_vector_ptr triangles = m_pLayersProcessor->getActiveTriangles();

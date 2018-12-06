@@ -33,16 +33,16 @@ protected:
     VSimTriangle::vector_ptr m_pTriangles;
     QFile m_file;
     
-void addShapePart(std::list<int> *connectionList) noexcept;
-void createConnections(std::list<int> *vertices) noexcept;
-void addNode(int id, const QVector3D &pos) noexcept;
-void makeNeighbours(int nodeId, int neighborId) noexcept;
-virtual bool importNodes() noexcept = 0;
-virtual bool importConnections() noexcept = 0;
+void addShapePart(std::list<int> *connectionList) ;
+void createConnections(std::list<int> *vertices) ;
+void addNode(int id, const QVector3D &pos) ;
+void makeNeighbours(int nodeId, int neighborId) ;
+virtual bool importNodes()  = 0;
+virtual bool importConnections()  = 0;
 
 private:
-void addTriangle(int nodeId1, int nodeId2, int nodeId3) noexcept;
-inline void addQuadrangle(int nodeId1, int nodeId2, int nodeId3, int nodeId4) noexcept;
+void addTriangle(int nodeId1, int nodeId2, int nodeId3) ;
+inline void addQuadrangle(int nodeId1, int nodeId2, int nodeId3, int nodeId4) ;
 };
 
 #endif //_VLAYERFROMFILEBUILDER_H

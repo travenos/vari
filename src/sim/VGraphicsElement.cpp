@@ -29,13 +29,13 @@ VGraphicsElement::~VGraphicsElement()
 
 }
 
-void VGraphicsElement::updateAll() noexcept
+void VGraphicsElement::updateAll() 
 {
     updateColor();
     updatePosition();
 }
 
-void VGraphicsElement::updateColor() noexcept
+void VGraphicsElement::updateColor() 
 {
     const QColor& color = m_pSimElement->getColor();
     m_pGraphicsMaterial->diffuseColor.setHSVValue(color.hueF(),

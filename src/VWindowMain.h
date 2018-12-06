@@ -11,8 +11,8 @@ class VSimulationFacade;
 class VWindowLayer;
 class VWindowCloth;
 class VWindowResin;
-class VCloth;
-class VPolygon;
+struct VCloth;
+struct VPolygon;
 
 class VWindowMain : public QMainWindow
 {

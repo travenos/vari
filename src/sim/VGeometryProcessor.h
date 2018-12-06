@@ -21,17 +21,17 @@ public:
 /**
  * @param polygon
  */
-static VLayer::ptr createFromPolygon(VPolygon const &polygon) noexcept;
+static VLayer::ptr createFromPolygon(VPolygon const &polygon) ;
     
 /**
  * @param polygon
  */
-static void cutByPolygon(const VLayer::ptr &layer, const VPolygon &polygon) noexcept;
+static void cutByPolygon(const VLayer::ptr &layer, const VPolygon &polygon) ;
     
 /**
  * @param matrix
  */
-static void transform(const VLayer::ptr &layer, const VMatrix &matrix) noexcept;
+static void transform(const VLayer::ptr &layer, const VMatrix &matrix) ;
 };
 
 #endif //_VGEOMETRYPROCESSOR_H

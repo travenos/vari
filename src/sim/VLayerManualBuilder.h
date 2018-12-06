@@ -13,7 +13,7 @@
 class VLayerManualBuilder: public VLayerAbstractBuilder {
 public: 
     
-const VLayer::ptr &build() noexcept;
+const VLayer::ptr &build() ;
 };
 
 #endif //_VLAYERMANUALBUILDER_H

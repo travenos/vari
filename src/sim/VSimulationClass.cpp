@@ -19,7 +19,7 @@ VSimulationClass::VSimulationClass():
  * @param nodesLock
  * @param trianglesLock
  */
-void VSimulationClass::setMutexes(mutex_ptr nodesLock, mutex_ptr trianglesLock) noexcept {
+void VSimulationClass::setMutexes(mutex_ptr nodesLock, mutex_ptr trianglesLock)  {
     m_pNodesLock = nodesLock;
     m_pTrianglesLock = trianglesLock;
 }

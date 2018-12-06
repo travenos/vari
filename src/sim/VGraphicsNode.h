@@ -22,8 +22,8 @@ public:
  */
 VGraphicsNode(const VSimNode::const_ptr &simNode);
 virtual ~VGraphicsNode();
-void updatePosition() noexcept;
-void setCubeSide(float side) noexcept;
+void updatePosition() ;
+void setCubeSide(float side) ;
 private:
     VSimNode::const_ptr m_pSimNode;
     SoTranslation* m_pTranslation;
