@@ -22,8 +22,8 @@ VSimTriangle::VSimTriangle(const VCloth::const_ptr &p_material,
                            const VSimNode::const_ptr &p_node1,
                            const VSimNode::const_ptr &p_node2) :
     VSimElement(p_material, p_param),
-    m_pNodes({p_node0.get(), p_node1.get(), p_node2.get()}),
-    m_color(p_material->baseColor)
+    m_color(p_material->baseColor),
+    m_pNodes({p_node0.get(), p_node1.get(), p_node2.get()})
 {
 
 }
