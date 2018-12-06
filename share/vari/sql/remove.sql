@@ -1,0 +1,3 @@
+DROP DATABASE vari;
+DROP OWNED BY vari;
+DROP ROLE vari;

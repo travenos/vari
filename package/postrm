@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+DATABASE_REMOVE_PATH="/tmp/vari/remove.sql"
+if [[ "$1" == "purge" ]]; then
+	sudo -u postgres psql -f "$DATABASE_REMOVE_PATH" 2>&1
+	rm -f "$DATABASE_REMOVE_PATH" 2>&1
+fi
+if [[ "$1" == "remove" || "$1" == "purge" ]]; then
+	ldconfig
+fi
+
+for USER in /home/* ; do
+  if test ! -f "$USER/Desktop/vari.desktop" ; then continue ; fi
+  rm -f "$USER/Desktop/vari.desktop"
+done
+exit 0

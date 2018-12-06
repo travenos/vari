@@ -1,0 +1,11 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Exec=/usr/bin/vari
+Name=VARI
+Comment=Software for simulating the VARI process
+Icon=vari
+Categories=Science;Education;

@@ -1,0 +1,12 @@
+Package: @package@
+Version: @version@
+Priority: standard
+Section: non-free
+Architecture: @architecture@
+Depends: @dependencies@
+Conflicts: @conflicts@
+Provides: @provides@
+Maintainer: Alexey Barashkov <travenos@robot-develop.org>
+Homepage: https://wicron.com/
+Installed-Size: @size@
+Description: Software for simulating the VARI process

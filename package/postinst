@@ -1,0 +1,17 @@
+#!/bin/bash
+DATABASE_CREATE_PATH="/usr/share/vari/sql/create.sql"
+set -e
+if [ -f /tmp/vari/init_db ]; then
+	sudo -u postgres psql -f "$DATABASE_CREATE_PATH"
+	rm -f /tmp/vari/init_db
+fi
+if [ "$1" = "configure" ]; then
+	ldconfig
+fi
+
+for USER in /home/* ; do
+  if test ! -d "$USER/Desktop" ; then continue ; fi
+  cp -f /usr/share/applications/vari.desktop "$USER/Desktop"
+  chmod 755 "$USER/Desktop/vari.desktop"
+done
+exit 0
