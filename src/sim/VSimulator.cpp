@@ -3,7 +3,6 @@
  * @author Alexey Barashkov
  */
 #include <functional>
-//#include <shared_mutex> //TODO
 #include "VSimulator.h"
 #include "VExceptions.h"
 
@@ -163,34 +162,13 @@ void VSimulator::cancelWaitingForNewData() const noexcept
 void VSimulator::simulationCycle() noexcept
 {
     resetInfo();
-    //bool madeChangesInCycle;
     std::atomic<bool> madeChangesInCycle;
-    //std::shared_mutex madeChangesLock;  //TODO
     auto calcFunc = [](const VSimNode::ptr& node){node->calculate();};
-    auto commitFunc = [&madeChangesInCycle/*, &madeChangesLock TODO*/](const VSimNode::ptr& node)
+    auto commitFunc = [&madeChangesInCycle](const VSimNode::ptr& node)
     {
         bool madeChanges = node->commit();
         if(madeChanges && !madeChangesInCycle.load())
             madeChangesInCycle.store(true);
-        //TODO also measure fulled percent and simulation info.
-        //TODO store summary pressure and count of filled in array with length of N_THREADS
-
-        /*
-        if (madeChanges)
-        {
-            bool needToRewrite;
-            {
-                std::shared_lock<std::shared_mutex> lock(madeChangesLock);
-                needToRewrite = !madeChangesInCycle;
-            }
-            if(needToRewrite)
-            {
-                std::unique_lock<std::shared_mutex> lock(madeChangesLock);
-                madeChangesInCycle = true;
-            }
-            //TODO: measure speed
-        }
-            */
     };
     auto updateColorsFunc = [](const VSimTriangle::ptr& triangle){triangle->updateColor();};
     while(!m_stopFlag.load())
@@ -228,7 +206,7 @@ template <typename Callable>
 inline void VSimulator::nodesAction(Callable&& func) noexcept
 {
     m_calculationThreads.clear();
-    std::lock_guard lock(*m_pNodesLock);
+    std::lock_guard<std::mutex> lock(*m_pNodesLock);
     size_t batchStart = 0;
     size_t batchStop;
     for (size_t i = 0; i < N_THREADS; ++i)
@@ -254,7 +232,7 @@ template <typename Callable>
 inline void VSimulator::trianglesAction(Callable&& func) noexcept
 {
     m_calculationThreads.clear();
-    std::lock_guard lock(*m_pTrianglesLock);
+    std::lock_guard<std::mutex> lock(*m_pTrianglesLock);
     size_t batchStart = 0;
     size_t batchStop;
     for (size_t i = 0; i < N_THREADS; ++i)
