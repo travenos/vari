@@ -9,9 +9,11 @@ if [ "$1" = "configure" ]; then
 	ldconfig
 fi
 
-for USER in /home/* ; do
-  if test ! -d "$USER/Desktop" ; then continue ; fi
-  cp -f /usr/share/applications/vari.desktop "$USER/Desktop"
-  chmod 755 "$USER/Desktop/vari.desktop"
+for USERDIR in /home/* ; do
+  if test ! -d "$USERDIR/Desktop" ; then continue ; fi
+  cp -f /usr/share/applications/vari.desktop "$USERDIR/Desktop"
+  chmod 755 "$USERDIR/Desktop/vari.desktop"
+  USER=$(basename $USERDIR)
+  chown ${USER}:${USER} "$USERDIR/Desktop/vari.desktop"
 done
 exit 0
