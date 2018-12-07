@@ -1,13 +1,13 @@
-; webot inno setup install script
+; vari inno setup install script
 
 #define AppName      "${APP_NAME}"
 #define AppVersion   "${PROJECT_VERSION_LONG}"
 #define AppPublisher "${PROJECT_VENDOR_LONG}"
 #define AppURL       "${ORG_WEBSITE}"
-#define AppGUID      "34B25717-C3E5-455D-8FCF-01E60BAEB42A"
+#define AppGUID      "931BBE66-77AA-471C-B785-7FAD395E634E"
 
-#define AppVARIName    "vari"
-#define AppVARIExeName "vari.exe"
+#define AppVARIName    "{#AppName}"
+#define AppVARIExeName "{#AppName}.exe"
 
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING .ISS SCRIPT FILES!
 
@@ -47,13 +47,16 @@ Source: "$ENV{QTDIR}/bin/Coin4.dll";         DestDir: "{app}"
 Source: "msvcr120.dll"; DestDir: "{app}"
 Source: "msvcp120.dll"; DestDir: "{app}"
 
+Source: "sql/create.sql"; DestDir: "{app}/sql"
+Source: "sql/remove.sql"; DestDir: "{app}/sql"
+
 [Run]
-Filename: "{sys}\netsh.exe"; Parameters: "firewall add allowedprogram ""{app}\vclient.exe"" ""Wicron vclient"" ENABLE ALL"; StatusMsg: "Status msg..."; Flags: runhidden; MinVersion: 0,5.01.2600sp2;
+Filename: "{sys}\psql.exe"; Parameters: "-h 127.0.0.1 -U postgres -f "{app}\sql\create.sql""; StatusMsg: "Initializing the database"; Flags: runhidden;
 
 [Icons]
-Name: "{group}\{#AppName}";           Filename: "{app}\{#AppVClientExeName}"; WorkingDir: "{app}"
-Name: "{group}\Uninstall {#AppName}"; Filename: "{uninstallexe}"
-Name: "{commondesktop}\{#AppName}";   Filename: "{app}\{#AppVClientExeName}"; Tasks: desktopicon
+Name: "{group}\{#AppName}";           Filename: "{app}\{#AppVARIExeName}"; WorkingDir: "{app}"
+Name: "{group}\Uninstall {#AppName}"; Filename: "{uninstall.exe}"
+Name: "{commondesktop}\{#AppName}";   Filename: "{app}\{#AppVARIExeName}"; Tasks: desktopicon
 
 [UninstallRun]
-Filename: {sys}\netsh.exe; Parameters: "firewall delete allowedprogram program=""{app}\vclient.exe"""; Flags: runhidden; MinVersion: 0,5.01.2600sp2;
+Filename: "{sys}\psql.exe"; Parameters: "-h 127.0.0.1 -U postgres -f "{app}\sql\remove.sql""; StatusMsg: "Dropping the database"; Flags: runhidden;
