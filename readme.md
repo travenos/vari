@@ -18,20 +18,28 @@ Possible arguments:
   
 
 ## Building for Windows
-Building by MSVC (Visual Studio 12 2013 Win64).
+Building by MSVC (Visual Studio 12 2013 Win64).  
+A directory with *devenv*  should be added to *PATH* environment variable.  
   
 **Dependencies:**  
-- Qt 5.9.5
-- CMake (>= 3.1)
-- Git
-- Doxygen
-- TortoiseHG
+- Qt 5.9.5  
+- CMake (>= 3.1)  
+- Git  
+- Doxygen  
+- TortoiseHG  
 - Inno Setup Compiler  
   
 *QTDIR* environment variable should be specified.  
   
 For building an **EXE** installer, run script **create_windows_installer.ps1**.  
+For using it, you should enable PowerShell script execution first (as administrator):  
+```
+Set-ExecutionPolicy remotesigned
+```  
 Usage:  
 ```
 .\create_windows_installer.ps1
 ```
+
+## Installing on Windows
+Before installation of VARI, install [PostgresSQL](https://www.openscg.com/bigsql/postgresql/installers.jsp/) . Make sure that it is added to *PATH*.
