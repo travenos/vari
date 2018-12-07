@@ -51,12 +51,12 @@ Source: "sql/create.sql"; DestDir: "{app}/sql"
 Source: "sql/remove.sql"; DestDir: "{app}/sql"
 
 [Run]
-Filename: "{sys}\psql.exe"; Parameters: "-h 127.0.0.1 -U postgres -f "{app}\sql\create.sql""; StatusMsg: "Initializing the database"; Flags: runhidden;
+Filename: "psql.exe"; Parameters: "-h 127.0.0.1 -U postgres -f ""{app}\sql\create.sql"""; StatusMsg: "Initializing the database"; Flags: runhidden;
 
 [Icons]
 Name: "{group}\{#AppName}";           Filename: "{app}\{#AppVARIExeName}"; WorkingDir: "{app}"
-Name: "{group}\Uninstall {#AppName}"; Filename: "{uninstall.exe}"
+Name: "{group}\Uninstall {#AppName}"; Filename: "{uninstallexe}"
 Name: "{commondesktop}\{#AppName}";   Filename: "{app}\{#AppVARIExeName}"; Tasks: desktopicon
 
 [UninstallRun]
-Filename: "{sys}\psql.exe"; Parameters: "-h 127.0.0.1 -U postgres -f "{app}\sql\remove.sql""; StatusMsg: "Dropping the database"; Flags: runhidden;
+Filename: "psql.exe"; Parameters: "-h 127.0.0.1 -U postgres -f ""{app}\sql\remove.sql"""; StatusMsg: "Dropping the database"; Flags: runhidden;
