@@ -17,7 +17,7 @@ Possible arguments:
 - **\-h** \- print help text.  
   
 
-##Building for Windows
+## Building for Windows
 Building by MSVC (Visual Studio 12 2013 Win64).
   
 **Dependencies:**  
