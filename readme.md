@@ -15,17 +15,19 @@ Possible arguments:
 - **\-d BUILD_DIRECTORY** \- specify directory, where binary files are being built.  
 - **\-v VERSION**  \- specify version of the package.  
 - **\-h** \- print help text.  
+  
 
 ##Building for Windows
 Building by MSVC (Visual Studio 12 2013 Win64)  
   
 **Dependencies:**  
 - Qt 5.9.5
-- Cmake (>= 3.1)
+- CMake (>= 3.1)
 - Git
 - Doxygen
 - TortoiseHG
-- Inno Setup Compiler
+- Inno Setup Compiler  
+  
 *QTDIR* environment variable should be specified.  
   
 For building an **EXE** installer, run script **create_windows_installer.ps1**.
