@@ -5,7 +5,7 @@ Software for simulating the VARI process
 sudo apt install make g++ cmake fakeroot qt5-default qt5-qmake mercurial doxygen
 
 ## Building a DEB package
-For building a **DEB** package, run script **make_deb.sh**.
+For building a **DEB** package, run script **make_deb.sh**.  
 Usage:  
 ```bash
 ./make_deb.sh
@@ -18,7 +18,7 @@ Possible arguments:
   
 
 ##Building for Windows
-Building by MSVC (Visual Studio 12 2013 Win64)  
+Building by MSVC (Visual Studio 12 2013 Win64).
   
 **Dependencies:**  
 - Qt 5.9.5
@@ -30,7 +30,7 @@ Building by MSVC (Visual Studio 12 2013 Win64)
   
 *QTDIR* environment variable should be specified.  
   
-For building an **EXE** installer, run script **create_windows_installer.ps1**.
+For building an **EXE** installer, run script **create_windows_installer.ps1**.  
 Usage:  
 ```
 .\create_windows_installer.ps1
