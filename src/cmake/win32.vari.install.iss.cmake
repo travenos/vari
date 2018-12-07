@@ -41,8 +41,8 @@ Source: "$ENV{QTDIR}/bin/Qt5Widgets.dll"; DestDir: "{app}"
 Source: "$ENV{QTDIR}/bin/Qt5Sql.dll";     DestDir: "{app}"
 Source: "$ENV{QTDIR}/bin/Qt5OpenGL.dll";  DestDir: "{app}"
 
-Source: "$ENV{COINDIR}/bin/SoQt1.dll";      DestDir: "{app}"
-Source: "$ENV{QTDIR}/bin/Coin4.dll";         DestDir: "{app}"
+Source: "${SoQt_LIBRARY_DIR}/bin/SoQt1.dll";    DestDir: "{app}"
+Source: "${Coin_LIB_DIR}/bin/Coin4.dll";    DestDir: "{app}"
 
 Source: "msvcr120.dll"; DestDir: "{app}"
 Source: "msvcp120.dll"; DestDir: "{app}"
