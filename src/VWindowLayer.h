@@ -40,7 +40,6 @@ private:
     static const QString GEOMETRY_MANUAL_TEXT;
     static const QString MATERIAL_NAME_TEXT;
     static const QString MATERIAL_INFO_TEXT;
-    //static const QString IMPORT_ERROR_TEXT; //TODO remove
 
     static const QColor DEFAULT_COLOR;
 

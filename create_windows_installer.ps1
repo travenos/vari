@@ -41,7 +41,7 @@ cmake "-D$CMAKE_INST_PREFIX_ARG" "-D$CMAKE_BUILD_ARG" -G $GENERATOR_NAME ..
 check_exit_code($LASTEXITCODE)
 $SLN_NAME="Coin.sln"
 devenv $SLN_NAME /Build $BUILD_TYPE /Project INSTALL
-check_exit_code($LASTEXITCODE)
+#check_exit_code($LASTEXITCODE)
 
 #BUILD SOQT
 cd ../..

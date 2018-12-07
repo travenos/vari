@@ -159,12 +159,10 @@ void VWindowMain::removeLayer()
     if (ui->layersListWidget->currentIndex().isValid())
     {
         int layer = ui->layersListWidget->currentRow();
+        delete ui->layersListWidget->currentItem();
+        m_pFacade->removeLayer(layer);
         if (layer > 0)
             ui->layersListWidget->setCurrentRow(layer - 1);
-        else if (layer < ui->layersListWidget->count() - 1)
-            ui->layersListWidget->setCurrentRow(layer + 1);
-        m_pFacade->removeLayer(layer);
-        delete ui->layersListWidget->currentItem();
     }
 }
 

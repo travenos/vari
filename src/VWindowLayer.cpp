@@ -10,8 +10,8 @@
 const QString VWindowLayer::NO_MATERIAL_TEXT("Материал слоя не задан");
 const QString VWindowLayer::NO_GEOMETRY_TEXT("Форма слоя не задана");
 const QString VWindowLayer::FILE_DIALOG_TITLE("Импорт формы слоя");
-const QString VWindowLayer::FILE_DIALOG_FORMATS("Файлы gmsh(*.msh *.iges *.igs);;Файлы Ansys (*.db *.ansys);;Все файлы (*)");
-const QString VWindowLayer::GEOMETRY_FROM_FILE_TEXT("Форма слоя будет импортирована из файла: %1");
+const QString VWindowLayer::FILE_DIALOG_FORMATS("Все файлы (*);;Файлы gmsh(*.msh *.iges *.igs);;Файлы Ansys (*.db *.ansys)");
+const QString VWindowLayer::GEOMETRY_FROM_FILE_TEXT("Форма слоя будет импортирована из файла:\n%1");
 const QString VWindowLayer::GEOMETRY_MANUAL_TEXT("Форма слоя задана пользователем");
 const QString VWindowLayer::MATERIAL_NAME_TEXT("Выбран материал: %1");
 const QString VWindowLayer::MATERIAL_INFO_TEXT("<html><head/><body>"
@@ -20,7 +20,6 @@ const QString VWindowLayer::MATERIAL_INFO_TEXT("<html><head/><body>"
                                                "<p>Проницаемость: %3 м<span style=\" vertical-align:super;\">2</span></p>"
                                                "<p>Пористость: %4</p>"
                                                "</body></html>");
-//const QString VWindowLayer::IMPORT_ERROR_TEXT("Невозможно импортировать форму слоя из файла"); //TODO remove
 
 const QColor VWindowLayer::DEFAULT_COLOR = QColor(255, 172, 172);
 
