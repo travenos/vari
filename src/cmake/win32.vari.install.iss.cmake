@@ -6,8 +6,8 @@
 #define AppURL       "${ORG_WEBSITE}"
 #define AppGUID      "931BBE66-77AA-471C-B785-7FAD395E634E"
 
-#define AppVARIName    "{#AppName}"
-#define AppVARIExeName "{#AppName}.exe"
+#define AppVARIName    "${APP_NAME}"
+#define AppVARIExeName "${APP_NAME}.exe"
 
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING .ISS SCRIPT FILES!
 
@@ -21,7 +21,7 @@ AppPublisherURL = {#AppURL}
 VersionInfoCompany = {#AppPublisher}
 DefaultDirName = {pf}\{#AppName}
 DefaultGroupName = {#AppName}
-UninstallDisplayIcon = {app}\{#AppVClientExeName}
+UninstallDisplayIcon = {app}\{#AppVARIExeName}
 Compression = lzma2
 SolidCompression = yes
 OutputBaseFilename = ${APP_NAME}-${PROJECT_VERSION_LONG}
