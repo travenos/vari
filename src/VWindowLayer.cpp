@@ -10,7 +10,10 @@
 const QString VWindowLayer::NO_MATERIAL_TEXT("Материал слоя не задан");
 const QString VWindowLayer::NO_GEOMETRY_TEXT("Форма слоя не задана");
 const QString VWindowLayer::FILE_DIALOG_TITLE("Импорт формы слоя");
-const QString VWindowLayer::FILE_DIALOG_FORMATS("Все файлы (*);;Файлы gmsh(*.msh *.iges *.igs);;Файлы Ansys (*.db *.ansys)");
+const QString VWindowLayer::FILE_DIALOG_FORMATS("Поддерживаемые форматы (*.msh *.iges *.igs *.db *.ansys);;"
+                                                "Файлы gmsh(*.msh *.iges *.igs);;"
+                                                "Файлы Ansys (*.db *.ansys);;"
+                                                "Все файлы (*)");
 const QString VWindowLayer::GEOMETRY_FROM_FILE_TEXT("Форма слоя будет импортирована из файла:\n%1");
 const QString VWindowLayer::GEOMETRY_MANUAL_TEXT("Форма слоя задана пользователем");
 const QString VWindowLayer::MATERIAL_NAME_TEXT("Выбран материал: %1");
