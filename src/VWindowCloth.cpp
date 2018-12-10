@@ -112,13 +112,13 @@ bool VWindowCloth::getInputs(QString &name, float &cavityheight, float &permeabi
     if (name.isEmpty())
         return false;
     bool ok;
-    cavityheight = ui->cavityHeightEdit->text().toFloat(&ok);
+    cavityheight = ui->cavityHeightEdit->text().replace(',', '.').toFloat(&ok);
     if (!ok)
         return false;
-    permeability = ui->permeabilityEdit->text().toFloat(&ok);
+    permeability = ui->permeabilityEdit->text().replace(',', '.').toFloat(&ok);
     if (!ok)
         return false;
-    QString porosityStr = ui->porosityEdit->text();
+    QString porosityStr = ui->porosityEdit->text().replace(',', '.');
     int pos = 0;
     QValidator::State state = ui->porosityEdit->validator()->validate(porosityStr, pos);
     if (state == QValidator::Acceptable)

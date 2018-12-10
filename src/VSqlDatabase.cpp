@@ -36,7 +36,7 @@ bool VSqlDatabase::hasInstance()
 
 VSqlDatabase::VSqlDatabase()
 {
-    m_database = QSqlDatabase::addDatabase("QPSQL");
+    m_database = QSqlDatabase::addDatabase(QStringLiteral("QPSQL"));
     m_database.setHostName(HOSTNAME);
     m_database.setDatabaseName(DATABASENAME);
     m_database.setUserName(USERNAME);

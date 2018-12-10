@@ -109,9 +109,9 @@ bool VWindowResin::getInputs(QString &name, float &viscosity, float &tempcoef)
     if (name.isEmpty())
         return false;
     bool ok;
-    viscosity = ui->viscosityEdit->text().toFloat(&ok);
+    viscosity = ui->viscosityEdit->text().replace(',', '.').toFloat(&ok);
     if (!ok)
         return false;
-    tempcoef = ui->tempcoefEdit->text().toFloat(&ok);
+    tempcoef = ui->tempcoefEdit->text().replace(',', '.').toFloat(&ok);
     return ok;
 }

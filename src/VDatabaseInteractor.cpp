@@ -7,8 +7,8 @@
 #include <deque>
 #include "VDatabaseInteractor.h"
 
-const QString VDatabaseInteractor::OPEN_ERROR_STRING("Unable to open database");
-const QString VDatabaseInteractor::FILE_ERROR_STRING("Error processing file");
+const QString VDatabaseInteractor::OPEN_ERROR_STRING("Невозможно открыть базу данных");
+const QString VDatabaseInteractor::FILE_ERROR_STRING("Ошибка обработки файла");
 
 const QString VDatabaseInteractor::GET_NAME_QUERY("SELECT name FROM %1;");
 const QString VDatabaseInteractor::DELETE_BY_ID_QUERY("DELETE FROM %1 WHERE id=%2;");

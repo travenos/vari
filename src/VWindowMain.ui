@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1355</width>
-    <height>1104</height>
+    <height>924</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -50,15 +50,21 @@
            <item>
             <widget class="QListWidget" name="layersListWidget">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+              <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="maximumSize">
+             <property name="minimumSize">
               <size>
-               <width>16777215</width>
-               <height>120</height>
+               <width>0</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="baseSize">
+              <size>
+               <width>0</width>
+               <height>20</height>
               </size>
              </property>
              <property name="selectionBehavior">
@@ -180,7 +186,11 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="temperatureEdit"/>
+                 <widget class="QLineEdit" name="temperatureEdit">
+                  <property name="inputMethodHints">
+                   <set>Qt::ImhFormattedNumbersOnly</set>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QPushButton" name="resetTemperatureButton">
@@ -245,6 +255,9 @@
                        <height>0</height>
                       </size>
                      </property>
+                     <property name="inputMethodHints">
+                      <set>Qt::ImhFormattedNumbersOnly</set>
+                     </property>
                     </widget>
                    </item>
                    <item row="1" column="3">
@@ -267,6 +280,9 @@
                        <width>40</width>
                        <height>0</height>
                       </size>
+                     </property>
+                     <property name="inputMethodHints">
+                      <set>Qt::ImhFormattedNumbersOnly</set>
                      </property>
                     </widget>
                    </item>
@@ -346,6 +362,9 @@
                        <height>0</height>
                       </size>
                      </property>
+                     <property name="inputMethodHints">
+                      <set>Qt::ImhFormattedNumbersOnly</set>
+                     </property>
                     </widget>
                    </item>
                    <item row="0" column="1">
@@ -355,6 +374,9 @@
                        <width>40</width>
                        <height>0</height>
                       </size>
+                     </property>
+                     <property name="inputMethodHints">
+                      <set>Qt::ImhFormattedNumbersOnly</set>
                      </property>
                     </widget>
                    </item>
@@ -512,6 +534,33 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>layersListWidget</tabstop>
+  <tabstop>layerEnableCheckBox</tabstop>
+  <tabstop>layerVisibleCheckBox</tabstop>
+  <tabstop>selectMaterialClothButton</tabstop>
+  <tabstop>layerRemoveButton</tabstop>
+  <tabstop>layerEditButton</tabstop>
+  <tabstop>addLayerButton</tabstop>
+  <tabstop>temperatureEdit</tabstop>
+  <tabstop>resetTemperatureButton</tabstop>
+  <tabstop>saveTemperatureButton</tabstop>
+  <tabstop>selectMaterialResinButton</tabstop>
+  <tabstop>injectionPressureEdit</tabstop>
+  <tabstop>resetInjectionPressureButton</tabstop>
+  <tabstop>saveInjectionPressureButton</tabstop>
+  <tabstop>injectionDiameterEdit</tabstop>
+  <tabstop>resetInjectionDiamterButton</tabstop>
+  <tabstop>injectionPlaceButton</tabstop>
+  <tabstop>showInjectionPlace</tabstop>
+  <tabstop>vacuumPressureEdit</tabstop>
+  <tabstop>resetVacuupPressureButton</tabstop>
+  <tabstop>saveVacuumPressureButton</tabstop>
+  <tabstop>vacuumDiameterEdit</tabstop>
+  <tabstop>resetVacuumDiameterButton</tabstop>
+  <tabstop>vacuumPlaceButton</tabstop>
+  <tabstop>showVacuumPlaceButton</tabstop>
+ </tabstops>
  <resources>
   <include location="resources/resources.qrc"/>
  </resources>
