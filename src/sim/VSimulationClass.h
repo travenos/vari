@@ -13,12 +13,13 @@
 class VSimulationClass {
 public: 
     typedef std::shared_ptr<std::mutex> mutex_ptr;
-    VSimulationClass();
+    VSimulationClass();    
+    VSimulationClass(const VSimulationClass& ) = delete;
+    VSimulationClass& operator= (const VSimulationClass& ) = delete;
 /**
  * @param nodesLock
  * @param trianglesLock
  */
-    //TODO remove operator= and copy constructor
 void setMutexes(mutex_ptr nodesLock, mutex_ptr trianglesLock) ;
 
 protected:

@@ -18,7 +18,9 @@
 
 VSimulationFacade::VSimulationFacade(QWidget *parent):
     m_pSimulator(new VSimulator),
-    m_pLayersProcessor(new VLayersProcessor)
+    m_pLayersProcessor(new VLayersProcessor),
+    m_selectInjectionPoint(false),
+    m_selectVacuumPoint(false)
 {
     SoQt::init(parent);
     m_pGraphicsViewer.reset(new VGraphicsViewer(parent, m_pSimulator));
@@ -26,6 +28,8 @@ VSimulationFacade::VSimulationFacade(QWidget *parent):
     std::shared_ptr<std::mutex> p_trianglesLock(new std::mutex);
     m_pSimulator->setMutexes(p_nodesLock, p_trianglesLock);
     m_pGraphicsViewer->setMutexes(p_nodesLock, p_trianglesLock);
+    connect(m_pGraphicsViewer.get(), SIGNAL(gotPoint(const QVector3D &)),
+            this, SLOT(m_on_got_point(const QVector3D &)));
     m_pLayersProcessor->setMutexes(p_nodesLock, p_trianglesLock);
 }
 
@@ -69,9 +73,8 @@ size_t VSimulationFacade::getInactiveLayersNumber() const
 void VSimulationFacade::setVisible(unsigned int layer, bool visible) 
 {
     m_pLayersProcessor->setVisibleLayer(layer, visible);
-    VSimNode::const_vector_ptr nodes = m_pLayersProcessor->getActiveNodes();
-    VSimTriangle::const_vector_ptr triangles = m_pLayersProcessor->getActiveTriangles();
-    m_pGraphicsViewer->setGraphicsElements(nodes, triangles);
+    m_pGraphicsViewer->updateVisibility();
+    emit layerVisibilityChanged(layer, visible);
 }
 
 /**
@@ -81,6 +84,7 @@ void VSimulationFacade::removeLayer(unsigned int layer)
 {
     m_pLayersProcessor->removeLayer(layer);
     updateConfiguration();
+    emit layerRemoved(layer);
 }
 
 /**
@@ -90,6 +94,7 @@ void VSimulationFacade::enableLayer(unsigned int layer, bool enable)
 {
     m_pLayersProcessor->enableLayer(layer, enable);
     updateConfiguration();
+    emit layerEnabled(layer, enable);
 }
 
 /**
@@ -99,6 +104,7 @@ void VSimulationFacade::enableLayer(unsigned int layer, bool enable)
 void VSimulationFacade::setMaterial(unsigned int layer, const VCloth &material) 
 {
     m_pLayersProcessor->setMaterial(layer, material);
+    emit materialChanged(layer);
 }
 
 void VSimulationFacade::draw() 
@@ -229,8 +235,8 @@ void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &
             m_pLayersProcessor->addLayer(p_layerBuilder);
             delete p_layerBuilder;
             updateConfiguration();
-            m_pGraphicsViewer->viewAll();
-            m_pGraphicsViewer->saveHomePosition();
+            m_pGraphicsViewer->viewFromAbove();
+            emit layerAdded();
         }
         catch(VImportException &e)
         {
@@ -248,4 +254,54 @@ void VSimulationFacade::updateConfiguration()
     VSimTriangle::const_vector_ptr triangles = m_pLayersProcessor->getActiveTriangles();
     m_pSimulator->setActiveElements(nodes, triangles);
     m_pGraphicsViewer->setGraphicsElements(nodes, triangles);
+}
+
+void VSimulationFacade::waitForInjectionPointSelection(float diameter)
+{
+    m_selectInjectionPoint = true;
+    m_selectVacuumPoint = false;
+    m_injectionDiameter = diameter;
+    m_pGraphicsViewer->viewFromAbove();
+    //TODO forbid rotation
+}
+
+void VSimulationFacade::waitForVacuumPointSelection(float diameter)
+{
+    m_selectVacuumPoint = true;
+    m_selectInjectionPoint = false;
+    m_vacuumDiameter = diameter;
+    m_pGraphicsViewer->viewFromAbove();
+    //TODO forbid rotation
+}
+
+void VSimulationFacade::cancelWaitingForInjectionPointSelection()
+{
+    m_selectInjectionPoint = false;
+    //TODO allow rotation
+}
+
+void VSimulationFacade::cancelWaitingForVacuumPointSelection()
+{
+    m_selectVacuumPoint = false;
+    //TODO allow rotation
+}
+
+void VSimulationFacade::m_on_got_point(const QVector3D &point)
+{
+    if(m_selectInjectionPoint)
+    {
+        m_pLayersProcessor->setInjectionPoint(point, m_injectionDiameter);
+        m_pSimulator->setInjectionDiameter(m_injectionDiameter);
+        m_selectInjectionPoint = false;
+        //TODO allow rotation
+        emit injectionPointSet();
+    }
+    else if (m_selectVacuumPoint)
+    {
+        m_pLayersProcessor->setVacuumPoint(point, m_vacuumDiameter);
+        m_pSimulator->setVacuumDiameter(m_vacuumDiameter);
+        m_selectVacuumPoint = false;
+        //TODO allow rotation
+        emit vacuumPointSet();
+    }
 }

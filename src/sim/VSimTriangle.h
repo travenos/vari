@@ -10,7 +10,8 @@
 #include <vector>
 #include "VSimNode.h"
 
-class VSimTriangle: public VSimElement {
+class VSimTriangle: public VSimElement
+{
 public: 
     typedef std::shared_ptr<VSimTriangle> ptr;
     typedef std::shared_ptr<const VSimTriangle> const_ptr;
@@ -32,13 +33,19 @@ VSimTriangle(const VCloth::const_ptr &p_material,
     
 void getVertices(QVector3D vertices[VERTICES_NUMBER]) const ;
 void updateColor() ;
-const QColor& getColor() const ;
+const QColor& getColor() const override;
 double getAveragePressure() const ;
 void reset()  override;
+
+bool isInjection() const override;
+bool isVacuum() const override;
+bool isNormal() const override;
+
 private:
     QColor m_color;
     const std::vector<const VSimNode *>m_pNodes;
 
+    bool isRole(VSimNode::VNodeRole role) const;
 };
 
 #endif //_VSIMTRIANGLE_H

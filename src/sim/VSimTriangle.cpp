@@ -73,3 +73,26 @@ void VSimTriangle::reset()
 {
     m_color = m_pMaterial->baseColor;
 }
+
+bool VSimTriangle::isInjection() const
+{
+    return isRole(VSimNode::INJECTION);
+}
+
+bool VSimTriangle::isVacuum() const
+{
+    return isRole(VSimNode::VACUUM);
+}
+
+bool VSimTriangle::isNormal() const
+{
+    return isRole(VSimNode::NORMAL);
+}
+
+bool VSimTriangle::isRole(VSimNode::VNodeRole role) const
+{
+    for (auto &node: m_pNodes)
+        if (node->getRole() != role)
+            return false;
+    return true;
+}

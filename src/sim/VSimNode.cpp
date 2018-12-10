@@ -38,12 +38,13 @@ void VSimNode::setRole(VNodeRole role)
 /**
  * @return VNodeRole
  */
-VSimNode::VNodeRole VSimNode::getRole() const  {
+VSimNode::VNodeRole VSimNode::getRole() const
+{
     return m_role;
 }
 
 void VSimNode::calculate()  {
-    if(m_role == NORMAL) //we don't need to calculate a new pressure if we have constant pressure cause it's an injection point
+    if(isNormal()) //we don't need to calculate a new pressure if we have constant pressure cause it's an injection point
     {
         double _K = m_pParam->getAveragePermeability();
         double K = m_pMaterial->permeability;
@@ -144,7 +145,8 @@ bool VSimNode::commit()  {
 /**
  * @return double
  */
-double VSimNode::getPressure() const  {
+double VSimNode::getPressure() const
+{
     return m_currentPressure;
 }
 
@@ -225,6 +227,11 @@ double VSimNode::getDistance(const VSimNode * node) const
     return m_position.distanceToPoint(node->getPosition());
 }
 
+double VSimNode::getDistance(const QVector3D& point) const
+{
+    return m_position.distanceToPoint(point);
+}
+
 /**
  * @return const QVector3D&
  */
@@ -269,4 +276,19 @@ double VSimNode::getPorosity() const
 double VSimNode::getPermeability() const 
 {
     return m_pMaterial->permeability;
+}
+
+bool VSimNode::isInjection() const
+{
+    return (m_role == INJECTION);
+}
+
+bool VSimNode::isVacuum() const
+{
+    return (m_role == VACUUM);
+}
+
+bool VSimNode::isNormal() const
+{
+    return (m_role == NORMAL);
 }

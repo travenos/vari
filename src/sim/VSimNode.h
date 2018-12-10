@@ -54,13 +54,18 @@ void clearAllNeighbours() ;
 void clearNeighbours(VLayerSequence layer) ;
 
 double getDistance(const VSimNode* node) const ;
+double getDistance(const QVector3D& point) const;
 const QVector3D &getPosition() const ;
-void reset()  override;
+virtual void reset()  override;
 void getNeighbours(std::vector<const VSimNode *> &neighbours) const ;
 size_t getNeighboursNumber() const ;
 double getCavityHeight() const ;
 double getPorosity() const ;
 double getPermeability() const ;
+
+virtual bool isInjection() const override;
+virtual bool isVacuum() const override;
+virtual bool isNormal() const override;
 
 private: 
 

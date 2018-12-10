@@ -12,6 +12,7 @@
 
 const QString VWindowMain::IMPORT_FROM_FILE_ERROR("Ошибка загрузки слоя из файла");
 const QString VWindowMain::IMPORT_WHEN_SIMULATING_ERROR("Невозможно импортировать во время симуляции");
+const QString VWindowMain::INVALID_PARAM_ERROR("Введены некорректные параметры");
 const QString VWindowMain::ASK_FOR_REMOVE("Вы уверены, что хотите удалить слой?");
 const QString VWindowMain::CLOTH_INFO_TEXT("<html><head/><body>"
                                                "Материал: &quot;%1&quot;<br>"
@@ -37,6 +38,16 @@ VWindowMain::VWindowMain(QWidget *parent) :
     ui->splitter->setStretchFactor(1,0);
     ui->layerParamBox->setVisible(false);
     m_pFacade.reset(new VSimulationFacade(ui->viewerWidget));
+    connect(m_pFacade.get(), SIGNAL(layerRemoved(unsigned int)),
+            this, SLOT(m_on_layer_removed(unsigned int)));
+    connect(m_pFacade.get(), SIGNAL(materialChanged(unsigned int)),
+            this, SLOT(m_on_material_changed(unsigned int)));
+    connect(m_pFacade.get(), SIGNAL(layerEnabled(unsigned int, bool)),
+            this, SLOT(m_on_layer_enabled(unsigned int, bool)));
+    connect(m_pFacade.get(), SIGNAL(injectionPointSet()),
+            this, SLOT(m_on_injection_point_set()));
+    connect(m_pFacade.get(), SIGNAL(vacuumPointSet()),
+            this, SLOT(m_on_vacuum_point_set()));
 }
 
 VWindowMain::~VWindowMain()
@@ -159,10 +170,7 @@ void VWindowMain::removeLayer()
     if (ui->layersListWidget->currentIndex().isValid())
     {
         int layer = ui->layersListWidget->currentRow();
-        delete ui->layersListWidget->currentItem();
         m_pFacade->removeLayer(layer);
-        if (layer > 0)
-            ui->layersListWidget->setCurrentRow(layer - 1);
     }
 }
 
@@ -203,9 +211,6 @@ void VWindowMain::setCloth(const QString & name, float cavityheight, float perme
         cloth.permeability = permeability;
         cloth.porosity = porosity;
         m_pFacade->setMaterial(layer, cloth);
-        ui->layersListWidget->currentItem()->setText(name);
-        ui->layerInfoLabel->setText(CLOTH_INFO_TEXT.arg(name).arg(cavityheight)
-                                             .arg(permeability).arg(porosity));
     }
 }
 
@@ -215,6 +220,95 @@ void VWindowMain::setResin(const QString & name , float viscosity, float tempcoe
     m_pFacade->setTempcoef(tempcoef);
     ui->resinInfoLabel->setText(RESIN_INFO_TEXT.arg(name).arg(viscosity)
                                          .arg(tempcoef));
+}
+
+void VWindowMain::removeLayerFromList(int layer)
+{
+    if(layer < ui->layersListWidget->count())
+    {
+        delete ui->layersListWidget->item(layer);
+        if (layer > 0)
+            ui->layersListWidget->setCurrentRow(layer - 1);
+    }
+}
+
+void VWindowMain::updateLayerMaterialInfo(int layer)
+{
+    if ( layer == ui->layersListWidget->currentRow())
+    {
+        VCloth::const_ptr cloth = m_pFacade->getMaterial(layer);
+        ui->layersListWidget->currentItem()->setText(cloth->name);
+        ui->layerInfoLabel->setText(CLOTH_INFO_TEXT.arg(cloth->name).arg(cloth->cavityHeight)
+                                             .arg(cloth->permeability).arg(cloth->porosity));
+    }
+}
+
+void VWindowMain::markLayerAsEnabled(int layer, bool enable)
+{
+    if(layer < ui->layersListWidget->count())
+    {
+        QColor textColor = enable ? QColor::fromRgb(0, 0, 0) : QColor::fromRgb(127, 127, 127);
+        ui->layersListWidget->item(layer)->setTextColor(textColor);
+    }
+}
+
+void VWindowMain::injectionPointSelectionResult()
+{
+    ui->injectionPlaceButton->setChecked(false);
+    //TODO show injection point
+}
+
+void VWindowMain::vacuumPointSelectionResult()
+{
+    ui->vacuumPlaceButton->setChecked(false);
+    //TODO show vacuum point
+}
+
+void VWindowMain::startInjectionPointSelection()
+{
+    bool ok;
+    float diameter = ui->injectionDiameterEdit->text().replace(',','.').toFloat(&ok);
+    if (ok)
+        m_pFacade->waitForInjectionPointSelection(diameter);
+    else
+    {
+        ui->injectionPlaceButton->setChecked(false);
+        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
+    }
+}
+void VWindowMain::cancelInjectionPointSelection()
+{
+    m_pFacade->cancelWaitingForInjectionPointSelection();
+}
+void VWindowMain::startVacuumPointSelection()
+{
+    bool ok;
+    float diameter = ui->vacuumDiameterEdit->text().replace(',','.').toFloat(&ok);
+    if (ok)
+        m_pFacade->waitForVacuumPointSelection(diameter);
+    else
+    {
+        ui->vacuumPlaceButton->setChecked(false);
+        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
+    }
+}
+void VWindowMain::cancelVacuumPointSelection()
+{
+    m_pFacade->cancelWaitingForVacuumPointSelection();
+}
+void VWindowMain::startSimulation()
+{
+    m_pFacade->startSimulation();
+}
+
+void VWindowMain::stopSimulation()
+{
+    m_pFacade->stopSimulation();
+}
+
+void VWindowMain::resetSimulationState()
+{
+    m_pFacade->resetSimulation();
 }
 
 void VWindowMain::m_on_layer_creation_from_file_available(const VCloth& material, const QString& filename)
@@ -289,4 +383,60 @@ void VWindowMain::on_selectMaterialClothButton_clicked()
 void VWindowMain::on_selectMaterialResinButton_clicked()
 {
     showWindowResin();
+}
+
+void VWindowMain::m_on_layer_removed(unsigned int layer)
+{
+    removeLayerFromList(layer);
+}
+
+void VWindowMain::m_on_material_changed(unsigned int layer)
+{
+    updateLayerMaterialInfo(layer);
+}
+
+void VWindowMain::m_on_layer_enabled(unsigned int layer, bool enable)
+{
+    markLayerAsEnabled(layer, enable);
+}
+
+void VWindowMain::m_on_injection_point_set()
+{
+    injectionPointSelectionResult();
+}
+
+void VWindowMain::m_on_vacuum_point_set()
+{
+    vacuumPointSelectionResult();
+}
+
+void VWindowMain::on_injectionPlaceButton_clicked(bool checked)
+{
+    if (checked)
+        startInjectionPointSelection();
+    else
+        cancelInjectionPointSelection();
+}
+
+void VWindowMain::on_vacuumPlaceButton_clicked(bool checked)
+{
+    if (checked)
+        startVacuumPointSelection();
+    else
+        cancelVacuumPointSelection();
+}
+
+void VWindowMain::on_actionStart_triggered()
+{
+    startSimulation();
+}
+
+void VWindowMain::on_actionStop_triggered()
+{
+    stopSimulation();
+}
+
+void VWindowMain::on_actionReset_triggered()
+{
+    resetSimulationState();
 }

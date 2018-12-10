@@ -26,9 +26,10 @@ VLayer::VLayer(const VSimNode::vector_ptr &nodes,
     m_pMaterial(material),
     m_visible(true),
     m_wasVisible(true),
-    m_active(true)
+    m_active(true),
+    m_hasInjectionPoint(false),
+    m_hasVacuumPoint(false)
 {
-
 }
 
 VLayer::~VLayer()
@@ -127,4 +128,62 @@ size_t VLayer::getTrianglesNumber() const
 VCloth::const_ptr VLayer::getMaterial() const 
 {
     return m_pMaterial;
+}
+
+bool VLayer::getInjectionPointInfo(QVector3D &point, float &diameter) const
+{
+    if (m_hasInjectionPoint)
+    {
+        point = m_injectionPoint;
+        diameter = m_injectionDiameter;
+        return true;
+    }
+    else
+        return false;
+}
+
+bool VLayer::getVacuumPointInfo(QVector3D &point, float &diameter) const
+{
+    if (m_hasVacuumPoint)
+    {
+        point = m_vacuumPoint;
+        diameter = m_vacuumDiameter;
+        return true;
+    }
+    else
+        return false;
+}
+
+void VLayer::setInjectionPoint(const QVector3D &point, float diameter)
+{
+    m_hasInjectionPoint = true;
+    m_injectionPoint = point;
+    m_injectionDiameter = diameter;
+    for (VSimNode::ptr &node : *m_pNodes)
+    {
+        if (node->getDistance(point) > diameter)
+        {
+            if (!(node->isVacuum()))
+                node->setRole(VSimNode::NORMAL);
+        }
+        else
+            node->setRole(VSimNode::INJECTION);
+    }
+}
+
+void VLayer::setVacuumPoint(const QVector3D &point, float diameter)
+{
+    m_hasVacuumPoint = true;
+    m_vacuumPoint = point;
+    m_vacuumDiameter = diameter;
+    for (VSimNode::ptr &node : *m_pNodes)
+    {
+        if (node->getDistance(point) > diameter)
+        {
+            if (!(node->isInjection()))
+                node->setRole(VSimNode::NORMAL);
+        }
+        else
+            node->setRole(VSimNode::VACUUM);
+    }
 }

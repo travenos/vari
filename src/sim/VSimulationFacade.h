@@ -15,11 +15,14 @@
 
 class QWidget;
 
-class VSimulationFacade {
+class VSimulationFacade : public QObject
+{
+    Q_OBJECT
 public: 
     
 VSimulationFacade(QWidget *parent);
-//TODO remove operator= and copy constructor
+VSimulationFacade(const VSimulationFacade& ) = delete;
+VSimulationFacade& operator= (const VSimulationFacade& ) = delete;
 void startSimulation() ;
 void stopSimulation() ;
 void resetSimulation() ;
@@ -71,6 +74,12 @@ VCloth::const_ptr getMaterial(unsigned int layer) const ;
 VSimulationParametres::const_ptr getParametres() const ;
 bool isLayerVisible(unsigned int layer) const ;
 bool isLayerEnabled(unsigned int layer) const ;
+
+void waitForInjectionPointSelection(float diameter);
+void waitForVacuumPointSelection(float diameter);
+
+void cancelWaitingForInjectionPointSelection();
+void cancelWaitingForVacuumPointSelection();
 /**
  * @param filename
  */
@@ -82,6 +91,22 @@ private:
     VSimulator::ptr m_pSimulator;
     VGraphicsViewer::ptr m_pGraphicsViewer;
     VLayersProcessor::ptr m_pLayersProcessor;
+    bool m_selectInjectionPoint;
+    bool m_selectVacuumPoint;
+    float m_injectionDiameter;
+    float m_vacuumDiameter;
+
+private slots:
+    void m_on_got_point(const QVector3D &point);
+
+signals:
+    void layerVisibilityChanged(unsigned int, bool);
+    void layerRemoved(unsigned int);
+    void layerEnabled(unsigned int, bool);
+    void materialChanged(unsigned int);
+    void layerAdded();
+    void injectionPointSet();
+    void vacuumPointSet();
 };
 
 #endif //_VSIMULATIONFACADE_H

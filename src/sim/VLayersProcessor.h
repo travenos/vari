@@ -65,6 +65,9 @@ const VSimTriangle::const_vector_ptr &getActiveTriangles() const ;
 bool isLayerVisible(unsigned int layer) const ;
 bool isLayerEnabled(unsigned int layer) const ;
 
+void setInjectionPoint(const QVector3D &point, float diameter);
+void setVacuumPoint(const QVector3D &point, float diameter);
+
 private:
     void updateActiveElementsVectors() ;
 

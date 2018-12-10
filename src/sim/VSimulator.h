@@ -132,10 +132,6 @@ private:
      */
     std::atomic<bool> m_stopFlag;
     /**
-     * Number of the current iteration
-     */
-    //std::atomic<int> m_iteration; //TODO remove
-    /**
     * This mutex is unlocked when the data is changed. It is needed for synchronization
     * with VGraphicsViewer. The methods waitForNewData() and cancelWaitingForNewData() are used.
     */

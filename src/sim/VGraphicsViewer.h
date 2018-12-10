@@ -15,6 +15,9 @@
 #include "VGraphicsTriangle.h"
 #include "VSimulator.h"
 
+class SoPerspectiveCamera;
+class SoEventCallback;
+
 class VGraphicsViewer: public QObject, public SoQtExaminerViewer, public VSimulationClass {
     Q_OBJECT
 public: 
@@ -30,10 +33,16 @@ public:
     void setGraphicsElements(const VSimNode::const_vector_ptr &nodes,
                              const VSimTriangle::const_vector_ptr &triangles) ;
     void updateTriangleColors() ;
+    void updateVisibility();
     void clearNodes() ;
     void clearTriangles() ;
     void clearAll() ;
+    void viewFromAbove() ;
+
+    static void event_cb(void * userdata, SoEventCallback * node);
 private:
+    void emitGotPoint(const QVector3D &point);
+
     void stopRender() ;
     void process() ;
     template<typename T1, typename T2>
@@ -47,6 +56,7 @@ private:
 
     SoSeparator*        m_pRoot;
     SoSeparator*        m_pFigureRoot;
+    SoPerspectiveCamera* m_pCam;
 
     std::unique_ptr<std::thread> m_pRenderWaiterThread;
     std::mutex m_renderSuccessLock;
@@ -56,6 +66,7 @@ private slots:
     void doRender() ;
 signals:
     void askForRender();
+    void gotPoint(const QVector3D &point);
 };
 
 #endif //_VGRAPHICSVIEWER_H
