@@ -7,5 +7,6 @@
         <file>img/reset.png</file>
         <file>img/save.png</file>
         <file>img/wicron.png</file>
+        <file>vari.ico</file>
     </qresource>
 </RCC>
