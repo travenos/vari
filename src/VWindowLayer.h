@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "sim/VCloth.h"
 #include "sim/VGeometryProcessor.h"
+#include "sim/VLayerAbstractBuilder.h"
 
 namespace Ui {
 class VWindowLayer;
@@ -62,8 +63,10 @@ private:
     VPolygon m_polygon;
 
 signals:
-    void creationFromFileAvailable(const VCloth &material, const QString &fileName);
-    void creationManualAvailable(const VCloth &material, const VPolygon &polygon);
+    void creationFromFileAvailable(const VCloth &material, const QString &fileName,
+                                   VLayerAbstractBuilder::VUnit units);
+    void creationManualAvailable(const VCloth &material, const VPolygon &polygon,
+                                 VLayerAbstractBuilder::VUnit units);
     void creationCanceled();
     void windowClosed();
 };

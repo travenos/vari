@@ -19,7 +19,8 @@ public:
  */
 VLayerFromGmeshBuilder(const QString &filename,
                        const VCloth &material,
-                       const VSimulationParametres::const_ptr &p_simParam);
+                       const VSimulationParametres::const_ptr &p_simParam,
+                       VUnit units=M);
 bool importNodes() ;
 bool importConnections() ;
 };

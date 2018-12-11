@@ -11,7 +11,8 @@
  * VGraphicsElement implementation
  */
 
-
+const QColor VGraphicsElement::INJECTION_COLOR = QColor(0,0,255);
+const QColor VGraphicsElement::VACUUM_COLOR = QColor(0,255,255);
 /**
  * @param simElement
  */
@@ -39,10 +40,13 @@ void VGraphicsElement::updateAll()
 
 void VGraphicsElement::updateColor() 
 {
-    const QColor& color = m_pSimElement->getColor();
-    m_pGraphicsMaterial->diffuseColor.setHSVValue(color.hueF(),
-                                                  color.saturationF(),
-                                                  color.valueF());
+    if (m_pSimElement->isVisible())
+    {
+        const QColor& color = m_pSimElement->getColor();
+        m_pGraphicsMaterial->diffuseColor.setValue(color.redF(),
+                                                      color.greenF(),
+                                                      color.blueF());
+    }
 }
 
 void VGraphicsElement::updateVisibility()
@@ -51,4 +55,26 @@ void VGraphicsElement::updateVisibility()
         m_pDrawStyle->style.setValue(SoDrawStyle::FILLED);
     else
         m_pDrawStyle->style.setValue(SoDrawStyle::INVISIBLE);
+}
+
+void VGraphicsElement::showInjectionColor()
+{
+    if (m_pSimElement->isInjection())
+    {
+        const QColor& color = INJECTION_COLOR;
+        m_pGraphicsMaterial->diffuseColor.setValue(color.redF(),
+                                                   color.greenF(),
+                                                   color.blueF());
+    }
+}
+
+void VGraphicsElement::showVacuumColor()
+{
+    if (m_pSimElement->isVacuum())
+    {
+        const QColor& color = VACUUM_COLOR;
+        m_pGraphicsMaterial->diffuseColor.setValue(color.redF(),
+                                                   color.greenF(),
+                                                   color.blueF());
+    }
 }

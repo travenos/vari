@@ -11,6 +11,8 @@
 
 class VLayerAbstractBuilder {
 public:     
+    enum VUnit {MM, M};
+    static const float MM_IN_M;
 VLayerAbstractBuilder(const VCloth &material,
                       const VSimulationParametres::const_ptr &p_simParam);
 virtual ~VLayerAbstractBuilder();

@@ -335,6 +335,9 @@
                    <property name="text">
                     <string>Показать позицию кольцевого источника</string>
                    </property>
+                   <property name="checkable">
+                    <bool>true</bool>
+                   </property>
                   </widget>
                  </item>
                 </layout>
@@ -395,7 +398,7 @@
                     </widget>
                    </item>
                    <item row="0" column="2">
-                    <widget class="QPushButton" name="resetVacuupPressureButton">
+                    <widget class="QPushButton" name="resetVacuumPressureButton">
                      <property name="text">
                       <string>Отменить</string>
                      </property>
@@ -431,6 +434,9 @@
                   <widget class="QPushButton" name="showVacuumPlaceButton">
                    <property name="text">
                     <string>Показать позицию кольцевого источника</string>
+                   </property>
+                   <property name="checkable">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
@@ -484,6 +490,7 @@
    <addaction name="actionSave"/>
    <addaction name="separator"/>
    <addaction name="actionStart"/>
+   <addaction name="actionPause"/>
    <addaction name="actionStop"/>
    <addaction name="actionReset"/>
   </widget>
@@ -525,6 +532,9 @@
    </property>
   </action>
   <action name="actionStop">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="resources/resources.qrc">
      <normaloff>:/img/stop.png</normaloff>:/img/stop.png</iconset>
@@ -540,6 +550,21 @@
    </property>
    <property name="text">
     <string>Сброс симуляции</string>
+   </property>
+  </action>
+  <action name="actionPause">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/img/pause.png</normaloff>:/img/pause.png</iconset>
+   </property>
+   <property name="text">
+    <string>Пауза симуляции</string>
+   </property>
+   <property name="toolTip">
+    <string>Пауза симуляции</string>
    </property>
   </action>
  </widget>
@@ -564,7 +589,7 @@
   <tabstop>injectionPlaceButton</tabstop>
   <tabstop>showInjectionPlace</tabstop>
   <tabstop>vacuumPressureEdit</tabstop>
-  <tabstop>resetVacuupPressureButton</tabstop>
+  <tabstop>resetVacuumPressureButton</tabstop>
   <tabstop>saveVacuumPressureButton</tabstop>
   <tabstop>vacuumDiameterEdit</tabstop>
   <tabstop>resetVacuumDiameterButton</tabstop>

@@ -28,9 +28,15 @@ VSimulationFacade::VSimulationFacade(QWidget *parent):
     std::shared_ptr<std::mutex> p_trianglesLock(new std::mutex);
     m_pSimulator->setMutexes(p_nodesLock, p_trianglesLock);
     m_pGraphicsViewer->setMutexes(p_nodesLock, p_trianglesLock);
+    m_pLayersProcessor->setMutexes(p_nodesLock, p_trianglesLock);
     connect(m_pGraphicsViewer.get(), SIGNAL(gotPoint(const QVector3D &)),
             this, SLOT(m_on_got_point(const QVector3D &)));
-    m_pLayersProcessor->setMutexes(p_nodesLock, p_trianglesLock);
+    connect(m_pSimulator.get(), SIGNAL(simulationStarted()),
+            this, SIGNAL(simulationStarted()));
+    connect(m_pSimulator.get(), SIGNAL(simulationPaused()),
+            this, SIGNAL(simulationPaused()));
+    connect(m_pSimulator.get(), SIGNAL(simulationStopped()),
+            this, SIGNAL(simulationStopped()));
 }
 
 void VSimulationFacade::startSimulation() 
@@ -41,6 +47,11 @@ void VSimulationFacade::startSimulation()
 void VSimulationFacade::stopSimulation() 
 {
     m_pSimulator->stop();
+}
+
+void VSimulationFacade::pauseSimulation()
+{
+    m_pSimulator->pause();
 }
 
 void VSimulationFacade::resetSimulation() 
@@ -126,22 +137,6 @@ void VSimulationFacade::setVacuumPressure(double pressure)
     m_pSimulator->setVacuumPressure(pressure);
 }
 
-/**
- * @param diameter
- */
-void VSimulationFacade::setInjectionDiameter(double diameter) 
-{
-    m_pSimulator->setInjectionDiameter(diameter);
-}
-
-/**
- * @param diameter
- */
-void VSimulationFacade::setVacuumDiameter(double diameter) 
-{
-    m_pSimulator->setVacuumDiameter(diameter);
-}
-
 void VSimulationFacade::setDefaultViscosity(double defaultViscosity) 
 {
     m_pSimulator->setDefaultViscosity(defaultViscosity);
@@ -202,7 +197,8 @@ bool VSimulationFacade::isLayerEnabled(unsigned int layer) const
 /**
  * @param filename
  */
-void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &filename) 
+void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &filename,
+                                         VLayerAbstractBuilder::VUnit units)
 {
     QFile file(filename);
     VLayerFromFileBuilder * p_layerBuilder = nullptr;
@@ -215,14 +211,16 @@ void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &
             {
                 p_layerBuilder = new VLayerFromGmeshBuilder(filename,
                                                             material,
-                                                            m_pSimulator->getSimulationParametres());
+                                                            m_pSimulator->getSimulationParametres(),
+                                                            units);
                 break;
             }
             else if(line.contains("ANSYS",Qt::CaseInsensitive))
             {
                 p_layerBuilder = new VLayerFromAnsysBuilder(filename,
                                                             material,
-                                                            m_pSimulator->getSimulationParametres());
+                                                            m_pSimulator->getSimulationParametres(),
+                                                            units);
                 break;
             }
         }
@@ -256,20 +254,22 @@ void VSimulationFacade::updateConfiguration()
     m_pGraphicsViewer->setGraphicsElements(nodes, triangles);
 }
 
-void VSimulationFacade::waitForInjectionPointSelection(float diameter)
+void VSimulationFacade::waitForInjectionPointSelection(double diameter)
 {
     m_selectInjectionPoint = true;
     m_selectVacuumPoint = false;
     m_injectionDiameter = diameter;
+    //TODO thread-safe
     m_pGraphicsViewer->viewFromAbove();
     //TODO forbid rotation
 }
 
-void VSimulationFacade::waitForVacuumPointSelection(float diameter)
+void VSimulationFacade::waitForVacuumPointSelection(double diameter)
 {
     m_selectVacuumPoint = true;
     m_selectInjectionPoint = false;
     m_vacuumDiameter = diameter;
+    //TODO thread-safe
     m_pGraphicsViewer->viewFromAbove();
     //TODO forbid rotation
 }

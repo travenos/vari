@@ -104,10 +104,7 @@ void VGraphicsViewer::clearAll()
 
 void VGraphicsViewer::doRender() 
 {
-    setAutoRedraw(false);
-    updateTriangleColors();
     render();
-    setAutoRedraw(true);
     //TODO print simulation info
     m_renderSuccessLock.unlock();
 }
@@ -129,7 +126,12 @@ void VGraphicsViewer::process()
         m_pSimulator->waitForNewData();
         m_renderSuccessLock.lock();
         if (!m_renderStopFlag.load())
+        {
+            setAutoRedraw(false);
+            updateTriangleColors();
+            setAutoRedraw(true);
             emit askForRender();
+        }
         else
             break;
     }
@@ -173,7 +175,7 @@ void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)
 void VGraphicsViewer::emitGotPoint(const QVector3D &point)
 {
     #ifdef DEBUG_MODE
-        qDebug() << "Selected point:" << point.x() << point.y() << point.z();
+        qInfo() << "Selected point:" << point.x() << point.y() << point.z();
     #endif
     emit gotPoint(point);
 }

@@ -15,7 +15,7 @@
 class VSimElement
 {
 public: 
-    
+    static const int RGB_MAX;
 /**
  * @param material
  */

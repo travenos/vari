@@ -94,7 +94,7 @@ VWindowResin::~VWindowResin()
 {
     delete m_pDatabaseResin;
     #ifdef DEBUG_MODE
-        qDebug() << "VWindowResin destroyed";
+        qInfo() << "VWindowResin destroyed";
     #endif
 }
 

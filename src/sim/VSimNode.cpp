@@ -21,10 +21,11 @@ VSimNode::VSimNode(const QVector3D& pos,
                    const VCloth::const_ptr &p_material,
                    const VSimulationParametres::const_ptr &p_param):
     VSimElement(p_material, p_param),
+    m_role(NORMAL),
     m_position(pos),
     m_neighboursNumber(0)
 {
-
+    reset();
 }
 
 /**
@@ -242,8 +243,13 @@ const QVector3D& VSimNode::getPosition() const
 
 void VSimNode::reset() 
 {
-    m_currentPressure = m_pParam->getVacuumPressure();
-    m_newPressure = m_pParam->getVacuumPressure();
+    double pressure;
+    if (!isInjection())
+        pressure = m_pParam->getVacuumPressure();
+    else
+        pressure = m_pParam->getInjectionPressure();
+    m_currentPressure = pressure;
+    m_newPressure = pressure;
 }
 
 void VSimNode::getNeighbours(std::vector<const VSimNode*> &neighbours) const 

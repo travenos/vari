@@ -49,6 +49,32 @@
         </widget>
        </item>
        <item>
+        <widget class="QGroupBox" name="unitsBox">
+         <property name="title">
+          <string>Единицы, в которых заданы размеры слоя:</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QRadioButton" name="mmRadioButton">
+            <property name="text">
+             <string>Миллиметры</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="mRadioButton">
+            <property name="text">
+             <string>Метры</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

@@ -23,7 +23,8 @@ public:
  */
 VLayerFromFileBuilder(const QString &filename,
                       const VCloth &material,
-                      const VSimulationParametres::const_ptr &p_simParam);
+                      const VSimulationParametres::const_ptr &p_simParam,
+                      VUnit units=M);
 virtual ~VLayerFromFileBuilder();
 const VLayer::ptr &build();
 
@@ -32,10 +33,11 @@ protected:
     VSimNode::vector_ptr m_pNodes;
     VSimTriangle::vector_ptr m_pTriangles;
     QFile m_file;
+    VUnit m_units;
     
 void addShapePart(std::list<int> *connectionList) ;
 void createConnections(std::list<int> *vertices) ;
-void addNode(int id, const QVector3D &pos) ;
+void addNode(int id, QVector3D pos) ;
 void makeNeighbours(int nodeId, int neighborId) ;
 virtual bool importNodes()  = 0;
 virtual bool importConnections()  = 0;

@@ -2,6 +2,9 @@
  * Project VARI
  * @author Alexey Barashkov
  */
+#ifdef DEBUG_MODE
+#include <QDebug>
+#endif
 #include <functional>
 #include "VSimulator.h"
 #include "VExceptions.h"
@@ -25,6 +28,7 @@ VSimulator::VSimulator():
     m_pActiveNodes(new std::vector<VSimNode::ptr>),
     m_pTriangles(new std::vector<VSimTriangle::ptr>),
     m_simulatingFlag(false),
+    m_pauseFlag(false),
     m_pParam(new VSimulationParametres)
 {
     m_newDataLock.lock();
@@ -58,6 +62,21 @@ void VSimulator::start()
  */
 void VSimulator::stop() 
 {
+    bool wasOnPause = m_pauseFlag.load();
+    m_pauseFlag.store(false);
+    interrupt();
+    if (wasOnPause)
+        emit simulationStopped();
+}
+
+void VSimulator::pause()
+{
+    m_pauseFlag.store(true);
+    interrupt();
+}
+
+void VSimulator::interrupt()
+{
     m_stopFlag.store(true);
     if (m_pSimulationThread)
     {
@@ -74,6 +93,11 @@ void VSimulator::stop()
 bool VSimulator::isSimulating() const 
 {
     return m_simulatingFlag.load();
+}
+
+bool VSimulator::isPaused() const
+{
+    return m_pauseFlag.load();
 }
 
 /**
@@ -161,7 +185,15 @@ void VSimulator::cancelWaitingForNewData() const
  */
 void VSimulator::simulationCycle() 
 {
-    resetInfo();
+    emit simulationStarted();
+    if (!(m_pauseFlag.load()))
+    {
+        m_pauseFlag.store(false);
+        resetInfo();
+        nodesAction([](const VSimNode::ptr& node){node->reset();});
+        trianglesAction([](const VSimTriangle::ptr& triangle){triangle->reset();});
+        m_pParam->setAveragePermeability(calcAveragePermeability());
+    }
     std::atomic<bool> madeChangesInCycle;
     auto calcFunc = [](const VSimNode::ptr& node){node->calculate();};
     auto commitFunc = [&madeChangesInCycle](const VSimNode::ptr& node)
@@ -171,14 +203,17 @@ void VSimulator::simulationCycle()
             madeChangesInCycle.store(true);
     };
     auto updateColorsFunc = [](const VSimTriangle::ptr& triangle){triangle->updateColor();};
-    while(!m_stopFlag.load())
+    while(!(m_stopFlag.load()))
     {
         {
             std::lock_guard<std::mutex> lock(m_infoLock);
             m_info.time += timeDelta();
             ++(m_info.iteration);
+            #ifdef DEBUG_MODE
+                qInfo() << "Time:" << m_info.time << "Iteration:" << m_info.iteration;
+            #endif
         }
-        madeChangesInCycle = false;
+        madeChangesInCycle.store(false);
         nodesAction(calcFunc);
         nodesAction(commitFunc);
         trianglesAction(updateColorsFunc);
@@ -187,6 +222,15 @@ void VSimulator::simulationCycle()
             break;
     }
     m_simulatingFlag.store(false);
+    if (!madeChangesInCycle)
+        m_pauseFlag.store(false);
+    if (!m_pauseFlag)
+        emit simulationStopped();
+    else
+        emit simulationPaused();
+    #ifdef DEBUG_MODE
+        qInfo() << "The simulation was stopped";
+    #endif
 }
 
 void VSimulator::resetInfo() 

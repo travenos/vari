@@ -11,6 +11,7 @@
 #include <memory>
 #include <thread>
 #include <atomic>
+#include <QObject>
 #include "VSimulationClass.h"
 #include "VSimNode.h"
 #include "VSimTriangle.h"
@@ -18,7 +19,9 @@
 #include "VGraphicsTriangle.h"
 #include "VLayer.h"
 
-class VSimulator: public VSimulationClass {
+class VSimulator: public QObject, public VSimulationClass
+{
+    Q_OBJECT
 public: 
     typedef std::shared_ptr<VSimulator> ptr;
     typedef std::shared_ptr<const VSimulator> const_ptr;
@@ -44,15 +47,32 @@ public:
  */
     void start() ;
     /**
- * Finish the simulation using a flag m_stopFlag
+ * Finish the simulation
  */
     void stop() ;
+    /**
+ * Pause the simulation
+ */
+    void pause() ;
     /**
  * Check if simulation thread is currently active
  */
     bool isSimulating() const ;
+    /**
+ * Check if simulation is set on pause
+ */
+    bool isPaused() const ;
+    /**
+ * Stop the simulation and reset all nodes states
+ */
     void reset() ;
+    /**
+     * Stop the simulation and remove all pointers to simulation elements
+     */
     void clear() ;
+    /**
+     * Reset information about the current simulation status
+     */
     void resetInfo() ;
     /**
  * Update an information about active nodes and triangles (m_activeNodes, m_triangles)
@@ -132,6 +152,10 @@ private:
      */
     std::atomic<bool> m_stopFlag;
     /**
+    * Flag, used to indicate, that simulation was paused
+    */
+    std::atomic<bool> m_pauseFlag;
+    /**
     * This mutex is unlocked when the data is changed. It is needed for synchronization
     * with VGraphicsViewer. The methods waitForNewData() and cancelWaitingForNewData() are used.
     */
@@ -160,6 +184,11 @@ private:
      * A function, which is being executed in the simulation thread
      */
     void simulationCycle()  ;
+
+    /**
+     * Interrupt the simulation using a flag m_stopFlag
+     */
+    void interrupt() ;
     /**
      * Perform an action over all nodes
      * @param func Describes an action for node
@@ -176,6 +205,11 @@ private:
     inline double timeDelta() const ;
     inline double calcAveragePermeability() const ;
     inline double calcAverageCellDistance() const ;
+
+signals:
+    void simulationStarted();
+    void simulationPaused();
+    void simulationStopped();
 };
 
 #endif //_VSIMULATOR_H

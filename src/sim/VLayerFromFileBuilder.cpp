@@ -18,11 +18,13 @@
  */
 VLayerFromFileBuilder::VLayerFromFileBuilder(const QString &filename,
                                              const VCloth &material,
-                                             const VSimulationParametres::const_ptr &p_simParam) :
+                                             const VSimulationParametres::const_ptr &p_simParam,
+                                             VUnit units) :
     VLayerAbstractBuilder(material, p_simParam),
     m_pNodes(new std::vector<VSimNode::ptr>),
     m_pTriangles(new std::vector<VSimTriangle::ptr>),
-    m_file(filename)
+    m_file(filename),
+    m_units(units)
 {
 }
 
@@ -89,8 +91,10 @@ void VLayerFromFileBuilder::createConnections(std::list<int>* vertices)
     }
 }
 
-void VLayerFromFileBuilder::addNode(int id, const QVector3D &pos) 
+void VLayerFromFileBuilder::addNode(int id, QVector3D pos)
 {
+    if(m_units == MM)
+        pos /= MM_IN_M;
     VSimNode::ptr newNode(new VSimNode(pos, m_pMaterial, m_pParam));
     m_nodesMap.insert(std::make_pair(id, newNode));
     m_pNodes->push_back(newNode);

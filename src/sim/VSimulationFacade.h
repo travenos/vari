@@ -25,6 +25,7 @@ VSimulationFacade(const VSimulationFacade& ) = delete;
 VSimulationFacade& operator= (const VSimulationFacade& ) = delete;
 void startSimulation() ;
 void stopSimulation() ;
+void pauseSimulation() ;
 void resetSimulation() ;
 size_t getLayersNumber() const ;
 size_t getActiveLayersNumber() const ;
@@ -54,13 +55,6 @@ void setInjectionPressure(double pressure) ;
  */
 
 void setVacuumPressure(double pressure) ;
-
-void setInjectionDiameter(double diameter) ;
-/**
- * @param diameter
- */
-void setVacuumDiameter(double diameter) ;
-
 void setDefaultViscosity(double defaultViscosity) ;
 void setTemperature(double temperature) ;
 void setTempcoef(double tempcoef) ;
@@ -75,15 +69,16 @@ VSimulationParametres::const_ptr getParametres() const ;
 bool isLayerVisible(unsigned int layer) const ;
 bool isLayerEnabled(unsigned int layer) const ;
 
-void waitForInjectionPointSelection(float diameter);
-void waitForVacuumPointSelection(float diameter);
+void waitForInjectionPointSelection(double diameter);
+void waitForVacuumPointSelection(double diameter);
 
 void cancelWaitingForInjectionPointSelection();
 void cancelWaitingForVacuumPointSelection();
 /**
  * @param filename
  */
-void newLayerFromFile(const VCloth &material, const QString &filename)  ;
+void newLayerFromFile(const VCloth &material, const QString &filename,
+                      VLayerAbstractBuilder::VUnit units=VLayerAbstractBuilder::M);
 
 private:
     void updateConfiguration() ;
@@ -93,8 +88,8 @@ private:
     VLayersProcessor::ptr m_pLayersProcessor;
     bool m_selectInjectionPoint;
     bool m_selectVacuumPoint;
-    float m_injectionDiameter;
-    float m_vacuumDiameter;
+    double m_injectionDiameter;
+    double m_vacuumDiameter;
 
 private slots:
     void m_on_got_point(const QVector3D &point);
@@ -107,6 +102,9 @@ signals:
     void layerAdded();
     void injectionPointSet();
     void vacuumPointSet();
+    void simulationStarted();
+    void simulationPaused();
+    void simulationStopped();
 };
 
 #endif //_VSIMULATIONFACADE_H

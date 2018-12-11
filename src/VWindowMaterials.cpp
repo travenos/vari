@@ -140,7 +140,7 @@ VWindowMaterials::~VWindowMaterials()
 {
     delete ui;
     #ifdef DEBUG_MODE
-        qDebug() << "VWindowMaterials destroyed";
+        qInfo() << "VWindowMaterials destroyed";
     #endif
 }
 

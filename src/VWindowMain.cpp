@@ -31,13 +31,30 @@ VWindowMain::VWindowMain(QWidget *parent) :
     ui(new Ui::VWindowMain),
     m_pWindowLayer(nullptr),
     m_pWindowCloth(nullptr),
-    m_pWindowResin(nullptr)
+    m_pWindowResin(nullptr),
+    m_pTemperatureValidator(new QDoubleValidator),
+    m_pPressureValidator(new QDoubleValidator),
+    m_pDiameterValidator(new QDoubleValidator)
 {
     ui->setupUi(this);
+    m_pTemperatureValidator->setBottom(-VSimulationParametres::KELVINS_IN_0_CELSIUS);
+    m_pPressureValidator->setBottom(0);
+    m_pDiameterValidator->setBottom(0);
+    ui->temperatureEdit->setValidator(m_pTemperatureValidator);
+    ui->injectionPressureEdit->setValidator(m_pPressureValidator);
+    ui->vacuumPressureEdit->setValidator(m_pPressureValidator);
+    ui->injectionDiameterEdit->setValidator(m_pDiameterValidator);
+    ui->vacuumDiameterEdit->setValidator(m_pDiameterValidator);
+
     ui->splitter->setStretchFactor(0,1);
     ui->splitter->setStretchFactor(1,0);
     ui->layerParamBox->setVisible(false);
     m_pFacade.reset(new VSimulationFacade(ui->viewerWidget));
+    connectSimulationSignals();
+}
+
+void VWindowMain::connectSimulationSignals()
+{
     connect(m_pFacade.get(), SIGNAL(layerRemoved(unsigned int)),
             this, SLOT(m_on_layer_removed(unsigned int)));
     connect(m_pFacade.get(), SIGNAL(materialChanged(unsigned int)),
@@ -48,6 +65,12 @@ VWindowMain::VWindowMain(QWidget *parent) :
             this, SLOT(m_on_injection_point_set()));
     connect(m_pFacade.get(), SIGNAL(vacuumPointSet()),
             this, SLOT(m_on_vacuum_point_set()));
+    connect(m_pFacade.get(), SIGNAL(simulationStarted()),
+            this, SLOT(m_on_simutation_started()));
+    connect(m_pFacade.get(), SIGNAL(simulationPaused()),
+            this, SLOT(m_on_simutation_paused()));
+    connect(m_pFacade.get(), SIGNAL(simulationStopped()),
+            this, SLOT(m_on_simutation_stopped()));
 }
 
 VWindowMain::~VWindowMain()
@@ -57,8 +80,11 @@ VWindowMain::~VWindowMain()
     deleteWindowResin();
     deleteWindowCloth();
     VSqlDatabase::deleteInstance();
+    delete m_pPressureValidator;
+    delete m_pTemperatureValidator;
+    delete m_pDiameterValidator;
     #ifdef DEBUG_MODE
-        qDebug() << "VWindowMain destroyed";
+        qInfo() << "VWindowMain destroyed";
     #endif
 }
 
@@ -89,11 +115,12 @@ void VWindowMain::deleteWindowResin()
     }
 }
 
-void VWindowMain::addLayerFromFile(const VCloth& material,const QString& filename)
+void VWindowMain::addLayerFromFile(const VCloth& material,const QString& filename,
+                                   VLayerAbstractBuilder::VUnit units)
 {
     try
     {
-        m_pFacade->newLayerFromFile(material, filename);
+        m_pFacade->newLayerFromFile(material, filename, units);
         ui->layersListWidget->addItem(material.name);
         ui->layersListWidget->setCurrentRow(ui->layersListWidget->count() - 1);
     }
@@ -107,7 +134,8 @@ void VWindowMain::addLayerFromFile(const VCloth& material,const QString& filenam
     }
 }
 
-void VWindowMain::addLayerFromPolygon(const VCloth& material,const VPolygon& polygon)
+void VWindowMain::addLayerFromPolygon(const VCloth& material, const VPolygon& polygon,
+                                      VLayerAbstractBuilder::VUnit units)
 {
     //TODO
 }
@@ -117,10 +145,14 @@ void VWindowMain::showWindowLayer()
     if (m_pWindowLayer == nullptr)
     {
         m_pWindowLayer = new VWindowLayer(this);
-        connect(m_pWindowLayer, SIGNAL(creationFromFileAvailable(const VCloth&,const QString&)),
-                this, SLOT(m_on_layer_creation_from_file_available(const VCloth&,const QString&)));
-        connect(m_pWindowLayer, SIGNAL(creationManualAvailable(const VCloth&,const VPolygon&)),
-                this, SLOT(m_on_layer_creation_manual_available(const VCloth&,const VPolygon&)));
+        connect(m_pWindowLayer,
+                SIGNAL(creationFromFileAvailable(const VCloth&,const QString&, VLayerAbstractBuilder::VUnit)),
+                this,
+                SLOT(m_on_layer_creation_from_file_available(const VCloth&,const QString&,VLayerAbstractBuilder::VUnit)));
+        connect(m_pWindowLayer,
+                SIGNAL(creationManualAvailable(const VCloth&,const VPolygon&, VLayerAbstractBuilder::VUnit)),
+                this,
+                SLOT(m_on_layer_creation_manual_available(const VCloth&,const VPolygon&, VLayerAbstractBuilder::VUnit)));
         connect(m_pWindowLayer,SIGNAL(windowClosed()), this, SLOT(m_on_layer_window_closed()));
     }
     m_pWindowLayer->show();
@@ -266,8 +298,8 @@ void VWindowMain::vacuumPointSelectionResult()
 
 void VWindowMain::startInjectionPointSelection()
 {
-    bool ok;
-    float diameter = ui->injectionDiameterEdit->text().replace(',','.').toFloat(&ok);
+    double diameter;
+    bool ok = readNumber(ui->injectionDiameterEdit, diameter);
     if (ok)
         m_pFacade->waitForInjectionPointSelection(diameter);
     else
@@ -276,14 +308,16 @@ void VWindowMain::startInjectionPointSelection()
         QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
     }
 }
+
 void VWindowMain::cancelInjectionPointSelection()
 {
     m_pFacade->cancelWaitingForInjectionPointSelection();
 }
+
 void VWindowMain::startVacuumPointSelection()
 {
-    bool ok;
-    float diameter = ui->vacuumDiameterEdit->text().replace(',','.').toFloat(&ok);
+    double diameter;
+    bool ok = readNumber(ui->vacuumDiameterEdit, diameter);
     if (ok)
         m_pFacade->waitForVacuumPointSelection(diameter);
     else
@@ -292,10 +326,12 @@ void VWindowMain::startVacuumPointSelection()
         QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
     }
 }
+
 void VWindowMain::cancelVacuumPointSelection()
 {
     m_pFacade->cancelWaitingForVacuumPointSelection();
 }
+
 void VWindowMain::startSimulation()
 {
     m_pFacade->startSimulation();
@@ -306,19 +342,133 @@ void VWindowMain::stopSimulation()
     m_pFacade->stopSimulation();
 }
 
+void VWindowMain::pauseSimulation()
+{
+    m_pFacade->pauseSimulation();
+}
+
 void VWindowMain::resetSimulationState()
 {
     m_pFacade->resetSimulation();
 }
 
-void VWindowMain::m_on_layer_creation_from_file_available(const VCloth& material, const QString& filename)
+void VWindowMain::saveTemperature()
 {
-    addLayerFromFile(material, filename);
+    double temperature;
+    bool ok = readNumber(ui->temperatureEdit, temperature);
+    if (ok)
+        m_pFacade->setTemperature(temperature);
+    else
+        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
 }
 
-void VWindowMain::m_on_layer_creation_manual_available(const VCloth& material,const VPolygon& polygon)
+void VWindowMain::saveInjectionPressure()
 {
-    addLayerFromPolygon(material, polygon);
+    double injectionPressure;
+    bool ok = readNumber(ui->injectionPressureEdit, injectionPressure);
+    if (ok)
+        m_pFacade->setInjectionPressure(injectionPressure);
+    else
+        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
+}
+
+void VWindowMain::saveVacuumPressure()
+{
+    double vacuumPressure;
+    bool ok = readNumber(ui->vacuumPressureEdit, vacuumPressure);
+    if (ok)
+        m_pFacade->setVacuumPressure(vacuumPressure);
+    else
+        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
+}
+
+void VWindowMain::showTemperature()
+{
+    double temperature = m_pFacade->getParametres()->getTemperature();
+    ui->temperatureEdit->setText(QString::number(temperature));
+}
+
+void VWindowMain::showInjectionPressure()
+{
+    double injectionPressure = m_pFacade->getParametres()->getInjectionPressure();
+    ui->injectionPressureEdit->setText(QString::number(injectionPressure));
+}
+
+void VWindowMain::showInjectionDiameter()
+{
+    double injectionDiameter = m_pFacade->getParametres()->getInjectionDiameter();
+    ui->injectionDiameterEdit->setText(QString::number(injectionDiameter));
+}
+
+void VWindowMain::showInjectionPlace(bool checked)
+{
+    //TODO
+}
+
+void VWindowMain::showVacuumPressure()
+{
+    double vacuumPressure = m_pFacade->getParametres()->getVacuumPressure();
+    ui->vacuumPressureEdit->setText(QString::number(vacuumPressure));
+}
+
+void VWindowMain::showVacuumDiameter()
+{
+    double vacuumDiameter = m_pFacade->getParametres()->getVacuumDiameter();
+    ui->vacuumDiameterEdit->setText(QString::number(vacuumDiameter));
+}
+void VWindowMain::showVacuumPlace(bool checked)
+{
+    //TODO
+}
+
+bool VWindowMain::readNumber(const QLineEdit * lineEdit, double &output) const
+{
+    bool ok;
+    QString numberStr = lineEdit->text().replace(',', '.');
+    int pos = 0;
+    QValidator::State state = lineEdit->validator()->validate(numberStr, pos);
+    if (state == QValidator::Acceptable)
+        output = numberStr.toDouble(&ok);
+    else
+        return false;
+    return ok;
+}
+
+void VWindowMain::simulationStartResult()
+{
+    ui->actionStart->setEnabled(false);
+    ui->actionPause->setEnabled(true);
+    ui->actionStop->setEnabled(true);
+}
+
+void VWindowMain::simulationPauseResult()
+{
+    ui->actionStart->setEnabled(true);
+    ui->actionPause->setEnabled(false);
+    ui->actionStop->setEnabled(true);
+}
+
+void VWindowMain::simulationStopResult()
+{
+    ui->actionStart->setEnabled(true);
+    ui->actionPause->setEnabled(false);
+    ui->actionStop->setEnabled(false);
+}
+
+/**
+ * Slots
+ */
+
+void VWindowMain::m_on_layer_creation_from_file_available(const VCloth& material, const QString& filename,
+                                                          VLayerAbstractBuilder::VUnit units)
+{
+    addLayerFromFile(material, filename, units);
+}
+
+void VWindowMain::m_on_layer_creation_manual_available(const VCloth& material,const VPolygon& polygon,
+                                                       VLayerAbstractBuilder::VUnit units)
+{
+    addLayerFromPolygon(material, polygon, units);
 }
 
 void VWindowMain::m_on_got_cloth(const QString & name, float cavityheight, float permeability, float porosity)
@@ -410,6 +560,21 @@ void VWindowMain::m_on_vacuum_point_set()
     vacuumPointSelectionResult();
 }
 
+void VWindowMain::m_on_simutation_started()
+{
+    simulationStartResult();
+}
+
+void VWindowMain::m_on_simutation_paused()
+{
+    simulationPauseResult();
+}
+
+void VWindowMain::m_on_simutation_stopped()
+{
+    simulationStopResult();
+}
+
 void VWindowMain::on_injectionPlaceButton_clicked(bool checked)
 {
     if (checked)
@@ -439,4 +604,59 @@ void VWindowMain::on_actionStop_triggered()
 void VWindowMain::on_actionReset_triggered()
 {
     resetSimulationState();
+}
+
+void VWindowMain::on_resetTemperatureButton_clicked()
+{
+    showTemperature();
+}
+
+void VWindowMain::on_saveTemperatureButton_clicked()
+{
+    saveTemperature();
+}
+
+void VWindowMain::on_resetInjectionPressureButton_clicked()
+{
+    showInjectionPressure();
+}
+
+void VWindowMain::on_saveInjectionPressureButton_clicked()
+{
+    saveInjectionPressure();
+}
+
+void VWindowMain::on_resetInjectionDiamterButton_clicked()
+{
+    showInjectionDiameter();
+}
+
+void VWindowMain::on_showInjectionPlace_clicked(bool checked)
+{
+    showInjectionPlace(checked);
+}
+
+void VWindowMain::on_resetVacuumPressureButton_clicked()
+{
+    showVacuumPressure();
+}
+
+void VWindowMain::on_saveVacuumPressureButton_clicked()
+{
+    saveVacuumPressure();
+}
+
+void VWindowMain::on_resetVacuumDiameterButton_clicked()
+{
+    showVacuumDiameter();
+}
+
+void VWindowMain::on_showVacuumPlaceButton_clicked(bool checked)
+{
+    showVacuumPlace(checked);
+}
+
+void VWindowMain::on_actionPause_triggered()
+{
+    pauseSimulation();
 }

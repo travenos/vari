@@ -39,18 +39,11 @@ void VSimTriangle::getVertices(QVector3D vertices[VERTICES_NUMBER]) const
 
 void VSimTriangle::updateColor() 
 {
-    double filledPart = getAveragePressure() /
-            (m_pParam->getInjectionPressure() - m_pParam->getVacuumPressure());
-    // TODO talk about this
-    /*
-    int colorValue = m_color.value();
-    colorValue *= (1 - filledPart);
-    m_color.setHsv(m_color.hue(), m_color.saturation(), colorValue);
-    */
-    const QColor DEFAULT_COLOR = QColor(255, 172, 172); //TODO Make a constant
-    int colorValue = DEFAULT_COLOR.value();
-    colorValue *= (1 - filledPart);
-    m_color.setHsv(DEFAULT_COLOR.hue(), DEFAULT_COLOR.saturation(), colorValue);
+    float nom = getAveragePressure() - m_pParam->getVacuumPressure();
+    float den = m_pParam->getInjectionPressure() - m_pParam->getVacuumPressure();
+    float filledPart = (den > 0) ? nom /den : 0;
+
+    m_color.setRgb(RGB_MAX * filledPart, RGB_MAX * (1-filledPart), 0);
 }
 
 /**

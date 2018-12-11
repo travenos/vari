@@ -13,7 +13,7 @@
  * VGraphicsNode implementation
  */
 
-const float VGraphicsNode::DEFAULT_CUBE_SIDE = 1.5;
+const float VGraphicsNode::DEFAULT_CUBE_SIDE = 1.5e-3;
 
 /**
  * @param simNode

@@ -12,6 +12,7 @@
  * VSimElement implementation
  */
 
+const int VSimElement::RGB_MAX = 255;
 
 /**
  * @param material
@@ -28,7 +29,7 @@ VSimElement::VSimElement(const VCloth::const_ptr &p_material,
 VSimElement::~VSimElement()
 {
     #ifdef DEBUG_MODE
-        qDebug() << "VSimElement destroyed";
+        qInfo() << "VSimElement destroyed";
     #endif
 }
 

@@ -56,7 +56,7 @@ double VSimulationParametres::getTemperature() const
 }
 void VSimulationParametres::setTemperature(double temperature) 
 {
-    if (temperature < - KELVINS_IN_0_CELSIUS)
+    if (temperature <= - KELVINS_IN_0_CELSIUS)
         temperature = - KELVINS_IN_0_CELSIUS + 1;
     m_temperature = temperature;
     m_viscosity = calculateViscosity();

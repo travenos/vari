@@ -18,13 +18,14 @@ const QString VWindowLayer::GEOMETRY_FROM_FILE_TEXT("Форма слоя буд�
 const QString VWindowLayer::GEOMETRY_MANUAL_TEXT("Форма слоя задана пользователем");
 const QString VWindowLayer::MATERIAL_NAME_TEXT("Выбран материал: %1");
 const QString VWindowLayer::MATERIAL_INFO_TEXT("<html><head/><body>"
-                                               "<p>Имя: &quot;%1&quot;</p>"
-                                               "<p>Толщина: %2 м</p>"
-                                               "<p>Проницаемость: %3 м<span style=\" vertical-align:super;\">2</span></p>"
-                                               "<p>Пористость: %4</p>"
+                                               "Материал: &quot;%1&quot;<br>"
+                                               "Толщина: %2 м<br>"
+                                               "Проницаемость: %3 м<span style=\" vertical-align:super;\">2</span><br>"
+                                               "Пористость: %4"
                                                "</body></html>");
 
 const QColor VWindowLayer::DEFAULT_COLOR = QColor(255, 172, 172);
+//const QColor VWindowLayer::DEFAULT_COLOR = QColor(255, 255, 255);
 
 VWindowLayer::VWindowLayer(QWidget *parent) :
     QMainWindow(parent),
@@ -43,7 +44,7 @@ VWindowLayer::~VWindowLayer()
     delete ui;
     m_pWindowCloth.reset();
     #ifdef DEBUG_MODE
-        qDebug() << "VWindowLayer destroyed";
+        qInfo() << "VWindowLayer destroyed";
     #endif
 }
 
@@ -63,10 +64,15 @@ void VWindowLayer::reset()
 void VWindowLayer::accept()
 {
     hide();
+    VLayerAbstractBuilder::VUnit units;
+    if (ui->mmRadioButton->isChecked())
+        units = VLayerAbstractBuilder::MM;
+    else
+        units = VLayerAbstractBuilder::M;
     if (m_selectedMaterial && m_selectedFile)
-        emit creationFromFileAvailable(m_material, m_filename);
+        emit creationFromFileAvailable(m_material, m_filename, units);
     else if (m_selectedMaterial && m_createdGeometry)
-        emit creationManualAvailable(m_material, m_polygon);
+        emit creationManualAvailable(m_material, m_polygon, units);
     reset();
     close();
 }

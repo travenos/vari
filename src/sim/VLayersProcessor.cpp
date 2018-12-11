@@ -230,13 +230,13 @@ void VLayersProcessor::updateActiveElementsVectors()
     m_pActiveTriangles.reset(activeTriangles);
 }
 
-void VLayersProcessor::setInjectionPoint(const QVector3D &point, float diameter)
+void VLayersProcessor::setInjectionPoint(const QVector3D &point, double diameter)
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     m_layers.back()->setInjectionPoint(point, diameter);
 }
 
-void VLayersProcessor::setVacuumPoint(const QVector3D &point, float diameter)
+void VLayersProcessor::setVacuumPoint(const QVector3D &point, double diameter)
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     m_layers.back()->setVacuumPoint(point, diameter);

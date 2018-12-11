@@ -13,9 +13,11 @@
 class SoMaterial;
 class SoDrawStyle;
 
-class VGraphicsElement : public SoSeparator {
+class VGraphicsElement : public SoSeparator
+{
 public: 
-    
+    static const QColor INJECTION_COLOR;
+    static const QColor VACUUM_COLOR;
 /**
  * @param simElement
  */
@@ -27,6 +29,8 @@ virtual void updateAll() ;
 virtual void updateColor() ;
 virtual void updateVisibility();
 virtual void updatePosition() = 0;
+virtual void showInjectionColor();
+virtual void showVacuumColor();
 
 private: 
     VSimElement::const_ptr m_pSimElement;

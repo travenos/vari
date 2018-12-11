@@ -35,7 +35,7 @@ VLayer::VLayer(const VSimNode::vector_ptr &nodes,
 VLayer::~VLayer()
 {
     #ifdef DEBUG_MODE
-        qDebug() << "VLayer destroyed";
+        qInfo() << "VLayer destroyed";
     #endif
 }
 
@@ -130,7 +130,7 @@ VCloth::const_ptr VLayer::getMaterial() const
     return m_pMaterial;
 }
 
-bool VLayer::getInjectionPointInfo(QVector3D &point, float &diameter) const
+bool VLayer::getInjectionPointInfo(QVector3D &point, double &diameter) const
 {
     if (m_hasInjectionPoint)
     {
@@ -142,7 +142,7 @@ bool VLayer::getInjectionPointInfo(QVector3D &point, float &diameter) const
         return false;
 }
 
-bool VLayer::getVacuumPointInfo(QVector3D &point, float &diameter) const
+bool VLayer::getVacuumPointInfo(QVector3D &point, double &diameter) const
 {
     if (m_hasVacuumPoint)
     {
@@ -154,14 +154,15 @@ bool VLayer::getVacuumPointInfo(QVector3D &point, float &diameter) const
         return false;
 }
 
-void VLayer::setInjectionPoint(const QVector3D &point, float diameter)
+void VLayer::setInjectionPoint(const QVector3D &point, double diameter)
 {
     m_hasInjectionPoint = true;
     m_injectionPoint = point;
     m_injectionDiameter = diameter;
+    double radius = diameter / 2;
     for (VSimNode::ptr &node : *m_pNodes)
     {
-        if (node->getDistance(point) > diameter)
+        if (node->getDistance(point) > radius)
         {
             if (!(node->isVacuum()))
                 node->setRole(VSimNode::NORMAL);
@@ -171,14 +172,15 @@ void VLayer::setInjectionPoint(const QVector3D &point, float diameter)
     }
 }
 
-void VLayer::setVacuumPoint(const QVector3D &point, float diameter)
+void VLayer::setVacuumPoint(const QVector3D &point, double diameter)
 {
     m_hasVacuumPoint = true;
     m_vacuumPoint = point;
     m_vacuumDiameter = diameter;
+    double radius = diameter / 2;
     for (VSimNode::ptr &node : *m_pNodes)
     {
-        if (node->getDistance(point) > diameter)
+        if (node->getDistance(point) > radius)
         {
             if (!(node->isInjection()))
                 node->setRole(VSimNode::NORMAL);

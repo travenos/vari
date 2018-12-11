@@ -74,6 +74,7 @@ struct VLayeredNeighbours
     std::multimap<double, const VSimNode*> previousLayerNeighbours;
     std::multimap<double, const VSimNode*> currentLayerNeighbours;
     std::multimap<double, const VSimNode*> nextLayerNeighbours;
+    //TODO: Implement size(), clear(), simple iterator
 };
 
     VNodeRole m_role;

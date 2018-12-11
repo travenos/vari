@@ -42,10 +42,10 @@ public:
     void reset() ;
     VCloth::const_ptr getMaterial() const ;
 
-    bool getInjectionPointInfo(QVector3D &point, float &diameter) const;
-    bool getVacuumPointInfo(QVector3D &point, float &diameter) const;
-    void setInjectionPoint(const QVector3D &point, float diameter);
-    void setVacuumPoint(const QVector3D &point, float diameter);
+    bool getInjectionPointInfo(QVector3D &point, double &diameter) const;
+    bool getVacuumPointInfo(QVector3D &point, double &diameter) const;
+    void setInjectionPoint(const QVector3D &point, double diameter);
+    void setVacuumPoint(const QVector3D &point, double diameter);
 
 private: 
     void p_setVisible(bool visible) ;
@@ -61,9 +61,9 @@ private:
     bool m_hasVacuumPoint;
 
     QVector3D m_injectionPoint;
-    float m_injectionDiameter;
+    double m_injectionDiameter;
     QVector3D m_vacuumPoint;
-    float m_vacuumDiameter;
+    double m_vacuumDiameter;
 };
 
 #endif //_VLAYER_H

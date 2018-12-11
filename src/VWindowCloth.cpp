@@ -97,7 +97,7 @@ VWindowCloth::~VWindowCloth()
 {
     delete m_pDatabaseCloth;
     #ifdef DEBUG_MODE
-        qDebug() << "VWindowCloth destroyed";
+        qInfo() << "VWindowCloth destroyed";
     #endif
 }
 
