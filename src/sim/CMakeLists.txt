@@ -48,6 +48,7 @@ SET(HEADER_FILES
     VSimTriangle.h
     VSimulationClass.h
     VSimulationFacade.h
+    VSimulationInfo.h
     VSimulationParametres.h
     VSimulator.h
     )

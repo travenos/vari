@@ -42,6 +42,8 @@ void VSimulationFacade::connectSignals()
             this, SIGNAL(simulationPaused()));
     connect(m_pSimulator.get(), SIGNAL(simulationStopped()),
             this, SIGNAL(simulationStopped()));
+    connect(m_pSimulator.get(), SIGNAL(gotSimInfo(const VSimulationInfo &)),
+            this, SIGNAL(gotSimInfo(const VSimulationInfo &)));
 }
 
 void VSimulationFacade::startSimulation() 

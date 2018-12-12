@@ -13,6 +13,7 @@
  * VSimulator implementation
  */
 
+const unsigned int VSimulator::TIMER_PERIOD = 1000;
 /**
  * Number of threads for calculations during the simulation
  */
@@ -29,9 +30,15 @@ VSimulator::VSimulator():
     m_pTriangles(new std::vector<VSimTriangle::ptr>),
     m_simulatingFlag(false),
     m_pauseFlag(false),
-    m_pParam(new VSimulationParametres)
+    m_pParam(new VSimulationParametres),
+    m_realTime(0l)
 {
     m_calculationThreads.reserve(N_THREADS);
+    m_timer.setInterval(TIMER_PERIOD);
+    connect(this, SIGNAL(simulationStarted()), &m_timer, SLOT(start()));
+    connect(this, SIGNAL(simulationStopped()), &m_timer, SLOT(stop()));
+    connect(this, SIGNAL(simulationPaused()), &m_timer, SLOT(stop()));
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(sendInfo()));
 }
 /**
  * Destructor
@@ -52,6 +59,8 @@ void VSimulator::start()
                 m_pSimulationThread->join();
         m_stopFlag.store(false);
         m_simulatingFlag.store(true);
+        if (!m_pauseFlag)
+            m_realTime = 0l;
         m_pSimulationThread.reset(new std::thread(std::bind(&VSimulator::simulationCycle, this)));
     }
 }
@@ -149,7 +158,7 @@ void VSimulator::setActiveElements(const VSimNode::const_vector_ptr &nodes,
  * Get the information about the current state of the simulation
  * @param info: output information about the current state of the simulation
  */
-VSimulator::VSimulationInfo VSimulator::getSimulationInfo() const 
+VSimulationInfo VSimulator::getSimulationInfo() const
 {
     std::lock_guard<std::mutex> lock(m_infoLock);
     return m_info;
@@ -205,11 +214,11 @@ void VSimulator::simulationCycle()
     while(!(m_stopFlag.load()))
     {
         {
-            std::lock_guard<std::mutex> lock(m_infoLock);
-            m_info.time += timeDelta();
+            std::lock_guard<std::mutex> locker(m_infoLock);
+            m_info.simTime += timeDelta();
             ++(m_info.iteration);
             #ifdef DEBUG_MODE
-                qInfo() << "Time:" << m_info.time << "Iteration:" << m_info.iteration;
+                qInfo() << "Time:" << m_info.simTime << "Iteration:" << m_info.iteration;
             #endif
         }
         madeChangesInCycle.store(false);
@@ -235,10 +244,7 @@ void VSimulator::simulationCycle()
 void VSimulator::resetInfo() 
 {
     std::lock_guard<std::mutex> lock(m_infoLock);
-    m_info.averagePressure = 0;
-    m_info.filledPercent = 0;
-    m_info.time = 0;
-    m_info.iteration = 0;
+    memset(&m_info, 0, sizeof(m_info));
 }
 
 /**
@@ -334,6 +340,16 @@ inline double VSimulator::calcAverageCellDistance() const
     if (counter > 0)
         distance /= counter;
     return distance;
+}
+
+void VSimulator::sendInfo()
+{
+    m_realTime += TIMER_PERIOD;
+    {
+        std::lock_guard<std::mutex> locker(m_infoLock);
+        m_info.realTime = m_realTime / 1000.0;
+        emit gotSimInfo(m_info);
+    }
 }
 
 void VSimulator::setInjectionDiameter(double diameter) 

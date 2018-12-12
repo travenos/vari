@@ -12,9 +12,7 @@
 #include <mutex>
 
 /**
-* This class is used for notification when the data is changed.
-* It is needed for synchronization with VGraphicsViewer.
-* The methods waitForNewData() and cancelWaitingForNewData() are used.
+* This class is used for notification when the something is changed.
 */
 class VNotify
 {

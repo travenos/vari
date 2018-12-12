@@ -108,6 +108,7 @@ signals:
     void simulationStarted();
     void simulationPaused();
     void simulationStopped();
+    void gotSimInfo(const VSimulationInfo &);
 };
 
 #endif //_VSIMULATIONFACADE_H

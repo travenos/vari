@@ -12,6 +12,7 @@
 #include <thread>
 #include <atomic>
 #include <QObject>
+#include <QTimer>
 #include "VSimulationClass.h"
 #include "VSimNode.h"
 #include "VSimTriangle.h"
@@ -19,6 +20,7 @@
 #include "VGraphicsTriangle.h"
 #include "VLayer.h"
 #include "VNotify.h"
+#include "VSimulationInfo.h"
 
 class VSimulator: public QObject, public VSimulationClass
 {
@@ -27,13 +29,10 @@ public:
     typedef std::shared_ptr<VSimulator> ptr;
     typedef std::shared_ptr<const VSimulator> const_ptr;
 
-    struct VSimulationInfo
-    {
-        double time = 0;
-        double filledPercent = 0;
-        double averagePressure = 0;
-        int iteration = 0;
-    };
+    /**
+     * Period of the timer (in ms)
+     */
+    static const unsigned int TIMER_PERIOD;
     /**
  * Default constructor
  */
@@ -170,11 +169,20 @@ private:
      * A struct, containing all parametres, which describe current simulation status
      */
     VSimulationInfo m_info;
-
     /**
      * Lock, used to get access to structure with simulation info
      */
     mutable std::mutex m_infoLock;
+
+    /**
+      * A timer for simulation time measurement
+      */
+    QTimer m_timer;
+
+    /**
+     * Duration of the simulation
+     */
+    long m_realTime;
 
     /**
     * Object for notification when the data is changed.
@@ -210,10 +218,14 @@ private:
     inline double calcAveragePermeability() const ;
     inline double calcAverageCellDistance() const ;
 
+private slots:
+    void sendInfo();
+
 signals:
     void simulationStarted();
     void simulationPaused();
     void simulationStopped();
+    void gotSimInfo(VSimulationInfo);
 };
 
 #endif //_VSIMULATOR_H

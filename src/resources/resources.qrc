@@ -9,5 +9,6 @@
         <file>img/wicron.png</file>
         <file>vari.ico</file>
         <file>img/pause.png</file>
+        <file>img/colormap.png</file>
     </qresource>
 </RCC>
