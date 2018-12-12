@@ -75,10 +75,10 @@ private:
     void showTemperature();
     void showInjectionPressure();
     void showInjectionDiameter();
-    void showInjectionPlace(bool checked);
+    void showInjectionPoint();
     void showVacuumPressure();
     void showVacuumDiameter();
-    void showVacuumPlace(bool checked);
+    void showVacuumPoint();
     void simulationStartResult();
     void simulationPauseResult();
     void simulationStopResult();
@@ -131,11 +131,11 @@ private slots:
     void on_resetInjectionPressureButton_clicked();
     void on_saveInjectionPressureButton_clicked();
     void on_resetInjectionDiamterButton_clicked();
-    void on_showInjectionPlace_clicked(bool checked);
+    void on_showInjectionPlace_clicked();
     void on_resetVacuumPressureButton_clicked();
     void on_saveVacuumPressureButton_clicked();
     void on_resetVacuumDiameterButton_clicked();
-    void on_showVacuumPlaceButton_clicked(bool checked);
+    void on_showVacuumPlaceButton_clicked();
     void on_actionPause_triggered();
 };
 

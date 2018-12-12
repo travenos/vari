@@ -45,7 +45,6 @@ void enableLayer(unsigned int layer, bool enable) ;
  * @param material
  */
 void setMaterial(unsigned int layer, const VCloth& material) ;
-void draw() ;
 /**
  * @param pressure
  */
@@ -80,7 +79,11 @@ void cancelWaitingForVacuumPointSelection();
 void newLayerFromFile(const VCloth &material, const QString &filename,
                       VLayerAbstractBuilder::VUnit units=VLayerAbstractBuilder::M);
 
+void showInjectionPoint();
+void showVacuumPoint();
+
 private:
+    void connectSignals() ;
     void updateConfiguration() ;
 
     VSimulator::ptr m_pSimulator;

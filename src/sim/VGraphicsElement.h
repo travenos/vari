@@ -29,8 +29,8 @@ virtual void updateAll() ;
 virtual void updateColor() ;
 virtual void updateVisibility();
 virtual void updatePosition() = 0;
-virtual void showInjectionColor();
-virtual void showVacuumColor();
+virtual void colorIfInjection();
+virtual void colorIfVacuum();
 
 private: 
     VSimElement::const_ptr m_pSimElement;

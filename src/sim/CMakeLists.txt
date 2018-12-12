@@ -28,6 +28,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
 SET(HEADER_FILES
+    VCloth.h
     VExceptions.h
     VGeometryProcessor.h
     VGraphicsElement.h
@@ -41,7 +42,7 @@ SET(HEADER_FILES
     VLayer.h
     VLayerManualBuilder.h
     VLayersProcessor.h
-    VCloth.h
+    VNotify.h
     VSimElement.h
     VSimNode.h
     VSimTriangle.h
@@ -64,6 +65,7 @@ SET(SOURCE_FILES
     VLayerFromGmeshBuilder.cpp
     VLayerManualBuilder.cpp
     VLayersProcessor.cpp
+    VNotify.cpp
     VSimElement.cpp
     VSimNode.cpp
     VSimTriangle.cpp

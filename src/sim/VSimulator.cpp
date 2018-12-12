@@ -31,7 +31,6 @@ VSimulator::VSimulator():
     m_pauseFlag(false),
     m_pParam(new VSimulationParametres)
 {
-    m_newDataLock.lock();
     m_calculationThreads.reserve(N_THREADS);
 }
 /**
@@ -109,7 +108,7 @@ void VSimulator::reset()
     nodesAction([](const VSimNode::ptr& node){node->reset();});
     trianglesAction([](const VSimTriangle::ptr& triangle){triangle->reset();});
     resetInfo();
-    m_newDataLock.unlock();
+    m_newDataNotifier.notifyOne();
 }
 
 void VSimulator::clear() 
@@ -170,14 +169,14 @@ int VSimulator::getIterationNumber() const
  */
 void VSimulator::waitForNewData() const 
 {
-    m_newDataLock.lock();
+    m_newDataNotifier.wait();
 }
 /**
  * Make waiting thread stop waiting and make it think that the simulation state has changed
  */
 void VSimulator::cancelWaitingForNewData() const 
 {
-    m_newDataLock.unlock();
+    m_newDataNotifier.notifyOne();
 }
 
 /**
@@ -217,7 +216,7 @@ void VSimulator::simulationCycle()
         nodesAction(calcFunc);
         nodesAction(commitFunc);
         trianglesAction(updateColorsFunc);
-        m_newDataLock.unlock();
+        m_newDataNotifier.notifyOne();
         if (!madeChangesInCycle)
             break;
     }

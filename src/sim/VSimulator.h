@@ -18,6 +18,7 @@
 #include "VGraphicsNode.h"
 #include "VGraphicsTriangle.h"
 #include "VLayer.h"
+#include "VNotify.h"
 
 class VSimulator: public QObject, public VSimulationClass
 {
@@ -156,11 +157,6 @@ private:
     */
     std::atomic<bool> m_pauseFlag;
     /**
-    * This mutex is unlocked when the data is changed. It is needed for synchronization
-    * with VGraphicsViewer. The methods waitForNewData() and cancelWaitingForNewData() are used.
-    */
-    mutable std::mutex m_newDataLock;
-    /**
      * Vector used for storage of calculation threads
      */
     std::vector<std::thread> m_calculationThreads;
@@ -181,6 +177,13 @@ private:
     mutable std::mutex m_infoLock;
 
     /**
+    * Object for notification when the data is changed.
+    * It is needed for synchronization with VGraphicsViewer.
+    * The methods waitForNewData() and cancelWaitingForNewData() are used.
+    */
+    mutable VNotify m_newDataNotifier;
+
+    /**
      * A function, which is being executed in the simulation thread
      */
     void simulationCycle()  ;
@@ -189,6 +192,7 @@ private:
      * Interrupt the simulation using a flag m_stopFlag
      */
     void interrupt() ;
+
     /**
      * Perform an action over all nodes
      * @param func Describes an action for node

@@ -77,7 +77,8 @@ void VWindowMain::setupValidators()
     ui->injectionPressureEdit->setValidator(m_pPressureValidator);
     ui->vacuumPressureEdit->setValidator(m_pPressureValidator);
     ui->injectionDiameterEdit->setValidator(m_pDiameterValidator);
-    ui->vacuumDiameterEdit->setValidator(m_pDiameterValidator);}
+    ui->vacuumDiameterEdit->setValidator(m_pDiameterValidator);
+}
 
 VWindowMain::~VWindowMain()
 {
@@ -293,13 +294,7 @@ void VWindowMain::markLayerAsEnabled(int layer, bool enable)
 void VWindowMain::injectionPointSelectionResult()
 {
     ui->injectionPlaceButton->setChecked(false);
-    //TODO show injection point
-}
-
-void VWindowMain::vacuumPointSelectionResult()
-{
-    ui->vacuumPlaceButton->setChecked(false);
-    //TODO show vacuum point
+    showInjectionPoint();
 }
 
 void VWindowMain::startInjectionPointSelection()
@@ -336,6 +331,12 @@ void VWindowMain::startVacuumPointSelection()
 void VWindowMain::cancelVacuumPointSelection()
 {
     m_pFacade->cancelWaitingForVacuumPointSelection();
+}
+
+void VWindowMain::vacuumPointSelectionResult()
+{
+    ui->vacuumPlaceButton->setChecked(false);
+    showVacuumPoint();
 }
 
 void VWindowMain::startSimulation()
@@ -406,9 +407,9 @@ void VWindowMain::showInjectionDiameter()
     ui->injectionDiameterEdit->setText(QString::number(injectionDiameter));
 }
 
-void VWindowMain::showInjectionPlace(bool checked)
+void VWindowMain::showInjectionPoint()
 {
-    //TODO
+    m_pFacade->showInjectionPoint();
 }
 
 void VWindowMain::showVacuumPressure()
@@ -422,9 +423,9 @@ void VWindowMain::showVacuumDiameter()
     double vacuumDiameter = m_pFacade->getParametres()->getVacuumDiameter();
     ui->vacuumDiameterEdit->setText(QString::number(vacuumDiameter));
 }
-void VWindowMain::showVacuumPlace(bool checked)
+void VWindowMain::showVacuumPoint()
 {
-    //TODO
+    m_pFacade->showVacuumPoint();
 }
 
 bool VWindowMain::readNumber(const QLineEdit * lineEdit, double &output) const
@@ -637,9 +638,9 @@ void VWindowMain::on_resetInjectionDiamterButton_clicked()
     showInjectionDiameter();
 }
 
-void VWindowMain::on_showInjectionPlace_clicked(bool checked)
+void VWindowMain::on_showInjectionPlace_clicked()
 {
-    showInjectionPlace(checked);
+    showInjectionPoint();
 }
 
 void VWindowMain::on_resetVacuumPressureButton_clicked()
@@ -657,9 +658,9 @@ void VWindowMain::on_resetVacuumDiameterButton_clicked()
     showVacuumDiameter();
 }
 
-void VWindowMain::on_showVacuumPlaceButton_clicked(bool checked)
+void VWindowMain::on_showVacuumPlaceButton_clicked()
 {
-    showVacuumPlace(checked);
+    showVacuumPoint();
 }
 
 void VWindowMain::on_actionPause_triggered()

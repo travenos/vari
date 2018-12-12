@@ -335,9 +335,6 @@
                    <property name="text">
                     <string>Показать позицию кольцевого источника</string>
                    </property>
-                   <property name="checkable">
-                    <bool>true</bool>
-                   </property>
                   </widget>
                  </item>
                 </layout>
@@ -434,9 +431,6 @@
                   <widget class="QPushButton" name="showVacuumPlaceButton">
                    <property name="text">
                     <string>Показать позицию кольцевого источника</string>
-                   </property>
-                   <property name="checkable">
-                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>

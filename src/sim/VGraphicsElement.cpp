@@ -57,7 +57,7 @@ void VGraphicsElement::updateVisibility()
         m_pDrawStyle->style.setValue(SoDrawStyle::INVISIBLE);
 }
 
-void VGraphicsElement::showInjectionColor()
+void VGraphicsElement::colorIfInjection()
 {
     if (m_pSimElement->isInjection())
     {
@@ -66,9 +66,11 @@ void VGraphicsElement::showInjectionColor()
                                                    color.greenF(),
                                                    color.blueF());
     }
+    else if (m_pSimElement->isNormal())
+        updateColor();
 }
 
-void VGraphicsElement::showVacuumColor()
+void VGraphicsElement::colorIfVacuum()
 {
     if (m_pSimElement->isVacuum())
     {
@@ -77,4 +79,6 @@ void VGraphicsElement::showVacuumColor()
                                                    color.greenF(),
                                                    color.blueF());
     }
+    else if (m_pSimElement->isNormal())
+        updateColor();
 }

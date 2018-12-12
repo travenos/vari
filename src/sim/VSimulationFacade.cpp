@@ -29,6 +29,11 @@ VSimulationFacade::VSimulationFacade(QWidget *parent):
     m_pSimulator->setMutexes(p_nodesLock, p_trianglesLock);
     m_pGraphicsViewer->setMutexes(p_nodesLock, p_trianglesLock);
     m_pLayersProcessor->setMutexes(p_nodesLock, p_trianglesLock);
+    connectSignals();
+}
+
+void VSimulationFacade::connectSignals()
+{
     connect(m_pGraphicsViewer.get(), SIGNAL(gotPoint(const QVector3D &)),
             this, SLOT(m_on_got_point(const QVector3D &)));
     connect(m_pSimulator.get(), SIGNAL(simulationStarted()),
@@ -116,12 +121,6 @@ void VSimulationFacade::setMaterial(unsigned int layer, const VCloth &material)
 {
     m_pLayersProcessor->setMaterial(layer, material);
     emit materialChanged(layer);
-}
-
-void VSimulationFacade::draw() 
-{
-    //TODO remove this method
-    m_pGraphicsViewer->render();
 }
 
 /**
@@ -259,7 +258,6 @@ void VSimulationFacade::waitForInjectionPointSelection(double diameter)
     m_selectInjectionPoint = true;
     m_selectVacuumPoint = false;
     m_injectionDiameter = diameter;
-    //TODO thread-safe
     m_pGraphicsViewer->viewFromAbove();
     //TODO forbid rotation
 }
@@ -269,7 +267,6 @@ void VSimulationFacade::waitForVacuumPointSelection(double diameter)
     m_selectVacuumPoint = true;
     m_selectInjectionPoint = false;
     m_vacuumDiameter = diameter;
-    //TODO thread-safe
     m_pGraphicsViewer->viewFromAbove();
     //TODO forbid rotation
 }
@@ -284,6 +281,16 @@ void VSimulationFacade::cancelWaitingForVacuumPointSelection()
 {
     m_selectVacuumPoint = false;
     //TODO allow rotation
+}
+
+void VSimulationFacade::showInjectionPoint()
+{
+    m_pGraphicsViewer->showInjectionPoint();
+}
+
+void VSimulationFacade::showVacuumPoint()
+{
+    m_pGraphicsViewer->showVacuumPoint();
 }
 
 void VSimulationFacade::m_on_got_point(const QVector3D &point)

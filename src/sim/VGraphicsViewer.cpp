@@ -5,6 +5,7 @@
 #ifdef DEBUG_MODE
 #include <QDebug>
 #endif
+#include <QApplication>
 #include <Inventor/actions/SoBoxHighlightRenderAction.h>
 #include <Inventor/nodes/SoBaseColor.h>
 #include <Inventor/nodes/SoShapeHints.h>
@@ -44,6 +45,7 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
 
     connect(this, SIGNAL(askForRender()), this, SLOT(doRender()));
     m_pRenderWaiterThread.reset(new std::thread(std::bind(&VGraphicsViewer::process, this)));
+    m_renderSuccessNotifier.notifyOne();
 }
 
 VGraphicsViewer::~VGraphicsViewer(){
@@ -60,10 +62,13 @@ void VGraphicsViewer::setGraphicsElements(const VSimNode::const_vector_ptr &node
     clearAll();
     createGraphicsElements(&m_graphicsNodes, nodes);
     createGraphicsElements(&m_graphicsTriangles, triangles);
-    for (auto node: m_graphicsNodes)
-        m_pFigureRoot->addChild(node);
-    for (auto triangle: m_graphicsTriangles)
-        m_pFigureRoot->addChild(triangle);
+    {
+        std::lock_guard<std::mutex> lock(m_viewMutex);
+        for (auto node: m_graphicsNodes)
+            m_pFigureRoot->addChild(node);
+        for (auto triangle: m_graphicsTriangles)
+            m_pFigureRoot->addChild(triangle);
+    }
 }
 
 void VGraphicsViewer::updateTriangleColors()
@@ -75,6 +80,7 @@ void VGraphicsViewer::updateTriangleColors()
 
 void VGraphicsViewer::updateVisibility()
 {
+    std::lock_guard<std::mutex> lock(m_viewMutex);
     for (auto &node : m_graphicsNodes)
         node->updateVisibility();
     for (auto &triangle : m_graphicsTriangles)
@@ -83,6 +89,7 @@ void VGraphicsViewer::updateVisibility()
 
 void VGraphicsViewer::clearNodes() 
 {
+    std::lock_guard<std::mutex> lock(m_viewMutex);
     for (auto node: m_graphicsNodes)
         m_pFigureRoot->removeChild(node);
     m_graphicsNodes.clear();
@@ -90,6 +97,7 @@ void VGraphicsViewer::clearNodes()
 
 void VGraphicsViewer::clearTriangles() 
 {
+    std::lock_guard<std::mutex> lock(m_viewMutex);
     for (auto triangle: m_graphicsTriangles)
         m_pFigureRoot->removeChild(triangle);
     m_graphicsTriangles.clear();
@@ -97,6 +105,7 @@ void VGraphicsViewer::clearTriangles()
 
 void VGraphicsViewer::clearAll() 
 {
+    std::lock_guard<std::mutex> lock(m_viewMutex);
     m_pFigureRoot->removeAllChildren();
     m_graphicsNodes.clear();
     m_graphicsTriangles.clear();
@@ -104,12 +113,9 @@ void VGraphicsViewer::clearAll()
 
 void VGraphicsViewer::doRender() 
 {
-    setAutoRedraw(false);
-    updateTriangleColors();
-    setAutoRedraw(true);
     render();
     //TODO print simulation info
-    m_renderSuccessLock.unlock();
+    m_renderSuccessNotifier.notifyOne();
 }
 
 template<typename T1, typename T2>
@@ -127,9 +133,15 @@ void VGraphicsViewer::process()
     while(true)
     {
         m_pSimulator->waitForNewData();
-        m_renderSuccessLock.lock();
+        m_renderSuccessNotifier.wait();
         if (!m_renderStopFlag.load())
         {
+            {
+                std::lock_guard<std::mutex> lock(m_viewMutex);
+                setAutoRedraw(false);
+                updateTriangleColors();
+                setAutoRedraw(true);
+            }
             emit askForRender();
         }
         else
@@ -141,14 +153,32 @@ void VGraphicsViewer::stopRender()
 {
     m_renderStopFlag.store(true);
     m_pSimulator->cancelWaitingForNewData();
-    m_renderSuccessLock.unlock();
+    m_renderSuccessNotifier.notifyOne();
 }
 
 void VGraphicsViewer::viewFromAbove()
 {
+    std::lock_guard<std::mutex> lock(m_viewMutex);
     m_pCam->position.setValue(SbVec3f(0, 0, 1));
     m_pCam->orientation.setValue(SbVec3f(0, 0, 1), 0);
     m_pCam->viewAll( m_pFigureRoot, getViewportRegion() );
+}
+
+void VGraphicsViewer::showInjectionPoint()
+{
+    std::lock_guard<std::mutex> lock(m_viewMutex);
+    for (auto &node : m_graphicsNodes)
+        node->colorIfInjection();
+    for (auto &triangle : m_graphicsTriangles)
+        triangle->colorIfInjection();
+}
+void VGraphicsViewer::showVacuumPoint()
+{
+    std::lock_guard<std::mutex> lock(m_viewMutex);
+    for (auto &node : m_graphicsNodes)
+        node->colorIfVacuum();
+    for (auto &triangle : m_graphicsTriangles)
+        triangle->colorIfVacuum();
 }
 
 void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)
