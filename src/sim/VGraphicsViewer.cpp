@@ -104,6 +104,9 @@ void VGraphicsViewer::clearAll()
 
 void VGraphicsViewer::doRender() 
 {
+    setAutoRedraw(false);
+    updateTriangleColors();
+    setAutoRedraw(true);
     render();
     //TODO print simulation info
     m_renderSuccessLock.unlock();
@@ -127,9 +130,6 @@ void VGraphicsViewer::process()
         m_renderSuccessLock.lock();
         if (!m_renderStopFlag.load())
         {
-            setAutoRedraw(false);
-            updateTriangleColors();
-            setAutoRedraw(true);
             emit askForRender();
         }
         else

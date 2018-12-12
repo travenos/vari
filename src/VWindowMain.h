@@ -34,6 +34,7 @@ private:
     static const QString ASK_FOR_REMOVE;
 
     void connectSimulationSignals();
+    void setupValidators();
 
     void showWindowLayer();
     void deleteWindowLayer();

@@ -4,6 +4,7 @@
 
 int main(int argc, char *argv[])
 {
+    QLocale::setDefault(QLocale::C);
     QApplication a(argc, argv);
     VWindowMain w;
     w.show();

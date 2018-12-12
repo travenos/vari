@@ -37,20 +37,12 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_pDiameterValidator(new QDoubleValidator)
 {
     ui->setupUi(this);
-    m_pTemperatureValidator->setBottom(-VSimulationParametres::KELVINS_IN_0_CELSIUS);
-    m_pPressureValidator->setBottom(0);
-    m_pDiameterValidator->setBottom(0);
-    ui->temperatureEdit->setValidator(m_pTemperatureValidator);
-    ui->injectionPressureEdit->setValidator(m_pPressureValidator);
-    ui->vacuumPressureEdit->setValidator(m_pPressureValidator);
-    ui->injectionDiameterEdit->setValidator(m_pDiameterValidator);
-    ui->vacuumDiameterEdit->setValidator(m_pDiameterValidator);
-
     ui->splitter->setStretchFactor(0,1);
     ui->splitter->setStretchFactor(1,0);
     ui->layerParamBox->setVisible(false);
     m_pFacade.reset(new VSimulationFacade(ui->viewerWidget));
     connectSimulationSignals();
+    setupValidators();
 }
 
 void VWindowMain::connectSimulationSignals()
@@ -72,6 +64,20 @@ void VWindowMain::connectSimulationSignals()
     connect(m_pFacade.get(), SIGNAL(simulationStopped()),
             this, SLOT(m_on_simutation_stopped()));
 }
+
+void VWindowMain::setupValidators()
+{
+    m_pTemperatureValidator->setLocale(QLocale::C);
+    m_pPressureValidator->setLocale(QLocale::C);
+    m_pDiameterValidator->setLocale(QLocale::C);
+    m_pTemperatureValidator->setBottom(-VSimulationParametres::KELVINS_IN_0_CELSIUS);
+    m_pPressureValidator->setBottom(0);
+    m_pDiameterValidator->setBottom(0);
+    ui->temperatureEdit->setValidator(m_pTemperatureValidator);
+    ui->injectionPressureEdit->setValidator(m_pPressureValidator);
+    ui->vacuumPressureEdit->setValidator(m_pPressureValidator);
+    ui->injectionDiameterEdit->setValidator(m_pDiameterValidator);
+    ui->vacuumDiameterEdit->setValidator(m_pDiameterValidator);}
 
 VWindowMain::~VWindowMain()
 {
