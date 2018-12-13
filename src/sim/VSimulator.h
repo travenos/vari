@@ -12,7 +12,6 @@
 #include <thread>
 #include <atomic>
 #include <QObject>
-#include <QTimer>
 #include "VSimulationClass.h"
 #include "VSimNode.h"
 #include "VSimTriangle.h"
@@ -158,7 +157,11 @@ private:
     /**
      * Vector used for storage of calculation threads
      */
-    std::vector<std::thread> m_calculationThreads;
+    mutable std::vector<std::thread> m_calculationThreads;
+    /**
+     * Vector used for storage of calculated data
+     */
+    mutable std::vector<double> m_calculationData;
 
     /**
      * A struct, containing all parametres needed for simulation
@@ -175,21 +178,16 @@ private:
     mutable std::mutex m_infoLock;
 
     /**
-      * A timer for simulation time measurement
-      */
-    QTimer m_timer;
-
-    /**
-     * Duration of the simulation
-     */
-    long m_realTime;
-
-    /**
     * Object for notification when the data is changed.
     * It is needed for synchronization with VGraphicsViewer.
     * The methods waitForNewData() and cancelWaitingForNewData() are used.
     */
     mutable VNotify m_newDataNotifier;
+
+    /**
+     * Duration of the simulation process before pause. Should be accessed only from simulation thread.
+     */
+    int m_st_timeBeforePause;
 
     /**
      * A function, which is being executed in the simulation thread
@@ -214,18 +212,28 @@ private:
     template<typename Callable>
     inline void trianglesAction(Callable &&func) ;
 
-    inline double timeDelta() const ;
-    inline double calcAveragePermeability() const ;
-    inline double calcAverageCellDistance() const ;
+    /**
+     * Calculate some average value for all nodes
+     * @param func Describes an action for node
+     */
+    template <typename Callable>
+    inline double calcAverage(Callable&& func) const;
 
-private slots:
-    void sendInfo();
+    inline void calculatePressure();
+    inline bool commitPressure();
+    inline void updateColors();
+
+    inline double getTimeDelta() const ;
+    inline double getAveragePermeability() const ;
+    inline double getAverageCellDistance() const ;
+    inline double getFilledPercent() const;
+    inline double getAveragePressure() const;
+
 
 signals:
     void simulationStarted();
     void simulationPaused();
     void simulationStopped();
-    void gotSimInfo(VSimulationInfo);
 };
 
 #endif //_VSIMULATOR_H

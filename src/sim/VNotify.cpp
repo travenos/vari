@@ -17,11 +17,6 @@ VNotify::VNotify() :
 void VNotify::wait()
 {
     std::unique_lock<std::mutex> locker(m_mutex);
-    if (m_flag)
-    {
-        m_flag.store(false);
-        return;
-    }
     while(!m_flag)
         m_cv.wait(locker);
     m_flag.store(false);

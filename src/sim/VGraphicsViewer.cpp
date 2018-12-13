@@ -5,7 +5,9 @@
 #ifdef DEBUG_MODE
 #include <QDebug>
 #endif
-#include <QApplication>
+#include <QWidget>
+#include <QLabel>
+#include <QGridLayout>
 #include <Inventor/actions/SoBoxHighlightRenderAction.h>
 #include <Inventor/nodes/SoBaseColor.h>
 #include <Inventor/nodes/SoShapeHints.h>
@@ -13,6 +15,7 @@
 #include <Inventor/nodes/SoEventCallback.h>
 #include <Inventor/events/SoMouseButtonEvent.h>
 #include <Inventor/SoPickedPoint.h>
+#include <Inventor/Qt/widgets/SoQtThumbWheel.h>
 #include <functional>
 
 #include "VGraphicsViewer.h"
@@ -20,35 +23,50 @@
  * VGraphicsViewer implementation
  */
 
+const QString VGraphicsViewer::LEFT_WHEEL_CAPTION("Y");
+const QString VGraphicsViewer::RIGHT_WHEEL_CAPTION("Масштаб");
+const QString VGraphicsViewer::BOTTOM_WHEEL_CAPTION("X");
+const QString VGraphicsViewer::REAL_TIME_LABEL_CAPTION("Время моделирования (с):");
+const QString VGraphicsViewer::SIM_TIME_LABEL_CAPTION("Время процесса (с):");
+const QString VGraphicsViewer::REALTIME_FACTOR_LABEL_CAPTION("Фактор реального времни:");
+const QString VGraphicsViewer::ITERATION_LABEL_CAPTION("Номер итерации:");
+const QString VGraphicsViewer::FILLED_PERCENT_LABEL_CAPTION("Степень заполнения (%):");
+const QString VGraphicsViewer::AVERAGE_PRESSURE_LABEL_CAPTION("Среднее давление (Па):");
 
 /**
  * @param parent
  * @param simulator
  */
 VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulator) :
-    SoQtExaminerViewer (parent),
+    SoQtExaminerViewer (parent, nullptr, true, SoQtFullViewer::BUILD_ALL, SoQtFullViewer::BROWSER, false),
     m_pSimulator(simulator),
     m_pRoot(new SoSeparator),
+    m_pFigureRoot(new SoSeparator),
+    m_pShapeHints(new SoShapeHints),
+    m_pCam(new SoPerspectiveCamera),
     m_renderStopFlag(false)
 {
+    m_pBaseWidget = buildWidget(getParentWidget());
+    setBaseWidget(m_pBaseWidget);
+
     SoEventCallback * cb = new SoEventCallback;
     cb->addEventCallback(SoMouseButtonEvent::getClassTypeId(), event_cb, this);
     m_pRoot->insertChild(cb, 0);
-    SoShapeHints *shapeHints = new SoShapeHints;
-    shapeHints->vertexOrdering = SoShapeHints::COUNTERCLOCKWISE;
-    m_pRoot->addChild(shapeHints);
-    m_pCam = new SoPerspectiveCamera;
+    m_pShapeHints->vertexOrdering = SoShapeHints::COUNTERCLOCKWISE;
+    m_pRoot->addChild(m_pShapeHints);
     m_pRoot->addChild(m_pCam);
-    m_pFigureRoot = new SoSeparator;
     m_pRoot->addChild(m_pFigureRoot);
     setSceneGraph(m_pRoot);
+    setPopupMenuEnabled(false);
 
     connect(this, SIGNAL(askForRender()), this, SLOT(doRender()));
+    connect(this, SIGNAL(askForDisplayingInfo()), this, SLOT(displayInfo()));
     m_pRenderWaiterThread.reset(new std::thread(std::bind(&VGraphicsViewer::process, this)));
     m_renderSuccessNotifier.notifyOne();
 }
 
-VGraphicsViewer::~VGraphicsViewer(){
+VGraphicsViewer::~VGraphicsViewer()
+{
     stopRender();
     m_pRenderWaiterThread->join();
     m_pRenderWaiterThread.reset();
@@ -57,18 +75,129 @@ VGraphicsViewer::~VGraphicsViewer(){
     setCamera(NULL);
 }
 
+QWidget* VGraphicsViewer::buildLeftTrim(QWidget * parent)
+{
+    const int WIDGET_WIDTH = 45;
+    QWidget * widget = new QWidget(parent);
+    widget->setFixedWidth(WIDGET_WIDTH);
+
+    QGridLayout * layout = new QGridLayout(widget);
+    //gl->addWidget(this->buildAppButtons(w), 0, 0);
+
+    SoQtThumbWheel * wheel = new SoQtThumbWheel(SoQtThumbWheel::Vertical, widget);
+    this->leftWheel = wheel;
+    wheel->setRangeBoundaryHandling(SoQtThumbWheel::ACCUMULATE);
+    this->leftWheelVal = wheel->value();
+
+    QObject::connect(wheel, SIGNAL(wheelMoved(float)), this, SLOT(leftWheelChanged(float)));
+    QObject::connect(wheel, SIGNAL(wheelPressed()), this, SLOT(leftWheelPressed()));
+    QObject::connect(wheel, SIGNAL(wheelReleased()), this, SLOT(leftWheelReleased()));
+
+    layout->addWidget(wheel, 0, 0, Qt::AlignBottom | Qt::AlignHCenter);
+    layout->setContentsMargins(0,0,0,0);
+    layout->activate();
+
+    return widget;
+}
+
+QWidget* VGraphicsViewer::buildBottomTrim(QWidget * parent)
+{
+    const int WIDGET_HEIGHT = 90;
+    const int INFO_LABEL_WIDHT = 90;
+    const int VERTICAL_SPACING = 4;
+    QWidget * widget = new QWidget(parent);
+    widget->setFixedHeight(WIDGET_HEIGHT);
+
+    QGridLayout * layout = new QGridLayout(widget);
+    //gl->addWidget(this->buildAppButtons(w), 0, 0);
+
+    SoQtThumbWheel * wheel = new SoQtThumbWheel(SoQtThumbWheel::Horizontal, widget);
+    this->bottomWheel = wheel;
+    wheel->setRangeBoundaryHandling(SoQtThumbWheel::ACCUMULATE);
+    this->bottomWheelVal = wheel->value();
+
+    QObject::connect(wheel, SIGNAL(wheelMoved(float)), this, SLOT(bottomWheelChanged(float)));
+    QObject::connect(wheel, SIGNAL(wheelPressed()), this, SLOT(bottomWheelPressed()));
+    QObject::connect(wheel, SIGNAL(wheelReleased()), this, SLOT(bottomWheelReleased()));
+
+    QLabel * leftWheelCaptionLabel = new QLabel(widget);
+    QLabel * rightWheelCaptionLabel = new QLabel(widget);
+    QLabel * bottomWheelCaptionLabel = new QLabel(widget);
+    QLabel * realTimeCaptionLabel = new QLabel(widget);
+    QLabel * simTimeCaptionLabel = new QLabel(widget);
+    QLabel * realtimeFactorCaptionLabel = new QLabel(widget);
+    QLabel * iterationCaptionLabel = new QLabel(widget);
+    QLabel * filledPercentCaptionLabel = new QLabel(widget);
+    QLabel * averagePressureCaptionLabel = new QLabel(widget);
+
+    m_pRealTimeLabel = new QLabel(widget);
+    m_pSimTimeLabel = new QLabel(widget);
+    m_pRealtimeFactorLabel = new QLabel(widget);
+    m_pIterationLabel = new QLabel(widget);
+    m_pFilledPercentLabel = new QLabel(widget);
+    m_pAveragePressureLabel = new QLabel(widget);
+
+    m_pRealTimeLabel->setFixedWidth(INFO_LABEL_WIDHT);
+    m_pSimTimeLabel->setFixedWidth(INFO_LABEL_WIDHT);
+    m_pRealtimeFactorLabel->setFixedWidth(INFO_LABEL_WIDHT);
+    m_pIterationLabel->setFixedWidth(INFO_LABEL_WIDHT);
+    m_pFilledPercentLabel->setFixedWidth(INFO_LABEL_WIDHT);
+    m_pAveragePressureLabel->setFixedWidth(INFO_LABEL_WIDHT);
+
+    leftWheelCaptionLabel->setText(LEFT_WHEEL_CAPTION);
+    rightWheelCaptionLabel->setText(RIGHT_WHEEL_CAPTION);
+    bottomWheelCaptionLabel->setText(BOTTOM_WHEEL_CAPTION);
+    realTimeCaptionLabel->setText(REAL_TIME_LABEL_CAPTION);
+    simTimeCaptionLabel->setText(SIM_TIME_LABEL_CAPTION);
+    realtimeFactorCaptionLabel->setText(REALTIME_FACTOR_LABEL_CAPTION);
+    iterationCaptionLabel->setText(ITERATION_LABEL_CAPTION);
+    filledPercentCaptionLabel->setText(FILLED_PERCENT_LABEL_CAPTION);
+    averagePressureCaptionLabel->setText(AVERAGE_PRESSURE_LABEL_CAPTION);
+
+    layout->addWidget(leftWheelCaptionLabel, 0, 0, Qt::AlignBottom | Qt::AlignCenter);
+    layout->addItem(new QSpacerItem(0,0,QSizePolicy::MinimumExpanding,QSizePolicy::Minimum),0, 1);
+    layout->addWidget(wheel, 0, 2, Qt::AlignBottom | Qt::AlignLeft);
+    layout->addWidget(bottomWheelCaptionLabel, 1, 2, Qt::AlignBottom | Qt::AlignHCenter);
+    layout->addItem(new QSpacerItem(0,0,QSizePolicy::MinimumExpanding,QSizePolicy::Minimum),0, 3);
+    layout->addWidget(realTimeCaptionLabel, 0, 4, Qt::AlignBottom | Qt::AlignRight);
+    layout->addWidget(m_pRealTimeLabel, 0, 5, Qt::AlignBottom | Qt::AlignLeft);
+    layout->addWidget(realtimeFactorCaptionLabel, 1, 4, Qt::AlignBottom | Qt::AlignRight);
+    layout->addWidget(m_pRealtimeFactorLabel, 1, 5, Qt::AlignBottom | Qt::AlignLeft);
+    layout->addWidget(simTimeCaptionLabel, 0, 6, Qt::AlignBottom | Qt::AlignRight);
+    layout->addWidget(m_pSimTimeLabel, 0, 7, Qt::AlignBottom | Qt::AlignLeft);
+    layout->addWidget(iterationCaptionLabel, 1, 6, Qt::AlignBottom | Qt::AlignRight);
+    layout->addWidget(m_pIterationLabel, 1, 7, Qt::AlignBottom | Qt::AlignLeft);
+    layout->addWidget(filledPercentCaptionLabel, 0, 8, Qt::AlignBottom | Qt::AlignRight);
+    layout->addWidget(m_pFilledPercentLabel, 0, 9, Qt::AlignBottom | Qt::AlignLeft);
+    layout->addWidget(averagePressureCaptionLabel, 1, 8, Qt::AlignBottom | Qt::AlignRight);
+    layout->addWidget(m_pAveragePressureLabel, 1, 9, Qt::AlignBottom | Qt::AlignLeft);
+    layout->addItem(new QSpacerItem(0,0,QSizePolicy::MinimumExpanding,QSizePolicy::Minimum),0, 10);
+    layout->addWidget(rightWheelCaptionLabel, 0, 11, Qt::AlignBottom | Qt::AlignRight);
+
+    layout->setVerticalSpacing(VERTICAL_SPACING);
+    layout->setContentsMargins(0,0,0,0);
+    layout->setSizeConstraint(QLayout::SetMinimumSize);
+
+    layout->activate();
+
+    return widget;
+}
+
 void VGraphicsViewer::setGraphicsElements(const VSimNode::const_vector_ptr &nodes,
                                           const VSimTriangle::const_vector_ptr &triangles)  {
     clearAll();
     createGraphicsElements(&m_graphicsNodes, nodes);
     createGraphicsElements(&m_graphicsTriangles, triangles);
-    {
-        std::lock_guard<std::mutex> lock(m_viewMutex);
-        for (auto node: m_graphicsNodes)
-            m_pFigureRoot->addChild(node);
-        for (auto triangle: m_graphicsTriangles)
-            m_pFigureRoot->addChild(triangle);
-    }
+    for (auto node: m_graphicsNodes)
+        m_pFigureRoot->addChild(node);
+    for (auto triangle: m_graphicsTriangles)
+        m_pFigureRoot->addChild(triangle);
+}
+
+void VGraphicsViewer::updateColors()
+{
+    updateTriangleColors();
+    updateNodeColors();
 }
 
 void VGraphicsViewer::updateTriangleColors()
@@ -78,9 +207,15 @@ void VGraphicsViewer::updateTriangleColors()
         triangle->updateColor();
 }
 
+void VGraphicsViewer::updateNodeColors()
+{
+    std::lock_guard<std::mutex> lock(*m_pNodesLock);
+    for (auto &node : m_graphicsNodes)
+        node->updateColor();
+}
+
 void VGraphicsViewer::updateVisibility()
 {
-    std::lock_guard<std::mutex> lock(m_viewMutex);
     for (auto &node : m_graphicsNodes)
         node->updateVisibility();
     for (auto &triangle : m_graphicsTriangles)
@@ -89,7 +224,6 @@ void VGraphicsViewer::updateVisibility()
 
 void VGraphicsViewer::clearNodes() 
 {
-    std::lock_guard<std::mutex> lock(m_viewMutex);
     for (auto node: m_graphicsNodes)
         m_pFigureRoot->removeChild(node);
     m_graphicsNodes.clear();
@@ -97,7 +231,6 @@ void VGraphicsViewer::clearNodes()
 
 void VGraphicsViewer::clearTriangles() 
 {
-    std::lock_guard<std::mutex> lock(m_viewMutex);
     for (auto triangle: m_graphicsTriangles)
         m_pFigureRoot->removeChild(triangle);
     m_graphicsTriangles.clear();
@@ -105,7 +238,6 @@ void VGraphicsViewer::clearTriangles()
 
 void VGraphicsViewer::clearAll() 
 {
-    std::lock_guard<std::mutex> lock(m_viewMutex);
     m_pFigureRoot->removeAllChildren();
     m_graphicsNodes.clear();
     m_graphicsTriangles.clear();
@@ -114,8 +246,33 @@ void VGraphicsViewer::clearAll()
 void VGraphicsViewer::doRender() 
 {
     render();
-    //TODO print simulation info
     m_renderSuccessNotifier.notifyOne();
+}
+
+void VGraphicsViewer::displayInfo()
+{
+    VSimulationInfo inf = m_pSimulator->getSimulationInfo();
+    if (inf.iteration > 0)
+    {
+        m_pSimTimeLabel->setText(QString::number(inf.simTime, 'g', 10));
+        m_pRealTimeLabel->setText(QString::number(inf.realTime, 'g'));
+        m_pRealtimeFactorLabel->setText(QString::number(inf.realtimeFactor, 'g', 10));
+        m_pFilledPercentLabel->setText(QString::number(inf.filledPercent, 'g', 10));
+        m_pAveragePressureLabel->setText(QString::number(inf.averagePressure, 'g', 10));
+        m_pIterationLabel->setText(QString::number(inf.iteration));
+    }
+    else
+        clearInfo();
+}
+
+void VGraphicsViewer::clearInfo()
+{
+    m_pSimTimeLabel->clear();
+    m_pRealTimeLabel->clear();
+    m_pRealtimeFactorLabel->clear();
+    m_pFilledPercentLabel->clear();
+    m_pAveragePressureLabel->clear();
+    m_pIterationLabel->clear();
 }
 
 template<typename T1, typename T2>
@@ -136,13 +293,11 @@ void VGraphicsViewer::process()
         m_renderSuccessNotifier.wait();
         if (!m_renderStopFlag.load())
         {
-            {
-                std::lock_guard<std::mutex> lock(m_viewMutex);
-                setAutoRedraw(false);
-                updateTriangleColors();
-                setAutoRedraw(true);
-            }
+            setAutoRedraw(false);
+            updateTriangleColors();
+            setAutoRedraw(true);
             emit askForRender();
+            emit askForDisplayingInfo();
         }
         else
             break;
@@ -158,7 +313,7 @@ void VGraphicsViewer::stopRender()
 
 void VGraphicsViewer::viewFromAbove()
 {
-    std::lock_guard<std::mutex> lock(m_viewMutex);
+    stopAnimating();
     m_pCam->position.setValue(SbVec3f(0, 0, 1));
     m_pCam->orientation.setValue(SbVec3f(0, 0, 1), 0);
     m_pCam->viewAll( m_pFigureRoot, getViewportRegion() );
@@ -166,7 +321,6 @@ void VGraphicsViewer::viewFromAbove()
 
 void VGraphicsViewer::showInjectionPoint()
 {
-    std::lock_guard<std::mutex> lock(m_viewMutex);
     for (auto &node : m_graphicsNodes)
         node->colorIfInjection();
     for (auto &triangle : m_graphicsTriangles)
@@ -174,7 +328,6 @@ void VGraphicsViewer::showInjectionPoint()
 }
 void VGraphicsViewer::showVacuumPoint()
 {
-    std::lock_guard<std::mutex> lock(m_viewMutex);
     for (auto &node : m_graphicsNodes)
         node->colorIfVacuum();
     for (auto &triangle : m_graphicsTriangles)
@@ -209,3 +362,11 @@ void VGraphicsViewer::emitGotPoint(const QVector3D &point)
     #endif
     emit gotPoint(point);
 }
+
+void VGraphicsViewer::leftWheelPressed(void) { leftWheelStart(); }
+void VGraphicsViewer::leftWheelChanged(float v) { leftWheelMotion(v); }
+void VGraphicsViewer::leftWheelReleased(void) { leftWheelFinish(); }
+
+void VGraphicsViewer::bottomWheelPressed(void) { bottomWheelStart(); }
+void VGraphicsViewer::bottomWheelChanged(float v) { bottomWheelMotion(v); }
+void VGraphicsViewer::bottomWheelReleased(void) { bottomWheelFinish(); }

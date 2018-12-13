@@ -82,6 +82,8 @@ void newLayerFromFile(const VCloth &material, const QString &filename,
 void showInjectionPoint();
 void showVacuumPoint();
 
+VSimulationInfo getSimulationInfo() const;
+
 private:
     void connectSignals() ;
     void updateConfiguration() ;
@@ -108,7 +110,6 @@ signals:
     void simulationStarted();
     void simulationPaused();
     void simulationStopped();
-    void gotSimInfo(const VSimulationInfo &);
 };
 
 #endif //_VSIMULATIONFACADE_H

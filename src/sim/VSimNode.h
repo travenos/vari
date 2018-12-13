@@ -41,6 +41,7 @@ VNodeRole getRole() const ;
 void calculate() ;
 bool commit() ;
 double getPressure() const ;
+double getFilledPart() const;
 /**
  * @param neighbour
  * @param layer

@@ -63,8 +63,6 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_simutation_paused()));
     connect(m_pFacade.get(), SIGNAL(simulationStopped()),
             this, SLOT(m_on_simutation_stopped()));
-    connect(m_pFacade.get(), SIGNAL(gotSimInfo(const VSimulationInfo &)),
-            this, SLOT(m_on_got_info(const VSimulationInfo &)));
 }
 
 void VWindowMain::setupValidators()
@@ -428,11 +426,6 @@ void VWindowMain::showVacuumPoint()
     m_pFacade->showVacuumPoint();
 }
 
-void VWindowMain::showSimInfo(const VSimulationInfo &info)
-{
-    ui->realTimeEdit->setText(QString::number(info.realTime));
-}
-
 bool VWindowMain::readNumber(const QLineEdit * lineEdit, double &output) const
 {
     bool ok;
@@ -587,11 +580,6 @@ void VWindowMain::m_on_simutation_paused()
 void VWindowMain::m_on_simutation_stopped()
 {
     simulationStopResult();
-}
-
-void VWindowMain::m_on_got_info(const VSimulationInfo &info)
-{
-    showSimInfo(info);
 }
 
 void VWindowMain::on_injectionPlaceButton_clicked(bool checked)

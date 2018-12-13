@@ -44,12 +44,13 @@ VSimNode::VNodeRole VSimNode::getRole() const
     return m_role;
 }
 
-void VSimNode::calculate()  {
-    if(isNormal()) //we don't need to calculate a new pressure if we have constant pressure cause it's an injection point
+void VSimNode::calculate()
+{
+    double m = m_neighboursNumber;
+    if(!isInjection() && m > 0) //we don't need to calculate a new pressure if we have constant pressure cause it's an injection point
     {
         double _K = m_pParam->getAveragePermeability();
         double K = m_pMaterial->permeability;
-        double m = m_neighboursNumber;
         double phi = m_pMaterial->porosity;
         double d = m_pMaterial->cavityHeight;
         double _l = m_pParam->getAverageCellDistance();
@@ -149,6 +150,13 @@ bool VSimNode::commit()  {
 double VSimNode::getPressure() const
 {
     return m_currentPressure;
+}
+
+double VSimNode::getFilledPart() const
+{
+    double nom = m_currentPressure - m_pParam->getVacuumPressure();
+    double den = m_pParam->getInjectionPressure() - m_pParam->getVacuumPressure();
+    return (den > 0) ? (nom / den) : 0;
 }
 
 /**

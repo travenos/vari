@@ -15,10 +15,13 @@
 #include "VGraphicsTriangle.h"
 #include "VSimulator.h"
 
+class SoShapeHints;
 class SoPerspectiveCamera;
 class SoEventCallback;
+class QWidget;
+class QLabel;
 
-class VGraphicsViewer: public QObject, protected SoQtExaminerViewer, public VSimulationClass {
+class VGraphicsViewer: public QObject, public SoQtExaminerViewer, public VSimulationClass {
     Q_OBJECT
 public: 
     typedef std::shared_ptr<VGraphicsViewer> ptr;
@@ -40,12 +43,31 @@ public:
     void showInjectionPoint();
     void showVacuumPoint();
 
+    void updateColors() ;
+    void updateNodeColors() ;
+    void updateTriangleColors() ;
+
+public slots:
+    void doRender() ;
+    void displayInfo() ;
+    void clearInfo() ;
+
+
 private:
+    static const QString LEFT_WHEEL_CAPTION;
+    static const QString RIGHT_WHEEL_CAPTION;
+    static const QString BOTTOM_WHEEL_CAPTION;
+    static const QString REAL_TIME_LABEL_CAPTION;
+    static const QString SIM_TIME_LABEL_CAPTION;
+    static const QString REALTIME_FACTOR_LABEL_CAPTION;
+    static const QString ITERATION_LABEL_CAPTION;
+    static const QString FILLED_PERCENT_LABEL_CAPTION;
+    static const QString AVERAGE_PRESSURE_LABEL_CAPTION;
+
     void emitGotPoint(const QVector3D &point);
 
     void stopRender() ;
     void process() ;
-    void updateTriangleColors() ;
 
     template<typename T1, typename T2>
     inline void createGraphicsElements(std::vector<T1 *>* gaphics,
@@ -58,19 +80,63 @@ private:
 
     VSimulator::ptr m_pSimulator;
 
+    QWidget*            m_pBaseWidget;
+    QLabel*             m_pRealTimeLabel;
+    QLabel*             m_pSimTimeLabel;
+    QLabel*             m_pRealtimeFactorLabel;
+    QLabel*             m_pIterationLabel;
+    QLabel*             m_pFilledPercentLabel;
+    QLabel*             m_pAveragePressureLabel;
+
     SoSeparator*        m_pRoot;
     SoSeparator*        m_pFigureRoot;
+    SoShapeHints*       m_pShapeHints;
     SoPerspectiveCamera* m_pCam;
+
 
     std::unique_ptr<std::thread> m_pRenderWaiterThread;
     mutable VNotify m_renderSuccessNotifier;
-    mutable std::mutex m_viewMutex;
     std::atomic<bool> m_renderStopFlag;
 
 private slots:
-    void doRender() ;
+    /**
+     * Slot that should be called when the left rotary wheel is pressed, to get ready for a movement.
+     */
+    void leftWheelPressed(void);
+
+    /**
+     * Slot that should be called when the left rotary wheel is changed, to keep track with the current value.
+     * @param v New value of the rotary wheel control
+     */
+    void leftWheelChanged(float v);
+
+    /**
+     * Slot that should be called when the left wheel is released, to stop moving the scene graph with the mouse movement.
+     */
+    void leftWheelReleased(void);
+
+    /**
+     * Slot that should be called when the bottom rotary wheel is pressed, to get ready for a movement.
+     */
+    void bottomWheelPressed(void);
+
+    /**
+     * Slot that should be called when the bottom rotary wheel is changed, to keep track with the current value.
+     * @param v New value of the rotary wheel control
+     */
+    void bottomWheelChanged(float v);
+
+    /**
+     * Slot that should be called when the bottom wheel is released, to stop moving the scene graph with the mouse movement.
+     */
+    void bottomWheelReleased(void);
+
+protected:
+    QWidget* buildLeftTrim(QWidget * parent);
+    QWidget* buildBottomTrim(QWidget * parent);
 signals:
     void askForRender();
+    void askForDisplayingInfo();
     void gotPoint(const QVector3D &point);
 };
 

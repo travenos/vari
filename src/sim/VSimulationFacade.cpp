@@ -42,8 +42,6 @@ void VSimulationFacade::connectSignals()
             this, SIGNAL(simulationPaused()));
     connect(m_pSimulator.get(), SIGNAL(simulationStopped()),
             this, SIGNAL(simulationStopped()));
-    connect(m_pSimulator.get(), SIGNAL(gotSimInfo(const VSimulationInfo &)),
-            this, SIGNAL(gotSimInfo(const VSimulationInfo &)));
 }
 
 void VSimulationFacade::startSimulation() 
@@ -64,6 +62,7 @@ void VSimulationFacade::pauseSimulation()
 void VSimulationFacade::resetSimulation() 
 {
     m_pSimulator->reset();
+    m_pGraphicsViewer->updateColors();
 }
 
 size_t VSimulationFacade::getLayersNumber() const
@@ -261,6 +260,7 @@ void VSimulationFacade::waitForInjectionPointSelection(double diameter)
     m_selectVacuumPoint = false;
     m_injectionDiameter = diameter;
     m_pGraphicsViewer->viewFromAbove();
+    m_pGraphicsViewer->setViewing(false);
     //TODO forbid rotation
 }
 
@@ -270,6 +270,7 @@ void VSimulationFacade::waitForVacuumPointSelection(double diameter)
     m_selectInjectionPoint = false;
     m_vacuumDiameter = diameter;
     m_pGraphicsViewer->viewFromAbove();
+    m_pGraphicsViewer->setViewing(false);
     //TODO forbid rotation
 }
 
@@ -293,6 +294,11 @@ void VSimulationFacade::showInjectionPoint()
 void VSimulationFacade::showVacuumPoint()
 {
     m_pGraphicsViewer->showVacuumPoint();
+}
+
+VSimulationInfo VSimulationFacade::getSimulationInfo() const
+{
+    return m_pSimulator->getSimulationInfo();
 }
 
 void VSimulationFacade::m_on_got_point(const QVector3D &point)

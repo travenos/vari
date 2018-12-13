@@ -80,7 +80,6 @@ private:
     void showVacuumPressure();
     void showVacuumDiameter();
     void showVacuumPoint();
-    void showSimInfo(const VSimulationInfo &info);
     void simulationStartResult();
     void simulationPauseResult();
     void simulationStopResult();
@@ -115,7 +114,6 @@ private slots:
     void m_on_simutation_started();
     void m_on_simutation_paused();
     void m_on_simutation_stopped();
-    void m_on_got_info(const VSimulationInfo &info);
 
     void on_addLayerButton_clicked();
     void on_layersListWidget_itemSelectionChanged();

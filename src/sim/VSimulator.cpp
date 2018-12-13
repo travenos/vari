@@ -6,6 +6,7 @@
 #include <QDebug>
 #endif
 #include <functional>
+#include <QTime>
 #include "VSimulator.h"
 #include "VExceptions.h"
 
@@ -31,14 +32,10 @@ VSimulator::VSimulator():
     m_simulatingFlag(false),
     m_pauseFlag(false),
     m_pParam(new VSimulationParametres),
-    m_realTime(0l)
+    m_st_timeBeforePause(0)
 {
-    m_calculationThreads.reserve(N_THREADS);
-    m_timer.setInterval(TIMER_PERIOD);
-    connect(this, SIGNAL(simulationStarted()), &m_timer, SLOT(start()));
-    connect(this, SIGNAL(simulationStopped()), &m_timer, SLOT(stop()));
-    connect(this, SIGNAL(simulationPaused()), &m_timer, SLOT(stop()));
-    connect(&m_timer, SIGNAL(timeout()), this, SLOT(sendInfo()));
+    m_calculationThreads.resize(N_THREADS);
+    m_calculationData.resize(N_THREADS);
 }
 /**
  * Destructor
@@ -59,8 +56,6 @@ void VSimulator::start()
                 m_pSimulationThread->join();
         m_stopFlag.store(false);
         m_simulatingFlag.store(true);
-        if (!m_pauseFlag)
-            m_realTime = 0l;
         m_pSimulationThread.reset(new std::thread(std::bind(&VSimulator::simulationCycle, this)));
     }
 }
@@ -146,8 +141,8 @@ void VSimulator::setActiveElements(const VSimNode::const_vector_ptr &nodes,
         m_pTriangles = triangles;
         m_nodesThreadPart = m_pActiveNodes->size() / N_THREADS + 1;
         m_trianglesThreadPart = m_pTriangles->size() / N_THREADS + 1;
-        m_pParam->setAveragePermeability(calcAveragePermeability());
-        m_pParam->setAverageCellDistance(calcAverageCellDistance());
+        m_pParam->setAveragePermeability(getAveragePermeability());
+        m_pParam->setAverageCellDistance(getAverageCellDistance());
         m_pParam->setNumberOfNodes(m_pActiveNodes->size());
     }
     else
@@ -194,37 +189,36 @@ void VSimulator::cancelWaitingForNewData() const
 void VSimulator::simulationCycle() 
 {
     emit simulationStarted();
+    QTime timeMeasurer;
+    timeMeasurer.start();
     if (!(m_pauseFlag.load()))
     {
         m_pauseFlag.store(false);
         resetInfo();
         nodesAction([](const VSimNode::ptr& node){node->reset();});
         trianglesAction([](const VSimTriangle::ptr& triangle){triangle->reset();});
-        m_pParam->setAveragePermeability(calcAveragePermeability());
+        m_pParam->setAveragePermeability(getAveragePermeability());
     }
-    std::atomic<bool> madeChangesInCycle;
-    auto calcFunc = [](const VSimNode::ptr& node){node->calculate();};
-    auto commitFunc = [&madeChangesInCycle](const VSimNode::ptr& node)
-    {
-        bool madeChanges = node->commit();
-        if(madeChanges && !madeChangesInCycle.load())
-            madeChangesInCycle.store(true);
-    };
-    auto updateColorsFunc = [](const VSimTriangle::ptr& triangle){triangle->updateColor();};
+    bool madeChangesInCycle = false;
     while(!(m_stopFlag.load()))
     {
+        double filledPercent = getFilledPercent();
+        double averagePressure = getAveragePressure();
         {
             std::lock_guard<std::mutex> locker(m_infoLock);
-            m_info.simTime += timeDelta();
+            m_info.simTime += getTimeDelta();
+            m_info.realTime = (m_st_timeBeforePause + timeMeasurer.elapsed()) / 1000.0;
+            m_info.realtimeFactor = m_info.simTime / m_info.realTime;
+            m_info.filledPercent = filledPercent;
+            m_info.averagePressure = averagePressure;
             ++(m_info.iteration);
             #ifdef DEBUG_MODE
                 qInfo() << "Time:" << m_info.simTime << "Iteration:" << m_info.iteration;
             #endif
         }
-        madeChangesInCycle.store(false);
-        nodesAction(calcFunc);
-        nodesAction(commitFunc);
-        trianglesAction(updateColorsFunc);
+        calculatePressure();
+        madeChangesInCycle = commitPressure();
+        updateColors();
         m_newDataNotifier.notifyOne();
         if (!madeChangesInCycle)
             break;
@@ -233,9 +227,15 @@ void VSimulator::simulationCycle()
     if (!madeChangesInCycle)
         m_pauseFlag.store(false);
     if (!m_pauseFlag)
+    {
+        m_st_timeBeforePause = 0;
         emit simulationStopped();
+    }
     else
+    {
+        m_st_timeBeforePause += timeMeasurer.elapsed();
         emit simulationPaused();
+    }
     #ifdef DEBUG_MODE
         qInfo() << "The simulation was stopped";
     #endif
@@ -247,14 +247,9 @@ void VSimulator::resetInfo()
     memset(&m_info, 0, sizeof(m_info));
 }
 
-/**
- * Perform an action over all nodes
- * @param func Describes an action for node
- */
 template <typename Callable>
 inline void VSimulator::nodesAction(Callable&& func) 
 {
-    m_calculationThreads.clear();
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     size_t batchStart = 0;
     size_t batchStop;
@@ -266,21 +261,46 @@ inline void VSimulator::nodesAction(Callable&& func)
                     for(size_t j = batchStart; j < batchStop && j < m_pActiveNodes->size(); ++j )
                         func((*m_pActiveNodes)[j]);
                 };
-        m_calculationThreads.emplace_back(prc);
+        m_calculationThreads[i] = std::thread(prc);
         batchStart += m_nodesThreadPart;
     }
     for(auto &thread : m_calculationThreads)
         thread.join();
 }
 
-/**
- * Perform an action over all triangles
- * @param func Describes an action for triangle
- */
 template <typename Callable>
-inline void VSimulator::trianglesAction(Callable&& func) 
+inline double VSimulator::calcAverage(Callable&& func) const
 {
-    m_calculationThreads.clear();
+    std::fill(m_calculationData.begin(), m_calculationData.end(), 0);
+    size_t batchStart = 0;
+    size_t batchStop;
+    size_t nodesCount;
+    {
+        std::lock_guard<std::mutex> lock(*m_pNodesLock);
+        nodesCount = m_pActiveNodes->size();
+        for (size_t i = 0; i < N_THREADS; ++i)
+        {
+            batchStop = batchStart + m_nodesThreadPart;
+            auto prc = [this, batchStart, batchStop, nodesCount, i, func]()
+                    {
+                        for(size_t j = batchStart; j < batchStop && j < nodesCount; ++j )
+                            m_calculationData[i] += func((*m_pActiveNodes)[j]);
+                    };
+            m_calculationThreads[i] = std::thread(prc);
+            batchStart += m_nodesThreadPart;
+        }
+        for(auto &thread : m_calculationThreads)
+            thread.join();
+    }
+    double sum = 0;
+    for (auto& data : m_calculationData)
+        sum += data;
+    return sum / nodesCount;
+}
+
+template <typename Callable>
+inline void VSimulator::trianglesAction(Callable&& func)
+{
     std::lock_guard<std::mutex> lock(*m_pTrianglesLock);
     size_t batchStart = 0;
     size_t batchStop;
@@ -292,38 +312,69 @@ inline void VSimulator::trianglesAction(Callable&& func)
                     for(size_t j = batchStart; j < batchStop && j < m_pTriangles->size(); ++j )
                         func((*m_pTriangles)[j]);
                 };
-        m_calculationThreads.emplace_back(prc);
+        m_calculationThreads[i] = std::thread(prc);
         batchStart += m_trianglesThreadPart;
     }
     for(auto &thread : m_calculationThreads)
         thread.join();
 }
 
-inline double VSimulator::timeDelta() const 
+inline void VSimulator::calculatePressure()
 {
-    std::lock_guard<std::mutex> lock(*m_pNodesLock);
-    double n = m_pParam->getViscosity();                             //[N*s/m2]
-    double _l = m_pParam->getAverageCellDistance();                   //[m]
-    double l_typ = (sqrt((double)m_pParam->getNumberOfNodes())*_l);   //[m]
-    double _K = m_pParam->getAveragePermeability();                   //[m^2]
-    double p_inj = m_pParam->getInjectionPressure();          //[N/m2]
-    double p_vac = m_pParam->getVacuumPressure();                    //[N/m2]
-
-    double time = n*l_typ*_l/(_K*(p_inj-p_vac));
-    return time;
+    auto calcFunc = [](const VSimNode::ptr& node)
+    {node->calculate();};
+    nodesAction(calcFunc);
 }
 
-inline double VSimulator::calcAveragePermeability() const 
+inline bool VSimulator::commitPressure()
 {
-    double permeability = 0;
-    for(auto &node : *m_pActiveNodes)
-        permeability += node->getPermeability();
-    if (m_pActiveNodes->size() > 0)
-        permeability /= m_pActiveNodes->size();
-    return permeability;
+    std::atomic<bool> madeChangesInCycle;
+    madeChangesInCycle.store(false);
+    auto commitFunc = [&madeChangesInCycle](const VSimNode::ptr& node)
+    {
+        bool madeChanges = node->commit();
+        if(madeChanges && !madeChangesInCycle.load())
+            madeChangesInCycle.store(true);
+    };
+    nodesAction(commitFunc);
+    return madeChangesInCycle.load();
 }
 
-inline double VSimulator::calcAverageCellDistance() const 
+inline void VSimulator::updateColors()
+{
+    auto updateColorsFunc = [](const VSimTriangle::ptr& triangle){triangle->updateColor();};
+    trianglesAction(updateColorsFunc);
+}
+
+inline double VSimulator::getFilledPercent() const
+{
+    auto filledPartFunc = [] (const VSimNode::ptr& node) -> double
+    {
+        return node->getFilledPart();
+    };
+    double filledPercent = calcAverage(filledPartFunc) * 100;
+    return filledPercent;
+}
+
+inline double VSimulator::getAveragePressure() const
+{
+    auto pressureFunc = [] (const VSimNode::ptr& node) -> double
+    {
+        return node->getPressure();
+    };
+    return calcAverage(pressureFunc);
+}
+
+inline double VSimulator::getAveragePermeability() const
+{
+    auto permeabilityFunc = [] (const VSimNode::ptr& node) -> double
+    {
+        return node->getPermeability();
+    };
+    return calcAverage(permeabilityFunc);
+}
+
+inline double VSimulator::getAverageCellDistance() const
 {
     double distance = 0;
     int counter = 0;
@@ -342,14 +393,18 @@ inline double VSimulator::calcAverageCellDistance() const
     return distance;
 }
 
-void VSimulator::sendInfo()
+inline double VSimulator::getTimeDelta() const
 {
-    m_realTime += TIMER_PERIOD;
-    {
-        std::lock_guard<std::mutex> locker(m_infoLock);
-        m_info.realTime = m_realTime / 1000.0;
-        emit gotSimInfo(m_info);
-    }
+    std::lock_guard<std::mutex> lock(*m_pNodesLock);
+    double n = m_pParam->getViscosity();                             //[N*s/m2]
+    double _l = m_pParam->getAverageCellDistance();                   //[m]
+    double l_typ = (sqrt((double)m_pParam->getNumberOfNodes())*_l);   //[m]
+    double _K = m_pParam->getAveragePermeability();                   //[m^2]
+    double p_inj = m_pParam->getInjectionPressure();          //[N/m2]
+    double p_vac = m_pParam->getVacuumPressure();                    //[N/m2]
+
+    double time = n*l_typ*_l/(_K*(p_inj-p_vac));
+    return time;
 }
 
 void VSimulator::setInjectionDiameter(double diameter) 
