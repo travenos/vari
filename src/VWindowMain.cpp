@@ -25,6 +25,9 @@ const QString VWindowMain::RESIN_INFO_TEXT("<html><head/><body>"
                                                "Вязкость при 25 °C: %2 Па·с<br>"
                                                "Температурный коэффициент: %3 Па·с"
                                                "</body></html>");
+const QString VWindowMain::MODEL_INFO_TEXT("Габариты: %1м x %2м x %3м;    "
+                                           "Число узлов: %4;    "
+                                           "Число треугольников: %5.");
 
 VWindowMain::VWindowMain(QWidget *parent) :
     QMainWindow(parent),
@@ -40,6 +43,7 @@ VWindowMain::VWindowMain(QWidget *parent) :
     ui->splitter->setStretchFactor(0,1);
     ui->splitter->setStretchFactor(1,0);
     ui->layerParamBox->setVisible(false);
+    ui->modelInfoLabel->setVisible(false);
     m_pFacade.reset(new VSimulationFacade(ui->viewerWidget));
     connectSimulationSignals();
     setupValidators();
@@ -53,6 +57,8 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_material_changed(unsigned int)));
     connect(m_pFacade.get(), SIGNAL(layerEnabled(unsigned int, bool)),
             this, SLOT(m_on_layer_enabled(unsigned int, bool)));
+    connect(m_pFacade.get(), SIGNAL(layerAdded()),
+            this, SLOT(m_on_layer_added()));
     connect(m_pFacade.get(), SIGNAL(injectionPointSet()),
             this, SLOT(m_on_injection_point_set()));
     connect(m_pFacade.get(), SIGNAL(vacuumPointSet()),
@@ -421,9 +427,30 @@ void VWindowMain::showVacuumDiameter()
     double vacuumDiameter = m_pFacade->getParametres()->getVacuumDiameter();
     ui->vacuumDiameterEdit->setText(QString::number(vacuumDiameter));
 }
+
 void VWindowMain::showVacuumPoint()
 {
     m_pFacade->showVacuumPoint();
+}
+
+void VWindowMain::showModelInfo()
+{
+    size_t nodesNumber = m_pFacade->getNodesNumber();
+    if (nodesNumber > 0)
+    {
+        size_t trianglesNumber = m_pFacade->getTrianglesNumber();
+        QVector3D modelSize;
+        m_pFacade->getModelSize(modelSize);
+        ui->modelInfoLabel->setText(MODEL_INFO_TEXT
+                                    .arg(modelSize.x())
+                                    .arg(modelSize.y())
+                                    .arg(modelSize.z())
+                                    .arg(nodesNumber)
+                                    .arg(trianglesNumber));
+        ui->modelInfoLabel->setVisible(true);
+    }
+    else
+        ui->modelInfoLabel->setVisible(false);
 }
 
 bool VWindowMain::readNumber(const QLineEdit * lineEdit, double &output) const
@@ -543,6 +570,7 @@ void VWindowMain::on_selectMaterialResinButton_clicked()
 void VWindowMain::m_on_layer_removed(unsigned int layer)
 {
     removeLayerFromList(layer);
+    showModelInfo();
 }
 
 void VWindowMain::m_on_material_changed(unsigned int layer)
@@ -553,6 +581,12 @@ void VWindowMain::m_on_material_changed(unsigned int layer)
 void VWindowMain::m_on_layer_enabled(unsigned int layer, bool enable)
 {
     markLayerAsEnabled(layer, enable);
+    showModelInfo();
+}
+
+void VWindowMain::m_on_layer_added()
+{
+    showModelInfo();
 }
 
 void VWindowMain::m_on_injection_point_set()

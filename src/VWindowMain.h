@@ -33,6 +33,7 @@ private:
     static const QString CLOTH_INFO_TEXT;
     static const QString RESIN_INFO_TEXT;
     static const QString ASK_FOR_REMOVE;
+    static const QString MODEL_INFO_TEXT;
 
     void connectSimulationSignals();
     void setupValidators();
@@ -80,6 +81,7 @@ private:
     void showVacuumPressure();
     void showVacuumDiameter();
     void showVacuumPoint();
+    void showModelInfo();
     void simulationStartResult();
     void simulationPauseResult();
     void simulationStopResult();
@@ -109,6 +111,7 @@ private slots:
     void m_on_layer_removed(unsigned int layer);
     void m_on_material_changed(unsigned int layer);
     void m_on_layer_enabled(unsigned int layer, bool enable);
+    void m_on_layer_added();
     void m_on_injection_point_set();
     void m_on_vacuum_point_set();
     void m_on_simutation_started();

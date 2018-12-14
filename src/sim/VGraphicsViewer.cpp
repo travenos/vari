@@ -78,6 +78,7 @@ VGraphicsViewer::~VGraphicsViewer()
 QWidget* VGraphicsViewer::buildLeftTrim(QWidget * parent)
 {
     const int WIDGET_WIDTH = 45;
+    const int HORIZONTAL_SPACING = 4;
     QWidget * widget = new QWidget(parent);
     widget->setFixedWidth(WIDGET_WIDTH);
 
@@ -85,6 +86,7 @@ QWidget* VGraphicsViewer::buildLeftTrim(QWidget * parent)
     //gl->addWidget(this->buildAppButtons(w), 0, 0);
 
     SoQtThumbWheel * wheel = new SoQtThumbWheel(SoQtThumbWheel::Vertical, widget);
+    wheel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     this->leftWheel = wheel;
     wheel->setRangeBoundaryHandling(SoQtThumbWheel::ACCUMULATE);
     this->leftWheelVal = wheel->value();
@@ -93,7 +95,14 @@ QWidget* VGraphicsViewer::buildLeftTrim(QWidget * parent)
     QObject::connect(wheel, SIGNAL(wheelPressed()), this, SLOT(leftWheelPressed()));
     QObject::connect(wheel, SIGNAL(wheelReleased()), this, SLOT(leftWheelReleased()));
 
-    layout->addWidget(wheel, 0, 0, Qt::AlignBottom | Qt::AlignHCenter);
+    QLabel * colorScaleLabel = new QLabel(widget);
+    colorScaleLabel->setPixmap(QPixmap(":/img/colormap.png"));
+
+    layout->addItem(new QSpacerItem(0,0,QSizePolicy::Minimum,QSizePolicy::MinimumExpanding),0, 0);
+    layout->addWidget(colorScaleLabel, 1, 0, Qt::AlignCenter | Qt::AlignHCenter);
+    layout->addItem(new QSpacerItem(0,0,QSizePolicy::Minimum,QSizePolicy::MinimumExpanding),2, 0);
+    layout->addWidget(wheel, 3, 0, Qt::AlignBottom | Qt::AlignHCenter);
+    layout->setHorizontalSpacing(HORIZONTAL_SPACING);
     layout->setContentsMargins(0,0,0,0);
     layout->activate();
 
@@ -103,8 +112,9 @@ QWidget* VGraphicsViewer::buildLeftTrim(QWidget * parent)
 QWidget* VGraphicsViewer::buildBottomTrim(QWidget * parent)
 {
     const int WIDGET_HEIGHT = 90;
-    const int INFO_LABEL_WIDHT = 90;
+    const int INFO_LABEL_WIDHT = 68;
     const int VERTICAL_SPACING = 4;
+    const int LEFT_MARGIN = 15;
     QWidget * widget = new QWidget(parent);
     widget->setFixedHeight(WIDGET_HEIGHT);
 
@@ -112,6 +122,7 @@ QWidget* VGraphicsViewer::buildBottomTrim(QWidget * parent)
     //gl->addWidget(this->buildAppButtons(w), 0, 0);
 
     SoQtThumbWheel * wheel = new SoQtThumbWheel(SoQtThumbWheel::Horizontal, widget);
+    wheel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     this->bottomWheel = wheel;
     wheel->setRangeBoundaryHandling(SoQtThumbWheel::ACCUMULATE);
     this->bottomWheelVal = wheel->value();
@@ -175,7 +186,7 @@ QWidget* VGraphicsViewer::buildBottomTrim(QWidget * parent)
     layout->addWidget(rightWheelCaptionLabel, 0, 11, Qt::AlignBottom | Qt::AlignRight);
 
     layout->setVerticalSpacing(VERTICAL_SPACING);
-    layout->setContentsMargins(0,0,0,0);
+    layout->setContentsMargins(LEFT_MARGIN,0,0,0);
     layout->setSizeConstraint(QLayout::SetMinimumSize);
 
     layout->activate();
@@ -252,14 +263,15 @@ void VGraphicsViewer::doRender()
 
 void VGraphicsViewer::displayInfo()
 {
+    const int PRECISION=7;
     VSimulationInfo inf = m_pSimulator->getSimulationInfo();
     if (inf.iteration > 0)
     {
-        m_pSimTimeLabel->setText(QString::number(inf.simTime, 'g', 10));
-        m_pRealTimeLabel->setText(QString::number(inf.realTime, 'g'));
-        m_pRealtimeFactorLabel->setText(QString::number(inf.realtimeFactor, 'g', 10));
-        m_pFilledPercentLabel->setText(QString::number(inf.filledPercent, 'g', 10));
-        m_pAveragePressureLabel->setText(QString::number(inf.averagePressure, 'g', 10));
+        m_pSimTimeLabel->setText(QString::number(inf.simTime, 'g', PRECISION));
+        m_pRealTimeLabel->setText(QString::number(inf.realTime, 'g', PRECISION));
+        m_pRealtimeFactorLabel->setText(QString::number(inf.realtimeFactor, 'g', PRECISION));
+        m_pFilledPercentLabel->setText(QString::number(inf.filledPercent, 'g', PRECISION));
+        m_pAveragePressureLabel->setText(QString::number(inf.averagePressure, 'g', PRECISION));
         m_pIterationLabel->setText(QString::number(inf.iteration));
     }
     else

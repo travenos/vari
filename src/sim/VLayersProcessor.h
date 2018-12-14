@@ -68,6 +68,10 @@ bool isLayerEnabled(unsigned int layer) const ;
 void setInjectionPoint(const QVector3D &point, double diameter);
 void setVacuumPoint(const QVector3D &point, double diameter);
 
+void getActiveModelSize(QVector3D &size) const;
+size_t getActiveNodesNumber() const;
+size_t getActiveTrianglesNumber() const;
+
 private:
     void updateActiveElementsVectors() ;
 

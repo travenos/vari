@@ -86,6 +86,21 @@ size_t VSimulationFacade::getInactiveLayersNumber() const
     return m_pLayersProcessor->getInactiveLayersNumber();
 }
 
+size_t VSimulationFacade::getNodesNumber() const
+{
+    return m_pLayersProcessor->getActiveNodesNumber();
+}
+
+size_t VSimulationFacade::getTrianglesNumber() const
+{
+    return m_pLayersProcessor->getActiveTrianglesNumber();
+}
+
+void VSimulationFacade::getModelSize(QVector3D &size) const
+{
+    m_pLayersProcessor->getActiveModelSize(size);
+}
+
 /**
  * @param layer
  * @param visible

@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <mutex>
+
 #include "VSimulator.h"
 #include "VLayersProcessor.h"
 #include "VGraphicsViewer.h"
@@ -30,6 +31,9 @@ void resetSimulation() ;
 size_t getLayersNumber() const ;
 size_t getActiveLayersNumber() const ;
 size_t getInactiveLayersNumber() const ;
+size_t getNodesNumber() const;
+size_t getTrianglesNumber() const;
+void getModelSize(QVector3D &size) const;
 /**
  * @param layer
  * @param visible

@@ -154,6 +154,51 @@ bool VLayersProcessor::isLayerEnabled(unsigned int layer) const
     return m_layers.at(layer)->isActive();
 }
 
+void VLayersProcessor::getActiveModelSize(QVector3D &size) const
+{
+    if (m_pActiveNodes->size() > 0)
+    {
+        const QVector3D &firstNode = m_pActiveNodes->at(0)->getPosition();
+        float minX = firstNode.x();
+        float maxX = firstNode.x();
+        float minY = firstNode.y();
+        float maxY = firstNode.y();
+        float minZ = firstNode.z();
+        float maxZ = firstNode.z();
+        for(auto &node : *m_pActiveNodes)
+        {
+            const QVector3D &pos = node->getPosition();
+            if (pos.x() < minX)
+                minX = pos.x();
+            else if (pos.x() > maxX)
+                maxX = pos.x();
+            if (pos.y() < minY)
+                minY = pos.y();
+            else if (pos.y() > maxY)
+                maxY = pos.y();
+            if (pos.z() < minZ)
+                minZ = pos.z();
+            else if (pos.z() > maxZ)
+                maxZ = pos.z();
+        }
+        size = QVector3D(maxX - minX, maxY - minY, maxZ - minZ);
+    }
+    else
+    {
+        size = QVector3D(0, 0, 0);
+    }
+}
+
+size_t VLayersProcessor::getActiveNodesNumber() const
+{
+    return m_pActiveNodes->size();
+}
+
+size_t VLayersProcessor::getActiveTrianglesNumber() const
+{
+    return m_pActiveTriangles->size();
+}
+
 /**
  * @param layer1
  * @param layer2
