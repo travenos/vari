@@ -6,6 +6,7 @@
 
 #include <Inventor/Qt/SoQt.h>
 #include <QFile>
+
 #include "VSimulationFacade.h"
 #include "VLayerFromGmeshBuilder.h"
 #include "VLayerFromAnsysBuilder.h"
@@ -42,6 +43,8 @@ void VSimulationFacade::connectSignals()
             this, SIGNAL(simulationPaused()));
     connect(m_pSimulator.get(), SIGNAL(simulationStopped()),
             this, SIGNAL(simulationStopped()));
+    connect(m_pGraphicsViewer.get(), SIGNAL(askForDisplayingInfo()),
+            this, SIGNAL(gotNewInfo()));
 }
 
 void VSimulationFacade::startSimulation() 

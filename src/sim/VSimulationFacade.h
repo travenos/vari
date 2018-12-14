@@ -110,6 +110,7 @@ signals:
     void simulationStarted();
     void simulationPaused();
     void simulationStopped();
+    void gotNewInfo();
 };
 
 #endif //_VSIMULATIONFACADE_H

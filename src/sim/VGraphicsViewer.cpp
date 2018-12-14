@@ -30,7 +30,7 @@ const QString VGraphicsViewer::REAL_TIME_LABEL_CAPTION("Время модели�
 const QString VGraphicsViewer::SIM_TIME_LABEL_CAPTION("Время процесса (с):");
 const QString VGraphicsViewer::REALTIME_FACTOR_LABEL_CAPTION("Фактор реального времни:");
 const QString VGraphicsViewer::ITERATION_LABEL_CAPTION("Номер итерации:");
-const QString VGraphicsViewer::FILLED_PERCENT_LABEL_CAPTION("Степень заполнения (%):");
+const QString VGraphicsViewer::FILLED_PERCENT_LABEL_CAPTION("Готовность эксперимента (%):");
 const QString VGraphicsViewer::AVERAGE_PRESSURE_LABEL_CAPTION("Среднее давление (Па):");
 
 /**
@@ -184,7 +184,8 @@ QWidget* VGraphicsViewer::buildBottomTrim(QWidget * parent)
 }
 
 void VGraphicsViewer::setGraphicsElements(const VSimNode::const_vector_ptr &nodes,
-                                          const VSimTriangle::const_vector_ptr &triangles)  {
+                                          const VSimTriangle::const_vector_ptr &triangles)
+{
     clearAll();
     createGraphicsElements(&m_graphicsNodes, nodes);
     createGraphicsElements(&m_graphicsTriangles, triangles);
