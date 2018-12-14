@@ -8,10 +8,12 @@
 #include <QWidget>
 #include <QLabel>
 #include <QGridLayout>
+#include <QPushButton>
 #include <Inventor/actions/SoBoxHighlightRenderAction.h>
 #include <Inventor/nodes/SoBaseColor.h>
 #include <Inventor/nodes/SoShapeHints.h>
 #include <Inventor/nodes/SoPerspectiveCamera.h>
+#include <Inventor/nodes/SoOrthographicCamera.h>
 #include <Inventor/nodes/SoEventCallback.h>
 #include <Inventor/events/SoMouseButtonEvent.h>
 #include <Inventor/SoPickedPoint.h>
@@ -58,6 +60,7 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_pRoot->addChild(m_pFigureRoot);
     setSceneGraph(m_pRoot);
     setPopupMenuEnabled(false);
+    m_pXYButton->setIcon(QIcon(QStringLiteral(":/img/xyplane.png")));
 
     connect(this, SIGNAL(askForRender()), this, SLOT(doRender()));
     connect(this, SIGNAL(askForDisplayingInfo()), this, SLOT(displayInfo()));
@@ -96,7 +99,7 @@ QWidget* VGraphicsViewer::buildLeftTrim(QWidget * parent)
     QObject::connect(wheel, SIGNAL(wheelReleased()), this, SLOT(leftWheelReleased()));
 
     QLabel * colorScaleLabel = new QLabel(widget);
-    colorScaleLabel->setPixmap(QPixmap(":/img/colormap.png"));
+    colorScaleLabel->setPixmap(QPixmap(QStringLiteral(":/img/colormap.png")));
 
     layout->addItem(new QSpacerItem(0,0,QSizePolicy::Minimum,QSizePolicy::MinimumExpanding),0, 0);
     layout->addWidget(colorScaleLabel, 1, 0, Qt::AlignCenter | Qt::AlignHCenter);
@@ -192,6 +195,17 @@ QWidget* VGraphicsViewer::buildBottomTrim(QWidget * parent)
     layout->activate();
 
     return widget;
+}
+
+void VGraphicsViewer::createViewerButtons(QWidget * parent, SbPList * buttonlist)
+{
+    SoQtExaminerViewer::createViewerButtons(parent, buttonlist);
+    m_pXYButton = static_cast<QPushButton*>((*buttonlist)[buttonlist->getLength() - 1]);
+}
+
+void VGraphicsViewer::toggleCameraType(void)
+{
+    viewFromAbove();
 }
 
 void VGraphicsViewer::setGraphicsElements(const VSimNode::const_vector_ptr &nodes,
@@ -349,6 +363,7 @@ void VGraphicsViewer::showVacuumPoint()
 
 void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)
 {
+    const float WHEEL_STEP = 0.1f;
     VGraphicsViewer* viewer = static_cast<VGraphicsViewer*>(userdata);
     const SoEvent * event = node->getEvent();
 
@@ -365,6 +380,14 @@ void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)
             QVector3D point(x, y, z);
             viewer->emitGotPoint(point);
         }
+    }
+    else if (SO_MOUSE_PRESS_EVENT(event, BUTTON4))
+    {
+        viewer->rightWheelMotion(viewer->rightWheelVal - WHEEL_STEP);
+    }
+    else if (SO_MOUSE_PRESS_EVENT(event, BUTTON5))
+    {
+        viewer->rightWheelMotion(viewer->rightWheelVal + WHEEL_STEP);
     }
 }
 

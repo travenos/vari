@@ -11,6 +11,8 @@
 #include <memory>
 #include <Inventor/Qt/viewers/SoQtExaminerViewer.h>
 #include <QObject>
+#include <QPushButton>
+
 #include "VGraphicsNode.h"
 #include "VGraphicsTriangle.h"
 #include "VSimulator.h"
@@ -87,6 +89,7 @@ private:
     QLabel*             m_pIterationLabel;
     QLabel*             m_pFilledPercentLabel;
     QLabel*             m_pAveragePressureLabel;
+    QPushButton*       m_pXYButton;
 
     SoSeparator*        m_pRoot;
     SoSeparator*        m_pFigureRoot;
@@ -134,6 +137,8 @@ private slots:
 protected:
     QWidget* buildLeftTrim(QWidget * parent);
     QWidget* buildBottomTrim(QWidget * parent);
+    void createViewerButtons(QWidget * parent, SbPList * buttonlist);
+    void toggleCameraType(void);
 signals:
     void askForRender();
     void askForDisplayingInfo();

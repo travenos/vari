@@ -10,5 +10,6 @@
         <file>vari.ico</file>
         <file>img/pause.png</file>
         <file>img/colormap.png</file>
+        <file>img/xyplane.png</file>
     </qresource>
 </RCC>
