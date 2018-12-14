@@ -205,9 +205,12 @@ void VSimulator::simulationCycle()
         double averagePressure = getAveragePressure();
         {
             std::lock_guard<std::mutex> locker(m_infoLock);
-            m_info.simTime += getTimeDelta();
+            double simTimeDelta = getTimeDelta();
+            m_info.simTime += simTimeDelta;
+            double oldRealTime = m_info.realTime;
             m_info.realTime = (m_st_timeBeforePause + timeMeasurer.elapsed()) / 1000.0;
-            m_info.realtimeFactor = m_info.simTime / m_info.realTime;
+            double realTimeDelta = m_info.realTime - oldRealTime;
+            m_info.realtimeFactor = simTimeDelta / realTimeDelta;
             m_info.filledPercent = filledPercent;
             m_info.averagePressure = averagePressure;
             ++(m_info.iteration);
