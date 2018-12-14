@@ -93,14 +93,40 @@ void VSimNode::calculate()
         if(m_newPressure >= m_pParam->getInjectionPressure())
             m_newPressure = m_pParam->getInjectionPressure();
 
-        if(m_newPressure > highestNeighborPressure)
+        if (!isVacuum())
         {
-            m_newPressure = highestNeighborPressure;
+            if(m_newPressure > highestNeighborPressure)
+            {
+                m_newPressure = highestNeighborPressure;
+            }
+        }
+        else
+        {
+            if(m_newPressure > m_pParam->getVacuumPressure())
+            {
+                m_newPressure = m_pParam->getVacuumPressure();
+            }
         }
     }
 }
 
-bool VSimNode::commit()  {
+void VSimNode::commit(bool *madeChanges, bool *isFull)
+{
+    if (isFull != nullptr)
+        (*isFull) = (m_newPressure >= m_pParam->getVacuumPressure());
+    if(m_newPressure != m_currentPressure)
+    {
+        if (madeChanges != nullptr)
+            (*madeChanges) = (m_currentPressure < m_pParam->getVacuumPressure());
+        m_currentPressure = m_newPressure;
+    }
+    else
+    {
+        if (madeChanges != nullptr)
+            (*madeChanges) = false;
+    }
+
+    /*
     if (m_newPressure != m_currentPressure)
     {
         m_currentPressure = m_newPressure;
@@ -108,6 +134,9 @@ bool VSimNode::commit()  {
     }
     else
         return false;
+    */
+
+
     //TODO make like in original program
     /*
     if(m_pressure != m_memorizedPressure)
@@ -154,9 +183,9 @@ double VSimNode::getPressure() const
 
 double VSimNode::getFilledPart() const
 {
-    double nom = m_currentPressure - m_pParam->getVacuumPressure();
-    double den = m_pParam->getInjectionPressure() - m_pParam->getVacuumPressure();
-    return (den > 0) ? (nom / den) : 0;
+    double nom = m_currentPressure;
+    double den = m_pParam->getVacuumPressure();
+    return (nom >= den) ? 1 : (nom / den);
 }
 
 /**
@@ -253,7 +282,7 @@ void VSimNode::reset()
 {
     double pressure;
     if (!isInjection())
-        pressure = m_pParam->getVacuumPressure();
+        pressure = 0;
     else
         pressure = m_pParam->getInjectionPressure();
     m_currentPressure = pressure;

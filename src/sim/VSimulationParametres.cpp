@@ -12,11 +12,13 @@
 
 const double VSimulationParametres::DEFAULT_TEMPERATURE = 25;
 const double VSimulationParametres::KELVINS_IN_0_CELSIUS = 273.15;
+const double VSimulationParametres::MIN_PRESSURE = 1;
 
 double VSimulationParametres::getInjectionDiameter() const 
 {
     return m_injectionDiameter;
 }
+
 void VSimulationParametres::setInjectionDiameter(double diameter) 
 {
     if (diameter < 0)
@@ -81,8 +83,8 @@ double VSimulationParametres::getInjectionPressure() const
 }
 void VSimulationParametres::setInjectionPressure(double pressure) 
 {
-    if (pressure < 0)
-        pressure = 0;
+    if (pressure < MIN_PRESSURE)
+        pressure = MIN_PRESSURE;
     m_injectionPressure = pressure;
 }
 
@@ -92,8 +94,8 @@ double VSimulationParametres::getVacuumPressure() const
 }
 void VSimulationParametres::setVacuumPressure(double pressure) 
 {
-    if (pressure < 0)
-        pressure = 0;
+    if (pressure < MIN_PRESSURE)
+        pressure = MIN_PRESSURE;
     m_vacuumPressure = pressure;
 }
 
@@ -152,13 +154,13 @@ void VSimulationParametres::setAverageCellDistance(double averageCellDistance)
     m_averageCellDistance = averageCellDistance;
 }
 
-size_t VSimulationParametres::getNumberOfNodes() const
+int VSimulationParametres::getNumberOfFullNodes() const
 {
-    return m_numberOfNodes;
+    return m_numberOfFullNodes;
 }
-void VSimulationParametres::setNumberOfNodes(size_t numberOfNodes)
+void VSimulationParametres::setNumberOfFullNodes(int numberOfNodes)
 {
-    m_numberOfNodes = numberOfNodes;
+    m_numberOfFullNodes = numberOfNodes;
 }
 
 double VSimulationParametres::calculateViscosity() const 

@@ -17,6 +17,7 @@ public:
 
     static const double DEFAULT_TEMPERATURE;
     static const double KELVINS_IN_0_CELSIUS;
+    static const double MIN_PRESSURE;
 
     double getInjectionDiameter() const ;
     void setInjectionDiameter(double diameter) ;
@@ -56,20 +57,20 @@ public:
     double getAverageCellDistance() const ;
     void setAverageCellDistance(double averageCellDistance) ;
 
-    size_t getNumberOfNodes() const ;
-    void setNumberOfNodes(size_t numberOfNodes) ;
+    int getNumberOfFullNodes() const ;
+    void setNumberOfFullNodes(int numberOfNodes) ;
 
 private:
-    double m_injectionDiameter = 0;
-    double m_vacuumDiameter = 0;
+    double m_injectionDiameter = 0.1;
+    double m_vacuumDiameter = 0.1;
 
-    double m_viscosity = 0;
+    double m_viscosity = 0.1;
     double m_temperature = 25;
     double m_tempcoef = 1;
-    double m_defaultViscosity = 0;
+    double m_defaultViscosity = 0.1;
 
-    double m_injectionPressure = 0;
-    double m_vacuumPressure = 0;
+    double m_injectionPressure = 1e5;
+    double m_vacuumPressure = 100;
 
     double m_q = 1;
     double m_r = 1;
@@ -78,7 +79,7 @@ private:
     double m_averagePermeability = 1;
     double m_averageCellDistance = 1;
 
-    size_t m_numberOfNodes = 1;
+    int m_numberOfFullNodes = 0;
 
     double calculateViscosity() const ;
 };

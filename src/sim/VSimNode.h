@@ -39,7 +39,7 @@ VSimNode(const QVector3D &pos,
 void setRole(VNodeRole role) ;
 VNodeRole getRole() const ;
 void calculate() ;
-bool commit() ;
+void commit(bool *madeChanges=nullptr, bool *isFull=nullptr) ;
 double getPressure() const ;
 double getFilledPart() const;
 /**

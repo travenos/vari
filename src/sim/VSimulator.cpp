@@ -141,9 +141,7 @@ void VSimulator::setActiveElements(const VSimNode::const_vector_ptr &nodes,
         m_pTriangles = triangles;
         m_nodesThreadPart = m_pActiveNodes->size() / N_THREADS + 1;
         m_trianglesThreadPart = m_pTriangles->size() / N_THREADS + 1;
-        m_pParam->setAveragePermeability(getAveragePermeability());
         m_pParam->setAverageCellDistance(getAverageCellDistance());
-        m_pParam->setNumberOfNodes(m_pActiveNodes->size());
     }
     else
         throw VSimulatorException();
@@ -198,6 +196,7 @@ void VSimulator::simulationCycle()
         nodesAction([](const VSimNode::ptr& node){node->reset();});
         trianglesAction([](const VSimTriangle::ptr& triangle){triangle->reset();});
         m_pParam->setAveragePermeability(getAveragePermeability());
+        m_pParam->setNumberOfFullNodes(0);
     }
     bool madeChangesInCycle = false;
     while(!(m_stopFlag.load()))
@@ -328,15 +327,20 @@ inline void VSimulator::calculatePressure()
 
 inline bool VSimulator::commitPressure()
 {
-    std::atomic<bool> madeChangesInCycle;
-    madeChangesInCycle.store(false);
-    auto commitFunc = [&madeChangesInCycle](const VSimNode::ptr& node)
+    std::atomic<bool> madeChangesInCycle(false);
+    std::atomic<int> fullNodesCount(0);
+    auto commitFunc = [&madeChangesInCycle, &fullNodesCount](const VSimNode::ptr& node)
     {
-        bool madeChanges = node->commit();
+        bool madeChanges;
+        bool isFull;
+        node->commit(&madeChanges, &isFull);
         if(madeChanges && !madeChangesInCycle.load())
             madeChangesInCycle.store(true);
+        if (isFull)
+            ++fullNodesCount;
     };
     nodesAction(commitFunc);
+    m_pParam->setNumberOfFullNodes(fullNodesCount);
     return madeChangesInCycle.load();
 }
 
@@ -398,7 +402,7 @@ inline double VSimulator::getTimeDelta() const
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     double n = m_pParam->getViscosity();                             //[N*s/m2]
     double _l = m_pParam->getAverageCellDistance();                   //[m]
-    double l_typ = (sqrt((double)m_pParam->getNumberOfNodes())*_l);   //[m]
+    double l_typ = (sqrt((double)m_pParam->getNumberOfFullNodes())*_l);   //[m]
     double _K = m_pParam->getAveragePermeability();                   //[m^2]
     double p_inj = m_pParam->getInjectionPressure();          //[N/m2]
     double p_vac = m_pParam->getVacuumPressure();                    //[N/m2]
