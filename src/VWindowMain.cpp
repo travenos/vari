@@ -69,6 +69,25 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_simutation_paused()));
     connect(m_pFacade.get(), SIGNAL(simulationStopped()),
             this, SLOT(m_on_simutation_stopped()));
+
+    connect(m_pFacade.get(), SIGNAL(injectionDiameterSet(double)),
+            this, SLOT(m_on_injection_diameter_set(double)));
+    connect(m_pFacade.get(), SIGNAL(vacuumDiameterSet(double)),
+            this, SLOT(m_on_vacuum_diameter_set(double)));
+    connect(m_pFacade.get(), SIGNAL(defaultViscositySet(double)),
+            this, SLOT(m_on_default_viscosity_set(double)));
+    connect(m_pFacade.get(), SIGNAL(temperatureSet(double)),
+            this, SLOT(m_on_temperature_set(double)));
+    connect(m_pFacade.get(), SIGNAL(tempcoefSet(double)),
+            this, SLOT(m_on_tempcoef_set(double)));
+    connect(m_pFacade.get(), SIGNAL(vacuumPressureSet(double)),
+            this, SLOT(m_on_vacuum_pressure_set(double)));
+    connect(m_pFacade.get(), SIGNAL(injectionPressureSet(double)),
+            this, SLOT(m_on_injection_pressure_set(double)));
+    connect(m_pFacade.get(), SIGNAL(canceledWaitingForInjectionPoint()),
+            this, SLOT(m_on_canceled_waiting_for_injection_point()));
+    connect(m_pFacade.get(), SIGNAL(canceledWaitingForVacuumPoint()),
+            this, SLOT(m_on_canceled_waiing_for_vacuum_point()));
 }
 
 void VWindowMain::setupValidators()
@@ -397,18 +416,21 @@ void VWindowMain::showTemperature()
 {
     double temperature = m_pFacade->getParametres()->getTemperature();
     ui->temperatureEdit->setText(QString::number(temperature));
+    ui->resetTemperatureButton->setEnabled(false);
 }
 
 void VWindowMain::showInjectionPressure()
 {
     double injectionPressure = m_pFacade->getParametres()->getInjectionPressure();
     ui->injectionPressureEdit->setText(QString::number(injectionPressure));
+    ui->resetInjectionPressureButton->setEnabled(false);
 }
 
 void VWindowMain::showInjectionDiameter()
 {
     double injectionDiameter = m_pFacade->getParametres()->getInjectionDiameter();
     ui->injectionDiameterEdit->setText(QString::number(injectionDiameter));
+    ui->resetInjectionDiameterButton->setEnabled(false);
 }
 
 void VWindowMain::showInjectionPoint()
@@ -420,12 +442,14 @@ void VWindowMain::showVacuumPressure()
 {
     double vacuumPressure = m_pFacade->getParametres()->getVacuumPressure();
     ui->vacuumPressureEdit->setText(QString::number(vacuumPressure));
+    ui->resetVacuumPressureButton->setEnabled(false);
 }
 
 void VWindowMain::showVacuumDiameter()
 {
     double vacuumDiameter = m_pFacade->getParametres()->getVacuumDiameter();
     ui->vacuumDiameterEdit->setText(QString::number(vacuumDiameter));
+    ui->resetVacuumDiameterButton->setEnabled(false);
 }
 
 void VWindowMain::showVacuumPoint()
@@ -616,6 +640,51 @@ void VWindowMain::m_on_simutation_stopped()
     simulationStopResult();
 }
 
+void VWindowMain::m_on_injection_diameter_set(double)
+{
+    showInjectionDiameter();
+}
+
+void VWindowMain::m_on_vacuum_diameter_set(double)
+{
+    showVacuumDiameter();
+}
+
+void VWindowMain::m_on_default_viscosity_set(double)
+{
+    //TODO
+}
+
+void VWindowMain::m_on_temperature_set(double)
+{
+    showTemperature();
+}
+
+void VWindowMain::m_on_tempcoef_set(double)
+{
+    //TODO
+}
+
+void VWindowMain::m_on_vacuum_pressure_set(double)
+{
+    showVacuumPressure();
+}
+
+void VWindowMain::m_on_injection_pressure_set(double)
+{
+    showInjectionPressure();
+}
+
+void VWindowMain::m_on_canceled_waiting_for_injection_point()
+{
+    ui->injectionPlaceButton->setChecked(false);
+}
+
+void VWindowMain::m_on_canceled_waiing_for_vacuum_point()
+{
+    ui->vacuumPlaceButton->setChecked(false);
+}
+
 void VWindowMain::on_injectionPlaceButton_clicked(bool checked)
 {
     if (checked)
@@ -667,9 +736,10 @@ void VWindowMain::on_saveInjectionPressureButton_clicked()
     saveInjectionPressure();
 }
 
-void VWindowMain::on_resetInjectionDiamterButton_clicked()
+void VWindowMain::on_resetInjectionDiameterButton_clicked()
 {
     showInjectionDiameter();
+    cancelInjectionPointSelection();
 }
 
 void VWindowMain::on_showInjectionPlace_clicked()
@@ -690,6 +760,7 @@ void VWindowMain::on_saveVacuumPressureButton_clicked()
 void VWindowMain::on_resetVacuumDiameterButton_clicked()
 {
     showVacuumDiameter();
+    cancelVacuumPointSelection();
 }
 
 void VWindowMain::on_showVacuumPlaceButton_clicked()
@@ -700,4 +771,29 @@ void VWindowMain::on_showVacuumPlaceButton_clicked()
 void VWindowMain::on_actionPause_triggered()
 {
     pauseSimulation();
+}
+
+void VWindowMain::on_temperatureEdit_textEdited(const QString &)
+{
+    ui->resetTemperatureButton->setEnabled(true);
+}
+
+void VWindowMain::on_injectionPressureEdit_textEdited(const QString &)
+{
+    ui->resetInjectionPressureButton->setEnabled(true);
+}
+
+void VWindowMain::on_injectionDiameterEdit_textEdited(const QString &)
+{
+    ui->resetInjectionDiameterButton->setEnabled(true);
+}
+
+void VWindowMain::on_vacuumPressureEdit_textEdited(const QString &)
+{
+    ui->resetVacuumPressureButton->setEnabled(true);
+}
+
+void VWindowMain::on_vacuumDiameterEdit_textEdited(const QString &)
+{
+    ui->resetVacuumDiameterButton->setEnabled(true);
 }

@@ -110,11 +110,26 @@ signals:
     void materialChanged(unsigned int);
     void layerAdded();
     void injectionPointSet();
+    void startedWaitingForInjectionPoint();
+    void canceledWaitingForInjectionPoint();
     void vacuumPointSet();
+    void startedWaitingForVacuumPoint();
+    void canceledWaitingForVacuumPoint();
     void simulationStarted();
     void simulationPaused();
     void simulationStopped();
     void gotNewInfo();
+
+    void injectionDiameterSet(double diameter) ;
+    void vacuumDiameterSet(double diameter) ;
+    void defaultViscositySet(double defaultViscosity);
+    void temperatureSet(double temperature) ;
+    void tempcoefSet(double tempcoef) ;
+    void vacuumPressureSet(double pressure) ;
+    void injectionPressureSet(double pressure) ;
+    void coefQSet(double q) ;
+    void coefRSet(double r) ;
+    void coefSSet(double s) ;
 };
 
 #endif //_VSIMULATIONFACADE_H

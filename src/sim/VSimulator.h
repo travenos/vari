@@ -234,6 +234,17 @@ signals:
     void simulationStarted();
     void simulationPaused();
     void simulationStopped();
+
+    void injectionDiameterSet(double diameter) ;
+    void vacuumDiameterSet(double diameter) ;
+    void defaultViscositySet(double defaultViscosity) ;
+    void temperatureSet(double temperature) ;
+    void tempcoefSet(double tempcoef) ;
+    void vacuumPressureSet(double pressure) ;
+    void injectionPressureSet(double pressure) ;
+    void coefQSet(double q) ;
+    void coefRSet(double r) ;
+    void coefSSet(double s) ;
 };
 
 #endif //_VSIMULATOR_H

@@ -117,6 +117,15 @@ private slots:
     void m_on_simutation_started();
     void m_on_simutation_paused();
     void m_on_simutation_stopped();
+    void m_on_injection_diameter_set(double);
+    void m_on_vacuum_diameter_set(double);
+    void m_on_default_viscosity_set(double);
+    void m_on_temperature_set(double);
+    void m_on_tempcoef_set(double);
+    void m_on_vacuum_pressure_set(double);
+    void m_on_injection_pressure_set(double);
+    void m_on_canceled_waiting_for_injection_point();
+    void m_on_canceled_waiing_for_vacuum_point();
 
     void on_addLayerButton_clicked();
     void on_layersListWidget_itemSelectionChanged();
@@ -134,13 +143,18 @@ private slots:
     void on_saveTemperatureButton_clicked();
     void on_resetInjectionPressureButton_clicked();
     void on_saveInjectionPressureButton_clicked();
-    void on_resetInjectionDiamterButton_clicked();
+    void on_resetInjectionDiameterButton_clicked();
     void on_showInjectionPlace_clicked();
     void on_resetVacuumPressureButton_clicked();
     void on_saveVacuumPressureButton_clicked();
     void on_resetVacuumDiameterButton_clicked();
     void on_showVacuumPlaceButton_clicked();
     void on_actionPause_triggered();
+    void on_temperatureEdit_textEdited(const QString &);
+    void on_injectionPressureEdit_textEdited(const QString &);
+    void on_injectionDiameterEdit_textEdited(const QString &);
+    void on_vacuumPressureEdit_textEdited(const QString &);
+    void on_vacuumDiameterEdit_textEdited(const QString &);
 };
 
 #endif // _VWINDOWMAIN_H

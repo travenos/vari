@@ -91,7 +91,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>1204</width>
+          <width>1201</width>
           <height>850</height>
          </rect>
         </property>
@@ -433,7 +433,7 @@
                      </widget>
                     </item>
                     <item row="1" column="2">
-                     <widget class="QPushButton" name="resetInjectionDiamterButton">
+                     <widget class="QPushButton" name="resetInjectionDiameterButton">
                       <property name="text">
                        <string>Отменить</string>
                       </property>
@@ -710,7 +710,7 @@
   <tabstop>resetInjectionPressureButton</tabstop>
   <tabstop>saveInjectionPressureButton</tabstop>
   <tabstop>injectionDiameterEdit</tabstop>
-  <tabstop>resetInjectionDiamterButton</tabstop>
+  <tabstop>resetInjectionDiameterButton</tabstop>
   <tabstop>injectionPlaceButton</tabstop>
   <tabstop>showInjectionPlace</tabstop>
   <tabstop>vacuumPressureEdit</tabstop>

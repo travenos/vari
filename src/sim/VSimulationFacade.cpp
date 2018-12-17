@@ -45,6 +45,27 @@ void VSimulationFacade::connectSignals()
             this, SIGNAL(simulationStopped()));
     connect(m_pGraphicsViewer.get(), SIGNAL(askForDisplayingInfo()),
             this, SIGNAL(gotNewInfo()));
+
+    connect(m_pSimulator.get(), SIGNAL(injectionDiameterSet(double)),
+            this, SIGNAL(injectionDiameterSet(double)));
+    connect(m_pSimulator.get(), SIGNAL(vacuumDiameterSet(double)),
+            this, SIGNAL(vacuumDiameterSet(double)));
+    connect(m_pSimulator.get(), SIGNAL(defaultViscositySet(double)),
+            this, SIGNAL(defaultViscositySet(double)));
+    connect(m_pSimulator.get(), SIGNAL(temperatureSet(double)),
+            this, SIGNAL(temperatureSet(double)));
+    connect(m_pSimulator.get(), SIGNAL(tempcoefSet(double)),
+            this, SIGNAL(tempcoefSet(double)));
+    connect(m_pSimulator.get(), SIGNAL(vacuumPressureSet(double)),
+            this, SIGNAL(vacuumPressureSet(double)));
+    connect(m_pSimulator.get(), SIGNAL(injectionPressureSet(double)),
+            this, SIGNAL(injectionPressureSet(double)));
+    connect(m_pSimulator.get(), SIGNAL(coefQSet(double)),
+            this, SIGNAL(coefQSet(double)));
+    connect(m_pSimulator.get(), SIGNAL(coefRSet(double)),
+            this, SIGNAL(coefRSet(double)));
+    connect(m_pSimulator.get(), SIGNAL(coefSSet(double)),
+            this, SIGNAL(coefSSet(double)));
 }
 
 void VSimulationFacade::startSimulation() 
@@ -280,6 +301,8 @@ void VSimulationFacade::waitForInjectionPointSelection(double diameter)
     m_pGraphicsViewer->viewFromAbove();
     m_pGraphicsViewer->setViewing(false);
     //TODO forbid rotation
+    emit canceledWaitingForVacuumPoint();
+    emit startedWaitingForInjectionPoint();
 }
 
 void VSimulationFacade::waitForVacuumPointSelection(double diameter)
@@ -290,18 +313,22 @@ void VSimulationFacade::waitForVacuumPointSelection(double diameter)
     m_pGraphicsViewer->viewFromAbove();
     m_pGraphicsViewer->setViewing(false);
     //TODO forbid rotation
+    emit canceledWaitingForInjectionPoint();
+    emit startedWaitingForVacuumPoint();
 }
 
 void VSimulationFacade::cancelWaitingForInjectionPointSelection()
 {
     m_selectInjectionPoint = false;
     //TODO allow rotation
+    emit canceledWaitingForInjectionPoint();
 }
 
 void VSimulationFacade::cancelWaitingForVacuumPointSelection()
 {
     m_selectVacuumPoint = false;
     //TODO allow rotation
+    emit canceledWaitingForVacuumPoint();
 }
 
 void VSimulationFacade::showInjectionPoint()
