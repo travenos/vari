@@ -40,8 +40,8 @@ void setRole(VNodeRole role) ;
 VNodeRole getRole() const ;
 void calculate() ;
 void commit(bool *madeChanges=nullptr, bool *isFull=nullptr) ;
-double getPressure() const ;
-double getFilledPart() const;
+double getPressure() const override;
+double getFilledPart() const override;
 /**
  * @param neighbour
  * @param layer
@@ -57,16 +57,16 @@ void clearNeighbours(VLayerSequence layer) ;
 double getDistance(const VSimNode* node) const ;
 double getDistance(const QVector3D& point) const;
 const QVector3D &getPosition() const ;
-virtual void reset()  override;
+void reset()  override;
 void getNeighbours(std::vector<const VSimNode *> &neighbours) const ;
 size_t getNeighboursNumber() const ;
 double getCavityHeight() const ;
 double getPorosity() const ;
 double getPermeability() const ;
 
-virtual bool isInjection() const override;
-virtual bool isVacuum() const override;
-virtual bool isNormal() const override;
+bool isInjection() const override;
+bool isVacuum() const override;
+bool isNormal() const override;
 
 private: 
 

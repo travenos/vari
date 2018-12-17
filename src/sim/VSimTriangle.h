@@ -34,7 +34,8 @@ VSimTriangle(const VCloth::const_ptr &p_material,
 void getVertices(QVector3D vertices[VERTICES_NUMBER]) const ;
 void updateColor() ;
 const QColor& getColor() const override;
-double getAveragePressure() const ;
+double getPressure() const override;
+double getFilledPart() const override;
 void reset()  override;
 
 bool isInjection() const override;

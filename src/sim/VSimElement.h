@@ -37,6 +37,9 @@ virtual void reset()  = 0;
 virtual bool isInjection() const = 0 ;
 virtual bool isVacuum() const = 0 ;
 virtual bool isNormal() const = 0 ;
+virtual double getPressure() const = 0;
+virtual double getFilledPart() const = 0;
+
 protected:
     const VCloth::const_ptr m_pMaterial;
     const VSimulationParametres::const_ptr m_pParam;

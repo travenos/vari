@@ -343,7 +343,10 @@ inline bool VSimulator::commitPressure()
             ++fullNodesCount;
     };
     nodesAction(commitFunc);
-    m_pParam->setNumberOfFullNodes(fullNodesCount);
+    {
+        std::lock_guard<std::mutex> lock(*m_pNodesLock);
+        m_pParam->setNumberOfFullNodes(fullNodesCount);
+    }
     return madeChangesInCycle.load();
 }
 
