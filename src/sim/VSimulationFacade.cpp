@@ -389,7 +389,7 @@ void VSimulationFacade::saveParametres() const
     settings.setValue(QStringLiteral("sim/injectionPressure"), param->getInjectionPressure());
 
     settings.setValue(QStringLiteral("sim/vacuumDiameter"), param->getVacuumDiameter());
-    settings.setValue(QStringLiteral("vacuumPressure"), param->getVacuumPressure());
+    settings.setValue(QStringLiteral("sim/vacuumPressure"), param->getVacuumPressure());
 
     settings.setValue(QStringLiteral("sim/coefQ"), param->getQ());
     settings.setValue(QStringLiteral("sim/coefR"), param->getR());
