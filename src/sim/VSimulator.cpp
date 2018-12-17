@@ -297,7 +297,7 @@ inline double VSimulator::calcAverage(Callable&& func) const
     double sum = 0;
     for (auto& data : m_calculationData)
         sum += data;
-    return sum / nodesCount;
+    return (nodesCount > 0) ? sum / nodesCount : 0;
 }
 
 template <typename Callable>
@@ -406,15 +406,20 @@ inline double VSimulator::getAverageCellDistance() const
 inline double VSimulator::getTimeDelta() const
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
-    double n = m_pParam->getViscosity();                             //[N*s/m2]
-    double _l = m_pParam->getAverageCellDistance();                   //[m]
-    double l_typ = (sqrt((double)m_pParam->getNumberOfFullNodes())*_l);   //[m]
-    double _K = m_pParam->getAveragePermeability();                   //[m^2]
-    double p_inj = m_pParam->getInjectionPressure();          //[N/m2]
-    double p_vac = m_pParam->getVacuumPressure();                    //[N/m2]
+    if (m_pActiveNodes->size() > 0)
+    {
+        double n = m_pParam->getViscosity();                             //[N*s/m2]
+        double _l = m_pParam->getAverageCellDistance();                   //[m]
+        double l_typ = (sqrt((double)m_pParam->getNumberOfFullNodes())*_l);   //[m]
+        double _K = m_pParam->getAveragePermeability();                   //[m^2]
+        double p_inj = m_pParam->getInjectionPressure();          //[N/m2]
+        double p_vac = m_pParam->getVacuumPressure();                    //[N/m2]
 
-    double time = n*l_typ*_l/(_K*(p_inj-p_vac));
-    return time;
+        double time = n*l_typ*_l/(_K*(p_inj-p_vac));
+        return time;
+    }
+    else
+        return 0;
 }
 
 void VSimulator::setInjectionDiameter(double diameter) 
