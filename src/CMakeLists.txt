@@ -9,6 +9,32 @@ set(EXE_NAME ${PROJECT_NAME})
 
 message(STATUS "CREATING VARI APP\n")
 
+#Set application version
+find_package(Git REQUIRED)
+set(GIT_RES_LONG  FALSE)
+set(GIT_FILE_VERSION_LONG  "${CMAKE_CURRENT_BINARY_DIR}/git.version.long")
+
+execute_process(COMMAND ${GIT_EXECUTABLE} describe --tags WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE ${GIT_RES_LONG}  OUTPUT_FILE ${GIT_FILE_VERSION_LONG})
+
+file(READ ${GIT_FILE_VERSION_LONG} READ_DATA_LONG)
+if (${READ_DATA_LONG})
+    string(REPLACE "\n" "" PROJECT_VERSION_LONG ${READ_DATA_LONG})
+    string(REPLACE "v" "" PROJECT_VERSION_LONG ${PROJECT_VERSION_LONG})
+else()
+    set(PROJECT_VERSION_LONG "1.0")
+endif()
+message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION_LONG}\n")
+
+#Get information about the compilation time
+string(TIMESTAMP CURRENT_YEAR "%Y")
+string(TIMESTAMP CURRENT_TIME "%d.%m.%Y %H:%M:%S")
+
+#Configure a file with vendor definitions
+set(VDEFINITIONS_SOURCE "${PROJECT_SOURCE_DIR}/cmake/VDefinitions.h.cmake")
+set(VDEFINITIONS_DEST "${PROJECT_BINARY_DIR}/VDefinitions.h")
+configure_file("${VDEFINITIONS_SOURCE}" "${VDEFINITIONS_DEST}")
+include_directories(${PROJECT_BINARY_DIR})
+
 #Set build type
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
@@ -109,22 +135,6 @@ set(SOURCE_FILES
     VDatabaseResin.cpp
     VSqlDatabase.cpp
     )
-
-#Set application version
-find_package(Git REQUIRED)
-set(GIT_RES_LONG  FALSE)
-set(GIT_FILE_VERSION_LONG  "${CMAKE_CURRENT_BINARY_DIR}/git.version.long")
-
-execute_process(COMMAND ${GIT_EXECUTABLE} describe --tags WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE ${GIT_RES_LONG}  OUTPUT_FILE ${GIT_FILE_VERSION_LONG})
-
-file(READ ${GIT_FILE_VERSION_LONG} READ_DATA_LONG)
-if (${READ_DATA_LONG})
-    string(REPLACE "\n" "" PROJECT_VERSION_LONG ${READ_DATA_LONG})
-    string(REPLACE "v" "" PROJECT_VERSION_LONG ${PROJECT_VERSION_LONG})
-else()
-    set(PROJECT_VERSION_LONG "1.0")
-endif()
-message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION_LONG}\n")
 
 #Create executable
 add_executable(${EXE_NAME}
