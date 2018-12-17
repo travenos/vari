@@ -18,6 +18,8 @@ class VWindowLayer : public QMainWindow
 public:
     VWindowLayer(QWidget *parent = nullptr);
     virtual ~VWindowLayer();
+    void saveParametres() const;
+    void loadSavedParametres();
 
 public slots:
 
@@ -59,6 +61,7 @@ private:
     bool m_selectedFile;
     bool m_createdGeometry;
     QString m_filename;
+    QString m_lastDir;
     VCloth m_material;
     VPolygon m_polygon;
 

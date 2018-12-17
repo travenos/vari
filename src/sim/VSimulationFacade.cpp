@@ -349,20 +349,20 @@ void VSimulationFacade::loadSavedParametres()
     VResin newResin;
     double temperature, injectionDiameter, injectionPressure, vacuumDiameter, vacuumPressure, q, r, s;
 
-    newResin.name = settings.value(QStringLiteral("resinName"), resin.name).toString();
-    newResin.defaultViscosity = settings.value(QStringLiteral("defaultViscosity"), resin.defaultViscosity).toDouble();
-    newResin.tempcoef = settings.value(QStringLiteral("tempcoef"), resin.tempcoef).toDouble();
+    newResin.name = settings.value(QStringLiteral("sim/resinName"), resin.name).toString();
+    newResin.defaultViscosity = settings.value(QStringLiteral("sim/defaultViscosity"), resin.defaultViscosity).toDouble();
+    newResin.tempcoef = settings.value(QStringLiteral("sim/tempcoef"), resin.tempcoef).toDouble();
 
-    temperature = settings.value(QStringLiteral("temperature"), param->getTemperature()).toDouble();
-    injectionDiameter = settings.value(QStringLiteral("injectionDiameter"), param->getInjectionDiameter()).toDouble();
-    injectionPressure = settings.value(QStringLiteral("injectionPressure"), param->getInjectionPressure()).toDouble();
+    temperature = settings.value(QStringLiteral("sim/temperature"), param->getTemperature()).toDouble();
+    injectionDiameter = settings.value(QStringLiteral("sim/injectionDiameter"), param->getInjectionDiameter()).toDouble();
+    injectionPressure = settings.value(QStringLiteral("sim/injectionPressure"), param->getInjectionPressure()).toDouble();
 
-    vacuumDiameter = settings.value(QStringLiteral("vacuumDiameter"), param->getVacuumDiameter()).toDouble();
-    vacuumPressure = settings.value(QStringLiteral("vacuumPressure"), param->getVacuumPressure()).toDouble();
+    vacuumDiameter = settings.value(QStringLiteral("sim/vacuumDiameter"), param->getVacuumDiameter()).toDouble();
+    vacuumPressure = settings.value(QStringLiteral("sim/vacuumPressure"), param->getVacuumPressure()).toDouble();
 
-    q = settings.value(QStringLiteral("coefQ"), param->getQ()).toDouble();
-    r = settings.value(QStringLiteral("coefR"), param->getR()).toDouble();
-    s = settings.value(QStringLiteral("coefS"), param->getS()).toDouble();
+    q = settings.value(QStringLiteral("sim/coefQ"), param->getQ()).toDouble();
+    r = settings.value(QStringLiteral("sim/coefR"), param->getR()).toDouble();
+    s = settings.value(QStringLiteral("sim/coefS"), param->getS()).toDouble();
 
     m_pSimulator->setResin(newResin);
     m_pSimulator->setTemperature(temperature);
@@ -380,20 +380,20 @@ void VSimulationFacade::saveParametres() const
     QSettings settings;
     VSimulationParametres::const_ptr param = m_pSimulator->getSimulationParametres();
     VResin resin = param->getResin();
-    settings.setValue(QStringLiteral("resinName"), resin.name);
-    settings.setValue(QStringLiteral("defaultViscosity"), resin.defaultViscosity);
-    settings.setValue(QStringLiteral("tempcoef"), resin.tempcoef);
+    settings.setValue(QStringLiteral("sim/resinName"), resin.name);
+    settings.setValue(QStringLiteral("sim/defaultViscosity"), resin.defaultViscosity);
+    settings.setValue(QStringLiteral("sim/tempcoef"), resin.tempcoef);
 
-    settings.setValue(QStringLiteral("temperature"), param->getTemperature());
-    settings.setValue(QStringLiteral("injectionDiameter"), param->getInjectionDiameter());
-    settings.setValue(QStringLiteral("injectionPressure"), param->getInjectionPressure());
+    settings.setValue(QStringLiteral("sim/temperature"), param->getTemperature());
+    settings.setValue(QStringLiteral("sim/injectionDiameter"), param->getInjectionDiameter());
+    settings.setValue(QStringLiteral("sim/injectionPressure"), param->getInjectionPressure());
 
-    settings.setValue(QStringLiteral("vacuumDiameter"), param->getVacuumDiameter());
+    settings.setValue(QStringLiteral("sim/vacuumDiameter"), param->getVacuumDiameter());
     settings.setValue(QStringLiteral("vacuumPressure"), param->getVacuumPressure());
 
-    settings.setValue(QStringLiteral("coefQ"), param->getQ());
-    settings.setValue(QStringLiteral("coefR"), param->getR());
-    settings.setValue(QStringLiteral("coefS"), param->getS());
+    settings.setValue(QStringLiteral("sim/coefQ"), param->getQ());
+    settings.setValue(QStringLiteral("sim/coefR"), param->getR());
+    settings.setValue(QStringLiteral("sim/coefS"), param->getS());
 
     settings.sync();
 }

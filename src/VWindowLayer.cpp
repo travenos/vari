@@ -3,6 +3,8 @@
 #endif
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QSettings>
+
 #include "VWindowLayer.h"
 #include "ui_VWindowLayer.h"
 #include "VWindowCloth.h"
@@ -36,10 +38,12 @@ VWindowLayer::VWindowLayer(QWidget *parent) :
 {
     ui->setupUi(this);
     reset();
+    loadSavedParametres();
 }
 
 VWindowLayer::~VWindowLayer()
 {
+    saveParametres();
     delete ui;
     m_pWindowCloth.reset();
     #ifdef DEBUG_MODE
@@ -58,6 +62,26 @@ void VWindowLayer::reset()
     m_selectedMaterial = false;
     m_selectedFile = false;
     m_createdGeometry = false;
+}
+
+void VWindowLayer::loadSavedParametres()
+{
+    QSettings settings;
+    bool mm_selected;
+    mm_selected = settings.value(QStringLiteral("import/sizeInMM"), true).toBool();
+    m_lastDir = settings.value(QStringLiteral("import/lastDir"), QDir::homePath()).toString();
+    if (mm_selected)
+        ui->mmRadioButton->setChecked(true);
+    else
+        ui->mRadioButton->setChecked(true);
+}
+
+void VWindowLayer::saveParametres() const
+{
+    QSettings settings;
+    bool mm_selected = ui->mmRadioButton->isChecked();
+    settings.setValue(QStringLiteral("import/sizeInMM"), mm_selected);
+    settings.setValue(QStringLiteral("import/lastDir"), m_lastDir);
 }
 
 void VWindowLayer::accept()
@@ -92,11 +116,12 @@ void VWindowLayer::tryToEnableAcceptButton()
 
 void VWindowLayer::openFile()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, FILE_DIALOG_TITLE, QDir::homePath(),
+    QString fileName = QFileDialog::getOpenFileName(this, FILE_DIALOG_TITLE, m_lastDir,
                                                     FILE_DIALOG_FORMATS);
     if (!fileName.isEmpty() && QFile::exists(fileName))
     {
         m_filename = fileName;
+        m_lastDir = QFileInfo(m_filename).absolutePath();
         ui->geometryStatusLabel->setText(GEOMETRY_FROM_FILE_TEXT.arg(fileName));
         ui->geometryStatusLabel->setStyleSheet(QStringLiteral("QLabel { color : black; }"));
         m_selectedFile = true;
