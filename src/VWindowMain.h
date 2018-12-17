@@ -59,6 +59,8 @@ private:
     void updateLayerMaterialInfo(int layer);
     void markLayerAsEnabled(int layer, bool enable);
 
+    void updateResinInfo();
+
     void injectionPointSelectionResult();
     void vacuumPointSelectionResult();
 
@@ -117,11 +119,10 @@ private slots:
     void m_on_simutation_started();
     void m_on_simutation_paused();
     void m_on_simutation_stopped();
+    void m_on_resin_changed();
     void m_on_injection_diameter_set(double);
     void m_on_vacuum_diameter_set(double);
-    void m_on_default_viscosity_set(double);
     void m_on_temperature_set(double);
-    void m_on_tempcoef_set(double);
     void m_on_vacuum_pressure_set(double);
     void m_on_injection_pressure_set(double);
     void m_on_canceled_waiting_for_injection_point();

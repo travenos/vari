@@ -47,6 +47,7 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_pFacade.reset(new VSimulationFacade(ui->viewerWidget));
     connectSimulationSignals();
     setupValidators();
+    m_pFacade->loadSavedParametres();
 }
 
 void VWindowMain::connectSimulationSignals()
@@ -70,16 +71,14 @@ void VWindowMain::connectSimulationSignals()
     connect(m_pFacade.get(), SIGNAL(simulationStopped()),
             this, SLOT(m_on_simutation_stopped()));
 
+    connect(m_pFacade.get(), SIGNAL(resinChanged()),
+            this, SLOT(m_on_resin_changed()));
     connect(m_pFacade.get(), SIGNAL(injectionDiameterSet(double)),
             this, SLOT(m_on_injection_diameter_set(double)));
     connect(m_pFacade.get(), SIGNAL(vacuumDiameterSet(double)),
             this, SLOT(m_on_vacuum_diameter_set(double)));
-    connect(m_pFacade.get(), SIGNAL(defaultViscositySet(double)),
-            this, SLOT(m_on_default_viscosity_set(double)));
     connect(m_pFacade.get(), SIGNAL(temperatureSet(double)),
             this, SLOT(m_on_temperature_set(double)));
-    connect(m_pFacade.get(), SIGNAL(tempcoefSet(double)),
-            this, SLOT(m_on_tempcoef_set(double)));
     connect(m_pFacade.get(), SIGNAL(vacuumPressureSet(double)),
             this, SLOT(m_on_vacuum_pressure_set(double)));
     connect(m_pFacade.get(), SIGNAL(injectionPressureSet(double)),
@@ -107,6 +106,8 @@ void VWindowMain::setupValidators()
 
 VWindowMain::~VWindowMain()
 {
+    m_pFacade->saveParametres();
+    m_pFacade.reset();
     delete ui;
     deleteWindowLayer();
     deleteWindowResin();
@@ -193,7 +194,8 @@ void VWindowMain::showWindowLayer()
 
 void VWindowMain::selectLayer()
 {
-    if (ui->layersListWidget->currentIndex().isValid())
+    if (ui->layersListWidget->currentIndex().isValid()
+            && ui->layersListWidget->currentRow() < int(m_pFacade->getLayersNumber()))
     {
         unsigned int layer = ui->layersListWidget->currentRow();
         VCloth::const_ptr cloth = m_pFacade->getMaterial(layer);
@@ -270,20 +272,22 @@ void VWindowMain::setCloth(const QString & name, float cavityheight, float perme
     {
         int layer = ui->layersListWidget->currentRow();
         VCloth cloth;
-        cloth.name = name;
         cloth.cavityHeight = cavityheight;
         cloth.permeability = permeability;
         cloth.porosity = porosity;
+        //TODO cloth.color
+        cloth.name = name;
         m_pFacade->setMaterial(layer, cloth);
     }
 }
 
 void VWindowMain::setResin(const QString & name , float viscosity, float tempcoef)
 {
-    m_pFacade->setDefaultViscosity(viscosity);
-    m_pFacade->setTempcoef(tempcoef);
-    ui->resinInfoLabel->setText(RESIN_INFO_TEXT.arg(name).arg(viscosity)
-                                         .arg(tempcoef));
+    VResin resin;
+    resin.defaultViscosity = viscosity;
+    resin.tempcoef = tempcoef;
+    resin.name = name;
+    m_pFacade->setResin(resin);
 }
 
 void VWindowMain::removeLayerFromList(int layer)
@@ -305,6 +309,13 @@ void VWindowMain::updateLayerMaterialInfo(int layer)
         ui->layerInfoLabel->setText(CLOTH_INFO_TEXT.arg(cloth->name).arg(cloth->cavityHeight)
                                              .arg(cloth->permeability).arg(cloth->porosity));
     }
+}
+
+void VWindowMain::updateResinInfo()
+{
+    VResin resin = m_pFacade->getParametres()->getResin();
+    ui->resinInfoLabel->setText(RESIN_INFO_TEXT.arg(resin.name).arg(resin.defaultViscosity)
+                                         .arg(resin.tempcoef));
 }
 
 void VWindowMain::markLayerAsEnabled(int layer, bool enable)
@@ -640,6 +651,11 @@ void VWindowMain::m_on_simutation_stopped()
     simulationStopResult();
 }
 
+void VWindowMain::m_on_resin_changed()
+{
+    updateResinInfo();
+}
+
 void VWindowMain::m_on_injection_diameter_set(double)
 {
     showInjectionDiameter();
@@ -650,19 +666,9 @@ void VWindowMain::m_on_vacuum_diameter_set(double)
     showVacuumDiameter();
 }
 
-void VWindowMain::m_on_default_viscosity_set(double)
-{
-    //TODO
-}
-
 void VWindowMain::m_on_temperature_set(double)
 {
     showTemperature();
-}
-
-void VWindowMain::m_on_tempcoef_set(double)
-{
-    //TODO
 }
 
 void VWindowMain::m_on_vacuum_pressure_set(double)

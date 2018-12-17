@@ -1,88 +1,92 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.1.0)
 
-PROJECT(vari)
-SET(PROJECT_VENDOR_LONG "Wicron")
-SET(ORG_WEBSITE "https://wicron.com")
+project(vari)
+set(PROJECT_VENDOR_LONG "Wicron")
+set(ORG_WEBSITE "https://wicron.com")
+set(APP_NAME "VARI")
 
-SET(EXE_NAME ${PROJECT_NAME})
+set(EXE_NAME ${PROJECT_NAME})
 
-MESSAGE(STATUS "CREATING VARI APP\n")
+message(STATUS "CREATING VARI APP\n")
 
 #Set build type
-IF(NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE Debug)
-ENDIF()
-MESSAGE(STATUS "Build Type: ${CMAKE_BUILD_TYPE}\n")
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug)
+endif()
+message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}\n")
 
 #Set compiler flags
-MESSAGE(STATUS "Using C++ compiler: ${CMAKE_CXX_COMPILER_ID}")
-MESSAGE(STATUS "Using C compiler: ${CMAKE_C_COMPILER_ID}\n")
-SET(CMAKE_CXX_STANDARD 11)
-IF ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-    SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -Wall -fPIC")
-ENDIF()
-IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -fPIC -pthread")
-ENDIF()
-SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DQT_NO_DEBUG")
-SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}   -DDEBUG_MODE -DQT_QML_DEBUG")
+message(STATUS "Using C++ compiler: ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "Using C compiler: ${CMAKE_C_COMPILER_ID}\n")
+set(CMAKE_CXX_STANDARD 11)
+if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -Wall -fPIC")
+endif()
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -fPIC -pthread")
+endif()
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DQT_NO_DEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}   -DDEBUG_MODE -DQT_QML_DEBUG")
 
-IF(CMAKE_BUILD_TYPE MATCHES Debug)
-    MESSAGE(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
-    MESSAGE(STATUS "C Flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG}\n")
-ELSE()
-    MESSAGE(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
-    MESSAGE(STATUS "C Flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}\n")
-ENDIF()
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG}")
+    message(STATUS "C Flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG}\n")
+else()
+    message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
+    message(STATUS "C Flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}\n")
+endif()
 
 #Find packages
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
-SET(MODULES_FOLDERS "modules")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+include_directories(${PROJECT_SOURCE_DIR})
+set(MODULES_FOLDERS "modules")
 
-INCLUDE(common)
+include(common)
 
-FIND_PACKAGE(Qt5Core    REQUIRED)
-FIND_PACKAGE(Qt5Gui     REQUIRED)
-FIND_PACKAGE(Qt5Widgets     REQUIRED)
-FIND_PACKAGE(Qt5Sql     REQUIRED)
+#Add simulator module
+set(SIMULATOR_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/sim")
+add_subdirectory(${SIMULATOR_DIRECTORY})
 
-IF (${Qt5Core_FOUND})
-    MESSAGE(STATUS "Found Qt 5 ${Qt5Core_VERSION}")
-    MESSAGE(STATUS "Qt 5 Core Directory: ${Qt5Core_DIR}\n")
-ENDIF()
+find_package(Qt5Core    REQUIRED)
+find_package(Qt5Gui     REQUIRED)
+find_package(Qt5Widgets     REQUIRED)
+find_package(Qt5Sql     REQUIRED)
 
-INCLUDE_DIRECTORIES(${Qt5Core_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${Qt5Gui_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${Qt5Widgets_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${Qt5Sql_INCLUDE_DIRS})
+if (${Qt5Core_FOUND})
+    message(STATUS "Found Qt 5 ${Qt5Core_VERSION}")
+    message(STATUS "Qt 5 Core Directory: ${Qt5Core_DIR}\n")
+endif()
+
+include_directories(${Qt5Core_INCLUDE_DIRS})
+include_directories(${Qt5Gui_INCLUDE_DIRS})
+include_directories(${Qt5Widgets_INCLUDE_DIRS})
+include_directories(${Qt5Sql_INCLUDE_DIRS})
 
 #Add user interface
-#CMAKE_POLICY(SET CMP0071 NEW)
-SET(CMAKE_AUTOMOC ON)
-SET(CMAKE_AUTOUIC ON)
-SET(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 
 SET(RESOURCES_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 
-IF(MSVC)
-    CONFIGURE_FILE(${RESOURCES_DIRECTORY}/app.rc.cmake ${CMAKE_CURRENT_BINARY_DIR}/app.rc)
+if(MSVC)
+    configure_file(${RESOURCES_DIRECTORY}/app.rc.cmake ${CMAKE_CURRENT_BINARY_DIR}/app.rc)
 
-    SET(WIN_RESOURCES
+    set(WIN_RESOURCES
         ${CMAKE_CURRENT_BINARY_DIR}/app.rc
         )
-ENDIF()
+endif()
 
-SET(QT_RESOURCES
+set(QT_RESOURCES
     ${RESOURCES_DIRECTORY}/resources.qrc)
 
-SET(QT_UI_FORMS
+set(QT_UI_FORMS
     VWindowMain.ui
     VWindowMaterials.ui
     VWindowLayer.ui
     )
 
-SET(HEADER_FILES
+set(HEADER_FILES
     VWindowMain.h
     VWindowMaterials.h
     VWindowCloth.h
@@ -94,7 +98,7 @@ SET(HEADER_FILES
     VSqlDatabase.h
     )
 
-SET(SOURCE_FILES
+set(SOURCE_FILES
     VWindowMain.cpp
     VWindowMaterials.cpp
     VWindowCloth.cpp
@@ -106,28 +110,24 @@ SET(SOURCE_FILES
     VSqlDatabase.cpp
     )
 
-#Add simulator module
-SET(SIMULATOR_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/sim")
-ADD_SUBDIRECTORY(${SIMULATOR_DIRECTORY})
-
 #Set application version
-FIND_PACKAGE(Git REQUIRED)
-SET(GIT_RES_LONG  FALSE)
-SET(GIT_FILE_VERSION_LONG  "${CMAKE_CURRENT_BINARY_DIR}/git.version.long")
+find_package(Git REQUIRED)
+set(GIT_RES_LONG  FALSE)
+set(GIT_FILE_VERSION_LONG  "${CMAKE_CURRENT_BINARY_DIR}/git.version.long")
 
-EXECUTE_PROCESS(COMMAND ${GIT_EXECUTABLE} describe --tags WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE ${GIT_RES_LONG}  OUTPUT_FILE ${GIT_FILE_VERSION_LONG})
+execute_process(COMMAND ${GIT_EXECUTABLE} describe --tags WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} RESULT_VARIABLE ${GIT_RES_LONG}  OUTPUT_FILE ${GIT_FILE_VERSION_LONG})
 
-FILE(READ ${GIT_FILE_VERSION_LONG} READ_DATA_LONG)
-IF (${READ_DATA_LONG})
-    STRING(REPLACE "\n" "" PROJECT_VERSION_LONG ${READ_DATA_LONG})
-    STRING(REPLACE "v" "" PROJECT_VERSION_LONG ${PROJECT_VERSION_LONG})
-ELSE()
-    SET(PROJECT_VERSION_LONG "1.0")
-ENDIF()
-MESSAGE(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION_LONG}\n")
+file(READ ${GIT_FILE_VERSION_LONG} READ_DATA_LONG)
+if (${READ_DATA_LONG})
+    string(REPLACE "\n" "" PROJECT_VERSION_LONG ${READ_DATA_LONG})
+    string(REPLACE "v" "" PROJECT_VERSION_LONG ${PROJECT_VERSION_LONG})
+else()
+    set(PROJECT_VERSION_LONG "1.0")
+endif()
+message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION_LONG}\n")
 
 #Create executable
-ADD_EXECUTABLE(${EXE_NAME}
+add_executable(${EXE_NAME}
     "main.cpp"
     ${HEADER_FILES}
     ${SOURCE_FILES}
@@ -136,26 +136,25 @@ ADD_EXECUTABLE(${EXE_NAME}
     ${WIN_RESOURCES}
     )
 
-TARGET_LINK_LIBRARIES(${EXE_NAME} Qt5::Core)
-TARGET_LINK_LIBRARIES(${EXE_NAME} Qt5::Gui)
-TARGET_LINK_LIBRARIES(${EXE_NAME} Qt5::Widgets)
-TARGET_LINK_LIBRARIES(${EXE_NAME} Qt5::Sql)
-ADD_DEPENDENCIES(${EXE_NAME} v_sim)
-TARGET_LINK_LIBRARIES(${EXE_NAME} v_sim)
+target_link_libraries(${EXE_NAME} Qt5::Core)
+target_link_libraries(${EXE_NAME} Qt5::Gui)
+target_link_libraries(${EXE_NAME} Qt5::Widgets)
+target_link_libraries(${EXE_NAME} Qt5::Sql)
+add_dependencies(${EXE_NAME} v_sim)
+target_link_libraries(${EXE_NAME} v_sim)
 
-SET(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
-SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
+set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
 
 #CONFIGURATING WINDOWS INSTALLER
-IF(WIN32 AND CMAKE_BUILD_TYPE MATCHES Release)
-    IF(NOT EXISTS $ENV{QTDIR})
-        MESSAGE(WARNING "QTDIR environment variable is not set correctly. The installer script will not be generated.")
-    ENDIF()
-    IF(NOT EXISTS $ENV{COINDIR})
-        MESSAGE(WARNING "COINDIR environment variable  is not set correctly. The installer script will not be generated.")
-    ENDIF()
-    IF (EXISTS $ENV{QTDIR} AND EXISTS $ENV{COINDIR})
-        SET(APP_NAME "VARI")
+if(WIN32 AND CMAKE_BUILD_TYPE MATCHES Release)
+    if(NOT EXISTS $ENV{QTDIR})
+        message(WARNING "QTDIR environment variable is not set correctly. The installer script will not be generated.")
+    endif()
+    if(NOT EXISTS $ENV{COINDIR})
+        message(WARNING "COINDIR environment variable  is not set correctly. The installer script will not be generated.")
+    endif()
+    if (EXISTS $ENV{QTDIR} AND EXISTS $ENV{COINDIR})
         INCLUDE(win32.vari.install)
-    ENDIF()
-ENDIF()
+    endif()
+endif()

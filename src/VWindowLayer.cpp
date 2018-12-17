@@ -25,7 +25,6 @@ const QString VWindowLayer::MATERIAL_INFO_TEXT("<html><head/><body>"
                                                "</body></html>");
 
 const QColor VWindowLayer::DEFAULT_COLOR = QColor(255, 172, 172);
-//const QColor VWindowLayer::DEFAULT_COLOR = QColor(255, 255, 255);
 
 VWindowLayer::VWindowLayer(QWidget *parent) :
     QMainWindow(parent),

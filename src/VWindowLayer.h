@@ -2,7 +2,7 @@
 #define _VWINDOWLAYER_H
 
 #include <QMainWindow>
-#include "sim/VCloth.h"
+
 #include "sim/VGeometryProcessor.h"
 #include "sim/VLayerAbstractBuilder.h"
 

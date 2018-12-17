@@ -1,36 +1,36 @@
-SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{COINDIR})
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{COINDIR})
 
-FIND_PACKAGE(Coin REQUIRED)
-FIND_PACKAGE(SoQt REQUIRED)
-FIND_PACKAGE(Qt5Core    REQUIRED)
-FIND_PACKAGE(Qt5Gui    REQUIRED)
-FIND_PACKAGE(Qt5Widgets     REQUIRED)
+find_package(Coin REQUIRED)
+find_package(SoQt REQUIRED)
+find_package(Qt5Core    REQUIRED)
+find_package(Qt5Gui    REQUIRED)
+find_package(Qt5Widgets     REQUIRED)
 
-IF (${Coin_FOUND})
-    MESSAGE(STATUS "Found Coin3D ${Coin_VERSION}")
-    MESSAGE(STATUS "Coin3D Directory: ${Coin_DIR}\n")
+if (${Coin_FOUND})
+    message(STATUS "Found Coin3D ${Coin_VERSION}")
+    message(STATUS "Coin3D Directory: ${Coin_DIR}\n")
     link_directories(${Coin_LIB_DIR})
-ENDIF()
-IF (${SoQt_FOUND})
-    MESSAGE(STATUS "Found SoQt ${SoQt_VERSION}")
-    MESSAGE(STATUS "SoQt Directory: ${SoQt_DIR}\n")
+endif()
+if (${SoQt_FOUND})
+    message(STATUS "Found SoQt ${SoQt_VERSION}")
+    message(STATUS "SoQt Directory: ${SoQt_DIR}\n")
     link_directories(${SoQt_LIBRARY_DIR})
-ENDIF()
+endif()
 
-INCLUDE_DIRECTORIES(${Qt5Core_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${Qt5Gui_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${Qt5Widgets_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${Coin_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${SoQt_INCLUDE_DIRS})
+include_directories(${Qt5Core_INCLUDE_DIRS})
+include_directories(${Qt5Gui_INCLUDE_DIRS})
+include_directories(${Qt5Widgets_INCLUDE_DIRS})
+include_directories(${Coin_INCLUDE_DIRS})
+include_directories(${SoQt_INCLUDE_DIRS})
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
-SET(HEADER_FILES
-    VCloth.h
+set(HEADER_FILES
+    VMaterials.h
     VExceptions.h
     VGeometryProcessor.h
     VGraphicsElement.h
@@ -55,7 +55,7 @@ SET(HEADER_FILES
     VSimulator.h
     )
 
-SET(SOURCE_FILES
+set(SOURCE_FILES
     VGeometryProcessor.cpp
     VGraphicsElement.cpp
     VGraphicsNode.cpp
@@ -82,5 +82,5 @@ ADD_MODULE(v_sim
     ${HEADER_FILES}
     ${SOURCE_FILES})
 
-TARGET_LINK_LIBRARIES(v_sim Qt5::Core Qt5::Gui Qt5::Widgets)
-TARGET_LINK_LIBRARIES(v_sim SoQt::SoQt Coin::Coin)
+target_link_libraries(v_sim Qt5::Core Qt5::Gui Qt5::Widgets)
+target_link_libraries(v_sim SoQt::SoQt Coin::Coin)

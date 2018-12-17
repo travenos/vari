@@ -101,11 +101,10 @@ public:
 
     VSimulationParametres::const_ptr getSimulationParametres() const ;
 
+    void setResin(const VResin &resin) ;
     void setInjectionDiameter(double diameter) ;
     void setVacuumDiameter(double diameter) ;
-    void setDefaultViscosity(double defaultViscosity) ;
     void setTemperature(double temperature) ;
-    void setTempcoef(double tempcoef) ;
     void setVacuumPressure(double pressure) ;
     void setInjectionPressure(double pressure) ;
     void setQ(double q) ;
@@ -235,11 +234,10 @@ signals:
     void simulationPaused();
     void simulationStopped();
 
+    void resinChanged();
     void injectionDiameterSet(double diameter) ;
     void vacuumDiameterSet(double diameter) ;
-    void defaultViscositySet(double defaultViscosity) ;
     void temperatureSet(double temperature) ;
-    void tempcoefSet(double tempcoef) ;
     void vacuumPressureSet(double pressure) ;
     void injectionPressureSet(double pressure) ;
     void coefQSet(double q) ;

@@ -343,10 +343,7 @@ inline bool VSimulator::commitPressure()
             ++fullNodesCount;
     };
     nodesAction(commitFunc);
-    {
-        std::lock_guard<std::mutex> lock(*m_pNodesLock);
-        m_pParam->setNumberOfFullNodes(fullNodesCount);
-    }
+    m_pParam->setNumberOfFullNodes(fullNodesCount);
     return madeChangesInCycle.load();
 }
 
@@ -422,6 +419,15 @@ inline double VSimulator::getTimeDelta() const
         return 0;
 }
 
+void VSimulator::setResin(const VResin& resin)
+{
+    {
+        std::lock_guard<std::mutex> lock(*m_pNodesLock);
+        m_pParam->setResin(resin);
+    }
+    emit resinChanged();
+}
+
 void VSimulator::setInjectionDiameter(double diameter) 
 {
     {
@@ -440,15 +446,6 @@ void VSimulator::setVacuumDiameter(double diameter)
     emit vacuumDiameterSet(diameter);
 }
 
-void VSimulator::setDefaultViscosity(double defaultViscosity) 
-{
-    {
-        std::lock_guard<std::mutex> lock(*m_pNodesLock);
-        m_pParam->setDefaultViscosity(defaultViscosity);
-    }
-    emit defaultViscositySet(defaultViscosity);
-}
-
 void VSimulator::setTemperature(double temperature) 
 {
     {
@@ -456,15 +453,6 @@ void VSimulator::setTemperature(double temperature)
         m_pParam->setTemperature(temperature);
     }
     emit temperatureSet(temperature);
-}
-
-void VSimulator::setTempcoef(double tempcoef)
-{
-    {
-        std::lock_guard<std::mutex> lock(*m_pNodesLock);
-        m_pParam->setTempcoef(tempcoef);
-    }
-    emit tempcoefSet(tempcoef);
 }
 
 void VSimulator::setVacuumPressure(double pressure) 

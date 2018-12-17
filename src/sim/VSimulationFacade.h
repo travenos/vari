@@ -49,6 +49,7 @@ void enableLayer(unsigned int layer, bool enable) ;
  * @param material
  */
 void setMaterial(unsigned int layer, const VCloth& material) ;
+void setResin(const VResin& resin) ;
 /**
  * @param pressure
  */
@@ -58,9 +59,7 @@ void setInjectionPressure(double pressure) ;
  */
 
 void setVacuumPressure(double pressure) ;
-void setDefaultViscosity(double defaultViscosity) ;
 void setTemperature(double temperature) ;
-void setTempcoef(double tempcoef) ;
 
 void setQ(double q) ;
 void setR(double r) ;
@@ -87,6 +86,9 @@ void showInjectionPoint();
 void showVacuumPoint();
 
 VSimulationInfo getSimulationInfo() const;
+
+void loadSavedParametres();
+void saveParametres() const;
 
 private:
     void connectSignals() ;
@@ -120,11 +122,10 @@ signals:
     void simulationStopped();
     void gotNewInfo();
 
+    void resinChanged();
     void injectionDiameterSet(double diameter) ;
     void vacuumDiameterSet(double diameter) ;
-    void defaultViscositySet(double defaultViscosity);
     void temperatureSet(double temperature) ;
-    void tempcoefSet(double tempcoef) ;
     void vacuumPressureSet(double pressure) ;
     void injectionPressureSet(double pressure) ;
     void coefQSet(double q) ;

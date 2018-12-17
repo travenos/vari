@@ -9,7 +9,7 @@
 
 #include <QColor>
 #include <vector>
-#include "VCloth.h"
+
 #include "VSimulationParametres.h"
 
 class VSimElement

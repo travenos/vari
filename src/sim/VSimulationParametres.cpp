@@ -4,6 +4,7 @@
  */
 
 #include <cmath>
+
 #include "VSimulationParametres.h"
 
 /**
@@ -13,6 +14,12 @@
 const double VSimulationParametres::DEFAULT_TEMPERATURE = 25;
 const double VSimulationParametres::KELVINS_IN_0_CELSIUS = 273.15;
 const double VSimulationParametres::MIN_PRESSURE = 1;
+
+VSimulationParametres::VSimulationParametres():
+    m_numberOfFullNodes(0),
+    averagePermeabilityAccessFlag(false),
+    averageCellDistanceAccessFlag(false)
+{}
 
 double VSimulationParametres::getInjectionDiameter() const 
 {
@@ -44,12 +51,7 @@ double VSimulationParametres::getViscosity() const
 
 double VSimulationParametres::getDefaultViscosity() const 
 {
-    return m_defaultViscosity;
-}
-void VSimulationParametres::setDefaultViscosity(double viscosity) 
-{
-    m_defaultViscosity = viscosity;
-    m_viscosity = calculateViscosity();
+    return m_resin.defaultViscosity;
 }
 
 double VSimulationParametres::getTemperature() const 
@@ -66,15 +68,18 @@ void VSimulationParametres::setTemperature(double temperature)
 
 double VSimulationParametres::getTempcoef() const 
 {
-    return m_tempcoef;
+    return m_resin.tempcoef;
 }
 
-void VSimulationParametres::setTempcoef(double tempcoef) 
+void VSimulationParametres::setResin(const VResin &resin)
 {
-    if (tempcoef < 0)
-        tempcoef = 0;
-    m_tempcoef = tempcoef;
-    m_viscosity = calculateViscosity();
+    m_resin = resin;
+    calculateViscosity();
+}
+
+const VResin& VSimulationParametres::getResin() const
+{
+    return m_resin;
 }
 
 double VSimulationParametres::getInjectionPressure() const 
@@ -134,30 +139,59 @@ void VSimulationParametres::setS(double s)
 
 double VSimulationParametres::getAveragePermeability() const 
 {
-    return m_averagePermeability;
+    double averagePermeability;
+    if(!averagePermeabilityAccessFlag)
+    {
+        std::lock_guard<std::mutex> locker(averagePermeabilityLock);
+        averagePermeability = m_averagePermeability;
+    }
+    else
+        averagePermeability = m_averagePermeability;
+    return averagePermeability;
 }
+
 void VSimulationParametres::setAveragePermeability(double averagePermeability) 
 {
     if (averagePermeability < 0)
         averagePermeability = 0;
-    m_averagePermeability = averagePermeability;
+    averagePermeabilityAccessFlag.store(true);
+    {
+        std::lock_guard<std::mutex> locker(averagePermeabilityLock);
+        m_averagePermeability = averagePermeability;
+    }
+    averagePermeabilityAccessFlag.store(false);
 }
 
 double VSimulationParametres::getAverageCellDistance() const 
 {
-    return m_averageCellDistance;
+    double averageCellDistance;
+    if(!averageCellDistanceAccessFlag)
+    {
+        std::lock_guard<std::mutex> locker(averageCellDistanceLock);
+        averageCellDistance = m_averageCellDistance;
+    }
+    else
+        averageCellDistance = m_averageCellDistance;
+    return averageCellDistance;
 }
+
 void VSimulationParametres::setAverageCellDistance(double averageCellDistance) 
 {
     if (averageCellDistance < 0)
         averageCellDistance = 0;
-    m_averageCellDistance = averageCellDistance;
+    averageCellDistanceAccessFlag.store(true);
+    {
+        std::lock_guard<std::mutex> locker(averageCellDistanceLock);
+        m_averageCellDistance = averageCellDistance;
+    }
+    averageCellDistanceAccessFlag.store(false);
 }
 
 int VSimulationParametres::getNumberOfFullNodes() const
 {
     return m_numberOfFullNodes;
 }
+
 void VSimulationParametres::setNumberOfFullNodes(int numberOfNodes)
 {
     m_numberOfFullNodes = numberOfNodes;
@@ -165,8 +199,8 @@ void VSimulationParametres::setNumberOfFullNodes(int numberOfNodes)
 
 double VSimulationParametres::calculateViscosity() const 
 {
-    double A = m_tempcoef;
-    double mu0 = m_defaultViscosity;
+    double A = m_resin.tempcoef;
+    double mu0 = m_resin.defaultViscosity;
     double T = m_temperature - KELVINS_IN_0_CELSIUS;
     double T0 = DEFAULT_TEMPERATURE - KELVINS_IN_0_CELSIUS;
     if (T != T0)
