@@ -123,6 +123,11 @@ void VSimulator::clear()
     m_pTriangles.reset(new std::vector<VSimTriangle::ptr>);
 }
 
+void VSimulator::resetTriangleColors()
+{
+    trianglesAction([](const VSimTriangle::ptr& triangle){triangle->reset();});
+}
+
 VSimulationParametres::const_ptr VSimulator::getSimulationParametres() const 
 {
     return m_pParam;

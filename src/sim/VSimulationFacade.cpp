@@ -160,6 +160,8 @@ void VSimulationFacade::enableLayer(unsigned int layer, bool enable)
 void VSimulationFacade::setMaterial(unsigned int layer, const VCloth &material) 
 {
     m_pLayersProcessor->setMaterial(layer, material);
+    m_pSimulator->resetTriangleColors();
+    m_pGraphicsViewer->updateColors();
     emit materialChanged(layer);
 }
 

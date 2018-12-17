@@ -148,11 +148,34 @@
                <string>Выбранный слой</string>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_4">
-               <property name="spacing">
-                <number>4</number>
-               </property>
                <item>
-                <widget class="QLabel" name="layerInfoLabel"/>
+                <layout class="QHBoxLayout" name="layerInfoLayout">
+                 <item>
+                  <widget class="QLabel" name="layerInfoLabel"/>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="layerColorButton">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>60</height>
+                    </size>
+                   </property>
+                   <property name="autoFillBackground">
+                    <bool>true</bool>
+                   </property>
+                   <property name="flat">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </item>
                <item>
                 <widget class="QCheckBox" name="layerEnableCheckBox">

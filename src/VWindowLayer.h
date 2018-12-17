@@ -34,9 +34,12 @@ private slots:
 
     void on_chooseMaterialButton_clicked();
 
+    void on_colorButton_clicked();
+
 private:
     static const QString NO_MATERIAL_TEXT;
     static const QString NO_GEOMETRY_TEXT;
+    static const QString COLOR_DIALOG_TITLE;
     static const QString FILE_DIALOG_TITLE;
     static const QString FILE_DIALOG_FORMATS;
     static const QString GEOMETRY_FROM_FILE_TEXT;
@@ -52,11 +55,12 @@ private:
     void tryToEnableAcceptButton();
     void openFile();
     void showWindowCloth();
-    virtual void closeEvent(QCloseEvent *);
+    void selectColor();
+    void showColor();
+    virtual void closeEvent(QCloseEvent *) override;
 
     Ui::VWindowLayer *ui;
     std::unique_ptr<VWindowCloth> m_pWindowCloth;
-    QColor m_color;
     bool m_selectedMaterial;
     bool m_selectedFile;
     bool m_createdGeometry;

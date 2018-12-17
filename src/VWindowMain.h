@@ -54,9 +54,11 @@ private:
     void showWindowResin();
     void setCloth(const QString & name, float cavityheight, float permeability, float porosity);
     void setResin(const QString & name , float viscosity, float tempcoef);
+    void selectColor();
 
     void removeLayerFromList(int layer);
     void updateLayerMaterialInfo(int layer);
+    void showColor(const QColor &color);
     void markLayerAsEnabled(int layer, bool enable);
 
     void updateResinInfo();
@@ -159,6 +161,7 @@ private slots:
     void on_injectionDiameterEdit_textEdited(const QString &);
     void on_vacuumPressureEdit_textEdited(const QString &);
     void on_vacuumDiameterEdit_textEdited(const QString &);
+    void on_layerColorButton_clicked();
 };
 
 #endif // _VWINDOWMAIN_H

@@ -99,6 +99,11 @@ public:
  */
     void cancelWaitingForNewData() const ;
 
+    /**
+     * Set default color for the triangles, not dependant on simulation state
+     */
+    void resetTriangleColors();
+
     VSimulationParametres::const_ptr getSimulationParametres() const ;
 
     void setResin(const VResin &resin) ;

@@ -3,6 +3,7 @@
 #endif
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QColorDialog>
 #include <QSettings>
 
 #include "VWindowLayer.h"
@@ -11,6 +12,7 @@
 
 const QString VWindowLayer::NO_MATERIAL_TEXT("Материал слоя не задан");
 const QString VWindowLayer::NO_GEOMETRY_TEXT("Форма слоя не задана");
+const QString VWindowLayer::COLOR_DIALOG_TITLE("Выбор цвета по умолчанию для слоя");
 const QString VWindowLayer::FILE_DIALOG_TITLE("Импорт формы слоя");
 const QString VWindowLayer::FILE_DIALOG_FORMATS("Поддерживаемые форматы (*.msh *.iges *.igs *.db *.ansys);;"
                                                 "Файлы gmsh(*.msh *.iges *.igs);;"
@@ -31,7 +33,6 @@ const QColor VWindowLayer::DEFAULT_COLOR = QColor(255, 172, 172);
 VWindowLayer::VWindowLayer(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::VWindowLayer),
-    m_color(DEFAULT_COLOR),
     m_selectedMaterial(false),
     m_selectedFile(false),
     m_createdGeometry(false)
@@ -39,6 +40,7 @@ VWindowLayer::VWindowLayer(QWidget *parent) :
     ui->setupUi(this);
     reset();
     loadSavedParametres();
+    showColor();
 }
 
 VWindowLayer::~VWindowLayer()
@@ -58,7 +60,6 @@ void VWindowLayer::reset()
     ui->geometryStatusLabel->setStyleSheet(QStringLiteral("QLabel { color : red; }"));
     ui->geometryStatusLabel->setText(NO_GEOMETRY_TEXT);
     ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok)->setEnabled(false);
-    m_material.baseColor = m_color;
     m_selectedMaterial = false;
     m_selectedFile = false;
     m_createdGeometry = false;
@@ -74,6 +75,8 @@ void VWindowLayer::loadSavedParametres()
         ui->mmRadioButton->setChecked(true);
     else
         ui->mRadioButton->setChecked(true);
+    QVariant color = settings.value(QStringLiteral("import/color"), DEFAULT_COLOR);
+    m_material.baseColor = color.value<QColor>();
 }
 
 void VWindowLayer::saveParametres() const
@@ -82,6 +85,7 @@ void VWindowLayer::saveParametres() const
     bool mm_selected = ui->mmRadioButton->isChecked();
     settings.setValue(QStringLiteral("import/sizeInMM"), mm_selected);
     settings.setValue(QStringLiteral("import/lastDir"), m_lastDir);
+    settings.setValue(QStringLiteral("import/color"), m_material.baseColor);
 }
 
 void VWindowLayer::accept()
@@ -142,6 +146,26 @@ void VWindowLayer::showWindowCloth()
     m_pWindowCloth->activateWindow();
 }
 
+void VWindowLayer::selectColor()
+{
+    QColor color = QColorDialog::getColor(DEFAULT_COLOR, this, COLOR_DIALOG_TITLE);
+
+    if (color.isValid())
+    {
+        m_material.baseColor = color;
+        showColor();
+    }
+}
+
+void VWindowLayer::showColor()
+{
+    QColor color = m_material.baseColor;
+    QPalette palette = ui->colorButton->palette();
+    palette.setColor(QPalette::Button, color);
+    palette.setColor(QPalette::Light, color);
+    palette.setColor(QPalette::Dark, color);
+    ui->colorButton->setPalette(palette);
+}
 
 void VWindowLayer::closeEvent(QCloseEvent *)
 {
@@ -161,8 +185,6 @@ void VWindowLayer::m_on_got_material(const QString &name, float cavityheight, fl
     tryToEnableAcceptButton();
 }
 
-//TODO color chooser dialog
-
 void VWindowLayer::on_buttonBox_rejected()
 {
     reject();
@@ -181,4 +203,9 @@ void VWindowLayer::on_createFromFileButton_clicked()
 void VWindowLayer::on_chooseMaterialButton_clicked()
 {
     showWindowCloth();
+}
+
+void VWindowLayer::on_colorButton_clicked()
+{
+    selectColor();
 }

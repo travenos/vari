@@ -2,6 +2,8 @@
 #include <QDebug>
 #endif
 #include <QMessageBox>
+#include <QColorDialog>
+
 #include "VWindowMain.h"
 #include "ui_VWindowMain.h"
 #include "sim/VSimulationFacade.h"
@@ -206,12 +208,20 @@ void VWindowMain::selectLayer()
         ui->layerEnableCheckBox->setChecked(enabled);
         ui->layerInfoLabel->setText(CLOTH_INFO_TEXT.arg(cloth->name).arg(cloth->cavityHeight)
                                              .arg(cloth->permeability).arg(cloth->porosity));
-        //TODO show color
+        showColor(cloth->baseColor);
     }
     else
         ui->layerParamBox->setVisible(false);
 }
 
+void VWindowMain::showColor(const QColor& color)
+{
+    QPalette palette = ui->layerColorButton->palette();
+    palette.setColor(QPalette::Button, color);
+    palette.setColor(QPalette::Light, color);
+    palette.setColor(QPalette::Dark, color);
+    ui->layerColorButton->setPalette(palette);
+}
 
 void VWindowMain::enableLayer(bool enable)
 {
@@ -271,13 +281,28 @@ void VWindowMain::setCloth(const QString & name, float cavityheight, float perme
     if (ui->layersListWidget->currentIndex().isValid())
     {
         int layer = ui->layersListWidget->currentRow();
-        VCloth cloth;
+        VCloth cloth = *(m_pFacade->getMaterial(layer));
         cloth.cavityHeight = cavityheight;
         cloth.permeability = permeability;
         cloth.porosity = porosity;
-        //TODO cloth.color
         cloth.name = name;
         m_pFacade->setMaterial(layer, cloth);
+    }
+}
+
+void VWindowMain::selectColor()
+{
+    if (ui->layersListWidget->currentIndex().isValid())
+    {
+        int layer = ui->layersListWidget->currentRow();
+        VCloth cloth = *(m_pFacade->getMaterial(layer));
+        QColor color = QColorDialog::getColor(cloth.baseColor, this);
+
+        if (color.isValid())
+        {
+            cloth.baseColor = color;
+            m_pFacade->setMaterial(layer, cloth);
+        }
     }
 }
 
@@ -308,6 +333,7 @@ void VWindowMain::updateLayerMaterialInfo(int layer)
         ui->layersListWidget->currentItem()->setText(cloth->name);
         ui->layerInfoLabel->setText(CLOTH_INFO_TEXT.arg(cloth->name).arg(cloth->cavityHeight)
                                              .arg(cloth->permeability).arg(cloth->porosity));
+        showColor(cloth->baseColor);
     }
 }
 
@@ -530,6 +556,7 @@ void VWindowMain::simulationStopResult()
 void VWindowMain::activateSimControls(bool enabled)
 {
     ui->layerEnableCheckBox->setEnabled(enabled);
+    ui->layerColorButton->setEnabled(enabled);
     ui->selectMaterialClothButton->setEnabled(enabled);
     ui->layerRemoveButton->setEnabled(enabled);
     ui->layerEditButton->setEnabled(enabled);
@@ -808,6 +835,11 @@ void VWindowMain::on_showVacuumPlaceButton_clicked()
 void VWindowMain::on_actionPause_triggered()
 {
     pauseSimulation();
+}
+
+void VWindowMain::on_layerColorButton_clicked()
+{
+    selectColor();
 }
 
 void VWindowMain::on_temperatureEdit_textEdited(const QString &)
