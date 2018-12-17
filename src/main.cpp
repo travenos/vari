@@ -4,6 +4,7 @@
  */
 
 #include <QApplication>
+#include <QTranslator>
 
 #include "VDefinitions.h"
 #include "VWindowMain.h"
@@ -14,9 +15,12 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain(QStringLiteral(ORG_WEBSITE));
     QCoreApplication::setApplicationName(QStringLiteral(APPLICATION_NAME));
     QCoreApplication::setApplicationVersion(QStringLiteral(APPLICATION_VERSION));
-    //Set russian translation for all elements
+
     QLocale::setDefault(QLocale::C);
     QApplication a(argc, argv);
+    QTranslator translator;
+    translator.load("qtbase_ru",":/");
+    a.installTranslator(&translator);
     VWindowMain w;
     w.show();
 

@@ -11,5 +11,6 @@
         <file>img/pause.png</file>
         <file>img/colormap.png</file>
         <file>img/xyplane.png</file>
+        <file>qtbase_ru.qm</file>
     </qresource>
 </RCC>
