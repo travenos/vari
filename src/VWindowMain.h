@@ -88,6 +88,9 @@ private:
     void simulationPauseResult();
     void simulationStopResult();
 
+    void activateSimControls(bool enabled);
+    void resetAllInputs();
+
     bool readNumber(const QLineEdit * lineEdit, double &output) const;
 
     Ui::VWindowMain *ui;

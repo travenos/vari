@@ -376,6 +376,7 @@ void VWindowMain::vacuumPointSelectionResult()
 void VWindowMain::startSimulation()
 {
     m_pFacade->startSimulation();
+    resetAllInputs();
 }
 
 void VWindowMain::stopSimulation()
@@ -391,6 +392,7 @@ void VWindowMain::pauseSimulation()
 void VWindowMain::resetSimulationState()
 {
     m_pFacade->resetSimulation();
+    resetAllInputs();
 }
 
 void VWindowMain::saveTemperature()
@@ -506,6 +508,7 @@ void VWindowMain::simulationStartResult()
     ui->actionStart->setEnabled(false);
     ui->actionPause->setEnabled(true);
     ui->actionStop->setEnabled(true);
+    activateSimControls(false);
 }
 
 void VWindowMain::simulationPauseResult()
@@ -513,6 +516,7 @@ void VWindowMain::simulationPauseResult()
     ui->actionStart->setEnabled(true);
     ui->actionPause->setEnabled(false);
     ui->actionStop->setEnabled(true);
+    activateSimControls(false);
 }
 
 void VWindowMain::simulationStopResult()
@@ -520,6 +524,33 @@ void VWindowMain::simulationStopResult()
     ui->actionStart->setEnabled(true);
     ui->actionPause->setEnabled(false);
     ui->actionStop->setEnabled(false);
+    activateSimControls(true);
+}
+
+void VWindowMain::activateSimControls(bool enabled)
+{
+    ui->layerEnableCheckBox->setEnabled(enabled);
+    ui->selectMaterialClothButton->setEnabled(enabled);
+    ui->layerRemoveButton->setEnabled(enabled);
+    ui->layerEditButton->setEnabled(enabled);
+    ui->addLayerButton->setEnabled(enabled);
+    ui->injectionPressureEdit->setEnabled(enabled);
+    ui->saveInjectionPressureButton->setEnabled(enabled);
+    ui->injectionDiameterEdit->setEnabled(enabled);
+    ui->injectionPlaceButton->setEnabled(enabled);
+    ui->vacuumPressureEdit->setEnabled(enabled);
+    ui->saveVacuumPressureButton->setEnabled(enabled);
+    ui->vacuumDiameterEdit->setEnabled(enabled);
+    ui->vacuumPlaceButton->setEnabled(enabled);
+}
+
+void VWindowMain::resetAllInputs()
+{
+    showTemperature();
+    showInjectionPressure();
+    showInjectionDiameter();
+    showVacuumPressure();
+    showVacuumDiameter();
 }
 
 /**
