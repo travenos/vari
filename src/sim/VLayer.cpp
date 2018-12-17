@@ -156,36 +156,46 @@ bool VLayer::getVacuumPointInfo(QVector3D &point, double &diameter) const
 
 void VLayer::setInjectionPoint(const QVector3D &point, double diameter)
 {
-    m_hasInjectionPoint = true;
-    m_injectionPoint = point;
-    m_injectionDiameter = diameter;
-    double radius = diameter / 2;
-    for (VSimNode::ptr &node : *m_pNodes)
-    {
-        if (node->getDistance(point) > radius)
-        {
-            if (!(node->isVacuum()))
-                node->setRole(VSimNode::NORMAL);
-        }
-        else
-            node->setRole(VSimNode::INJECTION);
-    }
+    setPoint(point, diameter, VSimNode::INJECTION, VSimNode::VACUUM);
 }
 
 void VLayer::setVacuumPoint(const QVector3D &point, double diameter)
 {
-    m_hasVacuumPoint = true;
-    m_vacuumPoint = point;
-    m_vacuumDiameter = diameter;
+    setPoint(point, diameter, VSimNode::VACUUM, VSimNode::INJECTION);
+}
+
+void VLayer::setPoint(const QVector3D &point, double diameter,
+                      VSimNode::VNodeRole setRole, VSimNode::VNodeRole anotherRole)
+{
+    if (m_pNodes->size() == 0)
+        return;
+    m_hasInjectionPoint = true;
+    m_injectionPoint = point;
+    m_injectionDiameter = diameter;
     double radius = diameter / 2;
+    double distance;
+    VSimNode::ptr nearestNode = m_pNodes->front();
+    double minDistance = nearestNode->getDistance(point);
+    bool foundNear = false;
     for (VSimNode::ptr &node : *m_pNodes)
     {
-        if (node->getDistance(point) > radius)
+        distance = node->getDistance(point);
+        if (distance > radius)
         {
-            if (!(node->isInjection()))
+            if (node->getRole() != anotherRole)
                 node->setRole(VSimNode::NORMAL);
+            if (!foundNear && distance < minDistance)
+            {
+                minDistance = distance;
+                nearestNode = node;
+            }
         }
         else
-            node->setRole(VSimNode::VACUUM);
+        {
+            node->setRole(setRole);
+            foundNear = true;
+        }
     }
+    if (!foundNear)
+        nearestNode->setRole(setRole);
 }

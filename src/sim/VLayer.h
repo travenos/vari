@@ -64,6 +64,9 @@ private:
     double m_injectionDiameter;
     QVector3D m_vacuumPoint;
     double m_vacuumDiameter;
+
+    void setPoint(const QVector3D &point, double diameter,
+                  VSimNode::VNodeRole setRole, VSimNode::VNodeRole anotherRole);
 };
 
 #endif //_VLAYER_H
