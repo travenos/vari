@@ -6,11 +6,11 @@
 
 #include "VWindowMain.h"
 #include "ui_VWindowMain.h"
-#include "sim/VSimulationFacade.h"
-#include "sim/VExceptions.h"
 #include "VWindowCloth.h"
 #include "VWindowResin.h"
 #include "VWindowLayer.h"
+#include "sim/VSimulationFacade.h"
+#include "sim/core/VExceptions.h"
 
 const QString VWindowMain::IMPORT_FROM_FILE_ERROR("Ошибка загрузки слоя из файла");
 const QString VWindowMain::IMPORT_WHEN_SIMULATING_ERROR("Невозможно импортировать во время симуляции");

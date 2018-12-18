@@ -73,6 +73,7 @@ include(common)
 set(SIMULATOR_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/sim")
 add_subdirectory(${SIMULATOR_DIRECTORY})
 
+#Find packages
 find_package(Qt5Core    REQUIRED)
 find_package(Qt5Gui     REQUIRED)
 find_package(Qt5Widgets     REQUIRED)

@@ -12,14 +12,15 @@
 #include <thread>
 #include <atomic>
 #include <QObject>
+
 #include "VSimulationClass.h"
 #include "VSimNode.h"
 #include "VSimTriangle.h"
 #include "VGraphicsNode.h"
 #include "VGraphicsTriangle.h"
 #include "VLayer.h"
-#include "VNotify.h"
-#include "VSimulationInfo.h"
+#include "core/VNotify.h"
+#include "core/VSimulationInfo.h"
 
 class VSimulator: public QObject, public VSimulationClass
 {

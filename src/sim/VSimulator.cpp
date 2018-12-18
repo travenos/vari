@@ -6,9 +6,12 @@
 #include <QDebug>
 #endif
 #include <functional>
+#include <cstring>
 #include <QTime>
+
 #include "VSimulator.h"
-#include "VExceptions.h"
+#include "core/VExceptions.h"
+#include "core/VSimulationParametres.h"
 
 /**
  * VSimulator implementation
@@ -112,7 +115,7 @@ void VSimulator::reset()
     nodesAction([](const VSimNode::ptr& node){node->reset();});
     trianglesAction([](const VSimTriangle::ptr& triangle){triangle->reset();});
     resetInfo();
-    m_newDataNotifier.notifyOne();
+    m_newDataNotifier.notifyAll();
 }
 
 void VSimulator::clear() 
@@ -183,7 +186,7 @@ void VSimulator::waitForNewData() const
  */
 void VSimulator::cancelWaitingForNewData() const 
 {
-    m_newDataNotifier.notifyOne();
+    m_newDataNotifier.notifyAll();
 }
 
 /**
@@ -226,7 +229,7 @@ void VSimulator::simulationCycle()
         calculatePressure();
         madeChangesInCycle = commitPressure();
         updateColors();
-        m_newDataNotifier.notifyOne();
+        m_newDataNotifier.notifyAll();
         if (!madeChangesInCycle)
             break;
     }
@@ -251,7 +254,7 @@ void VSimulator::simulationCycle()
 void VSimulator::resetInfo() 
 {
     std::lock_guard<std::mutex> lock(m_infoLock);
-    memset(&m_info, 0, sizeof(m_info));
+    std::memset(&m_info, 0, sizeof(m_info));
 }
 
 template <typename Callable>

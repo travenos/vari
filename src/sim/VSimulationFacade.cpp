@@ -11,7 +11,7 @@
 #include "VSimulationFacade.h"
 #include "VLayerFromGmeshBuilder.h"
 #include "VLayerFromAnsysBuilder.h"
-#include "VExceptions.h"
+#include "core/VExceptions.h"
 
 /**
  * VSimulationFacade implementation

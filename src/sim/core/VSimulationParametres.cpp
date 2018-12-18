@@ -15,12 +15,6 @@ const double VSimulationParametres::DEFAULT_TEMPERATURE = 25;
 const double VSimulationParametres::KELVINS_IN_0_CELSIUS = 273.15;
 const double VSimulationParametres::MIN_PRESSURE = 1;
 
-VSimulationParametres::VSimulationParametres():
-    m_numberOfFullNodes(0),
-    averagePermeabilityAccessFlag(false),
-    averageCellDistanceAccessFlag(false)
-{}
-
 double VSimulationParametres::getInjectionDiameter() const 
 {
     return m_injectionDiameter;
@@ -77,7 +71,7 @@ void VSimulationParametres::setResin(const VResin &resin)
     calculateViscosity();
 }
 
-const VResin& VSimulationParametres::getResin() const
+VResin VSimulationParametres::getResin() const
 {
     return m_resin;
 }
@@ -139,52 +133,22 @@ void VSimulationParametres::setS(double s)
 
 double VSimulationParametres::getAveragePermeability() const 
 {
-    double averagePermeability;
-    if(!averagePermeabilityAccessFlag)
-    {
-        std::lock_guard<std::mutex> locker(averagePermeabilityLock);
-        averagePermeability = m_averagePermeability;
-    }
-    else
-        averagePermeability = m_averagePermeability;
-    return averagePermeability;
+    return m_averagePermeability;
 }
 
 void VSimulationParametres::setAveragePermeability(double averagePermeability) 
 {
-    if (averagePermeability < 0)
-        averagePermeability = 0;
-    averagePermeabilityAccessFlag.store(true);
-    {
-        std::lock_guard<std::mutex> locker(averagePermeabilityLock);
-        m_averagePermeability = averagePermeability;
-    }
-    averagePermeabilityAccessFlag.store(false);
+    m_averagePermeability = averagePermeability;
 }
 
 double VSimulationParametres::getAverageCellDistance() const 
 {
-    double averageCellDistance;
-    if(!averageCellDistanceAccessFlag)
-    {
-        std::lock_guard<std::mutex> locker(averageCellDistanceLock);
-        averageCellDistance = m_averageCellDistance;
-    }
-    else
-        averageCellDistance = m_averageCellDistance;
-    return averageCellDistance;
+    return m_averageCellDistance;
 }
 
 void VSimulationParametres::setAverageCellDistance(double averageCellDistance) 
 {
-    if (averageCellDistance < 0)
-        averageCellDistance = 0;
-    averageCellDistanceAccessFlag.store(true);
-    {
-        std::lock_guard<std::mutex> locker(averageCellDistanceLock);
-        m_averageCellDistance = averageCellDistance;
-    }
-    averageCellDistanceAccessFlag.store(false);
+    m_averageCellDistance = averageCellDistance;
 }
 
 int VSimulationParametres::getNumberOfFullNodes() const

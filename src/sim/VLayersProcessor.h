@@ -10,7 +10,6 @@
 #include "VSimulationClass.h"
 #include "VLayerAbstractBuilder.h"
 #include "VLayer.h"
-#include "VSimulationParametres.h"
 #include "VSimulator.h"
 
 

@@ -8,9 +8,10 @@
 #define _VSIMULATIONPARAMETRES_H
 
 #include <memory>
-#include <mutex>
+#include <atomic>
 
 #include "VMaterials.h"
+#include "VThreadSafeValue.tcc"
 
 
 class VSimulationParametres {
@@ -22,8 +23,8 @@ public:
     static const double KELVINS_IN_0_CELSIUS;
     static const double MIN_PRESSURE;
 
-    VSimulationParametres();
-
+    //Methods below are NOT thread-safe (for performance reason)
+    //Be careful
     double getInjectionDiameter() const ;
     void setInjectionDiameter(double diameter) ;
 
@@ -31,7 +32,7 @@ public:
     void setVacuumDiameter(double diameter) ;
 
     void setResin(const VResin &resin);
-    const VResin& getResin() const;
+    VResin getResin() const;
 
     double getViscosity() const ;
 
@@ -57,17 +58,12 @@ public:
     double getS() const ;
     void setS(double s) ;
 
-    /**
-     * Thread-safe
-     */
-    double getAveragePermeability() const ;
-    void setAveragePermeability(double averagePermeability) ;
-
-    /**
-     * Thread-safe
-     */
     double getAverageCellDistance() const ;
     void setAverageCellDistance(double averageCellDistance) ;
+
+    //Methods below are thread-safe
+    double getAveragePermeability() const ;
+    void setAveragePermeability(double averagePermeability) ;
 
     int getNumberOfFullNodes() const ;
     void setNumberOfFullNodes(int numberOfNodes) ;
@@ -88,16 +84,11 @@ private:
     double m_r = 1;
     double m_s = 2;
 
-    double m_averagePermeability = 1;
     double m_averageCellDistance = 1;
 
-    std::atomic<int> m_numberOfFullNodes;
+    VThreadSafeValue<double> m_averagePermeability{1};
 
-    std::atomic<bool> averagePermeabilityAccessFlag;
-    std::atomic<bool> averageCellDistanceAccessFlag;
-
-    mutable std::mutex averagePermeabilityLock;
-    mutable std::mutex averageCellDistanceLock;
+    std::atomic<int> m_numberOfFullNodes{0};
 
     double calculateViscosity() const ;
 };

@@ -125,52 +125,6 @@ void VSimNode::commit(bool *madeChanges, bool *isFull)
         if (madeChanges != nullptr)
             (*madeChanges) = false;
     }
-
-    /*
-    if (m_newPressure != m_currentPressure)
-    {
-        m_currentPressure = m_newPressure;
-        return true;
-    }
-    else
-        return false;
-    */
-
-
-    //TODO make like in original program
-    /*
-    if(m_pressure != m_memorizedPressure)
-    {
-        m_pressure = m_memorizedPressure;
-        if(m_pressure > s_halfLimit)
-        {
-            if(m_pressure >= m_pSimulator->vacuumPressure())
-            {
-                if(getState() == SimNode::FULL)
-                {
-                    return FALSE;
-                }
-                else
-                {
-                    setState(FULL);
-                }
-            }
-            else
-            {
-                setState(HALF);
-            }
-        }
-        else
-        {
-            setState(EMPTY);
-        }
-        return TRUE;
-    }
-    else
-    {
-        return FALSE;
-    }
-    */
 }
 
 /**

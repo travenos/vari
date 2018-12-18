@@ -10,7 +10,7 @@
 #include <QColor>
 #include <vector>
 
-#include "VSimulationParametres.h"
+#include "core/VSimulationParametres.h"
 
 class VSimElement
 {

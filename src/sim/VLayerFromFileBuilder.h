@@ -12,7 +12,6 @@
 #include "VLayerAbstractBuilder.h"
 #include "VSimNode.h"
 #include "VSimTriangle.h"
-#include "VSimulationParametres.h"
 
 class VLayerFromFileBuilder: public VLayerAbstractBuilder {
 public: 
