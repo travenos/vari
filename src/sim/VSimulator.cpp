@@ -429,81 +429,54 @@ inline double VSimulator::getTimeDelta() const
 
 void VSimulator::setResin(const VResin& resin)
 {
-    {
-        std::lock_guard<std::mutex> lock(*m_pNodesLock);
-        m_pParam->setResin(resin);
-    }
+    m_pParam->setResin(resin);
     emit resinChanged();
 }
 
 void VSimulator::setInjectionDiameter(double diameter) 
 {
-    {
-        std::lock_guard<std::mutex> lock(*m_pNodesLock);
-        m_pParam->setInjectionDiameter(diameter);
-    }
+    m_pParam->setInjectionDiameter(diameter);
     emit injectionDiameterSet(diameter);
 }
 
 void VSimulator::setVacuumDiameter(double diameter) 
 {
-    {
-        std::lock_guard<std::mutex> lock(*m_pNodesLock);
-        m_pParam->setVacuumDiameter(diameter);
-    }
+    m_pParam->setVacuumDiameter(diameter);
     emit vacuumDiameterSet(diameter);
 }
 
 void VSimulator::setTemperature(double temperature) 
 {
-    {
-        std::lock_guard<std::mutex> lock(*m_pNodesLock);
-        m_pParam->setTemperature(temperature);
-    }
+    m_pParam->setTemperature(temperature);
     emit temperatureSet(temperature);
 }
 
 void VSimulator::setVacuumPressure(double pressure) 
 {
-    std::lock(*m_pNodesLock, *m_pTrianglesLock);
     m_pParam->setVacuumPressure(pressure);
-    m_pNodesLock->unlock();
-    m_pTrianglesLock->unlock();
     emit vacuumPressureSet(pressure);
 }
 
 void VSimulator::setInjectionPressure(double pressure) 
 {
-    std::lock(*m_pNodesLock, *m_pTrianglesLock);
     m_pParam->setInjectionPressure(pressure);
-    m_pNodesLock->unlock();
-    m_pTrianglesLock->unlock();
     emit injectionPressureSet(pressure);
 }
 
 void VSimulator::setQ(double q) 
 {
-    {
-        std::lock_guard<std::mutex> lock(*m_pNodesLock);
-        m_pParam->setQ(q);
-    }
+    m_pParam->setQ(q);
     emit coefQSet(q);
 }
 
 void VSimulator::setR(double r) 
 {
-    {
-        std::lock_guard<std::mutex> lock(*m_pNodesLock);
-        m_pParam->setR(r);
-    }
+    m_pParam->setR(r);
     emit coefRSet(r);
 }
 
 void VSimulator::setS(double s) 
 {
-    {
-        std::lock_guard<std::mutex> lock(*m_pNodesLock);
-        m_pParam->setS(s);
-    }
+    m_pParam->setS(s);
     emit coefSSet(s);
 }

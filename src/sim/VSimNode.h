@@ -11,6 +11,8 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <atomic>
+
 #include "VSimElement.h"
 
 class VSimTriangle;
@@ -79,10 +81,9 @@ struct VLayeredNeighbours
 };
 
     VNodeRole m_role;
-    double m_currentPressure;
-    double m_newPressure;
+    std::atomic<double> m_currentPressure;
+    std::atomic<double> m_newPressure;
     VLayeredNeighbours m_neighbours;
-    std::vector<const VSimTriangle*> m_pTriangles; // TODO Is it really necessary?
     QVector3D m_position;
     size_t m_neighboursNumber;
 };

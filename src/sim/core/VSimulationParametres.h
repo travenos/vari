@@ -23,8 +23,6 @@ public:
     static const double KELVINS_IN_0_CELSIUS;
     static const double MIN_PRESSURE;
 
-    //Methods below are NOT thread-safe (for performance reason)
-    //Be careful
     double getInjectionDiameter() const ;
     void setInjectionDiameter(double diameter) ;
 
@@ -61,7 +59,6 @@ public:
     double getAverageCellDistance() const ;
     void setAverageCellDistance(double averageCellDistance) ;
 
-    //Methods below are thread-safe
     double getAveragePermeability() const ;
     void setAveragePermeability(double averagePermeability) ;
 
@@ -69,24 +66,23 @@ public:
     void setNumberOfFullNodes(int numberOfNodes) ;
 
 private:
-    VResin m_resin;
+    VThreadSafeValue<VResin> m_resin;
 
-    double m_viscosity = 0.1;
-    double m_temperature = 25;
+    std::atomic<double> m_viscosity{0.1};
+    std::atomic<double> m_temperature{25};
 
-    double m_injectionDiameter = 0.1;
-    double m_vacuumDiameter = 0.1;
+    std::atomic<double> m_injectionDiameter{0.1};
+    std::atomic<double> m_vacuumDiameter{0.1};
 
-    double m_injectionPressure = 1e5;
-    double m_vacuumPressure = 100;
+    std::atomic<double> m_injectionPressure{1e5};
+    std::atomic<double> m_vacuumPressure{100};
 
-    double m_q = 1;
-    double m_r = 1;
-    double m_s = 2;
+    std::atomic<double> m_q{1};
+    std::atomic<double> m_r{1};
+    std::atomic<double> m_s{2};
 
-    double m_averageCellDistance = 1;
-
-    VThreadSafeValue<double> m_averagePermeability{1};
+    std::atomic<double> m_averageCellDistance{1};
+    std::atomic<double> m_averagePermeability{1};
 
     std::atomic<int> m_numberOfFullNodes{0};
 

@@ -118,7 +118,7 @@ void VSimNode::commit(bool *madeChanges, bool *isFull)
     {
         if (madeChanges != nullptr)
             (*madeChanges) = (m_currentPressure < m_pParam->getVacuumPressure());
-        m_currentPressure = m_newPressure;
+        m_currentPressure = m_newPressure.load();
     }
     else
     {

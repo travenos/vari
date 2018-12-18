@@ -45,7 +45,7 @@ double VSimulationParametres::getViscosity() const
 
 double VSimulationParametres::getDefaultViscosity() const 
 {
-    return m_resin.defaultViscosity;
+    return m_resin.getValue().defaultViscosity;
 }
 
 double VSimulationParametres::getTemperature() const 
@@ -62,7 +62,7 @@ void VSimulationParametres::setTemperature(double temperature)
 
 double VSimulationParametres::getTempcoef() const 
 {
-    return m_resin.tempcoef;
+    return m_resin.getValue().tempcoef;
 }
 
 void VSimulationParametres::setResin(const VResin &resin)
@@ -163,8 +163,9 @@ void VSimulationParametres::setNumberOfFullNodes(int numberOfNodes)
 
 double VSimulationParametres::calculateViscosity() const 
 {
-    double A = m_resin.tempcoef;
-    double mu0 = m_resin.defaultViscosity;
+    VResin resin = m_resin;
+    double A = resin.tempcoef;
+    double mu0 = resin.defaultViscosity;
     double T = m_temperature - KELVINS_IN_0_CELSIUS;
     double T0 = DEFAULT_TEMPERATURE - KELVINS_IN_0_CELSIUS;
     if (T != T0)
