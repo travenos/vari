@@ -10,7 +10,6 @@
 #include <vector>
 #include <memory>
 #include <Inventor/Qt/viewers/SoQtExaminerViewer.h>
-#include <QObject>
 #include <QPushButton>
 
 #include "VGraphicsNode.h"
@@ -23,7 +22,7 @@ class SoEventCallback;
 class QWidget;
 class QLabel;
 
-class VGraphicsViewer: public QObject, public SoQtExaminerViewer, public VSimulationClass {
+class VGraphicsViewer: public VSimulationClass, public SoQtExaminerViewer {
     Q_OBJECT
 public: 
     typedef std::shared_ptr<VGraphicsViewer> ptr;

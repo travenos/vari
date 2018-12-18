@@ -9,8 +9,10 @@
 
 #include <memory>
 #include <mutex>
+#include <QObject>
 
-class VSimulationClass {
+class VSimulationClass : public QObject
+{
 public: 
     typedef std::shared_ptr<std::mutex> mutex_ptr;
     VSimulationClass();    

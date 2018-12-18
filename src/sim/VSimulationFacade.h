@@ -64,7 +64,10 @@ void setTemperature(double temperature) ;
 void setQ(double q) ;
 void setR(double r) ;
 void setS(double s) ;
+
 void newModel() ;
+void loadModel(const QString &filename) ;
+void saveModel(const QString &filename) ;
 
 VCloth::const_ptr getMaterial(uint layer) const ;
 VSimulationParametres::const_ptr getParametres() const ;
@@ -111,6 +114,7 @@ signals:
     void layerEnabled(uint, bool);
     void materialChanged(uint);
     void layerAdded();
+    void layersCleared();
     void injectionPointSet();
     void startedWaitingForInjectionPoint();
     void canceledWaitingForInjectionPoint();

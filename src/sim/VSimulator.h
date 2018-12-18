@@ -11,7 +11,6 @@
 #include <memory>
 #include <thread>
 #include <atomic>
-#include <QObject>
 
 #include "VSimulationClass.h"
 #include "VSimNode.h"
@@ -22,7 +21,7 @@
 #include "core/VNotify.h"
 #include "core/VSimulationInfo.h"
 
-class VSimulator: public QObject, public VSimulationClass
+class VSimulator: public VSimulationClass
 {
     Q_OBJECT
 public: 

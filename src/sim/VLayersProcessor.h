@@ -13,7 +13,9 @@
 #include "VSimulator.h"
 
 
-class VLayersProcessor: public VSimulationClass {
+class VLayersProcessor: public VSimulationClass
+{
+    Q_OBJECT
 public: 
     typedef std::shared_ptr<VLayersProcessor> ptr;
     typedef std::shared_ptr<const VLayersProcessor> const_ptr;
@@ -104,6 +106,14 @@ void increasePositions(uint fromLayer) ;
  * @param layer
  */
 void putOnTop(uint layer) ;
+
+signals:
+    void layerVisibilityChanged(uint, bool);
+    void layerRemoved(uint);
+    void layerEnabled(uint, bool);
+    void materialChanged(uint);
+    void layerAdded();
+    void layersCleared();
 };
 
 #endif //_VLAYERSPROCESSOR_H

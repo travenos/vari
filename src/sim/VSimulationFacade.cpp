@@ -66,6 +66,19 @@ void VSimulationFacade::connectSignals()
             this, SIGNAL(coefRSet(double)));
     connect(m_pSimulator.get(), SIGNAL(coefSSet(double)),
             this, SIGNAL(coefSSet(double)));
+
+    connect(m_pLayersProcessor.get(), SIGNAL(layerVisibilityChanged(uint, bool)),
+            this, SIGNAL(layerVisibilityChanged(uint, bool)));
+    connect(m_pLayersProcessor.get(), SIGNAL(layerEnabled(uint, bool)),
+            this, SIGNAL(layerEnabled(uint, bool)));
+    connect(m_pLayersProcessor.get(), SIGNAL(layerRemoved(uint)),
+            this, SIGNAL(layerRemoved(uint)));
+    connect(m_pLayersProcessor.get(), SIGNAL(materialChanged(uint)),
+            this, SIGNAL(materialChanged(uint)));
+    connect(m_pLayersProcessor.get(), SIGNAL(layerAdded()),
+            this, SIGNAL(layerAdded()));
+    connect(m_pLayersProcessor.get(), SIGNAL(layersCleared()),
+            this, SIGNAL(layersCleared()));
 }
 
 void VSimulationFacade::startSimulation() 
@@ -130,7 +143,6 @@ void VSimulationFacade::setVisible(uint layer, bool visible)
 {
     m_pLayersProcessor->setVisibleLayer(layer, visible);
     m_pGraphicsViewer->updateVisibility();
-    emit layerVisibilityChanged(layer, visible);
 }
 
 /**
@@ -140,7 +152,6 @@ void VSimulationFacade::removeLayer(uint layer)
 {
     m_pLayersProcessor->removeLayer(layer);
     updateConfiguration();
-    emit layerRemoved(layer);
 }
 
 /**
@@ -150,9 +161,6 @@ void VSimulationFacade::enableLayer(uint layer, bool enable)
 {
     m_pLayersProcessor->enableLayer(layer, enable);
     updateConfiguration();
-    emit layerEnabled(layer, enable);
-    bool isVisible = m_pLayersProcessor->isLayerVisible(layer);
-    emit layerVisibilityChanged(layer, isVisible);
 }
 
 /**
@@ -164,7 +172,6 @@ void VSimulationFacade::setMaterial(uint layer, const VCloth &material)
     m_pLayersProcessor->setMaterial(layer, material);
     m_pSimulator->resetTriangleColors();
     m_pGraphicsViewer->updateColors();
-    emit materialChanged(layer);
 }
 
 void VSimulationFacade::setResin(const VResin& resin)
@@ -209,6 +216,15 @@ void VSimulationFacade::newModel()
     m_pSimulator->clear();
     m_pLayersProcessor->clear();
     m_pGraphicsViewer->clearAll();
+}
+
+void VSimulationFacade::loadModel(const QString &filename)
+{
+
+}
+void VSimulationFacade::saveModel(const QString &filename)
+{
+
 }
 
 VCloth::const_ptr VSimulationFacade::getMaterial(uint layer) const
@@ -271,7 +287,6 @@ void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &
             delete p_layerBuilder;
             updateConfiguration();
             m_pGraphicsViewer->viewFromAbove();
-            emit layerAdded();
         }
         catch(VImportException &e)
         {

@@ -267,6 +267,7 @@ void VGraphicsViewer::clearAll()
     m_pFigureRoot->removeAllChildren();
     m_graphicsNodes.clear();
     m_graphicsTriangles.clear();
+    clearInfo();
 }
 
 void VGraphicsViewer::doRender() 

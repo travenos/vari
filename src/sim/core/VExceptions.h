@@ -25,4 +25,8 @@ class VImportException: public VException
 {
 };
 
+class VExportException: public VException
+{
+};
+
 #endif //_VEXCEPTIONS_H

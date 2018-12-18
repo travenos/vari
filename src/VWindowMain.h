@@ -28,12 +28,17 @@ public:
 
 private:
     static const QString IMPORT_FROM_FILE_ERROR;
+    static const QString EXPORT_TO_FILE_ERROR;
     static const QString IMPORT_WHEN_SIMULATING_ERROR;
     static const QString INVALID_PARAM_ERROR;
     static const QString CLOTH_INFO_TEXT;
     static const QString RESIN_INFO_TEXT;
     static const QString ASK_FOR_REMOVE;
     static const QString MODEL_INFO_TEXT;
+
+    static const QString OPEN_FILE_DIALOG_TITLE;
+    static const QString SAVE_FILE_DIALOG_TITLE;
+    static const QString FILE_DIALOG_FORMATS;
 
     void connectSimulationSignals();
     void setupValidators();
@@ -87,9 +92,14 @@ private:
     void showVacuumDiameter();
     void showVacuumPoint();
     void showModelInfo();
+    void showNewLayer();
     void simulationStartResult();
     void simulationPauseResult();
     void simulationStopResult();
+
+    void newModel();
+    void loadModel();
+    void saveModel();
 
     void activateSimControls(bool enabled);
     void resetAllInputs();
@@ -110,6 +120,7 @@ private slots:
     void m_on_layer_window_closed();
     void m_on_cloth_window_closed();
     void m_on_resin_window_closed();
+    void m_on_layers_cleared();
     void m_on_got_cloth(const QString & name, float cavityheight, float permeability, float porosity);
     void m_on_got_resin(const QString & name , float viscosity, float tempcoef);
     void m_on_layer_creation_from_file_available(const VCloth& material, const QString& filename,
@@ -164,6 +175,10 @@ private slots:
     void on_vacuumPressureEdit_textEdited(const QString &);
     void on_vacuumDiameterEdit_textEdited(const QString &);
     void on_layerColorButton_clicked();
+    void on_actionNew_triggered();
+    void on_actionOpen_triggered();
+    void on_actionSave_triggered();
+    void on_layerEditButton_clicked();
 };
 
 #endif // _VWINDOWMAIN_H

@@ -29,7 +29,7 @@ VSimElement::VSimElement(const VCloth::const_ptr &p_material,
 VSimElement::~VSimElement()
 {
     #ifdef DEBUG_MODE
-        qInfo() << "VSimElement destroyed";
+    //    qInfo() << "VSimElement destroyed";
     #endif
 }
 

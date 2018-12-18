@@ -86,6 +86,7 @@ void VWindowLayer::saveParametres() const
     settings.setValue(QStringLiteral("import/sizeInMM"), mm_selected);
     settings.setValue(QStringLiteral("import/lastDir"), m_lastDir);
     settings.setValue(QStringLiteral("import/color"), m_material.baseColor);
+    settings.sync();
 }
 
 void VWindowLayer::accept()

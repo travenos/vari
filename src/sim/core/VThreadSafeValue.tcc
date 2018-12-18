@@ -37,15 +37,13 @@ public:
     operator T() const
     {
         QReadLocker locker(&m_lock);
-        T value = m_value;
-        return value;
+        return m_value;
     }
 
     T getValue() const
     {
         QReadLocker locker(&m_lock);
-        T value = m_value;
-        return value;
+        return m_value;
     }
 
 private:

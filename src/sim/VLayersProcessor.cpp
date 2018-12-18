@@ -64,6 +64,7 @@ void VLayersProcessor::addLayer(VLayerAbstractBuilder *builder)
     //TODO put the layer on the highest position
     m_layers.push_back(p_newLayer);
     updateActiveElementsVectors();
+    emit layerAdded();
 }
 
 /**
@@ -78,6 +79,7 @@ void VLayersProcessor::removeLayer(uint layer)
     {
         m_layers.erase(it);
     }
+    emit layerRemoved(layer);
 }
 
 /**
@@ -87,6 +89,7 @@ void VLayersProcessor::removeLayer(uint layer)
 void VLayersProcessor::setVisibleLayer(uint layer, bool visible) 
 {
     m_layers.at(layer)->setVisible(visible);
+    emit layerVisibilityChanged(layer, visible);
 }
 
 /**
@@ -114,6 +117,8 @@ void VLayersProcessor::enableLayer(uint layer, bool enable)
     }
     m_layers.at(layer)->markActive(enable);
     updateActiveElementsVectors();
+    emit layerEnabled(layer, enable);
+    emit layerVisibilityChanged(layer, isLayerVisible(layer));
 }
 
 /**
@@ -125,6 +130,7 @@ void VLayersProcessor::setMaterial(uint layer, const VCloth& material)
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     std::lock_guard<std::mutex> lockT(*m_pTrianglesLock);
     m_layers.at(layer)->setMateial(material);
+    emit materialChanged(layer);
 }
 
 void VLayersProcessor::reset() 
@@ -137,6 +143,7 @@ void VLayersProcessor::clear()
 {
     m_layers.clear();
     updateActiveElementsVectors();
+    emit layersCleared();
 }
 
 VCloth::const_ptr VLayersProcessor::getMaterial(uint layer) const 

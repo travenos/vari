@@ -2,7 +2,9 @@
 #include <QDebug>
 #endif
 #include <QMessageBox>
+#include <QFileDialog>
 #include <QColorDialog>
+#include <QSettings>
 
 #include "VWindowMain.h"
 #include "ui_VWindowMain.h"
@@ -12,7 +14,8 @@
 #include "sim/VSimulationFacade.h"
 #include "sim/core/VExceptions.h"
 
-const QString VWindowMain::IMPORT_FROM_FILE_ERROR("Ошибка загрузки слоя из файла");
+const QString VWindowMain::IMPORT_FROM_FILE_ERROR("Ошибка загрузки из файла");
+const QString VWindowMain::EXPORT_TO_FILE_ERROR("Ошибка сохранения в файл");
 const QString VWindowMain::IMPORT_WHEN_SIMULATING_ERROR("Невозможно импортировать во время симуляции");
 const QString VWindowMain::INVALID_PARAM_ERROR("Введены некорректные параметры");
 const QString VWindowMain::ASK_FOR_REMOVE("Вы уверены, что хотите удалить слой?");
@@ -30,6 +33,10 @@ const QString VWindowMain::RESIN_INFO_TEXT("<html><head/><body>"
 const QString VWindowMain::MODEL_INFO_TEXT("Габариты: %1м x %2м x %3м;    "
                                            "Число узлов: %4;    "
                                            "Число треугольников: %5.");
+const QString VWindowMain::OPEN_FILE_DIALOG_TITLE("Загрузка модели");
+const QString VWindowMain::SAVE_FILE_DIALOG_TITLE("Сохранение модели");
+const QString VWindowMain::FILE_DIALOG_FORMATS("Модели VARI (*.vari);;"
+                                                "Все файлы (*)");
 
 VWindowMain::VWindowMain(QWidget *parent) :
     QMainWindow(parent),
@@ -91,6 +98,8 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_canceled_waiting_for_injection_point()));
     connect(m_pFacade.get(), SIGNAL(canceledWaitingForVacuumPoint()),
             this, SLOT(m_on_canceled_waiing_for_vacuum_point()));
+    connect(m_pFacade.get(), SIGNAL(layersCleared()),
+            this, SLOT(m_on_layers_cleared()));
 }
 
 void VWindowMain::setupValidators()
@@ -158,8 +167,6 @@ void VWindowMain::addLayerFromFile(const VCloth& material,const QString& filenam
     try
     {
         m_pFacade->newLayerFromFile(material, filename, units);
-        ui->layersListWidget->addItem(material.name);
-        ui->layersListWidget->setCurrentRow(ui->layersListWidget->count() - 1);
     }
     catch (VImportException)
     {
@@ -321,9 +328,17 @@ void VWindowMain::removeLayerFromList(int layer)
 {
     if(layer < ui->layersListWidget->count())
     {
+        bool reselectFlag = false;
+        if (layer == ui->layersListWidget->currentRow())
+        {
+            if(layer > 0)
+                ui->layersListWidget->setCurrentRow(layer - 1);
+            else
+                reselectFlag = true;
+        }
         delete ui->layersListWidget->item(layer);
-        if (layer > 0)
-            ui->layersListWidget->setCurrentRow(layer - 1);
+        if (reselectFlag)
+            selectLayer();
     }
 }
 
@@ -593,6 +608,62 @@ void VWindowMain::resetAllInputs()
     showVacuumDiameter();
 }
 
+void VWindowMain::showNewLayer()
+{
+    VCloth::const_ptr cloth = m_pFacade->getMaterial(m_pFacade->getLayersNumber() - 1);
+    ui->layersListWidget->addItem(cloth->name);
+    ui->layersListWidget->setCurrentRow(ui->layersListWidget->count() - 1);
+}
+
+void VWindowMain::newModel()
+{
+    m_pFacade->newModel();
+}
+
+void VWindowMain::loadModel()
+{
+    QSettings settings;
+    QString lastDir = settings.value(QStringLiteral("import/lastDir"), QDir::homePath()).toString();
+    QString fileName = QFileDialog::getOpenFileName(this, OPEN_FILE_DIALOG_TITLE, lastDir,
+                                                    FILE_DIALOG_FORMATS);
+    if (!fileName.isEmpty() && QFile::exists(fileName))
+    {
+        lastDir = QFileInfo(fileName).absolutePath();
+        try
+        {
+            m_pFacade->loadModel(fileName);
+        }
+        catch (VImportException)
+        {
+            QMessageBox::warning(this, QStringLiteral("Error"), IMPORT_FROM_FILE_ERROR);
+        }
+        settings.setValue(QStringLiteral("import/lastDir"), lastDir);
+        settings.sync();
+    }
+}
+
+void VWindowMain::saveModel()
+{
+    QSettings settings;
+    QString lastDir = settings.value(QStringLiteral("import/lastDir"), QDir::homePath()).toString();
+    QString fileName = QFileDialog::getSaveFileName(this, SAVE_FILE_DIALOG_TITLE, lastDir,
+                                                    FILE_DIALOG_FORMATS);
+    if (!fileName.isEmpty())
+    {
+        lastDir = QFileInfo(fileName).absolutePath();
+        try
+        {
+            m_pFacade->saveModel(fileName);
+        }
+        catch (VExportException)
+        {
+            QMessageBox::warning(this, QStringLiteral("Error"), EXPORT_TO_FILE_ERROR);
+        }
+        settings.setValue(QStringLiteral("import/lastDir"), lastDir);
+        settings.sync();
+    }
+}
+
 /**
  * Slots
  */
@@ -632,6 +703,12 @@ void VWindowMain::m_on_cloth_window_closed()
 void VWindowMain::m_on_resin_window_closed()
 {
     deleteWindowResin();
+}
+
+void VWindowMain::m_on_layers_cleared()
+{
+    ui->layersListWidget->clear();
+    showModelInfo();
 }
 
 void VWindowMain::on_addLayerButton_clicked()
@@ -692,6 +769,7 @@ void VWindowMain::m_on_layer_enabled(uint layer, bool enable)
 
 void VWindowMain::m_on_layer_added()
 {
+    showNewLayer();
     showModelInfo();
 }
 
@@ -883,4 +961,24 @@ void VWindowMain::on_vacuumPressureEdit_textEdited(const QString &)
 void VWindowMain::on_vacuumDiameterEdit_textEdited(const QString &)
 {
     ui->resetVacuumDiameterButton->setEnabled(true);
+}
+
+void VWindowMain::on_actionNew_triggered()
+{
+    newModel();
+}
+
+void VWindowMain::on_actionOpen_triggered()
+{
+    loadModel();
+}
+
+void VWindowMain::on_actionSave_triggered()
+{
+    saveModel();
+}
+
+void VWindowMain::on_layerEditButton_clicked()
+{
+
 }
