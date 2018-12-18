@@ -25,7 +25,7 @@ public:
  * @param p_node1
  * @param p_node2
  */
-VSimTriangle(const VCloth::const_ptr &p_material,
+VSimTriangle(uint id, const VCloth::const_ptr &p_material,
              const VSimulationParametres::const_ptr &p_param,
              const VSimNode::const_ptr &p_node0,
              const VSimNode::const_ptr &p_node1,

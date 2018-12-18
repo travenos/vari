@@ -14,7 +14,9 @@
 /**
  * @param simulator
  */
-VLayersProcessor::VLayersProcessor()
+VLayersProcessor::VLayersProcessor():
+    m_nodeNextId(0),
+    m_triangleNextId(0)
 {
     updateActiveElementsVectors();
 }
@@ -60,7 +62,11 @@ size_t VLayersProcessor::getInactiveLayersNumber() const
  */
 void VLayersProcessor::addLayer(VLayerAbstractBuilder *builder) 
 {
+    builder->setNodeStartId(m_nodeNextId);
+    builder->setTriangleStartId(m_triangleNextId);
     VLayer::ptr p_newLayer = builder->build();
+    m_nodeNextId = builder->getNodeMaxId() + 1;
+    m_triangleNextId = builder->getTriangleMaxId() + 1;
     //TODO put the layer on the highest position
     m_layers.push_back(p_newLayer);
     updateActiveElementsVectors();
@@ -143,6 +149,8 @@ void VLayersProcessor::clear()
 {
     m_layers.clear();
     updateActiveElementsVectors();
+    m_nodeNextId = 0;
+    m_triangleNextId = 0;
     emit layersCleared();
 }
 

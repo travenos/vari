@@ -31,7 +31,7 @@ public:
  * @param p_material
  * @param p_param
  */
-VSimNode(const QVector3D &pos,
+VSimNode(uint id, const QVector3D &pos,
          const VCloth::const_ptr &p_material,
          const VSimulationParametres::const_ptr &p_param);
     

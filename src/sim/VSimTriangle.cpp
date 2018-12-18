@@ -16,12 +16,12 @@
  * @param p_node1
  * @param p_node2
  */
-VSimTriangle::VSimTriangle(const VCloth::const_ptr &p_material,
+VSimTriangle::VSimTriangle(uint id, const VCloth::const_ptr &p_material,
                            const VSimulationParametres::const_ptr &p_param,
                            const VSimNode::const_ptr &p_node0,
                            const VSimNode::const_ptr &p_node1,
                            const VSimNode::const_ptr &p_node2) :
-    VSimElement(p_material, p_param),
+    VSimElement(id, p_material, p_param),
     m_color(p_material->baseColor),
     m_pNodes({p_node0.get(), p_node1.get(), p_node2.get()})
 {

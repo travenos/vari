@@ -17,10 +17,10 @@
  * @param p_material
  * @param p_param
  */
-VSimNode::VSimNode(const QVector3D& pos,
+VSimNode::VSimNode(uint id, const QVector3D& pos,
                    const VCloth::const_ptr &p_material,
                    const VSimulationParametres::const_ptr &p_param):
-    VSimElement(p_material, p_param),
+    VSimElement(id, p_material, p_param),
     m_role(NORMAL),
     m_position(pos),
     m_neighboursNumber(0)

@@ -17,10 +17,11 @@ const int VSimElement::RGB_MAX = 255;
 /**
  * @param material
  */
-VSimElement::VSimElement(const VCloth::const_ptr &p_material,
+VSimElement::VSimElement(uint id, const VCloth::const_ptr &p_material,
                          const VSimulationParametres::const_ptr &p_param):
     m_pMaterial(p_material),
     m_pParam(p_param),
+    m_id(id),
     m_visible(true)
 {
 
@@ -47,6 +48,12 @@ void VSimElement::setVisible(bool visible)
 bool VSimElement::isVisible() const  
 {
     return m_visible;
+}
+
+
+uint VSimElement::getId() const
+{
+    return m_id;
 }
 
 /**
