@@ -38,17 +38,17 @@ void getModelSize(QVector3D &size) const;
  * @param layer
  * @param visible
  */
-void setVisible(unsigned int layer, bool visible) ;
+void setVisible(uint layer, bool visible) ;
 /**
  * @param layer
  */
-void removeLayer(unsigned int layer) ;
-void enableLayer(unsigned int layer, bool enable) ;
+void removeLayer(uint layer) ;
+void enableLayer(uint layer, bool enable) ;
 /**
  * @param layer
  * @param material
  */
-void setMaterial(unsigned int layer, const VCloth& material) ;
+void setMaterial(uint layer, const VCloth& material) ;
 void setResin(const VResin& resin) ;
 /**
  * @param pressure
@@ -66,10 +66,10 @@ void setR(double r) ;
 void setS(double s) ;
 void newModel() ;
 
-VCloth::const_ptr getMaterial(unsigned int layer) const ;
+VCloth::const_ptr getMaterial(uint layer) const ;
 VSimulationParametres::const_ptr getParametres() const ;
-bool isLayerVisible(unsigned int layer) const ;
-bool isLayerEnabled(unsigned int layer) const ;
+bool isLayerVisible(uint layer) const ;
+bool isLayerEnabled(uint layer) const ;
 
 void waitForInjectionPointSelection(double diameter);
 void waitForVacuumPointSelection(double diameter);
@@ -106,10 +106,10 @@ private slots:
     void m_on_got_point(const QVector3D &point);
 
 signals:
-    void layerVisibilityChanged(unsigned int, bool);
-    void layerRemoved(unsigned int);
-    void layerEnabled(unsigned int, bool);
-    void materialChanged(unsigned int);
+    void layerVisibilityChanged(uint, bool);
+    void layerRemoved(uint);
+    void layerEnabled(uint, bool);
+    void materialChanged(uint);
     void layerAdded();
     void injectionPointSet();
     void startedWaitingForInjectionPoint();

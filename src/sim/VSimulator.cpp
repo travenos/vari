@@ -17,11 +17,11 @@
  * VSimulator implementation
  */
 
-const unsigned int VSimulator::TIMER_PERIOD = 1000;
+const uint VSimulator::TIMER_PERIOD = 1000;
 /**
  * Number of threads for calculations during the simulation
  */
-const unsigned int VSimulator::N_THREADS =
+const uint VSimulator::N_THREADS =
         (std::thread::hardware_concurrency()>1)?std::thread::hardware_concurrency()-1:1;
 
 /**

@@ -69,7 +69,7 @@ void VLayersProcessor::addLayer(VLayerAbstractBuilder *builder)
 /**
  * @param layer
  */
-void VLayersProcessor::removeLayer(unsigned int layer) 
+void VLayersProcessor::removeLayer(uint layer) 
 {
     enableLayer(layer, false);
     auto it = m_layers.begin();
@@ -84,7 +84,7 @@ void VLayersProcessor::removeLayer(unsigned int layer)
  * @param layer
  * @param visible
  */
-void VLayersProcessor::setVisibleLayer(unsigned int layer, bool visible) 
+void VLayersProcessor::setVisibleLayer(uint layer, bool visible) 
 {
     m_layers.at(layer)->setVisible(visible);
 }
@@ -92,7 +92,7 @@ void VLayersProcessor::setVisibleLayer(unsigned int layer, bool visible)
 /**
  * @param disabledLayer
  */
-void VLayersProcessor::enableLayer(unsigned int layer, bool enable) 
+void VLayersProcessor::enableLayer(uint layer, bool enable) 
 {
     if(enable)
     {
@@ -120,7 +120,7 @@ void VLayersProcessor::enableLayer(unsigned int layer, bool enable)
  * @param layer
  * @param material
  */
-void VLayersProcessor::setMaterial(unsigned int layer, const VCloth& material) 
+void VLayersProcessor::setMaterial(uint layer, const VCloth& material) 
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     std::lock_guard<std::mutex> lockT(*m_pTrianglesLock);
@@ -139,17 +139,17 @@ void VLayersProcessor::clear()
     updateActiveElementsVectors();
 }
 
-VCloth::const_ptr VLayersProcessor::getMaterial(unsigned int layer) const 
+VCloth::const_ptr VLayersProcessor::getMaterial(uint layer) const 
 {
     return m_layers.at(layer)->getMaterial();
 }
 
-bool VLayersProcessor::isLayerVisible(unsigned int layer) const 
+bool VLayersProcessor::isLayerVisible(uint layer) const 
 {
     return m_layers.at(layer)->isVisible();
 }
 
-bool VLayersProcessor::isLayerEnabled(unsigned int layer) const 
+bool VLayersProcessor::isLayerEnabled(uint layer) const 
 {
     return m_layers.at(layer)->isActive();
 }
@@ -203,7 +203,7 @@ size_t VLayersProcessor::getActiveTrianglesNumber() const
  * @param layer1
  * @param layer2
  */
-void VLayersProcessor::createConnections(unsigned int layer1, unsigned int layer2)  {
+void VLayersProcessor::createConnections(uint layer1, uint layer2)  {
     //TODO find nearest ACTIVE layers to layer1 and layer2
 }
 
@@ -211,28 +211,28 @@ void VLayersProcessor::createConnections(unsigned int layer1, unsigned int layer
  * @param layer1
  * @param layer2
  */
-void VLayersProcessor::removeConnections(unsigned int layer1, unsigned int layer2)  {
+void VLayersProcessor::removeConnections(uint layer1, uint layer2)  {
     //TODO find nearest ACTIVE layers to layer1 and layer2
 }
 
 /**
  * @param layer
  */
-void VLayersProcessor::decreasePositions(unsigned int fromLayer)  {
+void VLayersProcessor::decreasePositions(uint fromLayer)  {
     //TODO find nearest ACTIVE layers to layer1 and layer2
 }
 
 /**
  * @param layer
  */
-void VLayersProcessor::increasePositions(unsigned int fromLayer)  {
+void VLayersProcessor::increasePositions(uint fromLayer)  {
     //TODO find nearest ACTIVE layers to layer1 and layer2
 }
 
 /**
  * @param layer
  */
-void VLayersProcessor::putOnTop(unsigned int layer)  {
+void VLayersProcessor::putOnTop(uint layer)  {
 
 }
 

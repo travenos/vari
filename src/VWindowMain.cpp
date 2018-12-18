@@ -54,12 +54,12 @@ VWindowMain::VWindowMain(QWidget *parent) :
 
 void VWindowMain::connectSimulationSignals()
 {
-    connect(m_pFacade.get(), SIGNAL(layerRemoved(unsigned int)),
-            this, SLOT(m_on_layer_removed(unsigned int)));
-    connect(m_pFacade.get(), SIGNAL(materialChanged(unsigned int)),
-            this, SLOT(m_on_material_changed(unsigned int)));
-    connect(m_pFacade.get(), SIGNAL(layerEnabled(unsigned int, bool)),
-            this, SLOT(m_on_layer_enabled(unsigned int, bool)));
+    connect(m_pFacade.get(), SIGNAL(layerRemoved(uint)),
+            this, SLOT(m_on_layer_removed(uint)));
+    connect(m_pFacade.get(), SIGNAL(materialChanged(uint)),
+            this, SLOT(m_on_material_changed(uint)));
+    connect(m_pFacade.get(), SIGNAL(layerEnabled(uint, bool)),
+            this, SLOT(m_on_layer_enabled(uint, bool)));
     connect(m_pFacade.get(), SIGNAL(layerAdded()),
             this, SLOT(m_on_layer_added()));
     connect(m_pFacade.get(), SIGNAL(injectionPointSet()),
@@ -75,6 +75,8 @@ void VWindowMain::connectSimulationSignals()
 
     connect(m_pFacade.get(), SIGNAL(resinChanged()),
             this, SLOT(m_on_resin_changed()));
+    connect(m_pFacade.get(), SIGNAL(layerVisibilityChanged(uint, bool)),
+            this, SLOT(m_on_layer_visibility_changed(uint, bool)));
     connect(m_pFacade.get(), SIGNAL(injectionDiameterSet(double)),
             this, SLOT(m_on_injection_diameter_set(double)));
     connect(m_pFacade.get(), SIGNAL(vacuumDiameterSet(double)),
@@ -199,7 +201,7 @@ void VWindowMain::selectLayer()
     if (ui->layersListWidget->currentIndex().isValid()
             && ui->layersListWidget->currentRow() < int(m_pFacade->getLayersNumber()))
     {
-        unsigned int layer = ui->layersListWidget->currentRow();
+        uint layer = ui->layersListWidget->currentRow();
         VCloth::const_ptr cloth = m_pFacade->getMaterial(layer);
         bool visible = m_pFacade->isLayerVisible(layer);
         bool enabled = m_pFacade->isLayerEnabled(layer);        
@@ -227,7 +229,7 @@ void VWindowMain::enableLayer(bool enable)
 {
     if (ui->layersListWidget->currentIndex().isValid())
     {
-        unsigned int layer = ui->layersListWidget->currentRow();
+        uint layer = ui->layersListWidget->currentRow();
         m_pFacade->enableLayer(layer, enable);
     }
 }
@@ -236,7 +238,7 @@ void VWindowMain::setVisibleLayer(bool visible)
 {
     if (ui->layersListWidget->currentIndex().isValid())
     {
-        unsigned int layer = ui->layersListWidget->currentRow();
+        uint layer = ui->layersListWidget->currentRow();
         m_pFacade->setVisible(layer, visible);
     }
 }
@@ -350,6 +352,17 @@ void VWindowMain::markLayerAsEnabled(int layer, bool enable)
     {
         QColor textColor = enable ? QColor::fromRgb(0, 0, 0) : QColor::fromRgb(127, 127, 127);
         ui->layersListWidget->item(layer)->setTextColor(textColor);
+        if (ui->layersListWidget->currentRow() == layer)
+            ui->layerEnableCheckBox->setChecked(enable);
+    }
+}
+
+void VWindowMain::markLayerAsVisible(int layer, bool visible)
+{
+    if(layer < ui->layersListWidget->count()
+       && ui->layersListWidget->currentRow() == layer)
+    {
+        ui->layerVisibleCheckBox->setChecked(visible);
     }
 }
 
@@ -660,18 +673,18 @@ void VWindowMain::on_selectMaterialResinButton_clicked()
     showWindowResin();
 }
 
-void VWindowMain::m_on_layer_removed(unsigned int layer)
+void VWindowMain::m_on_layer_removed(uint layer)
 {
     removeLayerFromList(layer);
     showModelInfo();
 }
 
-void VWindowMain::m_on_material_changed(unsigned int layer)
+void VWindowMain::m_on_material_changed(uint layer)
 {
     updateLayerMaterialInfo(layer);
 }
 
-void VWindowMain::m_on_layer_enabled(unsigned int layer, bool enable)
+void VWindowMain::m_on_layer_enabled(uint layer, bool enable)
 {
     markLayerAsEnabled(layer, enable);
     showModelInfo();
@@ -747,6 +760,11 @@ void VWindowMain::m_on_canceled_waiting_for_injection_point()
 void VWindowMain::m_on_canceled_waiing_for_vacuum_point()
 {
     ui->vacuumPlaceButton->setChecked(false);
+}
+
+void VWindowMain::m_on_layer_visibility_changed(uint layer, bool visible)
+{
+    markLayerAsVisible(layer, visible);
 }
 
 void VWindowMain::on_injectionPlaceButton_clicked(bool checked)

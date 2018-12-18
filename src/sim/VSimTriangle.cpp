@@ -33,7 +33,7 @@ VSimTriangle::VSimTriangle(const VCloth::const_ptr &p_material,
  */
 void VSimTriangle::getVertices(QVector3D vertices[VERTICES_NUMBER]) const 
 {
-    for (unsigned int i = 0; i < VERTICES_NUMBER; ++i)
+    for (uint i = 0; i < VERTICES_NUMBER; ++i)
         vertices[i] = m_pNodes[i]->getPosition();
 }
 

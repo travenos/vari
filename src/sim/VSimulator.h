@@ -32,7 +32,7 @@ public:
     /**
      * Period of the timer (in ms)
      */
-    static const unsigned int TIMER_PERIOD;
+    static const uint TIMER_PERIOD;
     /**
  * Default constructor
  */
@@ -124,7 +124,7 @@ private:
     /**
      * Number of threads for calculations during the simulation
      */
-    static const unsigned int N_THREADS;
+    static const uint N_THREADS;
 
     /**
      * Number of nodes, which are calculated in the same thread

@@ -32,6 +32,6 @@ void VGraphicsTriangle::updatePosition()
 {
     QVector3D vert[VSimTriangle::VERTICES_NUMBER];
     m_pSimTriangle->getVertices(vert);
-    for (unsigned int i = 0; i < VSimTriangle::VERTICES_NUMBER; ++i)
+    for (uint i = 0; i < VSimTriangle::VERTICES_NUMBER; ++i)
         m_pTriangleCoordinates->point.set1Value(i, vert[i].x(), vert[i].y(), vert[i].z());
 }

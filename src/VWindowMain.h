@@ -60,6 +60,7 @@ private:
     void updateLayerMaterialInfo(int layer);
     void showColor(const QColor &color);
     void markLayerAsEnabled(int layer, bool enable);
+    void markLayerAsVisible(int layer, bool visible);
 
     void updateResinInfo();
 
@@ -115,9 +116,10 @@ private slots:
                                                  VLayerAbstractBuilder::VUnit units);
     void m_on_layer_creation_manual_available(const VCloth& material, const VPolygon& polygon,
                                               VLayerAbstractBuilder::VUnit units);
-    void m_on_layer_removed(unsigned int layer);
-    void m_on_material_changed(unsigned int layer);
-    void m_on_layer_enabled(unsigned int layer, bool enable);
+    void m_on_layer_removed(uint layer);
+    void m_on_material_changed(uint layer);
+    void m_on_layer_enabled(uint layer, bool enable);
+    void m_on_layer_visibility_changed(uint layer, bool visible);
     void m_on_layer_added();
     void m_on_injection_point_set();
     void m_on_vacuum_point_set();

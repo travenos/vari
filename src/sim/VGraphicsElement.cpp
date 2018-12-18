@@ -40,13 +40,10 @@ void VGraphicsElement::updateAll()
 
 void VGraphicsElement::updateColor() 
 {
-    if (m_pSimElement->isVisible())
-    {
-        const QColor& color = m_pSimElement->getColor();
-        m_pGraphicsMaterial->diffuseColor.setValue(color.redF(),
-                                                      color.greenF(),
-                                                      color.blueF());
-    }
+    const QColor& color = m_pSimElement->getColor();
+    m_pGraphicsMaterial->diffuseColor.setValue(color.redF(),
+                                                  color.greenF(),
+                                                  color.blueF());
 }
 
 void VGraphicsElement::updateVisibility()

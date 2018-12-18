@@ -18,7 +18,7 @@ public:
     typedef std::shared_ptr<std::vector<VSimTriangle::ptr> > vector_ptr;
     typedef std::shared_ptr<const std::vector<VSimTriangle::ptr> > const_vector_ptr;
 
-    static const unsigned int VERTICES_NUMBER = 3;
+    static const uint VERTICES_NUMBER = 3;
 /**
  * @param p_material
  * @param p_node0

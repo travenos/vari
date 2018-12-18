@@ -34,35 +34,35 @@ void addLayer(VLayerAbstractBuilder *builder) ;
 /**
  * @param layer
  */
-void removeLayer(unsigned int layer) ;
+void removeLayer(uint layer) ;
     
 /**
  * @param layer
  * @param visible
  */
-void setVisibleLayer(unsigned int layer, bool visible) ;
+void setVisibleLayer(uint layer, bool visible) ;
     
 /**
  * @param layer
  */
-void enableLayer(unsigned int layer, bool enable) ;
+void enableLayer(uint layer, bool enable) ;
     
 /**
  * @param layer
  * @param material
  */
-void setMaterial(unsigned int layer, const VCloth &material) ;
+void setMaterial(uint layer, const VCloth &material) ;
 
 void reset() ;
 void clear() ;
 
-VCloth::const_ptr getMaterial(unsigned int layer) const ;
+VCloth::const_ptr getMaterial(uint layer) const ;
 
 const VSimNode::const_vector_ptr &getActiveNodes() const ;
 const VSimTriangle::const_vector_ptr &getActiveTriangles() const ;
 
-bool isLayerVisible(unsigned int layer) const ;
-bool isLayerEnabled(unsigned int layer) const ;
+bool isLayerVisible(uint layer) const ;
+bool isLayerEnabled(uint layer) const ;
 
 void setInjectionPoint(const QVector3D &point, double diameter);
 void setVacuumPoint(const QVector3D &point, double diameter);
@@ -82,28 +82,28 @@ private:
  * @param layer1
  * @param layer2
  */
-void createConnections(unsigned int layer1, unsigned int layer2) ;
+void createConnections(uint layer1, uint layer2) ;
     
 /**
  * @param layer1
  * @param layer2
  */
-void removeConnections(unsigned int layer1, unsigned int layer2) ;
+void removeConnections(uint layer1, uint layer2) ;
     
 /**
  * @param layer
  */
-void decreasePositions(unsigned int fromLayer) ;
+void decreasePositions(uint fromLayer) ;
     
 /**
  * @param layer
  */
-void increasePositions(unsigned int fromLayer) ;
+void increasePositions(uint fromLayer) ;
     
 /**
  * @param layer
  */
-void putOnTop(unsigned int layer) ;
+void putOnTop(uint layer) ;
 };
 
 #endif //_VLAYERSPROCESSOR_H

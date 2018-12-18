@@ -126,7 +126,7 @@ void VSimulationFacade::getModelSize(QVector3D &size) const
  * @param layer
  * @param visible
  */
-void VSimulationFacade::setVisible(unsigned int layer, bool visible) 
+void VSimulationFacade::setVisible(uint layer, bool visible)
 {
     m_pLayersProcessor->setVisibleLayer(layer, visible);
     m_pGraphicsViewer->updateVisibility();
@@ -136,7 +136,7 @@ void VSimulationFacade::setVisible(unsigned int layer, bool visible)
 /**
  * @param layer
  */
-void VSimulationFacade::removeLayer(unsigned int layer) 
+void VSimulationFacade::removeLayer(uint layer)
 {
     m_pLayersProcessor->removeLayer(layer);
     updateConfiguration();
@@ -146,18 +146,20 @@ void VSimulationFacade::removeLayer(unsigned int layer)
 /**
  * @param layer
  */
-void VSimulationFacade::enableLayer(unsigned int layer, bool enable) 
+void VSimulationFacade::enableLayer(uint layer, bool enable)
 {
     m_pLayersProcessor->enableLayer(layer, enable);
     updateConfiguration();
     emit layerEnabled(layer, enable);
+    bool isVisible = m_pLayersProcessor->isLayerVisible(layer);
+    emit layerVisibilityChanged(layer, isVisible);
 }
 
 /**
  * @param layer
  * @param material
  */
-void VSimulationFacade::setMaterial(unsigned int layer, const VCloth &material) 
+void VSimulationFacade::setMaterial(uint layer, const VCloth &material)
 {
     m_pLayersProcessor->setMaterial(layer, material);
     m_pSimulator->resetTriangleColors();
@@ -209,7 +211,7 @@ void VSimulationFacade::newModel()
     m_pGraphicsViewer->clearAll();
 }
 
-VCloth::const_ptr VSimulationFacade::getMaterial(unsigned int layer) const 
+VCloth::const_ptr VSimulationFacade::getMaterial(uint layer) const
 {
     return m_pLayersProcessor->getMaterial(layer);
 }
@@ -219,12 +221,12 @@ VSimulationParametres::const_ptr VSimulationFacade::getParametres() const
     return m_pSimulator->getSimulationParametres();
 }
 
-bool VSimulationFacade::isLayerVisible(unsigned int layer) const 
+bool VSimulationFacade::isLayerVisible(uint layer) const
 {
     return m_pLayersProcessor->isLayerVisible(layer);
 }
 
-bool VSimulationFacade::isLayerEnabled(unsigned int layer) const 
+bool VSimulationFacade::isLayerEnabled(uint layer) const
 {
     return m_pLayersProcessor->isLayerEnabled(layer);
 }
