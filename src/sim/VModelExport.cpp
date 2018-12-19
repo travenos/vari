@@ -62,7 +62,7 @@ void VModelExport::saveToFile(const QString &filename)
 
 void VModelExport::saveInfo(QXmlStreamWriter &xmlWriter)
 {
-    VXmlInfoTags tags;
+    auto &tags = INFO_TAGS;
     xmlWriter.writeStartElement(tags.NAME);
     xmlWriter.writeAttribute(tags.SIM_TIME, QString::number(m_info.simTime));
     xmlWriter.writeAttribute(tags.REAL_TIME, QString::number(m_info.realTime));
@@ -75,7 +75,7 @@ void VModelExport::saveInfo(QXmlStreamWriter &xmlWriter)
 
 void VModelExport::saveParametres(QXmlStreamWriter &xmlWriter)
 {
-    VXmlParamTags tags;
+    auto &tags = PARAM_TAGS;
     xmlWriter.writeStartElement(tags.NAME);
     xmlWriter.writeAttribute(tags.INJECTION_DIAMETER, QString::number(m_pParam->getInjectionDiameter()));
     xmlWriter.writeAttribute(tags.VACUUM_DIAMETER, QString::number(m_pParam->getVacuumDiameter()));
@@ -94,7 +94,7 @@ void VModelExport::saveParametres(QXmlStreamWriter &xmlWriter)
 
 void VModelExport::saveResin(QXmlStreamWriter &xmlWriter, const VResin &resin)
 {
-    VXmlParamTags::VXmlResinTags tags;
+    auto &tags = PARAM_TAGS.RESIN_TAGS;
     xmlWriter.writeStartElement(tags.NAME);
     xmlWriter.writeAttribute(tags.TEMP_COEF, QString::number(resin.tempcoef));
     xmlWriter.writeAttribute(tags.DEFAULT_VISCOSITY, QString::number(resin.defaultViscosity));
@@ -104,7 +104,7 @@ void VModelExport::saveResin(QXmlStreamWriter &xmlWriter, const VResin &resin)
 
 void VModelExport::savePaused(QXmlStreamWriter &xmlWriter)
 {
-    VXmlPausedTags tags;
+    auto &tags = PAUSED_TAGS;
     xmlWriter.writeStartElement(tags.NAME);
     xmlWriter.writeCharacters(QString::number(m_paused));
     xmlWriter.writeEndElement();
@@ -112,7 +112,7 @@ void VModelExport::savePaused(QXmlStreamWriter &xmlWriter)
 
 void VModelExport::saveLayers(QXmlStreamWriter &xmlWriter)
 {
-    VXmlLayersTags tags;
+    auto &tags = LAYERS_TAGS;
     xmlWriter.writeStartElement(tags.NAME);
     for (uint i = 0; i < m_pLayersProcessor->getLayersNumber(); ++i)
         saveLayer(xmlWriter, i);
@@ -121,7 +121,7 @@ void VModelExport::saveLayers(QXmlStreamWriter &xmlWriter)
 
 void VModelExport::saveLayer(QXmlStreamWriter &xmlWriter, uint layer)
 {
-    VXmlLayersTags::VXmlLayerTags tags;
+    auto &tags = LAYERS_TAGS.LAYER_TAGS;
     xmlWriter.writeStartElement(tags.NAME);
     xmlWriter.writeAttribute(tags.NUMBER, QString::number(layer));
     xmlWriter.writeAttribute(tags.IS_ENABLED,
@@ -136,7 +136,7 @@ void VModelExport::saveLayer(QXmlStreamWriter &xmlWriter, uint layer)
 
 void VModelExport::saveCloth(QXmlStreamWriter &xmlWriter, const VCloth::const_ptr &cloth)
 {
-    VXmlLayersTags::VXmlLayerTags::VXmlClothTags tags;
+    auto &tags = LAYERS_TAGS.LAYER_TAGS.CLOTH_TAGS;
     xmlWriter.writeStartElement(tags.NAME);
     xmlWriter.writeAttribute(tags.CAVITY_HEIGHT, QString::number(cloth->cavityHeight));
     xmlWriter.writeAttribute(tags.PERMEABILITY, QString::number(cloth->permeability));
@@ -149,7 +149,7 @@ void VModelExport::saveCloth(QXmlStreamWriter &xmlWriter, const VCloth::const_pt
 void VModelExport::saveNodes(QXmlStreamWriter &xmlWriter,
                                  const VSimNode::const_vector_ptr &nodes)
 {
-    VXmlLayersTags::VXmlLayerTags::VXmlNodesTags tags;
+    auto &tags = LAYERS_TAGS.LAYER_TAGS.NODES_TAGS;
     xmlWriter.writeStartElement(tags.NAME);
     for (auto &node : *nodes)
         saveNode(xmlWriter, node);
@@ -159,7 +159,7 @@ void VModelExport::saveNodes(QXmlStreamWriter &xmlWriter,
 void VModelExport::saveNode(QXmlStreamWriter &xmlWriter,
                                  const VSimNode::const_ptr &node)
 {
-    VXmlLayersTags::VXmlLayerTags::VXmlNodesTags::VXmlNodeTags tags;
+    auto &tags = LAYERS_TAGS.LAYER_TAGS.NODES_TAGS.NODE_TAGS;
     xmlWriter.writeStartElement(tags.NAME);
     xmlWriter.writeAttribute(tags.ID, QString::number(node->getId()));
     xmlWriter.writeAttribute(tags.PRESSURE, QString::number(node->getPressure()));
@@ -171,7 +171,7 @@ void VModelExport::saveNode(QXmlStreamWriter &xmlWriter,
 void VModelExport::saveTriangles(QXmlStreamWriter &xmlWriter,
                                  const VSimTriangle::const_vector_ptr &triangles)
 {
-    VXmlLayersTags::VXmlLayerTags::VXmlTrianglesTags tags;
+    auto &tags = LAYERS_TAGS.LAYER_TAGS.TRIANGLES_TAGS;
     xmlWriter.writeStartElement(tags.NAME);
     for (auto &triangle : *triangles)
         saveTriangle(xmlWriter, triangle);
@@ -181,7 +181,7 @@ void VModelExport::saveTriangles(QXmlStreamWriter &xmlWriter,
 void VModelExport::saveTriangle(QXmlStreamWriter &xmlWriter,
                                  const VSimTriangle::const_ptr &triangle)
 {
-    VXmlLayersTags::VXmlLayerTags::VXmlTrianglesTags::VXmlTriangleTags tags;
+    auto &tags = LAYERS_TAGS.LAYER_TAGS.TRIANGLES_TAGS.TRIANGLES_TAGS;
     xmlWriter.writeStartElement(tags.NAME);
     xmlWriter.writeAttribute(tags.ID, QString::number(triangle->getId()));
     xmlWriter.writeAttribute(tags.COLOR, triangle->getColor().name());
@@ -191,7 +191,7 @@ void VModelExport::saveTriangle(QXmlStreamWriter &xmlWriter,
 
 void VModelExport::saveConnections(QXmlStreamWriter &xmlWriter)
 {
-    VXmlConnectionsTags tags;
+    auto &tags = CONNECTIONS_TAGS;
     xmlWriter.writeStartElement(tags.NAME);
     for (uint i = 0; i < m_pLayersProcessor->getLayersNumber(); ++i)
     {
@@ -205,7 +205,7 @@ void VModelExport::saveConnections(QXmlStreamWriter &xmlWriter)
 void VModelExport::saveConnection(QXmlStreamWriter &xmlWriter,
                                  const VSimNode::const_ptr &node)
 {
-    VXmlConnectionsTags::VXmlConnectionTags tags;
+    auto &tags = CONNECTIONS_TAGS.CONNECTION_TAGS;
     xmlWriter.writeStartElement(tags.NAME);
     xmlWriter.writeAttribute(tags.ID, QString::number(node->getId()));
     std::vector<uint> connections;

@@ -43,6 +43,8 @@ protected:
         const QString AVERAGE_CELL_DISTANCE{QStringLiteral("averageCellDistance")};
         const QString AVERAGE_PERMEABILITY{QStringLiteral("averagePermeability")};
         const QString NUMBER_OF_FULL_NODES{QStringLiteral("numberOfFullNodes")};
+
+        const VXmlResinTags RESIN_TAGS;
     };
     struct VXmlPausedTags
     {
@@ -73,6 +75,8 @@ protected:
                 };
 
                 const QString NAME{QStringLiteral("Nodes")};
+
+                const VXmlNodeTags NODE_TAGS;
             };
             struct VXmlTrianglesTags
             {
@@ -84,15 +88,23 @@ protected:
                 };
 
                 const QString NAME{QStringLiteral("Triangles")};
+
+                const VXmlTriangleTags TRIANGLES_TAGS;
             };
 
             const QString NAME{QStringLiteral("Layer")};
             const QString NUMBER{QStringLiteral("number")};
             const QString IS_ENABLED{QStringLiteral("isEnabled")};
             const QString IS_VISIBLE{QStringLiteral("isVisible")};
+
+            const VXmlClothTags CLOTH_TAGS;
+            const VXmlNodesTags NODES_TAGS;
+            const VXmlTrianglesTags TRIANGLES_TAGS;
         };
 
         const QString NAME{QStringLiteral("Layers")};
+
+        const VXmlLayerTags LAYER_TAGS;
     };
     struct VXmlConnectionsTags
     {
@@ -104,8 +116,15 @@ protected:
         };
 
         const QString NAME{QStringLiteral("Connections")};
+
+        const VXmlConnectionTags CONNECTION_TAGS;
     };
 
+    const VXmlInfoTags INFO_TAGS;
+    const VXmlParamTags PARAM_TAGS;
+    const VXmlPausedTags PAUSED_TAGS;
+    const VXmlLayersTags LAYERS_TAGS;
+    const VXmlConnectionsTags CONNECTIONS_TAGS;
 };
 
 #endif // _VMODELIMPORTEXPORT_H
