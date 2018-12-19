@@ -49,6 +49,9 @@ public:
 
 private: 
     void p_setVisible(bool visible) ;
+//TODO Add id ranges: nodeMinId, nodeMaxId, triangleMinId, triangleMaxId
+    //TODO Add their setters, getters.
+    //Set theese values in builder
 
     const VSimNode::vector_ptr m_pNodes;
     const VSimTriangle::vector_ptr m_pTriangles;

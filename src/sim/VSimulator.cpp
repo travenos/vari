@@ -77,8 +77,11 @@ void VSimulator::stop()
 
 void VSimulator::pause()
 {
-    m_pauseFlag.store(true);
-    interrupt();
+    if (isSimulating())
+    {
+        m_pauseFlag.store(true);
+        interrupt();
+    }
 }
 
 void VSimulator::interrupt()

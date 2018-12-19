@@ -23,7 +23,6 @@ public:
      * @param simulator
      */
     VLayersProcessor();
-    //TODO remove operator= and copy constructor
     size_t getLayersNumber() const ;
     size_t getActiveLayersNumber() const ;
     size_t getInactiveLayersNumber() const ;
@@ -62,6 +61,9 @@ public:
 
     const VSimNode::const_vector_ptr &getActiveNodes() const ;
     const VSimTriangle::const_vector_ptr &getActiveTriangles() const ;
+
+    VSimNode::const_vector_ptr getLayerNodes(uint layer) const ;
+    VSimTriangle::const_vector_ptr getLayerTriangles(uint layer) const ;
 
     bool isLayerVisible(uint layer) const ;
     bool isLayerEnabled(uint layer) const ;

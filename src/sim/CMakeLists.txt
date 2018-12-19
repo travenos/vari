@@ -42,6 +42,9 @@ set(HEADER_FILES
     VLayer.h
     VLayerManualBuilder.h
     VLayersProcessor.h
+    VModelExport.h
+    VModelImport.h
+    VModelImportExport.h
     VSimElement.h
     VSimNode.h
     VSimTriangle.h
@@ -63,6 +66,8 @@ set(SOURCE_FILES
     VLayerFromGmeshBuilder.cpp
     VLayerManualBuilder.cpp
     VLayersProcessor.cpp
+    VModelExport.cpp
+    VModelImport.cpp
     VSimElement.cpp
     VSimNode.cpp
     VSimTriangle.cpp

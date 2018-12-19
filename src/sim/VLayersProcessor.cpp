@@ -260,6 +260,16 @@ const VSimTriangle::const_vector_ptr &VLayersProcessor::getActiveTriangles() con
     return m_pActiveTriangles;
 }
 
+VSimNode::const_vector_ptr VLayersProcessor::getLayerNodes(uint layer) const
+{
+    return m_layers.at(layer)->getNodes();
+}
+
+VSimTriangle::const_vector_ptr VLayersProcessor::getLayerTriangles(uint layer) const
+{
+    return m_layers.at(layer)->getTriangles();
+}
+
 void VLayersProcessor::updateActiveElementsVectors() 
 {
     std::vector<VSimNode::ptr> * activeNodes = new std::vector<VSimNode::ptr>;

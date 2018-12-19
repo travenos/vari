@@ -21,6 +21,7 @@ public:
     static const uint VERTICES_NUMBER = 3;
 /**
  * @param p_material
+ * @param p_param
  * @param p_node0
  * @param p_node1
  * @param p_node2
@@ -32,6 +33,7 @@ VSimTriangle(uint id, const VCloth::const_ptr &p_material,
              const VSimNode::const_ptr &p_node2);
     
 void getVertices(QVector3D vertices[VERTICES_NUMBER]) const ;
+QVector3D getVerticesId() const ;
 void updateColor() ;
 const QColor& getColor() const override;
 double getPressure() const override;

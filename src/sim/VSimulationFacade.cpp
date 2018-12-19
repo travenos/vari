@@ -11,6 +11,8 @@
 #include "VSimulationFacade.h"
 #include "VLayerFromGmeshBuilder.h"
 #include "VLayerFromAnsysBuilder.h"
+#include "VModelExport.h"
+#include "VModelImport.h"
 #include "core/VExceptions.h"
 
 /**
@@ -224,7 +226,13 @@ void VSimulationFacade::loadModel(const QString &filename)
 }
 void VSimulationFacade::saveModel(const QString &filename)
 {
-
+    m_pSimulator->pause();
+    VSimulationInfo info = m_pSimulator->getSimulationInfo();
+    VSimulationParametres::const_ptr param = m_pSimulator->getSimulationParametres();
+    bool paused = m_pSimulator->isPaused();
+    VModelExport saver(info, param, m_pLayersProcessor, paused);
+    saver.saveToFile(filename);
+    emit modelSaved();
 }
 
 VCloth::const_ptr VSimulationFacade::getMaterial(uint layer) const

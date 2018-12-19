@@ -12,6 +12,7 @@
 
 /**
  * @param p_material
+ * @param p_param
  * @param p_node0
  * @param p_node1
  * @param p_node2
@@ -35,6 +36,14 @@ void VSimTriangle::getVertices(QVector3D vertices[VERTICES_NUMBER]) const
 {
     for (uint i = 0; i < VERTICES_NUMBER; ++i)
         vertices[i] = m_pNodes[i]->getPosition();
+}
+
+QVector3D VSimTriangle::getVerticesId() const
+{
+    QVector3D ids;
+    for (uint i = 0; i < VERTICES_NUMBER; ++i)
+        ids[i] = m_pNodes[i]->getId();
+    return ids;
 }
 
 void VSimTriangle::updateColor() 

@@ -135,6 +135,9 @@ signals:
     void coefQSet(double q) ;
     void coefRSet(double r) ;
     void coefSSet(double s) ;
+
+    void modelSaved();
+    void modelLoaded();
 };
 
 #endif //_VSIMULATIONFACADE_H

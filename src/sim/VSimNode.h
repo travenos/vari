@@ -24,7 +24,7 @@ public:
     typedef std::shared_ptr<std::vector<VSimNode::ptr> > vector_ptr;
     typedef std::shared_ptr<const std::vector<VSimNode::ptr> > const_vector_ptr;
 
-    enum VLayerSequence { PREVIOUS, CURRENT, NEXT };
+    enum VLayerSequence { PREVIOUS=0, CURRENT, NEXT };
     enum VNodeRole { NORMAL, INJECTION, VACUUM };
 /**
  * @param pos
@@ -44,6 +44,7 @@ void calculate() ;
 void commit(bool *madeChanges=nullptr, bool *isFull=nullptr) ;
 double getPressure() const override;
 double getFilledPart() const override;
+double getNewPressure() const;
 /**
  * @param neighbour
  * @param layer
@@ -61,7 +62,11 @@ double getDistance(const QVector3D& point) const;
 const QVector3D &getPosition() const ;
 void reset()  override;
 void getNeighbours(std::vector<const VSimNode *> &neighbours) const ;
+void getNeighbours(std::vector<const VSimNode *> &neighbours, VLayerSequence layer) const ;
+void getNeighboursId(std::vector<uint> &neighbourId) const ;
+void getNeighboursId(std::vector<uint> &neighbourId, VLayerSequence layer) const;
 size_t getNeighboursNumber() const ;
+size_t getNeighboursNumber(VLayerSequence layer) const ;
 double getCavityHeight() const ;
 double getPorosity() const ;
 double getPermeability() const ;
@@ -72,13 +77,14 @@ bool isNormal() const override;
 
 private: 
 
-struct VLayeredNeighbours
-{
-    std::multimap<double, const VSimNode*> previousLayerNeighbours;
-    std::multimap<double, const VSimNode*> currentLayerNeighbours;
-    std::multimap<double, const VSimNode*> nextLayerNeighbours;
-    //TODO: Implement size(), clear(), simple iterator
-};
+//struct VLayeredNeighbours
+//{
+//    std::multimap<double, const VSimNode*> previousLayerNeighbours;
+//    std::multimap<double, const VSimNode*> currentLayerNeighbours;
+//    std::multimap<double, const VSimNode*> nextLayerNeighbours;
+//    //TODO: Implement size(), clear(), simple iterator
+//};
+    typedef std::multimap<double, const VSimNode*> VLayeredNeighbours[3];
 
     VNodeRole m_role;
     std::atomic<double> m_currentPressure;

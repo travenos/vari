@@ -80,11 +80,11 @@ void VSimNode::calculate()
                 highestNeighborPressure = p_it;
             }
         };
-        for(auto &it: m_neighbours.currentLayerNeighbours)
+        for(auto &it: m_neighbours[CURRENT])
             calcNeighbour(it);
-        for(auto &it: m_neighbours.previousLayerNeighbours)
+        for(auto &it: m_neighbours[PREVIOUS])
             calcNeighbour(it);
-        for(auto &it: m_neighbours.nextLayerNeighbours)
+        for(auto &it: m_neighbours[NEXT])
             calcNeighbour(it);
 
         m_newPressure = p_t+(brace0/m)*sum;
@@ -142,25 +142,19 @@ double VSimNode::getFilledPart() const
     return (nom >= den) ? 1 : (nom / den);
 }
 
+double VSimNode::getNewPressure() const
+{
+    return m_newPressure;
+}
+
 /**
  * @param node
  * @param layer
  */
 void VSimNode::addNeighbour(const VSimNode* node, VLayerSequence layer) 
 {
-    double dist = getDistance(node);
-    switch (layer)
-    {
-    case CURRENT:
-        m_neighbours.currentLayerNeighbours.insert(std::make_pair(dist, node));
-        break;
-    case PREVIOUS:
-        m_neighbours.previousLayerNeighbours.insert(std::make_pair(dist, node));
-        break;
-    default:
-        m_neighbours.nextLayerNeighbours.insert(std::make_pair(dist, node));
-        break;
-    }
+    double dist = getDistance(node);    
+    m_neighbours[layer].insert(std::make_pair(dist, node));
     ++m_neighboursNumber;
 }
 
@@ -185,9 +179,9 @@ void VSimNode::addNeighbourMutually(VSimNode* node, VLayerSequence layer)
 
 void VSimNode::clearAllNeighbours() 
 {
-    m_neighbours.currentLayerNeighbours.clear();
-    m_neighbours.previousLayerNeighbours.clear();
-    m_neighbours.nextLayerNeighbours.clear();
+    m_neighbours[PREVIOUS].clear();
+    m_neighbours[CURRENT].clear();
+    m_neighbours[NEXT].clear();
     m_neighboursNumber = 0;
 }
 
@@ -196,22 +190,11 @@ void VSimNode::clearAllNeighbours()
  */
 void VSimNode::clearNeighbours(VLayerSequence layer) 
 {
-    switch (layer)
-    {
-    case CURRENT:
-        m_neighbours.currentLayerNeighbours.clear();
-        break;
-    case PREVIOUS:
-        m_neighbours.previousLayerNeighbours.clear();
-        break;
-    default:
-        m_neighbours.nextLayerNeighbours.clear();
-        break;
-    }
+    m_neighbours[layer].clear();
     m_neighboursNumber =
-            m_neighbours.currentLayerNeighbours.size()
-            + m_neighbours.previousLayerNeighbours.size()
-            + m_neighbours.nextLayerNeighbours.size();
+            m_neighbours[PREVIOUS].size()
+            + m_neighbours[CURRENT].size()
+            + m_neighbours[NEXT].size();
 }
 
 double VSimNode::getDistance(const VSimNode * node) const 
@@ -247,17 +230,50 @@ void VSimNode::getNeighbours(std::vector<const VSimNode*> &neighbours) const
 {
     neighbours.clear();
     neighbours.reserve(getNeighboursNumber());
-    for (auto &neighbour : m_neighbours.currentLayerNeighbours)
+    for (auto &neighbour : m_neighbours[CURRENT])
         neighbours.push_back(neighbour.second);
-    for (auto &neighbour : m_neighbours.previousLayerNeighbours)
+    for (auto &neighbour : m_neighbours[PREVIOUS])
         neighbours.push_back(neighbour.second);
-    for (auto &neighbour : m_neighbours.nextLayerNeighbours)
+    for (auto &neighbour : m_neighbours[NEXT])
         neighbours.push_back(neighbour.second);
+}
+
+void VSimNode::getNeighbours(std::vector<const VSimNode*> &neighbours, VLayerSequence layer) const
+{
+    neighbours.clear();
+    neighbours.reserve(getNeighboursNumber(layer));
+    for (auto &neighbour : m_neighbours[layer])
+        neighbours.push_back(neighbour.second);
+}
+
+void VSimNode::getNeighboursId(std::vector<uint> &neighbourId) const
+{
+    neighbourId.clear();
+    neighbourId.reserve(getNeighboursNumber());
+    for (auto &neighbour : m_neighbours[CURRENT])
+        neighbourId.push_back(neighbour.second->getId());
+    for (auto &neighbour : m_neighbours[PREVIOUS])
+        neighbourId.push_back(neighbour.second->getId());
+    for (auto &neighbour : m_neighbours[NEXT])
+        neighbourId.push_back(neighbour.second->getId());
+}
+
+void VSimNode::getNeighboursId(std::vector<uint> &neighbourId, VLayerSequence layer) const
+{
+    neighbourId.clear();
+    neighbourId.reserve(getNeighboursNumber());
+    for (auto &neighbour : m_neighbours[layer])
+        neighbourId.push_back(neighbour.second->getId());
 }
 
 size_t VSimNode::getNeighboursNumber() const
 {
     return m_neighboursNumber;
+}
+
+size_t VSimNode::getNeighboursNumber(VLayerSequence layer) const
+{
+    return m_neighbours[layer].size();
 }
 
 double VSimNode::getCavityHeight() const 
