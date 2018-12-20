@@ -24,14 +24,13 @@ if (!(test-path "$COIN_REPO_PATH"))
 	hg clone $COIN_REPO_URL
 	cd "$COIN_REPO_PATH"
 	check_exit_code($LASTEXITCODE)
-	hg update default
 }
 else
 {
 	cd "$COIN_REPO_PATH"
 	hg pull
-	hg merge
 }
+hg update default
 hg checkout $COIN_CHANGESET_HASH
 if (!(test-path coin_build)) {mkdir coin_build}
 cd coin_build
@@ -51,14 +50,13 @@ if (!(test-path "$SOQT_REPO_PATH"))
 	hg clone $SOQT_REPO_URL
 	cd "$SOQT_REPO_PATH"
 	check_exit_code($LASTEXITCODE)
-	hg update default
 }
 else
 {
 	cd "$SOQT_REPO_PATH"
 	hg pull
-	hg merge
 }
+hg update default
 hg checkout $SOQT_CHANGESET_HASH
 if (!(test-path soqt_build)) {mkdir soqt_build}
 cd soqt_build

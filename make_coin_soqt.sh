@@ -93,12 +93,11 @@ COIN_REPO_PATH=coin
 if [ ! -d "$COIN_REPO_PATH" ]; then
 	hg clone $COIN_REPO_URL || exit
 	cd $COIN_REPO_PATH || exit
-	hg update default
 else
 	cd "$COIN_REPO_PATH"
 	hg pull
-	hg merge
 fi
+hg update default
 hg checkout $COIN_CHANGESET_HASH
 
 echo "Starting to build Coin3D. Making build in directory $WORK_DIR. It will be installed to directory $INSTALL_DIR. Using $THREADS_NUMBER threads."
@@ -117,12 +116,11 @@ SOQT_REPO_PATH=soqt
 if [ ! -d "$SOQT_REPO_PATH" ]; then
 	hg clone $SOQT_REPO_URL || exit
 	cd $SOQT_REPO_PATH || exit
-	hg update default
 else
 	cd "$SOQT_REPO_PATH"
 	hg pull
-	hg merge
 fi
+hg update default
 hg checkout $SOQT_CHANGESET_HASH
 
 echo "Starting to build SoQt. Making build in directory $WORK_DIR. It will be installed to directory $INSTALL_DIR. Using $THREADS_NUMBER threads."
