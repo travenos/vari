@@ -20,7 +20,7 @@ VSimulationParametres::VSimulationParametres(const VSimulationParametres &other)
     m_temperature(other.getTemperature()),
     m_injectionDiameter(other.getInjectionDiameter()),
     m_vacuumDiameter(other.getVacuumDiameter()),
-    m_injectionPressure(other.getInjectionDiameter()),
+    m_injectionPressure(other.getInjectionPressure()),
     m_vacuumPressure(other.getVacuumPressure()),
     m_q(other.getQ()),
     m_r(other.getR()),
@@ -38,7 +38,7 @@ VSimulationParametres& VSimulationParametres::operator= (const VSimulationParame
     m_temperature = other.getTemperature();
     m_injectionDiameter = other.getInjectionDiameter();
     m_vacuumDiameter = other.getVacuumDiameter();
-    m_injectionPressure = other.getInjectionDiameter();
+    m_injectionPressure = other.getInjectionPressure();
     m_vacuumPressure = other.getVacuumPressure();
     m_q = other.getQ();
     m_r = other.getR();
