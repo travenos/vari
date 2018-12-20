@@ -11,11 +11,11 @@
 class VModelImportExport
 {
 public:
-    VModelImportExport() {};
+    VModelImportExport() {}
 protected:
     struct VXmlInfoTags
     {
-        VXmlInfoTags() {};
+        VXmlInfoTags() {}
         const QString NAME{QStringLiteral("Info")};
         const QString SIM_TIME{QStringLiteral("simTime")};
         const QString REAL_TIME{QStringLiteral("realTime")};
@@ -26,10 +26,10 @@ protected:
     };
     struct VXmlParamTags
     {
-		VXmlParamTags() {};
+        VXmlParamTags() {}
         struct VXmlResinTags
         {
-			VXmlResinTags() {};
+            VXmlResinTags() {}
             const QString NAME{QStringLiteral("Resin")};
             const QString TEMP_COEF{QStringLiteral("tempcoef")};
             const QString DEFAULT_VISCOSITY{QStringLiteral("defaultViscosity")};
@@ -53,18 +53,18 @@ protected:
     };
     struct VXmlPausedTags
     {
-		VXmlPausedTags() {};
+        VXmlPausedTags() {}
         const QString NAME{QStringLiteral("Paused")};
     };
     struct VXmlLayersTags
     {
-		VXmlLayersTags() {};
+        VXmlLayersTags() {}
         struct VXmlLayerTags
         {
-			VXmlLayerTags() {};
+            VXmlLayerTags() {}
             struct VXmlClothTags
             {
-				VXmlClothTags() {};
+                VXmlClothTags() {}
                 const QString NAME{QStringLiteral("Cloth")};
                 const QString CAVITY_HEIGHT{QStringLiteral("cavityHeight")};
                 const QString PERMEABILITY{QStringLiteral("permeability")};
@@ -74,10 +74,10 @@ protected:
             };
             struct VXmlNodesTags
             {
-				VXmlNodesTags() {};
+                VXmlNodesTags() {}
                 struct VXmlNodeTags
                 {
-					VXmlNodeTags() {};
+                    VXmlNodeTags() {}
                     const QString NAME{QStringLiteral("Node")};
                     const QString ID{QStringLiteral("id")};
                     const QString PRESSURE{QStringLiteral("press")};
@@ -91,10 +91,10 @@ protected:
             };
             struct VXmlTrianglesTags
             {
-				VXmlTrianglesTags() {};
+                VXmlTrianglesTags() {}
                 struct VXmlTriangleTags
                 {
-					VXmlTriangleTags() {};
+                    VXmlTriangleTags() {}
                     const QString NAME{QStringLiteral("Trngl")};
                     const QString ID{QStringLiteral("id")};
                     const QString COLOR{QStringLiteral("color")};
@@ -121,10 +121,10 @@ protected:
     };
     struct VXmlConnectionsTags
     {
-		VXmlConnectionsTags() {};
+        VXmlConnectionsTags() {}
         struct VXmlConnectionTags
         {
-			VXmlConnectionTags() {};
+            VXmlConnectionTags() {}
             const QString NAME{QStringLiteral("Cnt")};
             const QString ID{QStringLiteral("id")};
 
