@@ -7,7 +7,7 @@
 #ifndef _VLAYERFROMFILEBUILDER_H
 #define _VLAYERFROMFILEBUILDER_H
 
-#include <map>
+#include <unordered_map>
 #include <QFile>
 #include "VLayerAbstractBuilder.h"
 #include "VSimNode.h"
@@ -25,7 +25,7 @@ public:
     const VLayer::ptr &build();
 
 protected: 
-    std::map<int, VSimNode::ptr> m_nodesMap;
+    std::unordered_map<int, VSimNode::ptr> m_nodesMap;
     VSimNode::vector_ptr m_pNodes;
     VSimTriangle::vector_ptr m_pTriangles;
     QFile m_file;

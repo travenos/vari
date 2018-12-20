@@ -33,7 +33,10 @@ public:
  */
 VSimNode(uint id, const QVector3D &pos,
          const VCloth::const_ptr &p_material,
-         const VSimulationParametres::const_ptr &p_param);
+         const VSimulationParametres::const_ptr &p_param,
+         double pressure=0,
+         double newPressure=0,
+         VNodeRole role=NORMAL);
     
 /**
  * @param role
@@ -78,11 +81,11 @@ bool isNormal() const override;
 private: 
     typedef std::multimap<double, const VSimNode*> VLayeredNeighbours[3];
 
-    VNodeRole m_role;
-    std::atomic<double> m_currentPressure;
-    std::atomic<double> m_newPressure;
     VLayeredNeighbours m_neighbours;
     QVector3D m_position;
+    std::atomic<double> m_currentPressure;
+    std::atomic<double> m_newPressure;
+    VNodeRole m_role;
     size_t m_neighboursNumber;
 };
 

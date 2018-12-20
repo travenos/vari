@@ -25,12 +25,6 @@ public:
     void setPaused(bool paused);
     void saveToFile(const QString &filename);
 
-protected:
-    VSimulationInfo m_info;
-    VSimulationParametres::const_ptr m_pParam;
-    VLayersProcessor::const_ptr m_pLayersProcessor;
-    bool m_paused;
-
 private:
     void saveInfo(QXmlStreamWriter &xmlWriter);
 
@@ -63,10 +57,21 @@ private:
     void saveConnection(QXmlStreamWriter &xmlWriter,
                                      const VSimNode::const_ptr &node);
 
+    void saveConnectionCurrentLayer(QXmlStreamWriter &xmlWriter,
+                                     const VSimNode::const_ptr &node);
+
+    void saveConnectionPreviousLayer(QXmlStreamWriter &xmlWriter,
+                                     const VSimNode::const_ptr &node);
+
     QString createString(const QVector3D &vect) const;
 
     template <typename T>
     QString createString(const std::vector<T> &vect) const;
+
+    VSimulationInfo m_info;
+    VSimulationParametres::const_ptr m_pParam;
+    VLayersProcessor::const_ptr m_pLayersProcessor;
+    bool m_paused;
 };
 
 #endif // _VMODELEXPORT_H

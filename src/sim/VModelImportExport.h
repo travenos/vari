@@ -16,7 +16,7 @@ protected:
     struct VXmlInfoTags
     {
         VXmlInfoTags() {}
-        const QString NAME{QStringLiteral("Info")};
+        const QString _NAME{QStringLiteral("Info")};
         const QString SIM_TIME{QStringLiteral("simTime")};
         const QString REAL_TIME{QStringLiteral("realTime")};
         const QString REALTIME_FACTOR{QStringLiteral("realtimeFactor")};
@@ -30,13 +30,13 @@ protected:
         struct VXmlResinTags
         {
             VXmlResinTags() {}
-            const QString NAME{QStringLiteral("Resin")};
+            const QString _NAME{QStringLiteral("Resin")};
             const QString TEMP_COEF{QStringLiteral("tempcoef")};
             const QString DEFAULT_VISCOSITY{QStringLiteral("defaultViscosity")};
             const QString MATERIAL_NAME{QStringLiteral("name")};
         };
 
-        const QString NAME{QStringLiteral("Param")};
+        const QString _NAME{QStringLiteral("Param")};
         const QString INJECTION_DIAMETER{QStringLiteral("injectionDiameter")};
         const QString VACUUM_DIAMETER{QStringLiteral("vacuumDiameter")};
         const QString TEMPERATURE{QStringLiteral("temperature")};
@@ -49,12 +49,12 @@ protected:
         const QString AVERAGE_PERMEABILITY{QStringLiteral("averagePermeability")};
         const QString NUMBER_OF_FULL_NODES{QStringLiteral("numberOfFullNodes")};
 
-        const VXmlResinTags RESIN_TAGS;
+        const VXmlResinTags _xRESIN_TAGS;
     };
     struct VXmlPausedTags
     {
         VXmlPausedTags() {}
-        const QString NAME{QStringLiteral("Paused")};
+        const QString _NAME{QStringLiteral("Paused")};
     };
     struct VXmlLayersTags
     {
@@ -65,7 +65,7 @@ protected:
             struct VXmlClothTags
             {
                 VXmlClothTags() {}
-                const QString NAME{QStringLiteral("Cloth")};
+                const QString _NAME{QStringLiteral("Cloth")};
                 const QString CAVITY_HEIGHT{QStringLiteral("cavityHeight")};
                 const QString PERMEABILITY{QStringLiteral("permeability")};
                 const QString POROSITY{QStringLiteral("porosity")};
@@ -78,16 +78,16 @@ protected:
                 struct VXmlNodeTags
                 {
                     VXmlNodeTags() {}
-                    const QString NAME{QStringLiteral("Node")};
+                    const QString _NAME{QStringLiteral("Node")};
                     const QString ID{QStringLiteral("id")};
                     const QString PRESSURE{QStringLiteral("press")};
                     const QString NEW_PRESSURE{QStringLiteral("nPress")};
                     const QString ROLE{QStringLiteral("role")};
                 };
 
-                const QString NAME{QStringLiteral("Nodes")};
+                const QString _NAME{QStringLiteral("Nodes")};
 
-                const VXmlNodeTags NODE_TAGS;
+                const VXmlNodeTags _xNODE_TAGS;
             };
             struct VXmlTrianglesTags
             {
@@ -95,29 +95,34 @@ protected:
                 struct VXmlTriangleTags
                 {
                     VXmlTriangleTags() {}
-                    const QString NAME{QStringLiteral("Trngl")};
+                    const QString _NAME{QStringLiteral("Trngl")};
                     const QString ID{QStringLiteral("id")};
                     const QString COLOR{QStringLiteral("color")};
                 };
 
-                const QString NAME{QStringLiteral("Triangles")};
+                const QString _NAME{QStringLiteral("Triangles")};
 
-                const VXmlTriangleTags TRIANGLES_TAGS;
+                const VXmlTriangleTags _xTRIANGLE_TAGS;
             };
 
-            const QString NAME{QStringLiteral("Layer")};
-            const QString NUMBER{QStringLiteral("number")};
+            const QString _NAME{QStringLiteral("Layer")};
             const QString IS_ENABLED{QStringLiteral("isEnabled")};
             const QString IS_VISIBLE{QStringLiteral("isVisible")};
+            const QString NODE_MIN_ID{QStringLiteral("midNodeId")};
+            const QString NODE_MAX_ID{QStringLiteral("maxNodeId")};
+            const QString TRIANGLE_MIN_ID{QStringLiteral("minTriangId")};
+            const QString TRIANGLE_MAX_ID{QStringLiteral("maxTriangId")};
+            const QString NUMBER_OF_NODES{QStringLiteral("nodesCount")};
+            const QString NUMBER_OF_TRIANGLES{QStringLiteral("triangCount")};
 
-            const VXmlClothTags CLOTH_TAGS;
-            const VXmlNodesTags NODES_TAGS;
-            const VXmlTrianglesTags TRIANGLES_TAGS;
+            const VXmlClothTags _xCLOTH_TAGS;
+            const VXmlNodesTags _xNODES_TAGS;
+            const VXmlTrianglesTags _xTRIANGLES_TAGS;
         };
 
-        const QString NAME{QStringLiteral("Layers")};
+        const QString _NAME{QStringLiteral("Layers")};
 
-        const VXmlLayerTags LAYER_TAGS;
+        const VXmlLayerTags _xLAYER_TAGS;
     };
     struct VXmlConnectionsTags
     {
@@ -125,21 +130,34 @@ protected:
         struct VXmlConnectionTags
         {
             VXmlConnectionTags() {}
-            const QString NAME{QStringLiteral("Cnt")};
+            struct VXmlCurLayerConnectionTags
+            {
+                VXmlCurLayerConnectionTags() {}
+                const QString _NAME{QStringLiteral("Cur")};
+            };
+            struct VXmlPrevLayerConnectionTags
+            {
+                VXmlPrevLayerConnectionTags() {}
+                const QString _NAME{QStringLiteral("Prev")};
+            };
+            const QString _NAME{QStringLiteral("Cnt")};
             const QString ID{QStringLiteral("id")};
 
+            const VXmlCurLayerConnectionTags _xCURRENT_TAGS;
+            const VXmlPrevLayerConnectionTags _xPREVIOUS_TAGS;
         };
 
-        const QString NAME{QStringLiteral("Connections")};
+        const QString _NAME{QStringLiteral("Connections")};
 
-        const VXmlConnectionTags CONNECTION_TAGS;
+        const VXmlConnectionTags _xCONNECTION_TAGS;
     };
+    const QString HEAD_TAG_NAME{QStringLiteral("Resources")};
 
-    const VXmlInfoTags INFO_TAGS;
-    const VXmlParamTags PARAM_TAGS;
-    const VXmlPausedTags PAUSED_TAGS;
-    const VXmlLayersTags LAYERS_TAGS;
-    const VXmlConnectionsTags CONNECTIONS_TAGS;
+    const VXmlInfoTags _xINFO_TAGS;
+    const VXmlParamTags _xPARAM_TAGS;
+    const VXmlPausedTags _xPAUSED_TAGS;
+    const VXmlLayersTags _xLAYERS_TAGS;
+    const VXmlConnectionsTags _xCONNECTIONS_TAGS;
 };
 
 #endif // _VMODELIMPORTEXPORT_H

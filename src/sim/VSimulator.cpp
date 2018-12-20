@@ -139,6 +139,22 @@ VSimulationParametres::const_ptr VSimulator::getSimulationParametres() const
     return m_pParam;
 }
 
+void VSimulator::setSimulationParametres(const VSimulationInfo &info,
+                                         const VSimulationParametres &param,
+                                         bool isPaused)
+{
+    stop();
+    *m_pParam = param;
+    {
+        std::lock_guard<std::mutex> locker(m_infoLock);
+        m_info = info;
+    }
+    m_pauseFlag.store(isPaused);
+    if (isPaused)
+        emit simulationPaused();
+}
+
+
 /**
  * Update an information about active nodes and triangles (m_activeNodes, m_triangles)
  * @param layers

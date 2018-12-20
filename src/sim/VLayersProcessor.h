@@ -55,7 +55,9 @@ public:
     void setMaterial(uint layer, const VCloth &material) ;
 
     void reset() ;
-    void clear() ;
+    void clear() ;    
+
+    void setLayers (const std::vector<VLayer::ptr> &layers) ;
 
     VCloth::const_ptr getMaterial(uint layer) const ;
 
@@ -64,6 +66,8 @@ public:
 
     VSimNode::const_vector_ptr getLayerNodes(uint layer) const ;
     VSimTriangle::const_vector_ptr getLayerTriangles(uint layer) const ;
+    size_t getLayerNodesNumber(uint layer) const ;
+    size_t getLayerTrianglesNumber(uint layer) const ;
 
     bool isLayerVisible(uint layer) const ;
     bool isLayerEnabled(uint layer) const ;
@@ -75,8 +79,14 @@ public:
     size_t getActiveNodesNumber() const;
     size_t getActiveTrianglesNumber() const;
 
+    uint getNodeMinId(uint layer) const;
+    uint getNodeMaxId(uint layer) const;
+    uint getTriangleMinId(uint layer) const;
+    uint getTriangleMaxId(uint layer) const;
+
 private:
     void updateActiveElementsVectors() ;
+    void updateNextIds();
 
     std::vector<VLayer::ptr> m_layers;
     VSimNode::const_vector_ptr m_pActiveNodes;
@@ -116,6 +126,7 @@ signals:
     void materialChanged(uint);
     void layerAdded();
     void layersCleared();
+    void layersLoaded();
 };
 
 #endif //_VLAYERSPROCESSOR_H

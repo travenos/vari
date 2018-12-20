@@ -154,6 +154,31 @@ void VLayersProcessor::clear()
     emit layersCleared();
 }
 
+void VLayersProcessor::setLayers (const std::vector<VLayer::ptr> &layers)
+{
+    m_layers = layers;
+    updateActiveElementsVectors();
+    updateNextIds();
+    emit layersLoaded();
+}
+
+void VLayersProcessor::updateNextIds()
+{
+    m_nodeNextId = 0;
+    m_triangleNextId = 0;
+    for (auto &layer : m_layers)
+    {
+        uint nodeId = layer->getNodeMaxId();
+        uint triangleId = layer->getTriangleMaxId();
+        if (nodeId > m_nodeNextId)
+            m_nodeNextId = nodeId;
+        if (triangleId > m_triangleNextId)
+            m_triangleNextId = triangleId;
+    }
+    ++m_nodeNextId;
+    ++m_triangleNextId;
+}
+
 VCloth::const_ptr VLayersProcessor::getMaterial(uint layer) const 
 {
     return m_layers.at(layer)->getMaterial();
@@ -270,6 +295,16 @@ VSimTriangle::const_vector_ptr VLayersProcessor::getLayerTriangles(uint layer) c
     return m_layers.at(layer)->getTriangles();
 }
 
+size_t VLayersProcessor::getLayerNodesNumber(uint layer) const
+{
+    return m_layers.at(layer)->getNodesNumber();
+}
+
+size_t VLayersProcessor::getLayerTrianglesNumber(uint layer) const
+{
+    return m_layers.at(layer)->getTrianglesNumber();
+}
+
 void VLayersProcessor::updateActiveElementsVectors() 
 {
     std::vector<VSimNode::ptr> * activeNodes = new std::vector<VSimNode::ptr>;
@@ -310,4 +345,24 @@ void VLayersProcessor::setVacuumPoint(const QVector3D &point, double diameter)
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     m_layers.back()->setVacuumPoint(point, diameter);
+}
+
+uint VLayersProcessor::getNodeMinId(uint layer) const
+{
+    return m_layers.at(layer)->getNodeMinId();
+}
+
+uint VLayersProcessor::getNodeMaxId(uint layer) const
+{
+    return m_layers.at(layer)->getNodeMaxId();
+}
+
+uint VLayersProcessor::getTriangleMinId(uint layer) const
+{
+    return m_layers.at(layer)->getTriangleMinId();
+}
+
+uint VLayersProcessor::getTriangleMaxId(uint layer) const
+{
+    return m_layers.at(layer)->getTriangleMaxId();
 }

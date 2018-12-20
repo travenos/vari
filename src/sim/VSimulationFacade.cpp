@@ -24,19 +24,19 @@ VSimulationFacade::VSimulationFacade(QWidget *parent):
     m_pSimulator(new VSimulator),
     m_pLayersProcessor(new VLayersProcessor),
     m_selectInjectionPoint(false),
-    m_selectVacuumPoint(false)
+    m_selectVacuumPoint(false),
+    m_pNodesLock(new std::mutex),
+    m_pTrianglesLock(new std::mutex)
 {
     SoQt::init(parent);
     m_pGraphicsViewer.reset(new VGraphicsViewer(parent, m_pSimulator));
-    std::shared_ptr<std::mutex> p_nodesLock(new std::mutex);
-    std::shared_ptr<std::mutex> p_trianglesLock(new std::mutex);
-    m_pSimulator->setMutexes(p_nodesLock, p_trianglesLock);
-    m_pGraphicsViewer->setMutexes(p_nodesLock, p_trianglesLock);
-    m_pLayersProcessor->setMutexes(p_nodesLock, p_trianglesLock);
-    connectSignals();
+    m_pSimulator->setMutexes(m_pNodesLock, m_pTrianglesLock);
+    m_pGraphicsViewer->setMutexes(m_pNodesLock, m_pTrianglesLock);
+    connectMainSignals();
+    initLayersProcessor();
 }
 
-void VSimulationFacade::connectSignals()
+void VSimulationFacade::connectMainSignals()
 {
     connect(m_pGraphicsViewer.get(), SIGNAL(gotPoint(const QVector3D &)),
             this, SLOT(m_on_got_point(const QVector3D &)));
@@ -68,7 +68,11 @@ void VSimulationFacade::connectSignals()
             this, SIGNAL(coefRSet(double)));
     connect(m_pSimulator.get(), SIGNAL(coefSSet(double)),
             this, SIGNAL(coefSSet(double)));
+}
 
+void VSimulationFacade::initLayersProcessor()
+{
+    m_pLayersProcessor->setMutexes(m_pNodesLock, m_pTrianglesLock);
     connect(m_pLayersProcessor.get(), SIGNAL(layerVisibilityChanged(uint, bool)),
             this, SIGNAL(layerVisibilityChanged(uint, bool)));
     connect(m_pLayersProcessor.get(), SIGNAL(layerEnabled(uint, bool)),
@@ -222,7 +226,15 @@ void VSimulationFacade::newModel()
 
 void VSimulationFacade::loadModel(const QString &filename)
 {
-
+    m_pSimulator->pause();
+    VSimulationParametres::const_ptr param = m_pSimulator->getSimulationParametres();
+    VModelImport loader(param);
+    loader.loadFromFile(filename);
+    m_pLayersProcessor = loader.getLayersProcessor();
+    initLayersProcessor();
+    m_pSimulator->setSimulationParametres(loader.getInfo(), loader.getSimulationParametres(), loader.getPaused());
+    updateConfiguration();
+    emit modelLoaded();
 }
 void VSimulationFacade::saveModel(const QString &filename)
 {

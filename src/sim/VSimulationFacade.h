@@ -94,7 +94,8 @@ void loadSavedParametres();
 void saveParametres() const;
 
 private:
-    void connectSignals() ;
+    void connectMainSignals() ;
+    void initLayersProcessor() ;
     void updateConfiguration() ;
 
     VSimulator::ptr m_pSimulator;
@@ -104,6 +105,9 @@ private:
     bool m_selectVacuumPoint;
     double m_injectionDiameter;
     double m_vacuumDiameter;
+
+    std::shared_ptr<std::mutex> m_pNodesLock;
+    std::shared_ptr<std::mutex> m_pTrianglesLock;
 
 private slots:
     void m_on_got_point(const QVector3D &point);

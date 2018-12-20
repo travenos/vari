@@ -106,6 +106,16 @@ public:
 
     VSimulationParametres::const_ptr getSimulationParametres() const ;
 
+    /**
+     * Set simulation state
+     * @param param
+     * @param info
+     * @param isPaused
+     */
+    void setSimulationParametres(const VSimulationInfo &info,
+                                 const VSimulationParametres &param,
+                                 bool isPaused);
+
     void setResin(const VResin &resin) ;
     void setInjectionDiameter(double diameter) ;
     void setVacuumDiameter(double diameter) ;

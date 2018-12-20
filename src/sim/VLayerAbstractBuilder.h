@@ -34,8 +34,8 @@ protected:
     const VSimulationParametres::const_ptr m_pParam;
     uint m_nodeStartId;
     uint m_triangleStartId;
-    uint m_NodeMaxId;
-    uint m_TriangleMaxId;
+    uint m_nodeMaxId;
+    uint m_triangleMaxId;
 };
 
 #endif //_VLAYERABSTRACTBUILDER_H

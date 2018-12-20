@@ -18,8 +18,8 @@ VLayerAbstractBuilder::VLayerAbstractBuilder(const VCloth &material,
     m_pParam(p_simParam),
     m_nodeStartId(0),
     m_triangleStartId(0),
-    m_NodeMaxId(0),
-    m_TriangleMaxId(0)
+    m_nodeMaxId(0),
+    m_triangleMaxId(0)
 {}
 
 VLayerAbstractBuilder::~VLayerAbstractBuilder()
@@ -37,10 +37,10 @@ void VLayerAbstractBuilder::setTriangleStartId(uint id)
 
 uint VLayerAbstractBuilder::getNodeMaxId() const
 {
-    return m_NodeMaxId;
+    return m_nodeMaxId;
 }
 
 uint VLayerAbstractBuilder::getTriangleMaxId() const
 {
-    return m_TriangleMaxId;
+    return m_triangleMaxId;
 }

@@ -14,7 +14,8 @@
 #include "VThreadSafeValue.tcc"
 
 
-class VSimulationParametres {
+class VSimulationParametres
+{
 public:
     typedef std::shared_ptr<VSimulationParametres> ptr;
     typedef std::shared_ptr<const VSimulationParametres> const_ptr;
@@ -22,6 +23,10 @@ public:
     static const double DEFAULT_TEMPERATURE;
     static const double KELVINS_IN_0_CELSIUS;
     static const double MIN_PRESSURE;
+
+    VSimulationParametres() = default;
+    VSimulationParametres(const VSimulationParametres &other);
+    VSimulationParametres& operator= (const VSimulationParametres& other);
 
     double getInjectionDiameter() const ;
     void setInjectionDiameter(double diameter) ;

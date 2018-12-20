@@ -28,7 +28,11 @@ VLayer::VLayer(const VSimNode::vector_ptr &nodes,
     m_wasVisible(true),
     m_active(true),
     m_hasInjectionPoint(false),
-    m_hasVacuumPoint(false)
+    m_hasVacuumPoint(false),
+    m_nodeMinId(0),
+    m_nodeMaxId(0),
+    m_triangleMinId(0),
+    m_triangleMaxId(0)
 {
 }
 
@@ -198,4 +202,32 @@ void VLayer::setPoint(const QVector3D &point, double diameter,
     }
     if (!foundNear)
         nearestNode->setRole(setRole);
+}
+
+void VLayer::setMinMaxIds(uint nodeMinId, uint nodeMaxId, uint tiangleMinId, uint triangleMaxId)
+{
+    m_nodeMinId = nodeMinId;
+    m_nodeMaxId = nodeMaxId;
+    m_triangleMinId = tiangleMinId;
+    m_triangleMaxId = triangleMaxId;
+}
+
+uint VLayer::getNodeMinId() const
+{
+    return m_nodeMinId;
+}
+
+uint VLayer::getNodeMaxId() const
+{
+    return m_nodeMaxId;
+}
+
+uint VLayer::getTriangleMinId() const
+{
+    return m_triangleMinId;
+}
+
+uint VLayer::getTriangleMaxId() const
+{
+    return m_triangleMaxId;
 }

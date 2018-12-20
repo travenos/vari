@@ -22,6 +22,7 @@ public:
      * @param triangles
      * @param material
      */
+    VLayer() = delete;
     VLayer(const VSimNode::vector_ptr &nodes, const VSimTriangle::vector_ptr &triangles, const VCloth::ptr &material);
     virtual ~VLayer();
     VLayer(const VLayer& ) = delete; //TODO implement theese methods
@@ -47,6 +48,12 @@ public:
     void setInjectionPoint(const QVector3D &point, double diameter);
     void setVacuumPoint(const QVector3D &point, double diameter);
 
+    void setMinMaxIds(uint nodeMinId, uint nodeMaxId, uint tiangleMinId, uint triangleMaxId);
+    uint getNodeMinId() const;
+    uint getNodeMaxId() const;
+    uint getTriangleMinId() const;
+    uint getTriangleMaxId() const;
+
 private: 
     void p_setVisible(bool visible) ;
 //TODO Add id ranges: nodeMinId, nodeMaxId, triangleMinId, triangleMaxId
@@ -67,6 +74,11 @@ private:
     double m_injectionDiameter;
     QVector3D m_vacuumPoint;
     double m_vacuumDiameter;
+
+    uint m_nodeMinId;
+    uint m_nodeMaxId;
+    uint m_triangleMinId;
+    uint m_triangleMaxId;
 
     void setPoint(const QVector3D &point, double diameter,
                   VSimNode::VNodeRole setRole, VSimNode::VNodeRole anotherRole);

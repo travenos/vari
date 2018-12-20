@@ -15,6 +15,41 @@ const double VSimulationParametres::DEFAULT_TEMPERATURE = 25;
 const double VSimulationParametres::KELVINS_IN_0_CELSIUS = 273.15;
 const double VSimulationParametres::MIN_PRESSURE = 1;
 
+VSimulationParametres::VSimulationParametres(const VSimulationParametres &other):
+    m_resin(other.getResin()),
+    m_temperature(other.getTemperature()),
+    m_injectionDiameter(other.getInjectionDiameter()),
+    m_vacuumDiameter(other.getVacuumDiameter()),
+    m_injectionPressure(other.getInjectionDiameter()),
+    m_vacuumPressure(other.getVacuumPressure()),
+    m_q(other.getQ()),
+    m_r(other.getR()),
+    m_s(other.getS()),
+    m_averageCellDistance(other.getAverageCellDistance()),
+    m_averagePermeability(other.getAveragePermeability()),
+    m_numberOfFullNodes(other.getNumberOfFullNodes())
+{
+    m_viscosity = calculateViscosity();
+}
+
+VSimulationParametres& VSimulationParametres::operator= (const VSimulationParametres& other)
+{
+    m_resin = other.getResin();
+    m_temperature = other.getTemperature();
+    m_injectionDiameter = other.getInjectionDiameter();
+    m_vacuumDiameter = other.getVacuumDiameter();
+    m_injectionPressure = other.getInjectionDiameter();
+    m_vacuumPressure = other.getVacuumPressure();
+    m_q = other.getQ();
+    m_r = other.getR();
+    m_s = other.getS();
+    m_averageCellDistance = other.getAverageCellDistance();
+    m_averagePermeability = other.getAveragePermeability();
+    m_numberOfFullNodes = other.getNumberOfFullNodes();
+    calculateViscosity();
+    return *this;
+}
+
 double VSimulationParametres::getInjectionDiameter() const 
 {
     return m_injectionDiameter;
@@ -176,4 +211,3 @@ double VSimulationParametres::calculateViscosity() const
     else
         return mu0;
 }
-
