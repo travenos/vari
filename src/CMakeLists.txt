@@ -63,16 +63,12 @@ else()
     message(STATUS "C Flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}\n")
 endif()
 
-#Find packages
+#Find modules
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 include_directories(${PROJECT_SOURCE_DIR})
 set(MODULES_FOLDERS "modules")
 
 include(common)
-
-#Add simulator module
-set(SIMULATOR_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/sim")
-add_subdirectory(${SIMULATOR_DIRECTORY})
 
 #Find packages
 find_package(Qt5Core    REQUIRED)
@@ -89,6 +85,10 @@ include_directories(${Qt5Core_INCLUDE_DIRS})
 include_directories(${Qt5Gui_INCLUDE_DIRS})
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 include_directories(${Qt5Sql_INCLUDE_DIRS})
+
+#Add simulator module
+set(SIMULATOR_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/sim")
+add_subdirectory(${SIMULATOR_DIRECTORY})
 
 #Add user interface
 set(CMAKE_AUTOMOC ON)

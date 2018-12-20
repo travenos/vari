@@ -610,7 +610,8 @@ void VWindowMain::resetAllInputs()
 
 void VWindowMain::showNewLayer()
 {
-    VCloth::const_ptr cloth = m_pFacade->getMaterial(m_pFacade->getLayersNumber() - 1);
+    uint lastLayer = static_cast<uint>(m_pFacade->getLayersNumber()) - 1;
+    VCloth::const_ptr cloth = m_pFacade->getMaterial(lastLayer);
     ui->layersListWidget->addItem(cloth->name);
     ui->layersListWidget->setCurrentRow(ui->layersListWidget->count() - 1);
 }

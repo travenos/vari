@@ -120,7 +120,7 @@ void VLayerFromFileBuilder::addTriangle(int nodeId1, int nodeId2, int nodeId3)
     VSimNode::const_ptr node1 = (m_nodesMap.find(nodeId1))->second;
     VSimNode::const_ptr node2 = (m_nodesMap.find(nodeId2))->second;
     VSimNode::const_ptr node3 = (m_nodesMap.find(nodeId3))->second;
-    uint currentId = m_pTriangles->size() + m_triangleStartId;
+    uint currentId = static_cast<uint>(m_pTriangles->size()) + m_triangleStartId;
     if (currentId > m_TriangleMaxId)
         m_TriangleMaxId = currentId;
     VSimTriangle::ptr triangle(new VSimTriangle(currentId, m_pMaterial, m_pParam, node1,node2,node3));

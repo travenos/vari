@@ -10,6 +10,8 @@
 
 class VModelImportExport
 {
+public:
+    VModelImportExport() = default;
 protected:
     struct VXmlInfoTags
     {
