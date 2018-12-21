@@ -603,6 +603,7 @@ void VWindowMain::activateSimControls(bool enabled)
     ui->saveVacuumPressureButton->setEnabled(enabled);
     ui->vacuumDiameterEdit->setEnabled(enabled);
     ui->vacuumPlaceButton->setEnabled(enabled);
+    ui->selectMaterialResinButton->setEnabled(enabled);
 }
 
 void VWindowMain::resetAllInputs()
