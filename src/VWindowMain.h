@@ -23,10 +23,7 @@ class VWindowMain : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit VWindowMain(QWidget *parent = nullptr);
-    ~VWindowMain();
-
-private:
+    static const QString ERROR_TITLE;
     static const QString IMPORT_FROM_FILE_ERROR;
     static const QString EXPORT_TO_FILE_ERROR;
     static const QString IMPORT_WHEN_SIMULATING_ERROR;
@@ -40,6 +37,13 @@ private:
     static const QString SAVE_FILE_DIALOG_TITLE;
     static const QString FILE_DIALOG_FORMATS;
 
+    static const QColor ACTIVE_COLOR;
+    static const QColor INACTIVE_COLOR;
+
+    explicit VWindowMain(QWidget *parent = nullptr);
+    ~VWindowMain();
+
+private:
     void connectSimulationSignals();
     void setupValidators();
 
@@ -66,6 +70,7 @@ private:
     void showColor(const QColor &color);
     void markLayerAsEnabled(int layer, bool enable);
     void markLayerAsVisible(int layer, bool visible);
+    void reloadLayersList();
 
     void updateResinInfo();
 
@@ -145,6 +150,7 @@ private slots:
     void m_on_injection_pressure_set(double);
     void m_on_canceled_waiting_for_injection_point();
     void m_on_canceled_waiing_for_vacuum_point();
+    void m_on_model_loaded();
 
     void on_addLayerButton_clicked();
     void on_layersListWidget_itemSelectionChanged();

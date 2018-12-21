@@ -3,8 +3,11 @@
  * @author Alexey Barashkov
  */
 
-
+#ifdef DEBUG_MODE
+#include <QDebug>
+#endif
 #include <cmath>
+
 #include "VSimNode.h"
 
 /**
@@ -30,6 +33,13 @@ VSimNode::VSimNode(uint id, const QVector3D& pos,
     m_role(role),
     m_neighboursNumber(0)
 {
+}
+
+VSimNode::~VSimNode()
+{
+    #ifdef DEBUG_MODE
+        qInfo() << "VSimNode destroyed";
+    #endif
 }
 
 /**

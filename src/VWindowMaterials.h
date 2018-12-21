@@ -13,6 +13,10 @@ class VWindowMaterials : public QMainWindow
     Q_OBJECT
 
 public:
+    static const QString ERROR_TITLE;
+    static const QString INVALID_PARAM_ERROR;
+    static const QString ASK_FOR_REMOVE;
+
     VWindowMaterials(QWidget *parent = nullptr);
     virtual ~VWindowMaterials();
 
@@ -38,9 +42,6 @@ private slots:
     void on_materialsListWidget_doubleClicked(const QModelIndex &);
 
 protected:
-    static const QString INVALID_PARAM_ERROR;
-    static const QString ASK_FOR_REMOVE;
-
     Ui::VWindowMaterials *ui;
     int m_currentId;
 

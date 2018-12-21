@@ -51,7 +51,7 @@ void VWindowCloth::selectMaterial( )
         }
         catch (DatabaseException &e)
         {
-            QMessageBox::warning(this, QStringLiteral("Error"), e.what());
+            QMessageBox::warning(this, ERROR_TITLE, e.what());
         }
     }
 }
@@ -63,7 +63,7 @@ void VWindowCloth::saveMaterial( )
     bool result = getInputs(name, cavityheight, permeability, porosity);
     if (!result)
     {
-        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
+        QMessageBox::warning(this, ERROR_TITLE, INVALID_PARAM_ERROR);
         return;
     }
     try
@@ -74,7 +74,7 @@ void VWindowCloth::saveMaterial( )
     }
     catch (DatabaseException &e)
     {
-        QMessageBox::warning(this, QStringLiteral("Error"), e.what());
+        QMessageBox::warning(this, ERROR_TITLE, e.what());
     }
 }
 
@@ -90,7 +90,7 @@ void VWindowCloth::accept()
         close();
     }
     else
-        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
+        QMessageBox::warning(this, ERROR_TITLE, INVALID_PARAM_ERROR);
 }
 
 VWindowCloth::~VWindowCloth()

@@ -11,6 +11,8 @@ class VWindowCloth : public VWindowMaterials
 {
     Q_OBJECT
 public:
+    static const QString TITLE;
+
     explicit VWindowCloth(QWidget *parent=nullptr);
     virtual ~VWindowCloth();
 
@@ -20,8 +22,6 @@ protected:
     virtual void accept();
 
 private:
-    static const QString TITLE;
-
     virtual VDatabaseInteractor* databaseInteractor();
     bool getInputs(QString &name, float &cavityheight, float &permeability, float &porosity);
 

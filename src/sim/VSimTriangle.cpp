@@ -3,6 +3,9 @@
  * @author Alexey Barashkov
  */
 
+#ifdef DEBUG_MODE
+#include <QDebug>
+#endif
 
 #include "VSimTriangle.h"
 
@@ -27,6 +30,26 @@ VSimTriangle::VSimTriangle(uint id, const VCloth::const_ptr &p_material,
     m_pNodes({p_node0.get(), p_node1.get(), p_node2.get()})
 {
 
+}
+
+VSimTriangle::VSimTriangle(uint id, const VCloth::const_ptr &p_material,
+                           const VSimulationParametres::const_ptr &p_param,
+                           const VSimNode::const_ptr &p_node0,
+                           const VSimNode::const_ptr &p_node1,
+                           const VSimNode::const_ptr &p_node2,
+                           const QColor &color) :
+    VSimElement(id, p_material, p_param),
+    m_color(color),
+    m_pNodes({p_node0.get(), p_node1.get(), p_node2.get()})
+{
+
+}
+
+VSimTriangle::~VSimTriangle()
+{
+    #ifdef DEBUG_MODE
+        qInfo() << "VSimTriangle destroyed";
+    #endif
 }
 
 /**

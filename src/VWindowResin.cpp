@@ -48,7 +48,7 @@ void VWindowResin::selectMaterial( )
         }
         catch (DatabaseException &e)
         {
-            QMessageBox::warning(this, QStringLiteral("Error"), e.what());
+            QMessageBox::warning(this, ERROR_TITLE, e.what());
         }
     }
 }
@@ -60,7 +60,7 @@ void VWindowResin::saveMaterial( )
     bool result = getInputs(name, viscosity, tempcoef);
     if (!result)
     {
-        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
+        QMessageBox::warning(this, ERROR_TITLE, INVALID_PARAM_ERROR);
         return;
     }
     try
@@ -71,7 +71,7 @@ void VWindowResin::saveMaterial( )
     }
     catch (DatabaseException &e)
     {
-        QMessageBox::warning(this, QStringLiteral("Error"), e.what());
+        QMessageBox::warning(this, ERROR_TITLE, e.what());
     }
 }
 
@@ -87,7 +87,7 @@ void VWindowResin::accept()
         close();
     }
     else
-        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
+        QMessageBox::warning(this, ERROR_TITLE, INVALID_PARAM_ERROR);
 }
 
 VWindowResin::~VWindowResin()

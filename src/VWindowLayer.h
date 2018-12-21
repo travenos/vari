@@ -16,6 +16,18 @@ class VWindowLayer : public QMainWindow
     Q_OBJECT
 
 public:
+    static const QString NO_MATERIAL_TEXT;
+    static const QString NO_GEOMETRY_TEXT;
+    static const QString COLOR_DIALOG_TITLE;
+    static const QString FILE_DIALOG_TITLE;
+    static const QString FILE_DIALOG_FORMATS;
+    static const QString GEOMETRY_FROM_FILE_TEXT;
+    static const QString GEOMETRY_MANUAL_TEXT;
+    static const QString MATERIAL_NAME_TEXT;
+    static const QString MATERIAL_INFO_TEXT;
+
+    static const QColor DEFAULT_COLOR;
+
     VWindowLayer(QWidget *parent = nullptr);
     virtual ~VWindowLayer();
     void saveParametres() const;
@@ -37,18 +49,6 @@ private slots:
     void on_colorButton_clicked();
 
 private:
-    static const QString NO_MATERIAL_TEXT;
-    static const QString NO_GEOMETRY_TEXT;
-    static const QString COLOR_DIALOG_TITLE;
-    static const QString FILE_DIALOG_TITLE;
-    static const QString FILE_DIALOG_FORMATS;
-    static const QString GEOMETRY_FROM_FILE_TEXT;
-    static const QString GEOMETRY_MANUAL_TEXT;
-    static const QString MATERIAL_NAME_TEXT;
-    static const QString MATERIAL_INFO_TEXT;
-
-    static const QColor DEFAULT_COLOR;
-
     void reset();
     void reject();
     void accept();

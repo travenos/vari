@@ -31,7 +31,16 @@ VSimTriangle(uint id, const VCloth::const_ptr &p_material,
              const VSimNode::const_ptr &p_node0,
              const VSimNode::const_ptr &p_node1,
              const VSimNode::const_ptr &p_node2);
-    
+
+VSimTriangle(uint id, const VCloth::const_ptr &p_material,
+             const VSimulationParametres::const_ptr &p_param,
+             const VSimNode::const_ptr &p_node0,
+             const VSimNode::const_ptr &p_node1,
+             const VSimNode::const_ptr &p_node2,
+             const QColor &color);
+
+virtual ~VSimTriangle();
+
 void getVertices(QVector3D vertices[VERTICES_NUMBER]) const ;
 QVector3D getVerticesId() const ;
 void updateColor() ;

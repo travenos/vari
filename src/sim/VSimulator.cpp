@@ -145,11 +145,21 @@ void VSimulator::setSimulationParametres(const VSimulationInfo &info,
 {
     stop();
     *m_pParam = param;
+    emit resinChanged();
+    emit injectionDiameterSet(m_pParam->getInjectionDiameter()) ;
+    emit vacuumDiameterSet(m_pParam->getVacuumDiameter()) ;
+    emit temperatureSet(m_pParam->getTemperature()) ;
+    emit vacuumPressureSet(m_pParam->getVacuumPressure()) ;
+    emit injectionPressureSet(m_pParam->getInjectionPressure()) ;
+    emit coefQSet(m_pParam->getQ()) ;
+    emit coefRSet(m_pParam->getR()) ;
+    emit coefSSet(m_pParam->getQ()) ;
     {
         std::lock_guard<std::mutex> locker(m_infoLock);
         m_info = info;
     }
     m_pauseFlag.store(isPaused);
+    m_newDataNotifier.notifyAll();
     if (isPaused)
         emit simulationPaused();
 }

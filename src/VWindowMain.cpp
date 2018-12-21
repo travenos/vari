@@ -14,6 +14,7 @@
 #include "sim/VSimulationFacade.h"
 #include "sim/core/VExceptions.h"
 
+const QString VWindowMain::ERROR_TITLE("Ошибка");
 const QString VWindowMain::IMPORT_FROM_FILE_ERROR("Ошибка загрузки из файла");
 const QString VWindowMain::EXPORT_TO_FILE_ERROR("Ошибка сохранения в файл");
 const QString VWindowMain::IMPORT_WHEN_SIMULATING_ERROR("Невозможно импортировать во время симуляции");
@@ -37,6 +38,9 @@ const QString VWindowMain::OPEN_FILE_DIALOG_TITLE("Загрузка модели
 const QString VWindowMain::SAVE_FILE_DIALOG_TITLE("Сохранение модели");
 const QString VWindowMain::FILE_DIALOG_FORMATS("Модели VARI (*.vari);;"
                                                 "Все файлы (*)");
+
+const QColor VWindowMain::ACTIVE_COLOR(0, 0, 0);
+const QColor VWindowMain::INACTIVE_COLOR(127, 127, 127);
 
 VWindowMain::VWindowMain(QWidget *parent) :
     QMainWindow(parent),
@@ -100,6 +104,8 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_canceled_waiing_for_vacuum_point()));
     connect(m_pFacade.get(), SIGNAL(layersCleared()),
             this, SLOT(m_on_layers_cleared()));
+    connect(m_pFacade.get(), SIGNAL(modelLoaded()),
+            this, SLOT(m_on_model_loaded()));
 }
 
 void VWindowMain::setupValidators()
@@ -170,11 +176,11 @@ void VWindowMain::addLayerFromFile(const VCloth& material,const QString& filenam
     }
     catch (VImportException)
     {
-        QMessageBox::warning(this, QStringLiteral("Error"), IMPORT_FROM_FILE_ERROR);
+        QMessageBox::warning(this, ERROR_TITLE, IMPORT_FROM_FILE_ERROR);
     }
     catch (VSimulatorException)
     {
-        QMessageBox::warning(this, QStringLiteral("Error"), IMPORT_WHEN_SIMULATING_ERROR);
+        QMessageBox::warning(this, ERROR_TITLE, IMPORT_WHEN_SIMULATING_ERROR);
     }
 }
 
@@ -365,7 +371,7 @@ void VWindowMain::markLayerAsEnabled(int layer, bool enable)
 {
     if(layer < ui->layersListWidget->count())
     {
-        QColor textColor = enable ? QColor::fromRgb(0, 0, 0) : QColor::fromRgb(127, 127, 127);
+        QColor textColor = enable ? ACTIVE_COLOR : INACTIVE_COLOR;
         ui->layersListWidget->item(layer)->setTextColor(textColor);
         if (ui->layersListWidget->currentRow() == layer)
             ui->layerEnableCheckBox->setChecked(enable);
@@ -395,7 +401,7 @@ void VWindowMain::startInjectionPointSelection()
     else
     {
         ui->injectionPlaceButton->setChecked(false);
-        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
+        QMessageBox::warning(this, ERROR_TITLE, INVALID_PARAM_ERROR);
     }
 }
 
@@ -413,7 +419,7 @@ void VWindowMain::startVacuumPointSelection()
     else
     {
         ui->vacuumPlaceButton->setChecked(false);
-        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
+        QMessageBox::warning(this, ERROR_TITLE, INVALID_PARAM_ERROR);
     }
 }
 
@@ -456,7 +462,7 @@ void VWindowMain::saveTemperature()
     if (ok)
         m_pFacade->setTemperature(temperature);
     else
-        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
+        QMessageBox::warning(this, ERROR_TITLE, INVALID_PARAM_ERROR);
 }
 
 void VWindowMain::saveInjectionPressure()
@@ -466,7 +472,7 @@ void VWindowMain::saveInjectionPressure()
     if (ok)
         m_pFacade->setInjectionPressure(injectionPressure);
     else
-        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
+        QMessageBox::warning(this, ERROR_TITLE, INVALID_PARAM_ERROR);
 }
 
 void VWindowMain::saveVacuumPressure()
@@ -476,7 +482,7 @@ void VWindowMain::saveVacuumPressure()
     if (ok)
         m_pFacade->setVacuumPressure(vacuumPressure);
     else
-        QMessageBox::warning(this, QStringLiteral("Error"), INVALID_PARAM_ERROR);
+        QMessageBox::warning(this, ERROR_TITLE, INVALID_PARAM_ERROR);
 }
 
 void VWindowMain::showTemperature()
@@ -616,6 +622,20 @@ void VWindowMain::showNewLayer()
     ui->layersListWidget->setCurrentRow(ui->layersListWidget->count() - 1);
 }
 
+void VWindowMain::reloadLayersList()
+{
+    ui->layersListWidget->clear();
+    for (uint layer = 0; layer < m_pFacade->getLayersNumber(); ++layer)
+    {
+        VCloth::const_ptr cloth = m_pFacade->getMaterial(layer);
+        ui->layersListWidget->addItem(cloth->name);
+        markLayerAsEnabled(layer, m_pFacade->isLayerEnabled(layer));
+        markLayerAsVisible(layer, m_pFacade->isLayerVisible(layer));
+    }
+    if (ui->layersListWidget->count() > 0)
+        ui->layersListWidget->setCurrentRow(ui->layersListWidget->count() - 1);
+}
+
 void VWindowMain::newModel()
 {
     m_pFacade->newModel();
@@ -623,8 +643,10 @@ void VWindowMain::newModel()
 
 void VWindowMain::loadModel()
 {
+    pauseSimulation();
     QSettings settings;
-    QString lastDir = settings.value(QStringLiteral("import/lastDir"), QDir::homePath()).toString();
+    QString lastDir = settings.value(QStringLiteral("import/lastDir"),
+                                     QDir::homePath()).toString();
     QString fileName = QFileDialog::getOpenFileName(this, OPEN_FILE_DIALOG_TITLE, lastDir,
                                                     FILE_DIALOG_FORMATS);
     if (!fileName.isEmpty() && QFile::exists(fileName))
@@ -636,7 +658,7 @@ void VWindowMain::loadModel()
         }
         catch (VImportException)
         {
-            QMessageBox::warning(this, QStringLiteral("Error"), IMPORT_FROM_FILE_ERROR);
+            QMessageBox::warning(this, ERROR_TITLE, IMPORT_FROM_FILE_ERROR);
         }
         settings.setValue(QStringLiteral("import/lastDir"), lastDir);
         settings.sync();
@@ -645,8 +667,10 @@ void VWindowMain::loadModel()
 
 void VWindowMain::saveModel()
 {
+    pauseSimulation();
     QSettings settings;
-    QString lastDir = settings.value(QStringLiteral("import/lastDir"), QDir::homePath()).toString();
+    QString lastDir = settings.value(QStringLiteral("import/lastDir"),
+                                     QDir::homePath()).toString();
     QString fileName = QFileDialog::getSaveFileName(this, SAVE_FILE_DIALOG_TITLE, lastDir,
                                                     FILE_DIALOG_FORMATS);
     if (!fileName.isEmpty())
@@ -658,7 +682,7 @@ void VWindowMain::saveModel()
         }
         catch (VExportException)
         {
-            QMessageBox::warning(this, QStringLiteral("Error"), EXPORT_TO_FILE_ERROR);
+            QMessageBox::warning(this, ERROR_TITLE, EXPORT_TO_FILE_ERROR);
         }
         settings.setValue(QStringLiteral("import/lastDir"), lastDir);
         settings.sync();
@@ -708,7 +732,7 @@ void VWindowMain::m_on_resin_window_closed()
 
 void VWindowMain::m_on_layers_cleared()
 {
-    ui->layersListWidget->clear();
+    reloadLayersList();
     showModelInfo();
 }
 
@@ -844,6 +868,12 @@ void VWindowMain::m_on_canceled_waiing_for_vacuum_point()
 void VWindowMain::m_on_layer_visibility_changed(uint layer, bool visible)
 {
     markLayerAsVisible(layer, visible);
+}
+
+void VWindowMain::m_on_model_loaded()
+{
+    reloadLayersList();
+    showModelInfo();
 }
 
 void VWindowMain::on_injectionPlaceButton_clicked(bool checked)

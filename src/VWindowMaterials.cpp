@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <deque>
 
+const QString VWindowMaterials::ERROR_TITLE("Ошибка");
 const QString VWindowMaterials::INVALID_PARAM_ERROR("Введены некорректные параметры");
 const QString VWindowMaterials::ASK_FOR_REMOVE("Вы уверены, что хотите удалить материал?");
 
@@ -33,7 +34,7 @@ void VWindowMaterials::loadMaterials( )
     }
     catch (DatabaseException &e)
     {
-        QMessageBox::warning(this, QStringLiteral("Error"), e.what());
+        QMessageBox::warning(this, ERROR_TITLE, e.what());
     }
 }
 
@@ -54,7 +55,7 @@ void VWindowMaterials::removeMaterial( )
             }
             catch (DatabaseException &e)
             {
-                QMessageBox::warning(this, QStringLiteral("Error"), e.what());
+                QMessageBox::warning(this, ERROR_TITLE, e.what());
             }
         }
     }
@@ -80,7 +81,7 @@ void VWindowMaterials::importMaterials()
         }
         catch (DatabaseException &e)
         {
-            QMessageBox::warning(this, QStringLiteral("Error"), e.what());
+            QMessageBox::warning(this, ERROR_TITLE, e.what());
         }
     }
 }
@@ -98,7 +99,7 @@ void VWindowMaterials::exportMaterials()
         }
         catch (DatabaseException &e)
         {
-            QMessageBox::warning(this, QStringLiteral("Error"), e.what());
+            QMessageBox::warning(this, ERROR_TITLE, e.what());
         }
     }
 }

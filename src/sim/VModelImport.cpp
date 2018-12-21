@@ -58,13 +58,12 @@ void VModelImport::loadFromFile(const QString &filename)
     QXmlStreamReader xmlReader(&file);
     xmlReader.readNext();
     while(!xmlReader.atEnd())
-    {
-        #ifdef DEBUG_MODE
-            qDebug() << xmlReader.name();
-            qDebug() << xmlReader.isEndElement();
-        #endif
+    {        
         if(xmlReader.isStartElement())
         {
+            #ifdef DEBUG_MODE
+                qDebug() << xmlReader.name();
+            #endif
             if (!xmlReader.name().compare(_xINFO_TAGS._NAME))
                 loadInfo(xmlReader);
             else if (!xmlReader.name().compare(_xPARAM_TAGS._NAME))
@@ -80,6 +79,7 @@ void VModelImport::loadFromFile(const QString &filename)
     }
     if(xmlReader.hasError())
     {
+        throw VImportException();
         #ifdef DEBUG_MODE
             qDebug() << xmlReader.errorString();
         #endif
@@ -343,7 +343,8 @@ void VModelImport::createTriangles(const std::vector<VTriangleInfo> &trianglesIn
                 throw VImportException();
         }
         VSimTriangle::ptr triangle(new VSimTriangle(trInf.id, material, m_pParamPtr,
-                                                    nodes[0], nodes[1], nodes[2]));
+                                                    nodes[0], nodes[1], nodes[2],
+                                                    trInf.color));
         triangles->push_back(triangle);
     }
 }

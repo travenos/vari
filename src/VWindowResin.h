@@ -11,6 +11,8 @@ class VWindowResin : public VWindowMaterials
 {
     Q_OBJECT
 public:
+    static const QString TITLE;
+
     explicit VWindowResin(QWidget *parent=nullptr);
     virtual ~VWindowResin();
 
@@ -20,7 +22,6 @@ protected:
     virtual void accept();
 
 private:
-    static const QString TITLE;
     virtual VDatabaseInteractor* databaseInteractor();
     bool getInputs(QString &name, float &viscosity, float &tempcoef);
 

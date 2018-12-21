@@ -37,7 +37,8 @@ VSimNode(uint id, const QVector3D &pos,
          double pressure=0,
          double newPressure=0,
          VNodeRole role=NORMAL);
-    
+
+virtual ~VSimNode();
 /**
  * @param role
  */

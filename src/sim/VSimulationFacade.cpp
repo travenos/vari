@@ -232,8 +232,9 @@ void VSimulationFacade::loadModel(const QString &filename)
     loader.loadFromFile(filename);
     m_pLayersProcessor = loader.getLayersProcessor();
     initLayersProcessor();
-    m_pSimulator->setSimulationParametres(loader.getInfo(), loader.getSimulationParametres(), loader.getPaused());
     updateConfiguration();
+    m_pSimulator->setSimulationParametres(loader.getInfo(), loader.getSimulationParametres(), loader.getPaused());
+    m_pGraphicsViewer->viewFromAbove();
     emit modelLoaded();
 }
 void VSimulationFacade::saveModel(const QString &filename)
@@ -333,7 +334,6 @@ void VSimulationFacade::waitForInjectionPointSelection(double diameter)
     m_injectionDiameter = diameter;
     m_pGraphicsViewer->viewFromAbove();
     m_pGraphicsViewer->setViewing(false);
-    //TODO forbid rotation
     emit canceledWaitingForVacuumPoint();
     emit startedWaitingForInjectionPoint();
 }
@@ -345,7 +345,6 @@ void VSimulationFacade::waitForVacuumPointSelection(double diameter)
     m_vacuumDiameter = diameter;
     m_pGraphicsViewer->viewFromAbove();
     m_pGraphicsViewer->setViewing(false);
-    //TODO forbid rotation
     emit canceledWaitingForInjectionPoint();
     emit startedWaitingForVacuumPoint();
 }
@@ -353,14 +352,12 @@ void VSimulationFacade::waitForVacuumPointSelection(double diameter)
 void VSimulationFacade::cancelWaitingForInjectionPointSelection()
 {
     m_selectInjectionPoint = false;
-    //TODO allow rotation
     emit canceledWaitingForInjectionPoint();
 }
 
 void VSimulationFacade::cancelWaitingForVacuumPointSelection()
 {
     m_selectVacuumPoint = false;
-    //TODO allow rotation
     emit canceledWaitingForVacuumPoint();
 }
 
@@ -444,7 +441,6 @@ void VSimulationFacade::m_on_got_point(const QVector3D &point)
         m_pLayersProcessor->setInjectionPoint(point, m_injectionDiameter);
         m_pSimulator->setInjectionDiameter(m_injectionDiameter);
         m_selectInjectionPoint = false;
-        //TODO allow rotation
         emit injectionPointSet();
     }
     else if (m_selectVacuumPoint)
@@ -452,7 +448,6 @@ void VSimulationFacade::m_on_got_point(const QVector3D &point)
         m_pLayersProcessor->setVacuumPoint(point, m_vacuumDiameter);
         m_pSimulator->setVacuumDiameter(m_vacuumDiameter);
         m_selectVacuumPoint = false;
-        //TODO allow rotation
         emit vacuumPointSet();
     }
 }
