@@ -17,7 +17,6 @@
  * VSimulator implementation
  */
 
-const uint VSimulator::TIMER_PERIOD = 1000;
 /**
  * Number of threads for calculations during the simulation
  */
@@ -530,16 +529,10 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
             if(newPressure > m_param.getInjectionPressure())
                 newPressure = m_param.getInjectionPressure();
 
-            if (!node->isVacuum())
-            {
-                if(newPressure > highestNeighborPressure)
+            if(newPressure > highestNeighborPressure)
                     newPressure = highestNeighborPressure;
-            }
-            else
-            {
-                if(newPressure > m_param.getVacuumPressure())
+            if(node->isVacuum() && newPressure > m_param.getVacuumPressure())
                     newPressure = m_param.getVacuumPressure();
-            }
             node->setNewPressure(newPressure);
         }
     }

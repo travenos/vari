@@ -54,6 +54,7 @@ void VModelImport::loadFromFile(const QString &filename)
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly | QFile::Text))
         throw VImportException();
+    m_allNodes.clear();
     QXmlStreamReader xmlReader(&file);
     xmlReader.readNext();
     while(!xmlReader.atEnd())

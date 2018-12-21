@@ -29,10 +29,6 @@ public:
     typedef std::shared_ptr<const VSimulator> const_ptr;
 
     /**
-     * Period of the timer (in ms)
-     */
-    static const uint TIMER_PERIOD;
-    /**
  * Default constructor
  */
     VSimulator();
