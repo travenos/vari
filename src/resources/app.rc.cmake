@@ -2,6 +2,7 @@ IDI_ICON1   ICON   DISCARDABLE   "${RESOURCES_DIRECTORY}/vari.ico"
 
 #include <windows.h>
 
+VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
