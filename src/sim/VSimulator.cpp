@@ -35,7 +35,7 @@ VSimulator::VSimulator():
     m_simulatingFlag(false),
     m_pauseFlag(false),
     m_pParam(new VSimulationParametres),
-    m_st_timeBeforePause(0)
+    m_simT_timeBeforePause(0)
 {
     m_calculationThreads.resize(N_THREADS);
     m_calculationData.resize(N_THREADS);
@@ -159,9 +159,12 @@ void VSimulator::setSimulationParametres(const VSimulationInfo &info,
         m_info = info;
     }
     m_pauseFlag.store(isPaused);
-    m_newDataNotifier.notifyAll();
     if (isPaused)
+    {
+        m_simT_timeBeforePause = static_cast<int>(info.realTime * 1000);
         emit simulationPaused();
+    }
+    m_newDataNotifier.notifyAll();
 }
 
 
@@ -245,7 +248,7 @@ void VSimulator::simulationCycle()
             double simTimeDelta = getTimeDelta();
             m_info.simTime += simTimeDelta;
             double oldRealTime = m_info.realTime;
-            m_info.realTime = (m_st_timeBeforePause + timeMeasurer.elapsed()) / 1000.0;
+            m_info.realTime = (m_simT_timeBeforePause + timeMeasurer.elapsed()) / 1000.0;
             double realTimeDelta = m_info.realTime - oldRealTime;
             m_info.realtimeFactor = simTimeDelta / realTimeDelta;
             m_info.filledPercent = filledPercent;
@@ -267,12 +270,12 @@ void VSimulator::simulationCycle()
         m_pauseFlag.store(false);
     if (!m_pauseFlag)
     {
-        m_st_timeBeforePause = 0;
+        m_simT_timeBeforePause = 0;
         emit simulationStopped();
     }
     else
     {
-        m_st_timeBeforePause += timeMeasurer.elapsed();
+        m_simT_timeBeforePause += timeMeasurer.elapsed();
         emit simulationPaused();
     }
     #ifdef DEBUG_MODE

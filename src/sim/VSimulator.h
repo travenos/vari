@@ -201,7 +201,7 @@ private:
     /**
      * Duration of the simulation process before pause. Should be accessed only from simulation thread.
      */
-    int m_st_timeBeforePause;
+    int m_simT_timeBeforePause;
 
     /**
      * A function, which is being executed in the simulation thread

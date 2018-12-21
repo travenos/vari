@@ -177,6 +177,7 @@ void VModelExport::saveNode(QXmlStreamWriter &xmlWriter,
     xmlWriter.writeAttribute(tags.ID, QString::number(node->getId()));
     xmlWriter.writeAttribute(tags.PRESSURE, QString::number(node->getPressure()));
     xmlWriter.writeAttribute(tags.NEW_PRESSURE, QString::number(node->getNewPressure()));
+    xmlWriter.writeAttribute(tags.ROLE, QString::number(node->getRole()));
     xmlWriter.writeCharacters(createString(node->getPosition()));
     xmlWriter.writeEndElement();
 }
