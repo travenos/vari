@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 # Copyright (c) 2018 Alexey Barashkov <travenos@robot-develop.org>
 PACKAGE_NAME="vari"
-DEPENDENCIES="libc6 (>= 2.27), libgcc1 (>= 1:8), libgl1-mesa-glx | libgl1, libstdc++6 (>= 8), libx11-6, libxi6, qt5-default (>= 5.9), postgresql, libqt5sql5-psql"
-CONFLICTS="libsoqt3-20, libsoqt4-20, libsoqt4-dev, libcoin80v5, libcoin80-dev, libcoin80-runtime"
-PROVIDES="libcoin80v5, libcoin80-dev"
 
 CODE_SOURCE_DIR="src"
 
@@ -19,6 +16,22 @@ PACKAGE_SOURCE_DIR="package"
 PACKAGE_DEST_DIR="$PREFIX/DEBIAN"
 
 CONTROL_NAME="control"
+
+LIBC_VER=$(dpkg -s libc6 | grep '^Version: ')
+LIBC_VER=${LIBC_VER%-*}
+LIBC_VER=${LIBC_VER:9}
+LIBGCC1_VER=$(dpkg -s libgcc1 | grep '^Version: ')
+LIBGCC1_VER=${LIBGCC1_VER%-*}
+LIBGCC1_VER=${LIBGCC1_VER:9}
+LIBSTDCXX_VER=$(dpkg -s libstdc++6 | grep '^Version: ')
+LIBSTDCXX_VER=${LIBSTDCXX_VER%-*}
+LIBSTDCXX_VER=${LIBSTDCXX_VER:9}
+QT_VER=$(dpkg -s qt5-default | grep '^Version: ')
+QT_VER=${QT_VER%-*}
+QT_VER=${QT_VER:9}
+DEPENDENCIES="libc6 (>= ${LIBC_VER}), libgcc1 (>= ${LIBGCC1_VER}), libgl1-mesa-glx | libgl1, libstdc++6 (>= ${LIBSTDCXX_VER}), libx11-6, libxi6, qt5-default (>= ${QT_VER}), postgresql, libqt5sql5-psql"
+CONFLICTS="libsoqt3-20, libsoqt4-20, libsoqt4-dev, libcoin80v5, libcoin80-dev, libcoin80-runtime"
+PROVIDES="libcoin80v5, libcoin80-dev"
 
 VERSION_ARG=-v
 THREADS_ARG=-j
