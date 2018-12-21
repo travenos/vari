@@ -78,7 +78,10 @@ find_package(Qt5Sql     REQUIRED)
 
 if (${Qt5Core_FOUND})
     message(STATUS "Found Qt 5 ${Qt5Core_VERSION}")
-    message(STATUS "Qt 5 Core Directory: ${Qt5Core_DIR}\n")
+    message(STATUS "Qt 5 Core Directory: ${Qt5Core_DIR}")
+    message(STATUS "Qt 5 Gui Directory: ${Qt5Gui_DIR}")
+    message(STATUS "Qt 5 Widgets Directory: ${Qt5Widgets_DIR}")
+    message(STATUS "Qt 5 SqlDirectory: ${Qt5Sql_DIR}\n")
 endif()
 
 include_directories(${Qt5Core_INCLUDE_DIRS})
