@@ -43,9 +43,6 @@ public:
     void reset() ;
     VCloth::const_ptr getMaterial() const ;
 
-    void setInjectionPoint(const QVector3D &point, double diameter);
-    void setVacuumPoint(const QVector3D &point, double diameter);
-
     void setMinMaxIds(uint nodeMinId, uint nodeMaxId, uint tiangleMinId, uint triangleMaxId);
     uint getNodeMinId() const;
     uint getNodeMaxId() const;
@@ -66,9 +63,6 @@ private:
     uint m_nodeMaxId;
     uint m_triangleMinId;
     uint m_triangleMaxId;
-
-    void setPoint(const QVector3D &point, double diameter,
-                  VSimNode::VNodeRole setRole, VSimNode::VNodeRole anotherRole);
 };
 
 #endif //_VLAYER_H

@@ -119,6 +119,8 @@ private:
      */
     void putOnTop(uint layer) ;
 
+    void setPoint(const QVector3D &point, double diameter,
+                  VSimNode::VNodeRole setRole, VSimNode::VNodeRole anotherRole);
 signals:
     void layerVisibilityChanged(uint, bool);
     void layerRemoved(uint);

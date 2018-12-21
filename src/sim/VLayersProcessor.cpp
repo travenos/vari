@@ -338,13 +338,13 @@ void VLayersProcessor::updateActiveElementsVectors()
 void VLayersProcessor::setInjectionPoint(const QVector3D &point, double diameter)
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
-    m_layers.back()->setInjectionPoint(point, diameter);
+    setPoint(point, diameter, VSimNode::INJECTION, VSimNode::VACUUM);
 }
 
 void VLayersProcessor::setVacuumPoint(const QVector3D &point, double diameter)
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
-    m_layers.back()->setVacuumPoint(point, diameter);
+    setPoint(point, diameter, VSimNode::VACUUM, VSimNode::INJECTION);
 }
 
 uint VLayersProcessor::getNodeMinId(uint layer) const
@@ -365,4 +365,42 @@ uint VLayersProcessor::getTriangleMinId(uint layer) const
 uint VLayersProcessor::getTriangleMaxId(uint layer) const
 {
     return m_layers.at(layer)->getTriangleMaxId();
+}
+
+void VLayersProcessor::setPoint(const QVector3D &point, double diameter,
+                      VSimNode::VNodeRole setRole, VSimNode::VNodeRole anotherRole)
+{
+    if (m_pActiveNodes->size() == 0)
+        return;
+    double radius = diameter / 2;
+    double distance;
+    VSimNode::ptr nearestNode = m_pActiveNodes->front();
+    std::vector<VSimNode::ptr> nearNodes;
+    double minDistance = nearestNode->getDistance(point);
+    for (auto &node : *m_pActiveNodes)
+    {
+        if (node->getRole() != anotherRole)
+            node->setRole(VSimNode::NORMAL);
+        distance = node->getDistance(point);
+        if (distance < minDistance)
+        {
+            minDistance = distance;
+            nearestNode = node;
+        }
+        if (distance <= radius)
+        {
+            nearNodes.push_back(node);
+        }
+    }
+    if (nearNodes.size() > 0)
+    {
+        double height = nearestNode->getCavityHeight() / 2;
+        for (auto &node : nearNodes)
+        {
+            double z = node->getPosition().z();
+            if (abs(z - point.z()) <= height)
+                node->setRole(setRole);
+        }
+    }
+    nearestNode->setRole(setRole);
 }

@@ -6,7 +6,6 @@
 #ifdef DEBUG_MODE
 #include <QDebug>
 #endif
-#include <cmath>
 
 #include "VSimNode.h"
 

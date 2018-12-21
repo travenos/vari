@@ -132,49 +132,6 @@ VCloth::const_ptr VLayer::getMaterial() const
     return m_pMaterial;
 }
 
-void VLayer::setInjectionPoint(const QVector3D &point, double diameter)
-{
-    setPoint(point, diameter, VSimNode::INJECTION, VSimNode::VACUUM);
-}
-
-void VLayer::setVacuumPoint(const QVector3D &point, double diameter)
-{
-    setPoint(point, diameter, VSimNode::VACUUM, VSimNode::INJECTION);
-}
-
-void VLayer::setPoint(const QVector3D &point, double diameter,
-                      VSimNode::VNodeRole setRole, VSimNode::VNodeRole anotherRole)
-{
-    if (m_pNodes->size() == 0)
-        return;
-    double radius = diameter / 2;
-    double distance;
-    VSimNode::ptr nearestNode = m_pNodes->front();
-    double minDistance = nearestNode->getDistance(point);
-    bool foundNear = false;
-    for (VSimNode::ptr &node : *m_pNodes)
-    {
-        distance = node->getDistance(point);
-        if (distance > radius)
-        {
-            if (node->getRole() != anotherRole)
-                node->setRole(VSimNode::NORMAL);
-            if (!foundNear && distance < minDistance)
-            {
-                minDistance = distance;
-                nearestNode = node;
-            }
-        }
-        else
-        {
-            node->setRole(setRole);
-            foundNear = true;
-        }
-    }
-    if (!foundNear)
-        nearestNode->setRole(setRole);
-}
-
 void VLayer::setMinMaxIds(uint nodeMinId, uint nodeMaxId, uint tiangleMinId, uint triangleMaxId)
 {
     m_nodeMinId = nodeMinId;
