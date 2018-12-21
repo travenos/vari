@@ -34,7 +34,6 @@ VSimulator::VSimulator():
     m_pTriangles(new std::vector<VSimTriangle::ptr>),
     m_simulatingFlag(false),
     m_pauseFlag(false),
-    m_pParam(new VSimulationParametres),
     m_simT_timeBeforePause(0)
 {
     m_calculationThreads.resize(N_THREADS);
@@ -115,9 +114,7 @@ bool VSimulator::isPaused() const
 void VSimulator::reset() 
 {
     stop();
-    nodesAction([](const VSimNode::ptr& node){node->reset();});
-    trianglesAction([](const VSimTriangle::ptr& triangle){triangle->reset();});
-    resetInfo();
+    resetState();
     m_newDataNotifier.notifyAll();
 }
 
@@ -134,9 +131,10 @@ void VSimulator::resetTriangleColors()
     trianglesAction([](const VSimTriangle::ptr& triangle){triangle->reset();});
 }
 
-VSimulationParametres::const_ptr VSimulator::getSimulationParametres() const 
+VSimulationParametres VSimulator::getSimulationParametres() const
 {
-    return m_pParam;
+    std::lock_guard<std::mutex> locker(*m_pNodesLock);
+    return m_param;
 }
 
 void VSimulator::setSimulationParametres(const VSimulationInfo &info,
@@ -144,16 +142,19 @@ void VSimulator::setSimulationParametres(const VSimulationInfo &info,
                                          bool isPaused)
 {
     stop();
-    *m_pParam = param;
+    {
+        std::lock_guard<std::mutex> locker(*m_pNodesLock);
+        m_param = param;
+    }
     emit resinChanged();
-    emit injectionDiameterSet(m_pParam->getInjectionDiameter()) ;
-    emit vacuumDiameterSet(m_pParam->getVacuumDiameter()) ;
-    emit temperatureSet(m_pParam->getTemperature()) ;
-    emit vacuumPressureSet(m_pParam->getVacuumPressure()) ;
-    emit injectionPressureSet(m_pParam->getInjectionPressure()) ;
-    emit coefQSet(m_pParam->getQ()) ;
-    emit coefRSet(m_pParam->getR()) ;
-    emit coefSSet(m_pParam->getQ()) ;
+    emit injectionDiameterSet(param.getInjectionDiameter()) ;
+    emit vacuumDiameterSet(param.getVacuumDiameter()) ;
+    emit temperatureSet(param.getTemperature()) ;
+    emit vacuumPressureSet(param.getVacuumPressure()) ;
+    emit injectionPressureSet(param.getInjectionPressure()) ;
+    emit coefQSet(param.getQ()) ;
+    emit coefRSet(param.getR()) ;
+    emit coefSSet(param.getQ()) ;
     {
         std::lock_guard<std::mutex> locker(m_infoLock);
         m_info = info;
@@ -177,11 +178,14 @@ void VSimulator::setActiveElements(const VSimNode::const_vector_ptr &nodes,
 {
     if (!isSimulating())
     {
+        std::lock(*m_pNodesLock, *m_pTrianglesLock);
         m_pActiveNodes = nodes;
         m_pTriangles = triangles;
         m_nodesThreadPart = m_pActiveNodes->size() / N_THREADS + 1;
         m_trianglesThreadPart = m_pTriangles->size() / N_THREADS + 1;
-        m_pParam->setAverageCellDistance(getAverageCellDistance());
+        m_param.setAverageCellDistance(getAverageCellDistance());
+        m_pNodesLock->unlock();
+        m_pTrianglesLock->unlock();
     }
     else
         throw VSimulatorException();
@@ -232,11 +236,13 @@ void VSimulator::simulationCycle()
     if (!(m_pauseFlag.load()))
     {
         m_pauseFlag.store(false);
-        resetInfo();
-        nodesAction([](const VSimNode::ptr& node){node->reset();});
-        trianglesAction([](const VSimTriangle::ptr& triangle){triangle->reset();});
-        m_pParam->setAveragePermeability(getAveragePermeability());
-        m_pParam->setNumberOfFullNodes(0);
+        resetState();
+        double avgPerm = getAveragePermeability();
+        {
+            std::lock_guard<std::mutex> locker(*m_pNodesLock);
+            m_param.setAveragePermeability(avgPerm);
+            m_param.setNumberOfFullNodes(0);
+        }
     }
     bool madeChangesInCycle = false;
     while(!(m_stopFlag.load()))
@@ -281,6 +287,18 @@ void VSimulator::simulationCycle()
     #ifdef DEBUG_MODE
         qInfo() << "The simulation was stopped";
     #endif
+}
+
+void VSimulator::resetState()
+{
+    nodesAction([this](const VSimNode::ptr& node)
+    {
+        node->setBoundaryPressures(m_param.getInjectionPressure(),
+                                   m_param.getVacuumPressure());
+        node->reset();
+    });
+    trianglesAction([](const VSimTriangle::ptr& triangle){triangle->reset();});
+    resetInfo();
 }
 
 void VSimulator::resetInfo() 
@@ -363,9 +381,7 @@ inline void VSimulator::trianglesAction(Callable&& func)
 
 inline void VSimulator::calculatePressure()
 {
-    auto calcFunc = [](const VSimNode::ptr& node)
-    {node->calculate();};
-    nodesAction(calcFunc);
+    nodesAction(std::bind(&VSimulator::calculateNewPressure, this, std::placeholders::_1));
 }
 
 inline bool VSimulator::commitPressure()
@@ -383,7 +399,10 @@ inline bool VSimulator::commitPressure()
             ++fullNodesCount;
     };
     nodesAction(commitFunc);
-    m_pParam->setNumberOfFullNodes(fullNodesCount);
+    {
+        std::lock_guard<std::mutex> locker(*m_pNodesLock);
+        m_param.setNumberOfFullNodes(fullNodesCount);
+    }
     return madeChangesInCycle.load();
 }
 
@@ -442,15 +461,15 @@ inline double VSimulator::getAverageCellDistance() const
 
 inline double VSimulator::getTimeDelta() const
 {
-    std::lock_guard<std::mutex> lock(*m_pNodesLock);
+    std::lock_guard<std::mutex> locker(*m_pNodesLock);
     if (m_pActiveNodes->size() > 0)
     {
-        double n = m_pParam->getViscosity();                             //[N*s/m2]
-        double _l = m_pParam->getAverageCellDistance();                   //[m]
-        double l_typ = (sqrt((double)m_pParam->getNumberOfFullNodes())*_l);   //[m]
-        double _K = m_pParam->getAveragePermeability();                   //[m^2]
-        double p_inj = m_pParam->getInjectionPressure();          //[N/m2]
-        double p_vac = m_pParam->getVacuumPressure();                    //[N/m2]
+        double n = m_param.getViscosity();                             //[N*s/m2]
+        double _l = m_param.getAverageCellDistance();                   //[m]
+        double l_typ = (sqrt((double)m_param.getNumberOfFullNodes())*_l);   //[m]
+        double _K = m_param.getAveragePermeability();                   //[m^2]
+        double p_inj = m_param.getInjectionPressure();          //[N/m2]
+        double p_vac = m_param.getVacuumPressure();                    //[N/m2]
 
         double time = n*l_typ*_l/(_K*(p_inj-p_vac));
         return time;
@@ -459,56 +478,149 @@ inline double VSimulator::getTimeDelta() const
         return 0;
 }
 
+void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
+{
+    double m = node->getNeighboursNumber();
+    if(!node->isInjection() && m > 0)
+    {
+        double _K = m_param.getAveragePermeability();
+        double K = node->getPermeability();
+        double phi = node->getPorosity();
+        double d = node->getCavityHeight();
+        double _l = m_param.getAverageCellDistance();
+        double q = m_param.getQ();
+        double r = m_param.getR();
+        double s = m_param.getS();
+        double p_t = node->getPressure();
+
+        double brace0 = pow(K/_K,q);
+
+        double sum = 0;
+        double highestNeighborPressure = 0;
+
+        const VSimNode::layered_neighbours_t &neighbours = node->getNeighbours();
+        for (uint layer = 0; layer < VSimNode::LAYERS_NUMBER; ++layer)
+        {
+            for(auto &it: neighbours[layer])
+            {
+                double distance = it.first;
+                if (distance > 0)
+                {
+                    const VSimNode* neighbor = it.second;
+                    double d_i = neighbor->getCavityHeight();
+                    double phi_i = neighbor->getPorosity();
+                    double brace1 = pow(((d_i*phi_i)/(d*phi)),r);
+                    double brace2 = pow(_l/distance,s);
+                    double p_it = neighbor->getPressure();
+                    double brace3 = p_it-p_t;
+                    sum += (brace1*brace2*brace3);
+                    if(p_it > highestNeighborPressure)
+                        highestNeighborPressure = p_it;
+                }
+                else
+                    --m;
+            }
+        }
+        if (m > 0)
+        {
+            double newPressure = p_t+(brace0/m)*sum;
+            if(newPressure < p_t)
+                newPressure = p_t;
+            if(newPressure > m_param.getInjectionPressure())
+                newPressure = m_param.getInjectionPressure();
+
+            if (!node->isVacuum())
+            {
+                if(newPressure > highestNeighborPressure)
+                    newPressure = highestNeighborPressure;
+            }
+            else
+            {
+                if(newPressure > m_param.getVacuumPressure())
+                    newPressure = m_param.getVacuumPressure();
+            }
+            node->setNewPressure(newPressure);
+        }
+    }
+}
+
 void VSimulator::setResin(const VResin& resin)
 {
-    m_pParam->setResin(resin);
+    {
+        std::lock_guard<std::mutex> lock(*m_pNodesLock);
+        m_param.setResin(resin);
+    }
     emit resinChanged();
 }
 
-void VSimulator::setInjectionDiameter(double diameter) 
+void VSimulator::setInjectionDiameter(double diameter)
 {
-    m_pParam->setInjectionDiameter(diameter);
+    {
+        std::lock_guard<std::mutex> lock(*m_pNodesLock);
+        m_param.setInjectionDiameter(diameter);
+    }
     emit injectionDiameterSet(diameter);
 }
 
-void VSimulator::setVacuumDiameter(double diameter) 
+void VSimulator::setVacuumDiameter(double diameter)
 {
-    m_pParam->setVacuumDiameter(diameter);
+    {
+        std::lock_guard<std::mutex> lock(*m_pNodesLock);
+        m_param.setVacuumDiameter(diameter);
+    }
     emit vacuumDiameterSet(diameter);
 }
 
-void VSimulator::setTemperature(double temperature) 
+void VSimulator::setTemperature(double temperature)
 {
-    m_pParam->setTemperature(temperature);
+    {
+        std::lock_guard<std::mutex> lock(*m_pNodesLock);
+        m_param.setTemperature(temperature);
+    }
     emit temperatureSet(temperature);
 }
 
-void VSimulator::setVacuumPressure(double pressure) 
+void VSimulator::setVacuumPressure(double pressure)
 {
-    m_pParam->setVacuumPressure(pressure);
+    std::lock(*m_pNodesLock, *m_pTrianglesLock);
+    m_param.setVacuumPressure(pressure);
+    m_pNodesLock->unlock();
+    m_pTrianglesLock->unlock();
     emit vacuumPressureSet(pressure);
 }
 
-void VSimulator::setInjectionPressure(double pressure) 
+void VSimulator::setInjectionPressure(double pressure)
 {
-    m_pParam->setInjectionPressure(pressure);
+    std::lock(*m_pNodesLock, *m_pTrianglesLock);
+    m_param.setInjectionPressure(pressure);
+    m_pNodesLock->unlock();
+    m_pTrianglesLock->unlock();
     emit injectionPressureSet(pressure);
 }
 
-void VSimulator::setQ(double q) 
+void VSimulator::setQ(double q)
 {
-    m_pParam->setQ(q);
+    {
+        std::lock_guard<std::mutex> lock(*m_pNodesLock);
+        m_param.setQ(q);
+    }
     emit coefQSet(q);
 }
 
-void VSimulator::setR(double r) 
+void VSimulator::setR(double r)
 {
-    m_pParam->setR(r);
+    {
+        std::lock_guard<std::mutex> lock(*m_pNodesLock);
+        m_param.setR(r);
+    }
     emit coefRSet(r);
 }
 
-void VSimulator::setS(double s) 
+void VSimulator::setS(double s)
 {
-    m_pParam->setS(s);
+    {
+        std::lock_guard<std::mutex> lock(*m_pNodesLock);
+        m_param.setS(s);
+    }
     emit coefSSet(s);
 }

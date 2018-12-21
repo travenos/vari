@@ -19,7 +19,6 @@ public:
     
     VLayerFromFileBuilder(const QString &filename,
                           const VCloth &material,
-                          const VSimulationParametres::const_ptr &p_simParam,
                           VUnit units=M);
     virtual ~VLayerFromFileBuilder();
     const VLayer::ptr &build();

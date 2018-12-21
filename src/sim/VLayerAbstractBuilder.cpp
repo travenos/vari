@@ -12,10 +12,8 @@
 
 const float VLayerAbstractBuilder::MM_IN_M = 1000;
 
-VLayerAbstractBuilder::VLayerAbstractBuilder(const VCloth &material,
-                      const VSimulationParametres::const_ptr &p_simParam) :
+VLayerAbstractBuilder::VLayerAbstractBuilder(const VCloth &material) :
     m_pMaterial(new VCloth(material)),
-    m_pParam(p_simParam),
     m_nodeStartId(0),
     m_triangleStartId(0),
     m_nodeMaxId(0),

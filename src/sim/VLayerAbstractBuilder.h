@@ -15,8 +15,7 @@ public:
     enum VUnit {MM, M};
     static const float MM_IN_M;
 
-    VLayerAbstractBuilder(const VCloth &material,
-                          const VSimulationParametres::const_ptr &p_simParam);
+    VLayerAbstractBuilder(const VCloth &material);
     virtual ~VLayerAbstractBuilder();
     VLayerAbstractBuilder(const VLayerAbstractBuilder& ) = delete;
     VLayerAbstractBuilder& operator= (const VLayerAbstractBuilder& ) = delete;
@@ -31,7 +30,6 @@ public:
 protected:
     VLayer::ptr m_pLayer;
     const VCloth::ptr m_pMaterial;
-    const VSimulationParametres::const_ptr m_pParam;
     uint m_nodeStartId;
     uint m_triangleStartId;
     uint m_nodeMaxId;

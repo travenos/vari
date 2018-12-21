@@ -70,6 +70,10 @@ public:
      */
     void clear() ;
     /**
+     * Reset all nodes, triangles and information about the simulation status
+     */
+    void resetState();
+    /**
      * Reset information about the current simulation status
      */
     void resetInfo() ;
@@ -104,7 +108,7 @@ public:
      */
     void resetTriangleColors();
 
-    VSimulationParametres::const_ptr getSimulationParametres() const ;
+    VSimulationParametres getSimulationParametres() const ;
 
     /**
      * Set simulation state
@@ -178,9 +182,10 @@ private:
     mutable std::vector<double> m_calculationData;
 
     /**
-     * A struct, containing all parametres needed for simulation
+     * A struct, containing all parametres needed for simulation.
+     * Should be accessed only when m_pNodesLock is locked
      */
-    VSimulationParametres::ptr m_pParam;
+    VSimulationParametres m_param;
 
     /**
      * A struct, containing all parametres, which describe current simulation status
@@ -236,6 +241,8 @@ private:
     inline void calculatePressure();
     inline bool commitPressure();
     inline void updateColors();
+
+    void calculateNewPressure(const VSimNode::ptr &node);
 
     inline double getTimeDelta() const ;
     inline double getAveragePermeability() const ;

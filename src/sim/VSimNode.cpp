@@ -15,21 +15,17 @@
  */
 
 
-/**
- * @param pos
- * @param p_material
- * @param p_param
- */
 VSimNode::VSimNode(uint id, const QVector3D& pos,
                    const VCloth::const_ptr &p_material,
-                   const VSimulationParametres::const_ptr &p_param,
+                   double injectionPressure,
+                   double vacuumPressure,
                    double pressure,
-                   double newPressure,
                    VNodeRole role):
-    VSimElement(id, p_material, p_param),
+    VSimElement(id, p_material),
     m_position(pos),
+    m_injectionPressure(injectionPressure),
+    m_vacuumPressure(vacuumPressure),
     m_currentPressure(pressure),
-    m_newPressure(newPressure),
     m_role(role),
     m_neighboursNumber(0)
 {
@@ -50,89 +46,25 @@ void VSimNode::setRole(VNodeRole role)
     m_role = role;
 }
 
-/**
- * @return VNodeRole
- */
 VSimNode::VNodeRole VSimNode::getRole() const
 {
     return m_role;
 }
 
-void VSimNode::calculate()
+void VSimNode::setNewPressure(double newPressure)
 {
-    double m = m_neighboursNumber;
-    if(!isInjection() && m > 0) //we don't need to calculate a new pressure if we have constant pressure cause it's an injection point
-    {
-        double _K = m_pParam->getAveragePermeability();
-        double K = m_pMaterial->permeability;
-        double phi = m_pMaterial->porosity;
-        double d = m_pMaterial->cavityHeight;
-        double _l = m_pParam->getAverageCellDistance();
-        double q = m_pParam->getQ();
-        double r = m_pParam->getR();
-        double s = m_pParam->getS();
-        double p_t = m_currentPressure;
-
-        double brace0 = pow(K/_K,q);
-
-        double sum=0;
-        double highestNeighborPressure = 0;
-        auto calcNeighbour = [d, phi, r, _l, s, p_t, &sum, &highestNeighborPressure]
-                (const std::pair<double, const VSimNode* > &it)
-        {
-            const VSimNode* neighbor = it.second;
-            double distance = it.first;
-            double d_i = neighbor->getCavityHeight();
-            double phi_i = neighbor->getPorosity();
-            double brace1 = pow(((d_i*phi_i)/(d*phi)),r);
-            double brace2 = pow(_l/distance,s);
-            double p_it = neighbor->getPressure();
-            double brace3 = p_it-p_t;
-            sum += (brace1*brace2*brace3);
-            if(p_it > highestNeighborPressure)
-            {
-                highestNeighborPressure = p_it;
-            }
-        };
-        for(auto &it: m_neighbours[CURRENT])
-            calcNeighbour(it);
-        for(auto &it: m_neighbours[PREVIOUS])
-            calcNeighbour(it);
-        for(auto &it: m_neighbours[NEXT])
-            calcNeighbour(it);
-
-        m_newPressure = p_t+(brace0/m)*sum;
-        if(m_newPressure < p_t)
-            m_newPressure = p_t;
-        if(m_newPressure >= m_pParam->getInjectionPressure())
-            m_newPressure = m_pParam->getInjectionPressure();
-
-        if (!isVacuum())
-        {
-            if(m_newPressure > highestNeighborPressure)
-            {
-                m_newPressure = highestNeighborPressure;
-            }
-        }
-        else
-        {
-            if(m_newPressure > m_pParam->getVacuumPressure())
-            {
-                m_newPressure = m_pParam->getVacuumPressure();
-            }
-        }
-    }
+    m_newPressure = newPressure;
 }
 
 void VSimNode::commit(bool *madeChanges, bool *isFull)
 {
     if (isFull != nullptr)
-        (*isFull) = (m_newPressure >= m_pParam->getVacuumPressure());
+        (*isFull) = (m_newPressure >= m_vacuumPressure);
     if(m_newPressure != m_currentPressure)
     {
         if (madeChanges != nullptr)
-            (*madeChanges) = (m_currentPressure < m_pParam->getVacuumPressure());
-        m_currentPressure = m_newPressure.load();
+            (*madeChanges) = (m_currentPressure < m_vacuumPressure);
+        m_currentPressure = m_newPressure;
     }
     else
     {
@@ -141,9 +73,6 @@ void VSimNode::commit(bool *madeChanges, bool *isFull)
     }
 }
 
-/**
- * @return double
- */
 double VSimNode::getPressure() const
 {
     return m_currentPressure;
@@ -152,23 +81,14 @@ double VSimNode::getPressure() const
 double VSimNode::getFilledPart() const
 {
     double nom = m_currentPressure;
-    double den = m_pParam->getVacuumPressure();
+    double den = m_vacuumPressure;
     return (nom >= den) ? 1 : (nom / den);
 }
 
-double VSimNode::getNewPressure() const
-{
-    return m_newPressure;
-}
-
-/**
- * @param node
- * @param layer
- */
 void VSimNode::addNeighbour(const VSimNode* node, VLayerSequence layer) 
 {
     double dist = getDistance(node);    
-    m_neighbours[layer].insert(std::make_pair(dist, node));
+    m_neighbours[layer].push_back(std::make_pair(dist, node));
     ++m_neighboursNumber;
 }
 
@@ -199,9 +119,6 @@ void VSimNode::clearAllNeighbours()
     m_neighboursNumber = 0;
 }
 
-/**
- * @param layer
- */
 void VSimNode::clearNeighbours(VLayerSequence layer) 
 {
     m_neighbours[layer].clear();
@@ -221,23 +138,26 @@ double VSimNode::getDistance(const QVector3D& point) const
     return m_position.distanceToPoint(point);
 }
 
-/**
- * @return const QVector3D&
- */
 const QVector3D& VSimNode::getPosition() const 
 {
     return m_position;
 }
 
-void VSimNode::reset() 
+void VSimNode::reset()
 {
     double pressure;
     if (!isInjection())
         pressure = 0;
     else
-        pressure = m_pParam->getInjectionPressure();
+        pressure = m_injectionPressure;
     m_currentPressure = pressure;
     m_newPressure = pressure;
+}
+
+void VSimNode::setBoundaryPressures(double injectionPressure, double vacuumPressure)
+{
+    m_injectionPressure = injectionPressure;
+    m_vacuumPressure = vacuumPressure;
 }
 
 void VSimNode::getNeighbours(std::vector<const VSimNode*> &neighbours) const 
@@ -252,12 +172,40 @@ void VSimNode::getNeighbours(std::vector<const VSimNode*> &neighbours) const
         neighbours.push_back(neighbour.second);
 }
 
+void VSimNode::getNeighbours(neighbours_vector_t &neighbours) const
+{
+    neighbours.clear();
+    neighbours.reserve(getNeighboursNumber());
+    for (uint layer = 0; layer < LAYERS_NUMBER; ++layer)
+        std::copy(m_neighbours[layer].begin(), m_neighbours[layer].end(),
+                  std::back_inserter(neighbours));
+}
+
 void VSimNode::getNeighbours(std::vector<const VSimNode*> &neighbours, VLayerSequence layer) const
 {
     neighbours.clear();
     neighbours.reserve(getNeighboursNumber(layer));
     for (auto &neighbour : m_neighbours[layer])
         neighbours.push_back(neighbour.second);
+}
+
+void VSimNode::getNeighbours(neighbours_vector_t &neighbours,
+                             VLayerSequence layer) const
+{
+    neighbours.clear();
+    neighbours.reserve(getNeighboursNumber(layer));
+    std::copy(m_neighbours[layer].begin(), m_neighbours[layer].end(),
+              std::back_inserter(neighbours));
+}
+
+const VSimNode::layered_neighbours_t &VSimNode::getNeighbours() const
+{
+    return m_neighbours;
+}
+
+const VSimNode::neighbours_vector_t &VSimNode::getNeighbours(VLayerSequence layer) const
+{
+    return m_neighbours[layer];
 }
 
 void VSimNode::getNeighboursId(std::vector<uint> &neighbourId) const

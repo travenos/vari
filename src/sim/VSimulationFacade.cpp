@@ -118,9 +118,6 @@ size_t VSimulationFacade::getActiveLayersNumber() const
     return m_pLayersProcessor->getActiveLayersNumber();
 }
 
-/**
- * @return int
- */
 size_t VSimulationFacade::getInactiveLayersNumber() const
 {
     return m_pLayersProcessor->getInactiveLayersNumber();
@@ -141,38 +138,24 @@ void VSimulationFacade::getModelSize(QVector3D &size) const
     m_pLayersProcessor->getActiveModelSize(size);
 }
 
-/**
- * @param layer
- * @param visible
- */
 void VSimulationFacade::setVisible(uint layer, bool visible)
 {
     m_pLayersProcessor->setVisibleLayer(layer, visible);
     m_pGraphicsViewer->updateVisibility();
 }
 
-/**
- * @param layer
- */
 void VSimulationFacade::removeLayer(uint layer)
 {
     m_pLayersProcessor->removeLayer(layer);
     updateConfiguration();
 }
 
-/**
- * @param layer
- */
 void VSimulationFacade::enableLayer(uint layer, bool enable)
 {
     m_pLayersProcessor->enableLayer(layer, enable);
     updateConfiguration();
 }
 
-/**
- * @param layer
- * @param material
- */
 void VSimulationFacade::setMaterial(uint layer, const VCloth &material)
 {
     m_pLayersProcessor->setMaterial(layer, material);
@@ -185,9 +168,6 @@ void VSimulationFacade::setResin(const VResin& resin)
     m_pSimulator->setResin(resin);
 }
 
-/**
- * @param pressure
- */
 void VSimulationFacade::setInjectionPressure(double pressure) 
 {
     m_pSimulator->setInjectionPressure(pressure);
@@ -227,8 +207,7 @@ void VSimulationFacade::newModel()
 void VSimulationFacade::loadModel(const QString &filename)
 {
     m_pSimulator->pause();
-    VSimulationParametres::const_ptr param = m_pSimulator->getSimulationParametres();
-    VModelImport loader(param);
+    VModelImport loader;
     loader.loadFromFile(filename);
     m_pLayersProcessor = loader.getLayersProcessor();
     initLayersProcessor();
@@ -241,7 +220,7 @@ void VSimulationFacade::saveModel(const QString &filename)
 {
     m_pSimulator->pause();
     VSimulationInfo info = m_pSimulator->getSimulationInfo();
-    VSimulationParametres::const_ptr param = m_pSimulator->getSimulationParametres();
+    VSimulationParametres param = m_pSimulator->getSimulationParametres();
     bool paused = m_pSimulator->isPaused();
     VModelExport saver(info, param, m_pLayersProcessor, paused);
     saver.saveToFile(filename);
@@ -253,7 +232,7 @@ VCloth::const_ptr VSimulationFacade::getMaterial(uint layer) const
     return m_pLayersProcessor->getMaterial(layer);
 }
 
-VSimulationParametres::const_ptr VSimulationFacade::getParametres() const 
+VSimulationParametres VSimulationFacade::getParametres() const
 {
     return m_pSimulator->getSimulationParametres();
 }
@@ -268,9 +247,6 @@ bool VSimulationFacade::isLayerEnabled(uint layer) const
     return m_pLayersProcessor->isLayerEnabled(layer);
 }
 
-/**
- * @param filename
- */
 void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &filename,
                                          VLayerAbstractBuilder::VUnit units)
 {
@@ -284,8 +260,7 @@ void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &
             if(line.contains("$MeshFormat",Qt::CaseInsensitive))
             {
                 p_layerBuilder = new VLayerFromGmeshBuilder(filename,
-                                                            material,
-                                                            m_pSimulator->getSimulationParametres(),
+                                                            material,                                                            
                                                             units);
                 break;
             }
@@ -293,7 +268,6 @@ void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &
             {
                 p_layerBuilder = new VLayerFromAnsysBuilder(filename,
                                                             material,
-                                                            m_pSimulator->getSimulationParametres(),
                                                             units);
                 break;
             }
@@ -379,8 +353,8 @@ VSimulationInfo VSimulationFacade::getSimulationInfo() const
 void VSimulationFacade::loadSavedParametres()
 {
     QSettings settings;
-    VSimulationParametres::const_ptr param = m_pSimulator->getSimulationParametres();
-    VResin resin = param->getResin();
+    VSimulationParametres param = m_pSimulator->getSimulationParametres();
+    VResin resin = param.getResin();
 
     VResin newResin;
     double temperature, injectionDiameter, injectionPressure, vacuumDiameter, vacuumPressure, q, r, s;
@@ -389,16 +363,16 @@ void VSimulationFacade::loadSavedParametres()
     newResin.defaultViscosity = settings.value(QStringLiteral("sim/defaultViscosity"), resin.defaultViscosity).toDouble();
     newResin.tempcoef = settings.value(QStringLiteral("sim/tempcoef"), resin.tempcoef).toDouble();
 
-    temperature = settings.value(QStringLiteral("sim/temperature"), param->getTemperature()).toDouble();
-    injectionDiameter = settings.value(QStringLiteral("sim/injectionDiameter"), param->getInjectionDiameter()).toDouble();
-    injectionPressure = settings.value(QStringLiteral("sim/injectionPressure"), param->getInjectionPressure()).toDouble();
+    temperature = settings.value(QStringLiteral("sim/temperature"), param.getTemperature()).toDouble();
+    injectionDiameter = settings.value(QStringLiteral("sim/injectionDiameter"), param.getInjectionDiameter()).toDouble();
+    injectionPressure = settings.value(QStringLiteral("sim/injectionPressure"), param.getInjectionPressure()).toDouble();
 
-    vacuumDiameter = settings.value(QStringLiteral("sim/vacuumDiameter"), param->getVacuumDiameter()).toDouble();
-    vacuumPressure = settings.value(QStringLiteral("sim/vacuumPressure"), param->getVacuumPressure()).toDouble();
+    vacuumDiameter = settings.value(QStringLiteral("sim/vacuumDiameter"), param.getVacuumDiameter()).toDouble();
+    vacuumPressure = settings.value(QStringLiteral("sim/vacuumPressure"), param.getVacuumPressure()).toDouble();
 
-    q = settings.value(QStringLiteral("sim/coefQ"), param->getQ()).toDouble();
-    r = settings.value(QStringLiteral("sim/coefR"), param->getR()).toDouble();
-    s = settings.value(QStringLiteral("sim/coefS"), param->getS()).toDouble();
+    q = settings.value(QStringLiteral("sim/coefQ"), param.getQ()).toDouble();
+    r = settings.value(QStringLiteral("sim/coefR"), param.getR()).toDouble();
+    s = settings.value(QStringLiteral("sim/coefS"), param.getS()).toDouble();
 
     m_pSimulator->setResin(newResin);
     m_pSimulator->setTemperature(temperature);
@@ -414,22 +388,22 @@ void VSimulationFacade::loadSavedParametres()
 void VSimulationFacade::saveParametres() const
 {
     QSettings settings;
-    VSimulationParametres::const_ptr param = m_pSimulator->getSimulationParametres();
-    VResin resin = param->getResin();
+    VSimulationParametres param = m_pSimulator->getSimulationParametres();
+    VResin resin = param.getResin();
     settings.setValue(QStringLiteral("sim/resinName"), resin.name);
     settings.setValue(QStringLiteral("sim/defaultViscosity"), resin.defaultViscosity);
     settings.setValue(QStringLiteral("sim/tempcoef"), resin.tempcoef);
 
-    settings.setValue(QStringLiteral("sim/temperature"), param->getTemperature());
-    settings.setValue(QStringLiteral("sim/injectionDiameter"), param->getInjectionDiameter());
-    settings.setValue(QStringLiteral("sim/injectionPressure"), param->getInjectionPressure());
+    settings.setValue(QStringLiteral("sim/temperature"), param.getTemperature());
+    settings.setValue(QStringLiteral("sim/injectionDiameter"), param.getInjectionDiameter());
+    settings.setValue(QStringLiteral("sim/injectionPressure"), param.getInjectionPressure());
 
-    settings.setValue(QStringLiteral("sim/vacuumDiameter"), param->getVacuumDiameter());
-    settings.setValue(QStringLiteral("sim/vacuumPressure"), param->getVacuumPressure());
+    settings.setValue(QStringLiteral("sim/vacuumDiameter"), param.getVacuumDiameter());
+    settings.setValue(QStringLiteral("sim/vacuumPressure"), param.getVacuumPressure());
 
-    settings.setValue(QStringLiteral("sim/coefQ"), param->getQ());
-    settings.setValue(QStringLiteral("sim/coefR"), param->getR());
-    settings.setValue(QStringLiteral("sim/coefS"), param->getS());
+    settings.setValue(QStringLiteral("sim/coefQ"), param.getQ());
+    settings.setValue(QStringLiteral("sim/coefR"), param.getR());
+    settings.setValue(QStringLiteral("sim/coefS"), param.getS());
 
     settings.sync();
 }

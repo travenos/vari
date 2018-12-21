@@ -17,9 +17,8 @@
  */
 VLayerFromGmeshBuilder::VLayerFromGmeshBuilder(const QString &filename,
                                                const VCloth &material,
-                                               const VSimulationParametres::const_ptr &p_simParam,
                                                VUnit units):
-VLayerFromFileBuilder(filename, material, p_simParam, units)
+VLayerFromFileBuilder(filename, material, units)
 {
 
 }

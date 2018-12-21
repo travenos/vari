@@ -18,9 +18,8 @@
  */
 VLayerFromFileBuilder::VLayerFromFileBuilder(const QString &filename,
                                              const VCloth &material,
-                                             const VSimulationParametres::const_ptr &p_simParam,
                                              VUnit units) :
-    VLayerAbstractBuilder(material, p_simParam),
+    VLayerAbstractBuilder(material),
     m_pNodes(new std::vector<VSimNode::ptr>),
     m_pTriangles(new std::vector<VSimTriangle::ptr>),
     m_file(filename),
@@ -99,7 +98,7 @@ void VLayerFromFileBuilder::addNode(int id, QVector3D pos)
     uint currentId = id + m_nodeStartId;
     if (currentId > m_nodeMaxId)
         m_nodeMaxId = currentId;
-    VSimNode::ptr newNode(new VSimNode(currentId, pos, m_pMaterial, m_pParam));
+    VSimNode::ptr newNode(new VSimNode(currentId, pos, m_pMaterial));
     m_nodesMap.insert(std::make_pair(id, newNode));
     m_pNodes->push_back(newNode);
 }
@@ -124,7 +123,7 @@ void VLayerFromFileBuilder::addTriangle(int nodeId1, int nodeId2, int nodeId3)
     uint currentId = static_cast<uint>(m_pTriangles->size()) + m_triangleStartId;
     if (currentId > m_triangleMaxId)
         m_triangleMaxId = currentId;
-    VSimTriangle::ptr triangle(new VSimTriangle(currentId, m_pMaterial, m_pParam, node1,node2,node3));
+    VSimTriangle::ptr triangle(new VSimTriangle(currentId, m_pMaterial, node1,node2,node3));
     m_pTriangles->push_back(triangle);
 }
 

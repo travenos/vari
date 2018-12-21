@@ -16,11 +16,11 @@ class VModelExport : public VModelImportExport
 public:
     VModelExport() = delete;
     VModelExport(const VSimulationInfo &info,
-                 const VSimulationParametres::const_ptr &param,
+                 const VSimulationParametres &param,
                  const VLayersProcessor::const_ptr &layersProcessor,
                  bool paused = false);
     void setInfo(const VSimulationInfo &info);
-    void setSimulationParametres(const VSimulationParametres::const_ptr &param);
+    void setSimulationParametres(const VSimulationParametres &param);
     void setLayersProcessor(const VLayersProcessor::const_ptr &layersProcesor);
     void setPaused(bool paused);
     void saveToFile(const QString &filename);
@@ -69,7 +69,7 @@ private:
     QString createString(const std::vector<T> &vect) const;
 
     VSimulationInfo m_info;
-    VSimulationParametres::const_ptr m_pParam;
+    VSimulationParametres m_param;
     VLayersProcessor::const_ptr m_pLayersProcessor;
     bool m_paused;
 };

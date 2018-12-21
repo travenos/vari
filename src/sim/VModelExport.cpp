@@ -14,11 +14,11 @@
 #include "core/VExceptions.h"
 
 VModelExport::VModelExport(const VSimulationInfo &info,
-                           const VSimulationParametres::const_ptr &param,
+                           const VSimulationParametres &param,
                            const VLayersProcessor::const_ptr &layersProcessor,
                            bool paused):
     m_info(info),
-    m_pParam(param),
+    m_param(param),
     m_pLayersProcessor(layersProcessor),
     m_paused(paused)
 {}
@@ -28,9 +28,9 @@ void VModelExport::setInfo(const VSimulationInfo &info)
     m_info= info;
 }
 
-void VModelExport::setSimulationParametres(const VSimulationParametres::const_ptr &param)
+void VModelExport::setSimulationParametres(const VSimulationParametres &param)
 {
-    m_pParam = param;
+    m_param = param;
 }
 
 void VModelExport::setLayersProcessor(const VLayersProcessor::const_ptr &layersProcesor)
@@ -79,18 +79,18 @@ void VModelExport::saveParametres(QXmlStreamWriter &xmlWriter)
 {
     auto &tags = _xPARAM_TAGS;
     xmlWriter.writeStartElement(tags._NAME);
-    xmlWriter.writeAttribute(tags.INJECTION_DIAMETER, QString::number(m_pParam->getInjectionDiameter()));
-    xmlWriter.writeAttribute(tags.VACUUM_DIAMETER, QString::number(m_pParam->getVacuumDiameter()));
-    xmlWriter.writeAttribute(tags.TEMPERATURE, QString::number(m_pParam->getTemperature()));
-    xmlWriter.writeAttribute(tags.INJECTION_PRESSURE, QString::number(m_pParam->getInjectionPressure()));
-    xmlWriter.writeAttribute(tags.VACUUM_PRESSURE, QString::number(m_pParam->getVacuumPressure()));
-    xmlWriter.writeAttribute(tags.Q, QString::number(m_pParam->getQ()));
-    xmlWriter.writeAttribute(tags.R, QString::number(m_pParam->getR()));
-    xmlWriter.writeAttribute(tags.S, QString::number(m_pParam->getS()));
-    xmlWriter.writeAttribute(tags.AVERAGE_CELL_DISTANCE, QString::number(m_pParam->getAverageCellDistance()));;
-    xmlWriter.writeAttribute(tags.AVERAGE_PERMEABILITY, QString::number(m_pParam->getAveragePermeability()));
-    xmlWriter.writeAttribute(tags.NUMBER_OF_FULL_NODES, QString::number(m_pParam->getNumberOfFullNodes()));
-    saveResin(xmlWriter, m_pParam->getResin());
+    xmlWriter.writeAttribute(tags.INJECTION_DIAMETER, QString::number(m_param.getInjectionDiameter()));
+    xmlWriter.writeAttribute(tags.VACUUM_DIAMETER, QString::number(m_param.getVacuumDiameter()));
+    xmlWriter.writeAttribute(tags.TEMPERATURE, QString::number(m_param.getTemperature()));
+    xmlWriter.writeAttribute(tags.INJECTION_PRESSURE, QString::number(m_param.getInjectionPressure()));
+    xmlWriter.writeAttribute(tags.VACUUM_PRESSURE, QString::number(m_param.getVacuumPressure()));
+    xmlWriter.writeAttribute(tags.Q, QString::number(m_param.getQ()));
+    xmlWriter.writeAttribute(tags.R, QString::number(m_param.getR()));
+    xmlWriter.writeAttribute(tags.S, QString::number(m_param.getS()));
+    xmlWriter.writeAttribute(tags.AVERAGE_CELL_DISTANCE, QString::number(m_param.getAverageCellDistance()));;
+    xmlWriter.writeAttribute(tags.AVERAGE_PERMEABILITY, QString::number(m_param.getAveragePermeability()));
+    xmlWriter.writeAttribute(tags.NUMBER_OF_FULL_NODES, QString::number(m_param.getNumberOfFullNodes()));
+    saveResin(xmlWriter, m_param.getResin());
     xmlWriter.writeEndElement();
 }
 
@@ -176,7 +176,6 @@ void VModelExport::saveNode(QXmlStreamWriter &xmlWriter,
     xmlWriter.writeStartElement(tags._NAME);
     xmlWriter.writeAttribute(tags.ID, QString::number(node->getId()));
     xmlWriter.writeAttribute(tags.PRESSURE, QString::number(node->getPressure()));
-    xmlWriter.writeAttribute(tags.NEW_PRESSURE, QString::number(node->getNewPressure()));
     xmlWriter.writeAttribute(tags.ROLE, QString::number(node->getRole()));
     xmlWriter.writeCharacters(createString(node->getPosition()));
     xmlWriter.writeEndElement();

@@ -70,7 +70,7 @@ void loadModel(const QString &filename) ;
 void saveModel(const QString &filename) ;
 
 VCloth::const_ptr getMaterial(uint layer) const ;
-VSimulationParametres::const_ptr getParametres() const ;
+VSimulationParametres getParametres() const ;
 bool isLayerVisible(uint layer) const ;
 bool isLayerEnabled(uint layer) const ;
 

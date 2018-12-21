@@ -81,7 +81,6 @@ protected:
                     const QString _NAME{QStringLiteral("Node")};
                     const QString ID{QStringLiteral("id")};
                     const QString PRESSURE{QStringLiteral("press")};
-                    const QString NEW_PRESSURE{QStringLiteral("nPress")};
                     const QString ROLE{QStringLiteral("role")};
                 };
 

@@ -17,10 +17,8 @@ const int VSimElement::RGB_MAX = 255;
 /**
  * @param material
  */
-VSimElement::VSimElement(uint id, const VCloth::const_ptr &p_material,
-                         const VSimulationParametres::const_ptr &p_param):
+VSimElement::VSimElement(uint id, const VCloth::const_ptr &p_material):
     m_pMaterial(p_material),
-    m_pParam(p_param),
     m_id(id),
     m_visible(true)
 {

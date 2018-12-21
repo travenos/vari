@@ -15,7 +15,6 @@ class VLayerFromGmeshBuilder: public VLayerFromFileBuilder
 
     VLayerFromGmeshBuilder(const QString &filename,
                            const VCloth &material,
-                           const VSimulationParametres::const_ptr &p_simParam,
                            VUnit units=M);
     bool importNodes() override;
     bool importConnections() override;

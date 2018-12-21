@@ -20,14 +20,9 @@ set(SOURCE_FILES
     VSimulationParametres.cpp
     )
 
-set(TEMPLATE_SOURCE_FILES
-    VThreadSafeValue.tcc
-    )
-
 ADD_MODULE(v_core
     ${HEADER_FILES}
-    ${SOURCE_FILES}
-    ${TEMPLATE_SOURCE_FILES})
+    ${SOURCE_FILES})
 
 target_link_libraries(v_core Qt5::Core Qt5::Gui)
 

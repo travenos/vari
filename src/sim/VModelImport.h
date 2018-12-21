@@ -16,7 +16,7 @@ class QXmlStreamReader;
 class VModelImport : public VModelImportExport
 {
 public:
-    VModelImport(VSimulationParametres::const_ptr paramPointer);
+    VModelImport();
     const VSimulationInfo& getInfo() const;
     const VSimulationParametres &getSimulationParametres() const;
     const VLayersProcessor::ptr& getLayersProcessor() const;
@@ -61,7 +61,6 @@ private:
 
     VSimulationInfo m_info;
     VSimulationParametres m_param;
-    VSimulationParametres::const_ptr m_pParamPtr;
     VLayersProcessor::ptr m_pLayersProcessor;
     bool m_paused;
 

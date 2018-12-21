@@ -22,8 +22,7 @@ public:
     typedef std::shared_ptr<std::vector<VSimElement::ptr> > vector_ptr;
     typedef std::shared_ptr<const std::vector<VSimElement::ptr> > const_vector_ptr;
 
-    VSimElement(uint id, const VCloth::const_ptr &p_material,
-                const VSimulationParametres::const_ptr &p_param);
+    VSimElement(uint id, const VCloth::const_ptr &p_material);
 
 
     virtual ~VSimElement();
@@ -43,7 +42,6 @@ public:
 
 protected:
     const VCloth::const_ptr m_pMaterial;
-    const VSimulationParametres::const_ptr m_pParam;
 private: 
     uint m_id;
     bool m_visible;

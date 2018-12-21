@@ -23,8 +23,7 @@
         xmlReader.readNext(); \
     }
 
-VModelImport::VModelImport(VSimulationParametres::const_ptr paramPointer):
-    m_pParamPtr(paramPointer),
+VModelImport::VModelImport():
     m_pLayersProcessor(new VLayersProcessor),
     m_paused(false)
 {
@@ -259,7 +258,7 @@ void VModelImport::loadNode(QXmlStreamReader& xmlReader, const VCloth::const_ptr
     auto &tags = _xLAYERS_TAGS._xLAYER_TAGS._xNODES_TAGS._xNODE_TAGS;
     const size_t DIMS = 3;
     uint id = 0;
-    double pressure=0, newPressure=0;
+    double pressure=0;
     VSimNode::VNodeRole role = VSimNode::NORMAL;
     foreach(const QXmlStreamAttribute &attr, xmlReader.attributes())
     {
@@ -267,8 +266,6 @@ void VModelImport::loadNode(QXmlStreamReader& xmlReader, const VCloth::const_ptr
             id = attr.value().toUInt();
         else if (!attr.name().compare(tags.PRESSURE))
             pressure = attr.value().toDouble();
-        else if (!attr.name().compare(tags.NEW_PRESSURE))
-            newPressure = attr.value().toDouble();
         else if (!attr.name().compare(tags.ROLE))
             role = static_cast<VSimNode::VNodeRole>(attr.value().toUInt());
     }
@@ -280,7 +277,10 @@ void VModelImport::loadNode(QXmlStreamReader& xmlReader, const VCloth::const_ptr
     {
         QVector3D pos(positionVect[0], positionVect[1], positionVect[2]);
         VSimNode::ptr nodePtr;
-        nodePtr.reset(new VSimNode(id, pos, material, m_pParamPtr, pressure, newPressure, role));
+        nodePtr.reset(new VSimNode(id, pos, material,
+                                   m_param.getInjectionPressure(),
+                                   m_param.getVacuumPressure(),
+                                   pressure, role));
         if (m_allNodes.insert({id, nodePtr}).second)
             nodes->push_back(nodePtr);
         else
@@ -342,7 +342,7 @@ void VModelImport::createTriangles(const std::vector<VTriangleInfo> &trianglesIn
             else
                 throw VImportException();
         }
-        VSimTriangle::ptr triangle(new VSimTriangle(trInf.id, material, m_pParamPtr,
+        VSimTriangle::ptr triangle(new VSimTriangle(trInf.id, material,
                                                     nodes[0], nodes[1], nodes[2],
                                                     trInf.color));
         triangles->push_back(triangle);
