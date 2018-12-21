@@ -362,7 +362,7 @@ void VModelImport::loadConnections(QXmlStreamReader &xmlReader)
 void VModelImport::loadConnection(QXmlStreamReader& xmlReader)
 {
     auto &tags = _xCONNECTIONS_TAGS._xCONNECTION_TAGS;
-    uint id;
+    uint id = 0;
     bool idGot = false;
     foreach(const QXmlStreamAttribute &attr, xmlReader.attributes())
     {

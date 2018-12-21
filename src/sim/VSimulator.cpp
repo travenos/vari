@@ -381,7 +381,8 @@ inline void VSimulator::trianglesAction(Callable&& func)
 
 inline void VSimulator::calculatePressure()
 {
-    nodesAction(std::bind(&VSimulator::calculateNewPressure, this, std::placeholders::_1));
+    auto calcFunc = [this](const VSimNode::ptr &node) {calculateNewPressure(node);};
+    nodesAction(calcFunc);
 }
 
 inline bool VSimulator::commitPressure()
