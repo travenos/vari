@@ -13,6 +13,16 @@
 #include "VModelImport.h"
 #include "core/VExceptions.h"
 
+#define READ_ELEMENTS(body) \
+    while (!(xmlReader.isEndElement() && !xmlReader.name().compare(tags._NAME)) && !xmlReader.atEnd()) \
+    { \
+        if(xmlReader.isStartElement()) \
+        { \
+            body \
+        } \
+        xmlReader.readNext(); \
+    }
+
 VModelImport::VModelImport(VSimulationParametres::const_ptr paramPointer):
     m_pParamPtr(paramPointer),
     m_pLayersProcessor(new VLayersProcessor),
@@ -125,15 +135,11 @@ void VModelImport::loadParametres(QXmlStreamReader& xmlReader)
         else if (!attr.name().compare(tags.NUMBER_OF_FULL_NODES))
             m_param.setNumberOfFullNodes(attr.value().toInt());
     }
-    while (!(xmlReader.isEndElement() && !xmlReader.name().compare(tags._NAME)) && !xmlReader.atEnd())
-    {
-        if(xmlReader.isStartElement())
-        {
-            if (!xmlReader.name().compare(tags._xRESIN_TAGS._NAME))
-                loadResin(xmlReader, m_param);
-        }
-        xmlReader.readNext();
-    }
+    READ_ELEMENTS
+    (
+        if (!xmlReader.name().compare(tags._xRESIN_TAGS._NAME))
+            loadResin(xmlReader, m_param);
+    );
 }
 
 void VModelImport::loadResin(QXmlStreamReader &xmlReader, VSimulationParametres &param)
@@ -161,15 +167,11 @@ void VModelImport::loadLayers(QXmlStreamReader& xmlReader)
 {
     auto &tags = _xLAYERS_TAGS;
     std::vector<VLayer::ptr> layers;
-    while (!(xmlReader.isEndElement() && xmlReader.name().compare(tags._NAME)) && !xmlReader.atEnd())
-    {
-        if(xmlReader.isStartElement())
-        {
-            if (!xmlReader.name().compare(tags._xLAYER_TAGS._NAME))
-                loadLayer(xmlReader, layers);
-        }
-        xmlReader.readNext();
-    }
+    READ_ELEMENTS
+    (
+        if (!xmlReader.name().compare(tags._xLAYER_TAGS._NAME))
+            loadLayer(xmlReader, layers);
+    );
     m_pLayersProcessor->setLayers(layers);
 }
 
@@ -205,19 +207,15 @@ void VModelImport::loadLayer(QXmlStreamReader& xmlReader, std::vector<VLayer::pt
     nodes->reserve(nodesNumber);
     triangles->reserve(trianglesNumber);
     trianglesInfos.reserve(trianglesNumber);
-    while (!(xmlReader.isEndElement() && !xmlReader.name().compare(tags._NAME)) && !xmlReader.atEnd())
-    {
-        if(xmlReader.isStartElement())
-        {
-            if (!xmlReader.name().compare(tags._xCLOTH_TAGS._NAME))
-                loadCloth(xmlReader, material);
-            if (!xmlReader.name().compare(tags._xNODES_TAGS._NAME))
-                loadNodes(xmlReader, material, nodes);
-            if (!xmlReader.name().compare(tags._xTRIANGLES_TAGS._NAME))
-                loadTrianglesInfos(xmlReader, trianglesInfos);
-        }
-        xmlReader.readNext();
-    }
+    READ_ELEMENTS
+    (
+        if (!xmlReader.name().compare(tags._xCLOTH_TAGS._NAME))
+            loadCloth(xmlReader, material);
+        if (!xmlReader.name().compare(tags._xNODES_TAGS._NAME))
+            loadNodes(xmlReader, material, nodes);
+        if (!xmlReader.name().compare(tags._xTRIANGLES_TAGS._NAME))
+            loadTrianglesInfos(xmlReader, trianglesInfos);
+    );
     createTriangles(trianglesInfos, material, triangles);
     VLayer::ptr layer(new VLayer(nodes, triangles, material));
     layer->markActive(isEnabled);
@@ -248,15 +246,11 @@ void VModelImport::loadNodes(QXmlStreamReader& xmlReader,
                              const VCloth::const_ptr &material, VSimNode::vector_ptr &nodes)
 {
     auto &tags = _xLAYERS_TAGS._xLAYER_TAGS._xNODES_TAGS;
-    while (!(xmlReader.isEndElement() && !xmlReader.name().compare(tags._NAME)) && !xmlReader.atEnd())
-    {
-        if(xmlReader.isStartElement())
-        {
-            if (!xmlReader.name().compare(tags._xNODE_TAGS._NAME))
-                loadNode(xmlReader, material, nodes);
-        }
-        xmlReader.readNext();
-    }
+    READ_ELEMENTS
+    (
+        if (!xmlReader.name().compare(tags._xNODE_TAGS._NAME))
+            loadNode(xmlReader, material, nodes);
+    );
 }
 
 void VModelImport::loadNode(QXmlStreamReader& xmlReader, const VCloth::const_ptr &material,
@@ -300,15 +294,11 @@ void VModelImport::loadTrianglesInfos(QXmlStreamReader& xmlReader,
                                       std::vector<VTriangleInfo> &trianglesInfos)
 {
     auto &tags = _xLAYERS_TAGS._xLAYER_TAGS._xTRIANGLES_TAGS;
-    while (!(xmlReader.isEndElement() && !xmlReader.name().compare(tags._NAME)) && !xmlReader.atEnd())
-    {
-        if(xmlReader.isStartElement())
-        {
-            if (!xmlReader.name().compare(tags._xTRIANGLE_TAGS._NAME))
-                loadTriangleInfo(xmlReader, trianglesInfos);
-        }
-        xmlReader.readNext();
-    }
+    READ_ELEMENTS
+    (
+        if (!xmlReader.name().compare(tags._xTRIANGLE_TAGS._NAME))
+            loadTriangleInfo(xmlReader, trianglesInfos);
+    );
 }
 
 void VModelImport::loadTriangleInfo(QXmlStreamReader& xmlReader,
@@ -361,15 +351,11 @@ void VModelImport::createTriangles(const std::vector<VTriangleInfo> &trianglesIn
 void VModelImport::loadConnections(QXmlStreamReader &xmlReader)
 {
     auto &tags = _xCONNECTIONS_TAGS;
-    while (!(xmlReader.isEndElement() && !xmlReader.name().compare(tags._NAME)) && !xmlReader.atEnd())
-    {
-        if(xmlReader.isStartElement())
-        {
-            if (!xmlReader.name().compare(tags._xCONNECTION_TAGS._NAME))
-                loadConnection(xmlReader);
-        }
-        xmlReader.readNext();
-    }
+    READ_ELEMENTS
+    (
+        if (!xmlReader.name().compare(tags._xCONNECTION_TAGS._NAME))
+            loadConnection(xmlReader);
+    );
 }
 
 void VModelImport::loadConnection(QXmlStreamReader& xmlReader)
@@ -387,23 +373,19 @@ void VModelImport::loadConnection(QXmlStreamReader& xmlReader)
     }
     if (idGot)
     {
-        while (!(xmlReader.isEndElement() && !xmlReader.name().compare(tags._NAME)) && !xmlReader.atEnd())
-        {
-            if(xmlReader.isStartElement())
+        READ_ELEMENTS
+        (
+            if (!xmlReader.name().compare(tags._xCURRENT_TAGS._NAME))
             {
-                if (!xmlReader.name().compare(tags._xCURRENT_TAGS._NAME))
-                {
-                    QString nbIdStr = xmlReader.readElementText();
+                QString nbIdStr = xmlReader.readElementText();
                     createConnection(nbIdStr, id, true);
-                }
-                else if (!xmlReader.name().compare(tags._xPREVIOUS_TAGS._NAME))
-                {
-                    QString nbIdStr = xmlReader.readElementText();
-                    createConnection(nbIdStr, id, false);
-                }
             }
-            xmlReader.readNext();
-        }
+            else if (!xmlReader.name().compare(tags._xPREVIOUS_TAGS._NAME))
+            {
+                QString nbIdStr = xmlReader.readElementText();
+                createConnection(nbIdStr, id, false);
+            }
+        );
     }
     else
         throw VImportException();
