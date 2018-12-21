@@ -27,8 +27,6 @@ VLayer::VLayer(const VSimNode::vector_ptr &nodes,
     m_visible(true),
     m_wasVisible(true),
     m_active(true),
-    m_hasInjectionPoint(false),
-    m_hasVacuumPoint(false),
     m_nodeMinId(0),
     m_nodeMaxId(0),
     m_triangleMinId(0),
@@ -134,30 +132,6 @@ VCloth::const_ptr VLayer::getMaterial() const
     return m_pMaterial;
 }
 
-bool VLayer::getInjectionPointInfo(QVector3D &point, double &diameter) const
-{
-    if (m_hasInjectionPoint)
-    {
-        point = m_injectionPoint;
-        diameter = m_injectionDiameter;
-        return true;
-    }
-    else
-        return false;
-}
-
-bool VLayer::getVacuumPointInfo(QVector3D &point, double &diameter) const
-{
-    if (m_hasVacuumPoint)
-    {
-        point = m_vacuumPoint;
-        diameter = m_vacuumDiameter;
-        return true;
-    }
-    else
-        return false;
-}
-
 void VLayer::setInjectionPoint(const QVector3D &point, double diameter)
 {
     setPoint(point, diameter, VSimNode::INJECTION, VSimNode::VACUUM);
@@ -173,9 +147,6 @@ void VLayer::setPoint(const QVector3D &point, double diameter,
 {
     if (m_pNodes->size() == 0)
         return;
-    m_hasInjectionPoint = true;
-    m_injectionPoint = point;
-    m_injectionDiameter = diameter;
     double radius = diameter / 2;
     double distance;
     VSimNode::ptr nearestNode = m_pNodes->front();

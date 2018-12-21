@@ -43,8 +43,6 @@ public:
     void reset() ;
     VCloth::const_ptr getMaterial() const ;
 
-    bool getInjectionPointInfo(QVector3D &point, double &diameter) const;
-    bool getVacuumPointInfo(QVector3D &point, double &diameter) const;
     void setInjectionPoint(const QVector3D &point, double diameter);
     void setVacuumPoint(const QVector3D &point, double diameter);
 
@@ -56,9 +54,6 @@ public:
 
 private: 
     void p_setVisible(bool visible) ;
-//TODO Add id ranges: nodeMinId, nodeMaxId, triangleMinId, triangleMaxId
-    //TODO Add their setters, getters.
-    //Set theese values in builder
 
     const VSimNode::vector_ptr m_pNodes;
     const VSimTriangle::vector_ptr m_pTriangles;
@@ -66,14 +61,6 @@ private:
     bool m_visible;
     bool m_wasVisible;
     bool m_active;
-
-    bool m_hasInjectionPoint;
-    bool m_hasVacuumPoint;
-
-    QVector3D m_injectionPoint;
-    double m_injectionDiameter;
-    QVector3D m_vacuumPoint;
-    double m_vacuumDiameter;
 
     uint m_nodeMinId;
     uint m_nodeMaxId;
