@@ -83,5 +83,6 @@ check_exit_code($LASTEXITCODE)
 
 #Create an installer
 cd Release
+if (test-path Output) {rm Output -r -fo}
 iscc win32.vari.install.iss
 check_exit_code($LASTEXITCODE)

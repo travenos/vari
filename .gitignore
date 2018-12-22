@@ -3,3 +3,4 @@ build*
 coin3d
 pkg-vari
 *.user
+.directory

@@ -10,6 +10,11 @@ set(EXE_NAME ${PROJECT_NAME})
 message(STATUS "CREATING VARI APP\n")
 
 #Set application version
+set(PROJECT_VERSION_MAJOR 0)
+set(PROJECT_VERSION_MINOR 1)
+set(PROJECT_VERSION_PATCH 0)
+set(PROJECT_VERSION_TWEAK 0)
+
 find_package(Git REQUIRED)
 set(GIT_RES_LONG  FALSE)
 set(GIT_FILE_VERSION_LONG  "${CMAKE_CURRENT_BINARY_DIR}/git.version.long")
@@ -77,11 +82,20 @@ find_package(Qt5Widgets     REQUIRED)
 find_package(Qt5Sql     REQUIRED)
 
 if (${Qt5Core_FOUND})
-    message(STATUS "Found Qt 5 ${Qt5Core_VERSION}")
+    message(STATUS "Found Qt 5 Core ${Qt5Core_VERSION}")
     message(STATUS "Qt 5 Core Directory: ${Qt5Core_DIR}")
+endif()
+if (${Qt5Gui_FOUND})
+    message(STATUS "Found Qt 5 Gui ${Qt5Gui_VERSION}")
     message(STATUS "Qt 5 Gui Directory: ${Qt5Gui_DIR}")
+endif()
+if (${Qt5Widgets_FOUND})
+    message(STATUS "Found Qt 5 Widgets ${Qt5Widgets_VERSION}")
     message(STATUS "Qt 5 Widgets Directory: ${Qt5Widgets_DIR}")
-    message(STATUS "Qt 5 SqlDirectory: ${Qt5Sql_DIR}\n")
+endif()
+if (${Qt5Sql_FOUND})
+    message(STATUS "Found Qt Sql 5 ${Qt5Sql_VERSION}")
+    message(STATUS "Qt 5 Sql Directory: ${Qt5Sql_DIR}\n")
 endif()
 
 include_directories(${Qt5Core_INCLUDE_DIRS})
@@ -98,13 +112,13 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-SET(RESOURCES_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/resources)
-
+set(RESOURCES_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 if(MSVC)
-    configure_file(${RESOURCES_DIRECTORY}/app.rc.cmake ${CMAKE_CURRENT_BINARY_DIR}/app.rc)
-
+    set(WIN_APP_RC_SOURCE "${PROJECT_SOURCE_DIR}/cmake/app.rc.cmake")
+    set(WIN_APP_RC_DEST "${CMAKE_CURRENT_BINARY_DIR}/app.rc")
+    configure_file("${WIN_APP_RC_SOURCE}" "${WIN_APP_RC_DEST}")
     set(WIN_RESOURCES
-        ${CMAKE_CURRENT_BINARY_DIR}/app.rc
+        "${WIN_APP_RC_DEST}"
         )
 endif()
 
