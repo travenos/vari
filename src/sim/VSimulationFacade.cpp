@@ -68,6 +68,10 @@ void VSimulationFacade::connectMainSignals()
             this, SIGNAL(coefRSet(double)));
     connect(m_pSimulator.get(), SIGNAL(coefSSet(double)),
             this, SIGNAL(coefSSet(double)));
+    connect(m_pSimulator.get(), SIGNAL(timeLimitSet(double)),
+            this, SIGNAL(timeLimitSet(double)));
+    connect(m_pSimulator.get(), SIGNAL(timeLimitModeSwitched(bool)),
+            this, SIGNAL(timeLimitModeSwitched(bool)));
 }
 
 void VSimulationFacade::initLayersProcessor()
@@ -197,6 +201,16 @@ void VSimulationFacade::setS(double s)
     m_pSimulator->setS(s);
 }
 
+void VSimulationFacade::setTimeLimit(double limit)
+{
+    m_pSimulator->setTimeLimit(limit);
+}
+
+void VSimulationFacade::setTimeLimitMode(bool on)
+{
+    m_pSimulator->setTimeLimitMode(on);
+}
+
 void VSimulationFacade::newModel() 
 {
     m_pSimulator->clear();
@@ -212,7 +226,8 @@ void VSimulationFacade::loadModel(const QString &filename)
     m_pLayersProcessor = loader.getLayersProcessor();
     initLayersProcessor();
     updateConfiguration();
-    m_pSimulator->setSimulationParametres(loader.getInfo(), loader.getSimulationParametres(), loader.getPaused());
+    m_pSimulator->setSimulationParametres(loader.getInfo(), loader.getSimulationParametres(),
+                                          loader.getPaused(), loader.getTimeLimited());
     m_pGraphicsViewer->viewFromAbove();
     emit modelLoaded();
 }
@@ -222,7 +237,8 @@ void VSimulationFacade::saveModel(const QString &filename)
     VSimulationInfo info = m_pSimulator->getSimulationInfo();
     VSimulationParametres param = m_pSimulator->getSimulationParametres();
     bool paused = m_pSimulator->isPaused();
-    VModelExport saver(info, param, m_pLayersProcessor, paused);
+    bool timeLimited = m_pSimulator->isTimeLimitModeOn();
+    VModelExport saver(info, param, m_pLayersProcessor, paused, timeLimited);
     saver.saveToFile(filename);
     emit modelSaved();
 }
@@ -357,7 +373,8 @@ void VSimulationFacade::loadSavedParametres()
     VResin resin = param.getResin();
 
     VResin newResin;
-    double temperature, injectionDiameter, injectionPressure, vacuumDiameter, vacuumPressure, q, r, s;
+    double temperature, injectionDiameter, injectionPressure, vacuumDiameter, vacuumPressure, q, r, s, timeLimit;
+    bool timeLimitMode;
 
     newResin.name = settings.value(QStringLiteral("sim/resinName"), resin.name).toString();
     newResin.defaultViscosity = settings.value(QStringLiteral("sim/defaultViscosity"), resin.defaultViscosity).toDouble();
@@ -374,6 +391,9 @@ void VSimulationFacade::loadSavedParametres()
     r = settings.value(QStringLiteral("sim/coefR"), param.getR()).toDouble();
     s = settings.value(QStringLiteral("sim/coefS"), param.getS()).toDouble();
 
+    timeLimit = settings.value(QStringLiteral("sim/timeLimit"), param.getTimeLimit()).toDouble();
+    timeLimitMode = settings.value(QStringLiteral("sim/timeLimitMode"), m_pSimulator->isTimeLimitModeOn()).toBool();
+
     m_pSimulator->setResin(newResin);
     m_pSimulator->setTemperature(temperature);
     m_pSimulator->setInjectionDiameter(injectionDiameter);
@@ -382,7 +402,9 @@ void VSimulationFacade::loadSavedParametres()
     m_pSimulator->setVacuumPressure(vacuumPressure);
     m_pSimulator->setQ(q);
     m_pSimulator->setR(r);
-    m_pSimulator->setS(s);
+    m_pSimulator->setS(s);    
+    m_pSimulator->setTimeLimit(timeLimit);
+    m_pSimulator->setTimeLimitMode(timeLimitMode);
 }
 
 void VSimulationFacade::saveParametres() const
@@ -405,6 +427,8 @@ void VSimulationFacade::saveParametres() const
     settings.setValue(QStringLiteral("sim/coefR"), param.getR());
     settings.setValue(QStringLiteral("sim/coefS"), param.getS());
 
+    settings.setValue(QStringLiteral("sim/timeLimit"), param.getTimeLimit());
+    settings.setValue(QStringLiteral("sim/timeLimitMode"), m_pSimulator->isTimeLimitModeOn());
     settings.sync();
 }
 

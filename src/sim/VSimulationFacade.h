@@ -21,77 +21,63 @@ class VSimulationFacade : public QObject
     Q_OBJECT
 public: 
     
-VSimulationFacade(QWidget *parent);
-VSimulationFacade(const VSimulationFacade& ) = delete;
-VSimulationFacade& operator= (const VSimulationFacade& ) = delete;
-void startSimulation() ;
-void stopSimulation() ;
-void pauseSimulation() ;
-void resetSimulation() ;
-size_t getLayersNumber() const ;
-size_t getActiveLayersNumber() const ;
-size_t getInactiveLayersNumber() const ;
-size_t getNodesNumber() const;
-size_t getTrianglesNumber() const;
-void getModelSize(QVector3D &size) const;
-/**
- * @param layer
- * @param visible
- */
-void setVisible(uint layer, bool visible) ;
-/**
- * @param layer
- */
-void removeLayer(uint layer) ;
-void enableLayer(uint layer, bool enable) ;
-/**
- * @param layer
- * @param material
- */
-void setMaterial(uint layer, const VCloth& material) ;
-void setResin(const VResin& resin) ;
-/**
- * @param pressure
- */
-void setInjectionPressure(double pressure) ;
-/**
- * @param diameter
- */
+    VSimulationFacade(QWidget *parent);
+    VSimulationFacade(const VSimulationFacade& ) = delete;
+    VSimulationFacade& operator= (const VSimulationFacade& ) = delete;
+    void startSimulation() ;
+    void stopSimulation() ;
+    void pauseSimulation() ;
+    void resetSimulation() ;
+    size_t getLayersNumber() const ;
+    size_t getActiveLayersNumber() const ;
+    size_t getInactiveLayersNumber() const ;
+    size_t getNodesNumber() const;
+    size_t getTrianglesNumber() const;
+    void getModelSize(QVector3D &size) const;
 
-void setVacuumPressure(double pressure) ;
-void setTemperature(double temperature) ;
+    void setVisible(uint layer, bool visible) ;
 
-void setQ(double q) ;
-void setR(double r) ;
-void setS(double s) ;
+    void removeLayer(uint layer) ;
+    void enableLayer(uint layer, bool enable) ;
 
-void newModel() ;
-void loadModel(const QString &filename) ;
-void saveModel(const QString &filename) ;
+    void setMaterial(uint layer, const VCloth& material) ;
+    void setResin(const VResin& resin) ;
+    void setInjectionPressure(double pressure) ;
+    void setVacuumPressure(double pressure) ;
+    void setTemperature(double temperature) ;
 
-VCloth::const_ptr getMaterial(uint layer) const ;
-VSimulationParametres getParametres() const ;
-bool isLayerVisible(uint layer) const ;
-bool isLayerEnabled(uint layer) const ;
+    void setQ(double q) ;
+    void setR(double r) ;
+    void setS(double s) ;
 
-void waitForInjectionPointSelection(double diameter);
-void waitForVacuumPointSelection(double diameter);
+    void setTimeLimit(double limit);
+    void setTimeLimitMode(bool on);
 
-void cancelWaitingForInjectionPointSelection();
-void cancelWaitingForVacuumPointSelection();
-/**
- * @param filename
- */
-void newLayerFromFile(const VCloth &material, const QString &filename,
-                      VLayerAbstractBuilder::VUnit units=VLayerAbstractBuilder::M);
+    void newModel() ;
+    void loadModel(const QString &filename) ;
+    void saveModel(const QString &filename) ;
 
-void showInjectionPoint();
-void showVacuumPoint();
+    VCloth::const_ptr getMaterial(uint layer) const ;
+    bool isLayerVisible(uint layer) const ;
+    bool isLayerEnabled(uint layer) const ;
 
-VSimulationInfo getSimulationInfo() const;
+    void waitForInjectionPointSelection(double diameter);
+    void waitForVacuumPointSelection(double diameter);
 
-void loadSavedParametres();
-void saveParametres() const;
+    void cancelWaitingForInjectionPointSelection();
+    void cancelWaitingForVacuumPointSelection();
+
+    void newLayerFromFile(const VCloth &material, const QString &filename,
+                          VLayerAbstractBuilder::VUnit units=VLayerAbstractBuilder::M);
+
+    void showInjectionPoint();
+    void showVacuumPoint();
+
+    VSimulationInfo getSimulationInfo() const;
+    VSimulationParametres getParametres() const ;
+
+    void loadSavedParametres();
+    void saveParametres() const;
 
 private:
     void connectMainSignals() ;
@@ -139,6 +125,8 @@ signals:
     void coefQSet(double q) ;
     void coefRSet(double r) ;
     void coefSSet(double s) ;
+    void timeLimitSet(double);
+    void timeLimitModeSwitched(bool);
 
     void modelSaved();
     void modelLoaded();

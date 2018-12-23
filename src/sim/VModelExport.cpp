@@ -16,11 +16,12 @@
 VModelExport::VModelExport(const VSimulationInfo &info,
                            const VSimulationParametres &param,
                            const VLayersProcessor::const_ptr &layersProcessor,
-                           bool paused):
+                           bool paused, bool timeLimited):
     m_info(info),
     m_param(param),
     m_pLayersProcessor(layersProcessor),
-    m_paused(paused)
+    m_paused(paused),
+    m_timeLimited(timeLimited)
 {}
 
 void VModelExport::setInfo(const VSimulationInfo &info)
@@ -43,6 +44,11 @@ void VModelExport::setPaused(bool paused)
     m_paused = paused;
 }
 
+void VModelExport::setTimeLimited(bool timeLimited)
+{
+    m_timeLimited = timeLimited;
+}
+
 void VModelExport::saveToFile(const QString &filename)
 {
     QFile file(filename);
@@ -55,6 +61,7 @@ void VModelExport::saveToFile(const QString &filename)
     saveInfo(xmlWriter);
     saveParametres(xmlWriter);
     savePaused(xmlWriter);
+    saveTimeLimit(xmlWriter);
     saveLayers(xmlWriter);
     saveConnections(xmlWriter);
     xmlWriter.writeEndElement();
@@ -109,6 +116,15 @@ void VModelExport::savePaused(QXmlStreamWriter &xmlWriter)
     auto &tags = _xPAUSED_TAGS;
     xmlWriter.writeStartElement(tags._NAME);
     xmlWriter.writeCharacters(QString::number(m_paused));
+    xmlWriter.writeEndElement();
+}
+
+void VModelExport::saveTimeLimit(QXmlStreamWriter &xmlWriter)
+{
+    auto &tags = _xTIMELIMIT_TAGS;
+    xmlWriter.writeStartElement(tags._NAME);
+    xmlWriter.writeAttribute(tags.DURATION, QString::number(m_param.getTimeLimit()));
+    xmlWriter.writeCharacters(QString::number(m_timeLimited));
     xmlWriter.writeEndElement();
 }
 

@@ -58,6 +58,10 @@ public:
  */
     bool isPaused() const ;
     /**
+    * Check if time timit mode is on
+    */
+    bool isTimeLimitModeOn() const ;
+    /**
  * Stop the simulation and reset all nodes states
  */
     void reset() ;
@@ -114,7 +118,7 @@ public:
      */
     void setSimulationParametres(const VSimulationInfo &info,
                                  const VSimulationParametres &param,
-                                 bool isPaused);
+                                 bool isPaused=false, bool isTimeLimited=false);
 
     void setResin(const VResin &resin) ;
     void setInjectionDiameter(double diameter) ;
@@ -125,6 +129,8 @@ public:
     void setQ(double q) ;
     void setR(double r) ;
     void setS(double s) ;
+    void setTimeLimit(double limit);
+    void setTimeLimitMode(bool on);
 
 private:
     typedef void(*nodeFunc)(VSimNode::ptr& node);
@@ -168,6 +174,10 @@ private:
     * Flag, used to indicate, that simulation was paused
     */
     std::atomic<bool> m_pauseFlag;
+    /**
+    * Flag used for time limitation mode
+    */
+    std::atomic<bool> m_timeLimitFlag;
     /**
      * Vector used for storage of calculation threads
      */
@@ -261,6 +271,9 @@ signals:
     void coefQSet(double q) ;
     void coefRSet(double r) ;
     void coefSSet(double s) ;
+
+    void timeLimitModeSwitched(bool);
+    void timeLimitSet(double);
 };
 
 #endif //_VSIMULATOR_H

@@ -56,6 +56,12 @@ protected:
         VXmlPausedTags() {}
         const QString _NAME{QStringLiteral("Paused")};
     };
+    struct VXmlTimeLimitTags
+    {
+        VXmlTimeLimitTags() {}
+        const QString _NAME{QStringLiteral("TimeLimit")};
+        const QString DURATION{QStringLiteral("Duration")};
+    };
     struct VXmlLayersTags
     {
         VXmlLayersTags() {}
@@ -155,6 +161,7 @@ protected:
     const VXmlInfoTags _xINFO_TAGS;
     const VXmlParamTags _xPARAM_TAGS;
     const VXmlPausedTags _xPAUSED_TAGS;
+    const VXmlTimeLimitTags _xTIMELIMIT_TAGS;
     const VXmlLayersTags _xLAYERS_TAGS;
     const VXmlConnectionsTags _xCONNECTIONS_TAGS;
 };

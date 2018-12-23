@@ -18,11 +18,13 @@ public:
     VModelExport(const VSimulationInfo &info,
                  const VSimulationParametres &param,
                  const VLayersProcessor::const_ptr &layersProcessor,
-                 bool paused = false);
+                 bool paused = false,
+                 bool timeLimited = false);
     void setInfo(const VSimulationInfo &info);
     void setSimulationParametres(const VSimulationParametres &param);
     void setLayersProcessor(const VLayersProcessor::const_ptr &layersProcesor);
     void setPaused(bool paused);
+    void setTimeLimited(bool timeLimited);
     void saveToFile(const QString &filename);
 
 private:
@@ -33,6 +35,8 @@ private:
     void saveResin(QXmlStreamWriter &xmlWriter, const VResin &resin);
 
     void savePaused(QXmlStreamWriter &xmlWriter);
+
+    void saveTimeLimit(QXmlStreamWriter &xmlWriter);
 
     void saveLayers(QXmlStreamWriter &xmlWriter);
 
@@ -72,6 +76,7 @@ private:
     VSimulationParametres m_param;
     VLayersProcessor::const_ptr m_pLayersProcessor;
     bool m_paused;
+    bool m_timeLimited;
 };
 
 #endif // _VMODELEXPORT_H

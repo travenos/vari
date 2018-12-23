@@ -25,7 +25,8 @@
 
 VModelImport::VModelImport():
     m_pLayersProcessor(new VLayersProcessor),
-    m_paused(false)
+    m_paused(false),
+    m_timeLimited(false)
 {
 }
 
@@ -49,6 +50,11 @@ bool VModelImport::getPaused() const
     return m_paused;
 }
 
+bool VModelImport::getTimeLimited() const
+{
+    return m_timeLimited;
+}
+
 void VModelImport::loadFromFile(const QString &filename)
 {
     QFile file(filename);
@@ -70,6 +76,8 @@ void VModelImport::loadFromFile(const QString &filename)
                 loadParametres(xmlReader);
             else if (!xmlReader.name().compare(_xPAUSED_TAGS._NAME))
                 loadPaused(xmlReader);
+            else if (!xmlReader.name().compare(_xTIMELIMIT_TAGS._NAME))
+                loadTimeLimit(xmlReader);
             else if (!xmlReader.name().compare(_xLAYERS_TAGS._NAME))
                 loadLayers(xmlReader);
             else if (!xmlReader.name().compare(_xCONNECTIONS_TAGS._NAME))
@@ -161,6 +169,17 @@ void VModelImport::loadResin(QXmlStreamReader &xmlReader, VSimulationParametres 
 void VModelImport::loadPaused(QXmlStreamReader &xmlReader)
 {
     m_paused = static_cast<bool>(xmlReader.readElementText().toInt());
+}
+
+void VModelImport::loadTimeLimit(QXmlStreamReader &xmlReader)
+{
+    auto &tags = _xTIMELIMIT_TAGS;
+    foreach(const QXmlStreamAttribute &attr, xmlReader.attributes())
+    {
+        if (!attr.name().compare(tags.DURATION))
+            m_param.setTimeLimit(attr.value().toDouble());
+    }
+    m_timeLimited = static_cast<bool>(xmlReader.readElementText().toInt());
 }
 
 void VModelImport::loadLayers(QXmlStreamReader& xmlReader)

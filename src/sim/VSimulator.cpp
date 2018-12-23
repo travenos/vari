@@ -33,6 +33,7 @@ VSimulator::VSimulator():
     m_pTriangles(new std::vector<VSimTriangle::ptr>),
     m_simulatingFlag(false),
     m_pauseFlag(false),
+    m_timeLimitFlag(false),
     m_simT_timeBeforePause(0)
 {
     m_calculationThreads.resize(N_THREADS);
@@ -107,6 +108,11 @@ bool VSimulator::isPaused() const
     return m_pauseFlag.load();
 }
 
+bool VSimulator::isTimeLimitModeOn() const
+{
+    return m_timeLimitFlag.load();
+}
+
 /**
  * Stop the simulation if it is active and set the default state for all nodes
  */
@@ -138,7 +144,8 @@ VSimulationParametres VSimulator::getSimulationParametres() const
 
 void VSimulator::setSimulationParametres(const VSimulationInfo &info,
                                          const VSimulationParametres &param,
-                                         bool isPaused)
+                                         bool isPaused,
+                                         bool isTimeLimited)
 {
     stop();
     {
@@ -154,6 +161,7 @@ void VSimulator::setSimulationParametres(const VSimulationInfo &info,
     emit coefQSet(param.getQ()) ;
     emit coefRSet(param.getR()) ;
     emit coefSSet(param.getQ()) ;
+    emit timeLimitSet(param.getTimeLimit()) ;
     {
         std::lock_guard<std::mutex> locker(m_infoLock);
         m_info = info;
@@ -164,6 +172,7 @@ void VSimulator::setSimulationParametres(const VSimulationInfo &info,
         m_simT_timeBeforePause = static_cast<int>(info.realTime * 1000);
         emit simulationPaused();
     }
+    setTimeLimitMode(isTimeLimited);
     m_newDataNotifier.notifyAll();
 }
 
@@ -269,6 +278,16 @@ void VSimulator::simulationCycle()
         m_newDataNotifier.notifyAll();
         if (!madeChangesInCycle)
             break;
+        if (m_timeLimitFlag)
+        {
+            std::lock_guard<std::mutex> infoLocker(m_infoLock);
+            std::lock_guard<std::mutex> nodesLocker(*m_pNodesLock);
+            if (m_info.simTime >= m_param.getTimeLimit())
+            {
+                m_pauseFlag.store(true);
+                break;
+            }
+        }
     }
     m_simulatingFlag.store(false);
     if (!madeChangesInCycle)
@@ -617,4 +636,19 @@ void VSimulator::setS(double s)
         m_param.setS(s);
     }
     emit coefSSet(s);
+}
+
+void VSimulator::setTimeLimit(double limit)
+{
+    {
+        std::lock_guard<std::mutex> locker(*m_pNodesLock);
+        m_param.setTimeLimit(limit);
+    }
+    emit timeLimitSet(limit);
+}
+
+void VSimulator::setTimeLimitMode(bool on)
+{
+    m_timeLimitFlag.store(on);
+    emit timeLimitModeSwitched(on);
 }

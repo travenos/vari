@@ -21,6 +21,7 @@ public:
     const VSimulationParametres &getSimulationParametres() const;
     const VLayersProcessor::ptr& getLayersProcessor() const;
     bool getPaused() const;
+    bool getTimeLimited() const;
     void loadFromFile(const QString &filename);
 
 private:
@@ -35,6 +36,7 @@ private:
     void loadInfo(QXmlStreamReader& xmlReader);
     void loadParametres(QXmlStreamReader &xmlReader);
     void loadPaused(QXmlStreamReader& xmlReader);
+    void loadTimeLimit(QXmlStreamReader& xmlReader);
     void loadLayers(QXmlStreamReader &xmlReader);
     void loadConnections(QXmlStreamReader& xmlReader);
 
@@ -63,6 +65,7 @@ private:
     VSimulationParametres m_param;
     VLayersProcessor::ptr m_pLayersProcessor;
     bool m_paused;
+    bool m_timeLimited;
 
     std::unordered_map<uint, VSimNode::ptr> m_allNodes;
 };

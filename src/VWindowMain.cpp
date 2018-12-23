@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <QColorDialog>
 #include <QSettings>
+#include <QTimeZone>
 
 #include "VWindowMain.h"
 #include "ui_VWindowMain.h"
@@ -98,6 +99,10 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_vacuum_pressure_set(double)));
     connect(m_pFacade.get(), SIGNAL(injectionPressureSet(double)),
             this, SLOT(m_on_injection_pressure_set(double)));
+    connect(m_pFacade.get(), SIGNAL(timeLimitSet(double)),
+            this, SLOT(m_on_time_limit_set(double)));
+    connect(m_pFacade.get(), SIGNAL(timeLimitModeSwitched(bool)),
+            this, SLOT(m_on_time_limit_mode_switched(bool)));
     connect(m_pFacade.get(), SIGNAL(canceledWaitingForInjectionPoint()),
             this, SLOT(m_on_canceled_waiting_for_injection_point()));
     connect(m_pFacade.get(), SIGNAL(canceledWaitingForVacuumPoint()),
@@ -254,6 +259,11 @@ void VWindowMain::setVisibleLayer(bool visible)
         uint layer = ui->layersListWidget->currentRow();
         m_pFacade->setVisible(layer, visible);
     }
+}
+
+void VWindowMain::enableTimeLimitMode(bool checked)
+{
+    m_pFacade->setTimeLimitMode(checked);
 }
 
 void VWindowMain::removeLayer()
@@ -485,6 +495,12 @@ void VWindowMain::saveVacuumPressure()
         QMessageBox::warning(this, ERROR_TITLE, INVALID_PARAM_ERROR);
 }
 
+void VWindowMain::saveTimeLimit()
+{
+    double time = QTime(0,0).secsTo(ui->timeEdit->time());
+    m_pFacade->setTimeLimit(time);
+}
+
 void VWindowMain::showTemperature()
 {
     double temperature = m_pFacade->getParametres().getTemperature();
@@ -524,6 +540,15 @@ void VWindowMain::showVacuumDiameter()
     ui->vacuumDiameterEdit->setText(QString::number(vacuumDiameter));
     ui->resetVacuumDiameterButton->setEnabled(false);
 }
+
+void VWindowMain::showTimeLimit()
+{
+    double timeLimit = m_pFacade->getParametres().getTimeLimit();
+    QDateTime dateTime = QDateTime::fromMSecsSinceEpoch(timeLimit * 1000, QTimeZone::utc());
+    ui->timeEdit->setTime(dateTime.time());
+    ui->resetTimeLimitButton->setEnabled(false);
+}
+
 
 void VWindowMain::showVacuumPoint()
 {
@@ -856,6 +881,16 @@ void VWindowMain::m_on_injection_pressure_set(double)
     showInjectionPressure();
 }
 
+void VWindowMain::m_on_time_limit_set(double)
+{
+    showTimeLimit();
+}
+
+void VWindowMain::m_on_time_limit_mode_switched(bool on)
+{
+    ui->timeLimitCheckBox->setChecked(on);
+}
+
 void VWindowMain::m_on_canceled_waiting_for_injection_point()
 {
     ui->injectionPlaceButton->setChecked(false);
@@ -995,6 +1030,11 @@ void VWindowMain::on_vacuumDiameterEdit_textEdited(const QString &)
     ui->resetVacuumDiameterButton->setEnabled(true);
 }
 
+void VWindowMain::on_timeEdit_timeChanged(const QTime&)
+{
+    ui->resetTimeLimitButton->setEnabled(true);
+}
+
 void VWindowMain::on_actionNew_triggered()
 {
     newModel();
@@ -1008,6 +1048,21 @@ void VWindowMain::on_actionOpen_triggered()
 void VWindowMain::on_actionSave_triggered()
 {
     saveModel();
+}
+
+void VWindowMain::on_saveTimeLimitButton_clicked()
+{
+    saveTimeLimit();
+}
+
+void VWindowMain::on_resetTimeLimitButton_clicked()
+{
+    showTimeLimit();
+}
+
+void VWindowMain::on_timeLimitCheckBox_clicked(bool checked)
+{
+    enableTimeLimitMode(checked);
 }
 
 void VWindowMain::on_layerEditButton_clicked()

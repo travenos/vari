@@ -23,8 +23,8 @@ public:
     static const double MIN_PRESSURE;
 
     VSimulationParametres() = default;
-    VSimulationParametres(const VSimulationParametres &other);
-    VSimulationParametres& operator= (const VSimulationParametres& other);
+    VSimulationParametres(const VSimulationParametres &other) = default;
+    VSimulationParametres& operator= (const VSimulationParametres& other) = default;
 
     double getInjectionDiameter() const ;
     void setInjectionDiameter(double diameter) ;
@@ -65,6 +65,9 @@ public:
     double getAveragePermeability() const ;
     void setAveragePermeability(double averagePermeability) ;
 
+    double getTimeLimit() const ;
+    void setTimeLimit(double limit) ;
+
     int getNumberOfFullNodes() const ;
     void setNumberOfFullNodes(int numberOfNodes) ;
 
@@ -86,6 +89,8 @@ private:
 
     double m_averageCellDistance{1};
     double m_averagePermeability{1};
+
+    double m_timeLimit{7200};
 
     int m_numberOfFullNodes{0};
 

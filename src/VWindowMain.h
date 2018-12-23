@@ -106,6 +106,10 @@ private:
     void loadModel();
     void saveModel();
 
+    void saveTimeLimit();
+    void showTimeLimit();
+    void enableTimeLimitMode(bool checked);
+
     void activateSimControls(bool enabled);
     void resetAllInputs();
 
@@ -148,6 +152,8 @@ private slots:
     void m_on_temperature_set(double);
     void m_on_vacuum_pressure_set(double);
     void m_on_injection_pressure_set(double);
+    void m_on_time_limit_set(double);
+    void m_on_time_limit_mode_switched(bool on);
     void m_on_canceled_waiting_for_injection_point();
     void m_on_canceled_waiing_for_vacuum_point();
     void m_on_model_loaded();
@@ -185,6 +191,10 @@ private slots:
     void on_actionOpen_triggered();
     void on_actionSave_triggered();
     void on_layerEditButton_clicked();
+    void on_saveTimeLimitButton_clicked();
+    void on_resetTimeLimitButton_clicked();
+    void on_timeLimitCheckBox_clicked(bool checked);
+    void on_timeEdit_timeChanged(const QTime &);
 };
 
 #endif // _VWINDOWMAIN_H
