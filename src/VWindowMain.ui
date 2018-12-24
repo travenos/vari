@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1560</width>
-    <height>941</height>
+    <width>1565</width>
+    <height>960</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -76,7 +76,7 @@
       <widget class="QScrollArea" name="controlWidget">
        <property name="minimumSize">
         <size>
-         <width>520</width>
+         <width>530</width>
          <height>0</height>
         </size>
        </property>
@@ -90,9 +90,9 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>-160</y>
-          <width>1184</width>
-          <height>998</height>
+          <y>0</y>
+          <width>1205</width>
+          <height>891</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
@@ -697,8 +697,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1560</width>
-     <height>31</height>
+     <width>1565</width>
+     <height>22</height>
     </rect>
    </property>
   </widget>
@@ -718,7 +718,6 @@
    <addaction name="actionStop"/>
    <addaction name="actionReset"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionNew">
    <property name="icon">
     <iconset resource="resources/resources.qrc">
@@ -794,9 +793,11 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
+  <tabstop>controlWidget</tabstop>
   <tabstop>layersListWidget</tabstop>
   <tabstop>layerEnableCheckBox</tabstop>
   <tabstop>layerVisibleCheckBox</tabstop>
+  <tabstop>layerColorButton</tabstop>
   <tabstop>selectMaterialClothButton</tabstop>
   <tabstop>layerRemoveButton</tabstop>
   <tabstop>layerEditButton</tabstop>
@@ -819,6 +820,10 @@
   <tabstop>resetVacuumDiameterButton</tabstop>
   <tabstop>vacuumPlaceButton</tabstop>
   <tabstop>showVacuumPlaceButton</tabstop>
+  <tabstop>timeLimitCheckBox</tabstop>
+  <tabstop>timeEdit</tabstop>
+  <tabstop>resetTimeLimitButton</tabstop>
+  <tabstop>saveTimeLimitButton</tabstop>
  </tabstops>
  <resources>
   <include location="resources/resources.qrc"/>
