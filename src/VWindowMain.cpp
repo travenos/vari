@@ -20,6 +20,7 @@ const QString VWindowMain::IMPORT_FROM_FILE_ERROR("Ошибка загрузки
 const QString VWindowMain::EXPORT_TO_FILE_ERROR("Ошибка сохранения в файл");
 const QString VWindowMain::IMPORT_WHEN_SIMULATING_ERROR("Невозможно импортировать во время симуляции");
 const QString VWindowMain::INVALID_PARAM_ERROR("Введены некорректные параметры");
+const QString VWindowMain::REMOVE_TITLE("Удалить?");
 const QString VWindowMain::ASK_FOR_REMOVE("Вы уверены, что хотите удалить слой?");
 const QString VWindowMain::CLOTH_INFO_TEXT("<html><head/><body>"
                                                "Материал: &quot;%1&quot;<br>"
@@ -784,7 +785,7 @@ void VWindowMain::on_layerVisibleCheckBox_clicked(bool checked)
 
 void VWindowMain::on_layerRemoveButton_clicked()
 {
-    if (QMessageBox::question(this, QStringLiteral("Remove?"),
+    if (QMessageBox::question(this, REMOVE_TITLE,
                               ASK_FOR_REMOVE, QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes)
     {
         removeLayer();

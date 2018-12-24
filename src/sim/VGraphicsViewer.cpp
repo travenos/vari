@@ -25,9 +25,9 @@
  * VGraphicsViewer implementation
  */
 
-const QString VGraphicsViewer::LEFT_WHEEL_CAPTION("Y");
+const QString VGraphicsViewer::LEFT_WHEEL_CAPTION("X");
 const QString VGraphicsViewer::RIGHT_WHEEL_CAPTION("Масштаб");
-const QString VGraphicsViewer::BOTTOM_WHEEL_CAPTION("X");
+const QString VGraphicsViewer::BOTTOM_WHEEL_CAPTION("Y");
 const QString VGraphicsViewer::REAL_TIME_LABEL_CAPTION("Время моделирования (с):");
 const QString VGraphicsViewer::SIM_TIME_LABEL_CAPTION("Время процесса (с):");
 const QString VGraphicsViewer::REALTIME_FACTOR_LABEL_CAPTION("Фактор реального времни:");

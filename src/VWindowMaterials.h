@@ -14,8 +14,12 @@ class VWindowMaterials : public QMainWindow
 
 public:
     static const QString ERROR_TITLE;
+    static const QString REMOVE_TITLE;
+    static const QString IMPORT_TITLE;
+    static const QString EXPORT_TITLE;
     static const QString INVALID_PARAM_ERROR;
     static const QString ASK_FOR_REMOVE;
+    static const QString FILE_DIALOG_FORMATS;
 
     VWindowMaterials(QWidget *parent = nullptr);
     virtual ~VWindowMaterials();

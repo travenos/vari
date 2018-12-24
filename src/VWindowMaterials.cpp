@@ -9,8 +9,13 @@
 #include <deque>
 
 const QString VWindowMaterials::ERROR_TITLE("Ошибка");
+const QString VWindowMaterials::REMOVE_TITLE("Удалить?");
+const QString VWindowMaterials::IMPORT_TITLE("Импорт базы данных");
+const QString VWindowMaterials::EXPORT_TITLE("Экспорт базы данных");
 const QString VWindowMaterials::INVALID_PARAM_ERROR("Введены некорректные параметры");
 const QString VWindowMaterials::ASK_FOR_REMOVE("Вы уверены, что хотите удалить материал?");
+const QString VWindowMaterials::FILE_DIALOG_FORMATS("Табличные данные (*.csv);;Все файлы (*)");
+
 
 VWindowMaterials::VWindowMaterials(QWidget *parent) :
     QMainWindow(parent),
@@ -44,8 +49,8 @@ void VWindowMaterials::removeMaterial( )
 {
     if (m_currentId >= 0)
     {
-        if (QMessageBox::question(this, QStringLiteral("Remove?"),
-                                  ASK_FOR_REMOVE, QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes)
+        if (QMessageBox::question(this, REMOVE_TITLE, ASK_FOR_REMOVE,
+                                  QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes)
         {
             try
             {
@@ -65,9 +70,9 @@ void VWindowMaterials::removeMaterial( )
 
 void VWindowMaterials::importMaterials()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, QStringLiteral("Import file"),
+    QString fileName = QFileDialog::getOpenFileName(this, IMPORT_TITLE,
                                                     QDir::homePath(),
-                                                    QStringLiteral("Table data (*.csv);;All files (*)"));
+                                                    FILE_DIALOG_FORMATS);
     if (!fileName.isEmpty())
     {
         QString name;
@@ -88,9 +93,9 @@ void VWindowMaterials::importMaterials()
 
 void VWindowMaterials::exportMaterials()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, QStringLiteral("Export file"),
+    QString fileName = QFileDialog::getSaveFileName(this, EXPORT_TITLE,
                                                     QDir::homePath(),
-                                                    QStringLiteral("Table data (*.csv);;All files (*)"));
+                                                    FILE_DIALOG_FORMATS);
     if (!fileName.isEmpty())
     {
         try

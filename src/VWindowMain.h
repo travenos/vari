@@ -24,6 +24,7 @@ class VWindowMain : public QMainWindow
 
 public:
     static const QString ERROR_TITLE;
+    static const QString REMOVE_TITLE;
     static const QString IMPORT_FROM_FILE_ERROR;
     static const QString EXPORT_TO_FILE_ERROR;
     static const QString IMPORT_WHEN_SIMULATING_ERROR;
