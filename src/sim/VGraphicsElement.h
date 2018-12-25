@@ -18,6 +18,7 @@ class VGraphicsElement : public SoSeparator
 public: 
     static const QColor INJECTION_COLOR;
     static const QColor VACUUM_COLOR;
+    static const QColor SELECTION_COLOR;
 /**
  * @param simElement
  */
@@ -31,6 +32,9 @@ virtual void updateVisibility();
 virtual void updatePosition() = 0;
 virtual void colorIfInjection();
 virtual void colorIfVacuum();
+virtual void markAsSelected();
+virtual uint getSimId() const;
+virtual bool isVisible() const;
 
 private: 
     VSimElement::const_ptr m_pSimElement;

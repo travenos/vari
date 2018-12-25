@@ -13,7 +13,8 @@
 #include "VSimNode.h"
 #include "VSimTriangle.h"
 
-class VLayer {
+class VLayer
+{
 public: 
     typedef std::shared_ptr<VLayer> ptr;
     typedef std::shared_ptr<const VLayer> const_ptr;

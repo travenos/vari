@@ -6,6 +6,7 @@
 #include <Inventor/nodes/SoTranslation.h>
 #include <Inventor/nodes/SoCube.h>
 #include <Inventor/nodes/SoBaseColor.h>
+
 #include "VGraphicsNode.h"
 #include "VSimElement.h"
 
@@ -33,7 +34,6 @@ VGraphicsNode::VGraphicsNode(const VSimNode::const_ptr &simNode):
 
 VGraphicsNode::~VGraphicsNode()
 {
-
 }
 
 void VGraphicsNode::updatePosition() 

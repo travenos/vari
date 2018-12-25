@@ -73,6 +73,9 @@ public:
     void showInjectionPoint();
     void showVacuumPoint();
 
+    void startCuttingLayer(uint layer);
+    void cancelCuttingLayer();
+
     VSimulationInfo getSimulationInfo() const;
     VSimulationParametres getParametres() const ;
 
@@ -83,6 +86,8 @@ private:
     void connectMainSignals() ;
     void initLayersProcessor() ;
     void updateConfiguration() ;
+
+    QWidget * m_parentWidget;
 
     VSimulator::ptr m_pSimulator;
     VGraphicsViewer::ptr m_pGraphicsViewer;
@@ -97,6 +102,7 @@ private:
 
 private slots:
     void m_on_got_point(const QVector3D &point);
+    void m_on_got_nodes_selection(const std::shared_ptr<std::vector<uint> > &pSelectedNodesIds);
 
 signals:
     void layerVisibilityChanged(uint, bool);

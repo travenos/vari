@@ -2,7 +2,9 @@
  * Project VARI
  * @author Alexey Barashkov
  */
-
+#ifdef DEBUG_MODE
+#include <QDebug>
+#endif
 
 #include <Inventor/Qt/SoQt.h>
 #include <QFile>
@@ -21,6 +23,7 @@
 
 
 VSimulationFacade::VSimulationFacade(QWidget *parent):
+    m_parentWidget(parent),
     m_pSimulator(new VSimulator),
     m_pLayersProcessor(new VLayersProcessor),
     m_selectInjectionPoint(false),
@@ -38,6 +41,10 @@ VSimulationFacade::VSimulationFacade(QWidget *parent):
 
 void VSimulationFacade::connectMainSignals()
 {
+    connect(m_pGraphicsViewer.get(),
+            SIGNAL(gotNodesSelection(const std::shared_ptr<std::vector<uint> > &)),
+            this,
+            SLOT(m_on_got_nodes_selection(const std::shared_ptr<std::vector<uint> > &)));
     connect(m_pGraphicsViewer.get(), SIGNAL(gotPoint(const QVector3D &)),
             this, SLOT(m_on_got_point(const QVector3D &)));
     connect(m_pSimulator.get(), SIGNAL(simulationStarted()),
@@ -351,6 +358,18 @@ void VSimulationFacade::cancelWaitingForVacuumPointSelection()
     emit canceledWaitingForVacuumPoint();
 }
 
+void VSimulationFacade::startCuttingLayer(uint layer)
+{
+    m_pGraphicsViewer->enableSelection(true);
+    //TODO
+}
+
+void VSimulationFacade::cancelCuttingLayer()
+{
+    m_pGraphicsViewer->enableSelection(false);
+}
+
+
 void VSimulationFacade::showInjectionPoint()
 {
     m_pGraphicsViewer->showInjectionPoint();
@@ -448,4 +467,13 @@ void VSimulationFacade::m_on_got_point(const QVector3D &point)
         m_selectVacuumPoint = false;
         emit vacuumPointSet();
     }
+}
+
+void VSimulationFacade::m_on_got_nodes_selection(const std::shared_ptr<std::vector<uint> > &pSelectedNodesIds)
+{
+    #ifdef DEBUG_MODE
+        qInfo() << "Selected Ids:";
+        for (auto id : *pSelectedNodesIds)
+            qInfo() << id;
+    #endif
 }

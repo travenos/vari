@@ -19,10 +19,12 @@
 class SoShapeHints;
 class SoPerspectiveCamera;
 class SoEventCallback;
+class SoExtSelection;
 class QWidget;
 class QLabel;
 
-class VGraphicsViewer: public VSimulationClass, public SoQtExaminerViewer {
+class VGraphicsViewer: public VSimulationClass, public SoQtExaminerViewer
+{
     Q_OBJECT
 public: 
     typedef std::shared_ptr<VGraphicsViewer> ptr;
@@ -48,11 +50,12 @@ public:
     void updateNodeColors() ;
     void updateTriangleColors() ;
 
+    void enableSelection(bool enable);
+
 public slots:
     void doRender() ;
     void displayInfo() ;
     void clearInfo() ;
-
 
 private:
     static const QString LEFT_WHEEL_CAPTION;
@@ -65,7 +68,9 @@ private:
     static const QString FILLED_PERCENT_LABEL_CAPTION;
     static const QString AVERAGE_PRESSURE_LABEL_CAPTION;
 
-    void emitGotPoint(const QVector3D &point);
+    static const int ICON_SIZE = 24;
+
+    void initSelection();
 
     void stopRender() ;
     void process() ;
@@ -75,6 +80,7 @@ private:
                                        const std::shared_ptr<const std::vector< std::shared_ptr<T2> > > &sim) ;
 
     static void event_cb(void * userdata, SoEventCallback * node);
+    static void selection_finish_cb(void * userdata, SoSelection * sel);
 
     std::vector<VGraphicsNode*> m_graphicsNodes;
     std::vector<VGraphicsTriangle*> m_graphicsTriangles;
@@ -88,17 +94,20 @@ private:
     QLabel*             m_pIterationLabel;
     QLabel*             m_pFilledPercentLabel;
     QLabel*             m_pAveragePressureLabel;
-    QPushButton*       m_pXYButton;
+    QPushButton*        m_pXYButton;
+    QPushButton*        m_pSelectionButton;
 
     SoSeparator*        m_pRoot;
     SoSeparator*        m_pFigureRoot;
     SoShapeHints*       m_pShapeHints;
     SoPerspectiveCamera* m_pCam;
+    SoExtSelection*     m_pSelection;
 
 
     std::unique_ptr<std::thread> m_pRenderWaiterThread;
     mutable VNotify m_renderSuccessNotifier;
     std::atomic<bool> m_renderStopFlag;
+    mutable std::mutex m_graphMutex;
 
 private slots:
     /**
@@ -133,6 +142,8 @@ private slots:
      */
     void bottomWheelReleased(void);
 
+    void setSelectionMode(bool on) ;
+
 protected:
     QWidget* buildLeftTrim(QWidget * parent);
     QWidget* buildBottomTrim(QWidget * parent);
@@ -142,6 +153,7 @@ signals:
     void askForRender();
     void askForDisplayingInfo();
     void gotPoint(const QVector3D &point);
+    void gotNodesSelection(const std::shared_ptr<std::vector<uint> > &p_selectedNodes);
 };
 
 #endif //_VGRAPHICSVIEWER_H

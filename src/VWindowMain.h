@@ -114,6 +114,9 @@ private:
     void activateSimControls(bool enabled);
     void resetAllInputs();
 
+    void startCuttingLayer();
+    void cancelCuttingLayer();
+
     bool readNumber(const QLineEdit * lineEdit, double &output) const;
 
     Ui::VWindowMain *ui;
@@ -191,11 +194,11 @@ private slots:
     void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionSave_triggered();
-    void on_layerEditButton_clicked();
     void on_saveTimeLimitButton_clicked();
     void on_resetTimeLimitButton_clicked();
     void on_timeLimitCheckBox_clicked(bool checked);
     void on_timeEdit_timeChanged(const QTime &);
+    void on_layerEditButton_clicked(bool checked);
 };
 
 #endif // _VWINDOWMAIN_H

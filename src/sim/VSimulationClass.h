@@ -16,6 +16,7 @@ class VSimulationClass : public QObject
 public: 
     typedef std::shared_ptr<std::mutex> mutex_ptr;
     VSimulationClass();    
+    virtual ~VSimulationClass() = default;
     VSimulationClass(const VSimulationClass& ) = delete;
     VSimulationClass& operator= (const VSimulationClass& ) = delete;
 /**

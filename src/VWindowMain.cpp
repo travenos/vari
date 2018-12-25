@@ -716,6 +716,25 @@ void VWindowMain::saveModel()
     }
 }
 
+void VWindowMain::startCuttingLayer()
+{
+    if (ui->layersListWidget->currentIndex().isValid())
+    {
+        uint layer = ui->layersListWidget->currentRow();
+        for (uint i =0; i < m_pFacade->getLayersNumber(); ++i)
+        {
+            if (i != layer)
+                m_pFacade->setVisible(i, false);
+        }
+        m_pFacade->startCuttingLayer(layer);
+    }
+}
+
+void VWindowMain::cancelCuttingLayer()
+{
+    m_pFacade->cancelCuttingLayer();
+}
+
 /**
  * Slots
  */
@@ -1066,7 +1085,10 @@ void VWindowMain::on_timeLimitCheckBox_clicked(bool checked)
     enableTimeLimitMode(checked);
 }
 
-void VWindowMain::on_layerEditButton_clicked()
+void VWindowMain::on_layerEditButton_clicked(bool checked)
 {
-
+    if (checked)
+        startCuttingLayer();
+    else
+        cancelCuttingLayer();
 }

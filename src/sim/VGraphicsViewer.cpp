@@ -15,6 +15,8 @@
 #include <Inventor/nodes/SoPerspectiveCamera.h>
 #include <Inventor/nodes/SoOrthographicCamera.h>
 #include <Inventor/nodes/SoEventCallback.h>
+#include <Inventor/nodes/SoSelection.h>
+#include <Inventor/nodes/SoExtSelection.h>
 #include <Inventor/events/SoMouseButtonEvent.h>
 #include <Inventor/SoPickedPoint.h>
 #include <Inventor/Qt/widgets/SoQtThumbWheel.h>
@@ -46,26 +48,52 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_pFigureRoot(new SoSeparator),
     m_pShapeHints(new SoShapeHints),
     m_pCam(new SoPerspectiveCamera),
+    m_pSelection(new SoExtSelection),
     m_renderStopFlag(false)
 {
+    setBackgroundColor(SbColor(0.0, 0.0, 0.0));
+    setPopupMenuEnabled(false);
+
     m_pBaseWidget = buildWidget(getParentWidget());
     setBaseWidget(m_pBaseWidget);
 
     SoEventCallback * cb = new SoEventCallback;
     cb->addEventCallback(SoMouseButtonEvent::getClassTypeId(), event_cb, this);
     m_pRoot->insertChild(cb, 0);
+
     m_pShapeHints->vertexOrdering = SoShapeHints::COUNTERCLOCKWISE;
     m_pRoot->addChild(m_pShapeHints);
     m_pRoot->addChild(m_pCam);
-    m_pRoot->addChild(m_pFigureRoot);
+
+    initSelection();
+    m_pRoot->addChild(m_pSelection);
+
     setSceneGraph(m_pRoot);
-    setPopupMenuEnabled(false);
+
     m_pXYButton->setIcon(QIcon(QStringLiteral(":/img/xyplane.png")));
+    m_pXYButton->setIconSize(QSize(ICON_SIZE, ICON_SIZE));
+    m_pXYButton->adjustSize();
 
     connect(this, SIGNAL(askForRender()), this, SLOT(doRender()));
     connect(this, SIGNAL(askForDisplayingInfo()), this, SLOT(displayInfo()));
     m_pRenderWaiterThread.reset(new std::thread(std::bind(&VGraphicsViewer::process, this)));
     m_renderSuccessNotifier.notifyOne();
+}
+
+void VGraphicsViewer::initSelection()
+{
+    m_pSelection->lassoPolicy = SoExtSelection::PART;
+    m_pSelection->lassoMode = SoExtSelection::ALL_SHAPES;
+    m_pSelection->policy = SoSelection::DISABLE;
+    m_pSelection->lassoType = SoExtSelection::NOLASSO;
+
+    m_pSelection->setLassoColor(SbColor(0.9f,0.7f,0.2f));
+    m_pSelection->setLassoWidth(3);
+    m_pSelection->setOverlayLassoPattern(0xf0f0);
+    m_pSelection->animateOverlayLasso(false);
+    m_pSelection->addFinishCallback(selection_finish_cb, this);
+
+    m_pSelection->addChild(m_pFigureRoot);
 }
 
 VGraphicsViewer::~VGraphicsViewer()
@@ -76,6 +104,7 @@ VGraphicsViewer::~VGraphicsViewer()
     m_pRoot->removeAllChildren();
     setSceneGraph(NULL);
     setCamera(NULL);
+    delete m_pBaseWidget;
 }
 
 QWidget* VGraphicsViewer::buildLeftTrim(QWidget * parent)
@@ -86,7 +115,6 @@ QWidget* VGraphicsViewer::buildLeftTrim(QWidget * parent)
     widget->setFixedWidth(WIDGET_WIDTH);
 
     QGridLayout * layout = new QGridLayout(widget);
-    //gl->addWidget(this->buildAppButtons(w), 0, 0);
 
     SoQtThumbWheel * wheel = new SoQtThumbWheel(SoQtThumbWheel::Vertical, widget);
     wheel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -122,7 +150,6 @@ QWidget* VGraphicsViewer::buildBottomTrim(QWidget * parent)
     widget->setFixedHeight(WIDGET_HEIGHT);
 
     QGridLayout * layout = new QGridLayout(widget);
-    //gl->addWidget(this->buildAppButtons(w), 0, 0);
 
     SoQtThumbWheel * wheel = new SoQtThumbWheel(SoQtThumbWheel::Horizontal, widget);
     wheel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -201,6 +228,19 @@ void VGraphicsViewer::createViewerButtons(QWidget * parent, SbPList * buttonlist
 {
     SoQtExaminerViewer::createViewerButtons(parent, buttonlist);
     m_pXYButton = static_cast<QPushButton*>((*buttonlist)[buttonlist->getLength() - 1]);
+
+    m_pSelectionButton = new QPushButton(QIcon(QStringLiteral(":/img/selectpart.png")),
+                                                        QStringLiteral(""), parent);
+    m_pSelectionButton->setFocusPolicy(Qt::NoFocus);
+    m_pSelectionButton->setIconSize(QSize(ICON_SIZE, ICON_SIZE));
+    m_pSelectionButton->adjustSize();
+    m_pSelectionButton->setCheckable(true);
+    m_pSelectionButton->setChecked(false);
+    m_pSelectionButton->setVisible(false);
+
+    connect(m_pSelectionButton, SIGNAL(toggled(bool)), this, SLOT(setSelectionMode(bool)));
+
+    buttonlist->append(m_pSelectionButton);
 }
 
 void VGraphicsViewer::toggleCameraType(void)
@@ -214,10 +254,13 @@ void VGraphicsViewer::setGraphicsElements(const VSimNode::const_vector_ptr &node
     clearAll();
     createGraphicsElements(&m_graphicsNodes, nodes);
     createGraphicsElements(&m_graphicsTriangles, triangles);
-    for (auto node: m_graphicsNodes)
-        m_pFigureRoot->addChild(node);
-    for (auto triangle: m_graphicsTriangles)
-        m_pFigureRoot->addChild(triangle);
+    {
+        std::lock_guard<std::mutex> locker(m_graphMutex);
+        for (auto node: m_graphicsNodes)
+            m_pFigureRoot->addChild(node);
+        for (auto triangle: m_graphicsTriangles)
+            m_pFigureRoot->addChild(triangle);
+    }
 }
 
 void VGraphicsViewer::updateColors()
@@ -250,6 +293,7 @@ void VGraphicsViewer::updateVisibility()
 
 void VGraphicsViewer::clearNodes() 
 {
+    std::lock_guard<std::mutex> locker(m_graphMutex);
     for (auto node: m_graphicsNodes)
         m_pFigureRoot->removeChild(node);
     m_graphicsNodes.clear();
@@ -257,6 +301,7 @@ void VGraphicsViewer::clearNodes()
 
 void VGraphicsViewer::clearTriangles() 
 {
+    std::lock_guard<std::mutex> locker(m_graphMutex);
     for (auto triangle: m_graphicsTriangles)
         m_pFigureRoot->removeChild(triangle);
     m_graphicsTriangles.clear();
@@ -264,10 +309,17 @@ void VGraphicsViewer::clearTriangles()
 
 void VGraphicsViewer::clearAll() 
 {
+    std::lock_guard<std::mutex> locker(m_graphMutex);
     m_pFigureRoot->removeAllChildren();
     m_graphicsNodes.clear();
     m_graphicsTriangles.clear();
     clearInfo();
+}
+
+void VGraphicsViewer::enableSelection(bool enable)
+{
+    m_pSelectionButton->setVisible(enable);
+    setSelectionMode(enable);
 }
 
 void VGraphicsViewer::doRender() 
@@ -304,13 +356,15 @@ void VGraphicsViewer::clearInfo()
 }
 
 template<typename T1, typename T2>
-inline void VGraphicsViewer::createGraphicsElements(std::vector<T1 *>* gaphics,
+inline void VGraphicsViewer::createGraphicsElements(std::vector<T1 *>* graphics,
                                                     const std::shared_ptr<const std::vector< std::shared_ptr<T2> > > &sim) 
 {
-    gaphics->clear();
-    gaphics->reserve(sim->size());
+    std::lock_guard<std::mutex> locker(m_graphMutex);
+    graphics->clear();
+    graphics->reserve(sim->size());
     for (auto &simElem : *sim)
-        gaphics->push_back(new T1(simElem));
+        graphics->push_back(new T1(simElem));
+    graphics->shrink_to_fit();
 }
 
 void VGraphicsViewer::process() 
@@ -321,9 +375,12 @@ void VGraphicsViewer::process()
         m_renderSuccessNotifier.wait();
         if (!m_renderStopFlag.load())
         {
-            setAutoRedraw(false);
-            updateTriangleColors();
-            setAutoRedraw(true);
+            {
+                std::lock_guard<std::mutex> locker(m_graphMutex);
+                setAutoRedraw(false);
+                updateTriangleColors();
+                setAutoRedraw(true);
+            }
             emit askForRender();
             emit askForDisplayingInfo();
         }
@@ -362,6 +419,26 @@ void VGraphicsViewer::showVacuumPoint()
         triangle->colorIfVacuum();
 }
 
+void VGraphicsViewer::setSelectionMode(bool on)
+{
+    m_pSelectionButton->setChecked(on);
+    if (on)
+    {
+        m_pSelection->policy = SoSelection::SHIFT;
+        m_pSelection->lassoType = SoExtSelection::LASSO;
+        setViewing(false);
+    }
+    else
+    {
+        std::lock_guard<std::mutex> locker(m_graphMutex);
+        SoExtSelection* old_selection = m_pSelection;
+        m_pSelection = new SoExtSelection;
+        initSelection();
+        m_pRoot->removeChild(m_pRoot->findChild(old_selection));
+        m_pRoot->addChild(m_pSelection);
+    }
+}
+
 void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)
 {
     const float WHEEL_STEP = 0.1f;
@@ -379,7 +456,10 @@ void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)
             float x, y, z;
             pickedPoint->getPoint().getValue(x, y, z);
             QVector3D point(x, y, z);
-            viewer->emitGotPoint(point);
+            #ifdef DEBUG_MODE
+                qInfo() << "Selected point:" << point.x() << point.y() << point.z();
+            #endif
+            emit viewer->gotPoint(point);
         }
     }
     else if (SO_MOUSE_PRESS_EVENT(event, BUTTON4))
@@ -392,12 +472,42 @@ void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)
     }
 }
 
-void VGraphicsViewer::emitGotPoint(const QVector3D &point)
+/**
+ * Callback function for the lasso selection mode. Should be called when the select action finishes for post processing.
+ * @param sel Pointer to the used selection object.
+ */
+void VGraphicsViewer::selection_finish_cb(void * userdata, SoSelection * sel)
 {
-    #ifdef DEBUG_MODE
-        qInfo() << "Selected point:" << point.x() << point.y() << point.z();
-    #endif
-    emit gotPoint(point);
+    VGraphicsViewer* viewer = static_cast<VGraphicsViewer*>(userdata);
+    std::shared_ptr<std::vector<uint> > p_selectedNodesIds(new std::vector<uint>);
+
+    viewer->updateNodeColors();
+    viewer->updateTriangleColors();
+
+    const SoPathList* pListSelected = sel->getList();
+    p_selectedNodesIds->reserve(pListSelected->getLength());
+    for(int i = 0; i < pListSelected->getLength(); ++i)
+    {
+        SoPath* path = (*pListSelected)[i];
+        for (int j = path->getLength() -1 ; j >= 0 ; --j)
+        {
+            VGraphicsElement * pElement = dynamic_cast<VGraphicsElement *>(path->getNode(j));
+            if (pElement != nullptr && pElement->isVisible())
+            {
+                pElement->markAsSelected();
+                VGraphicsNode * pNode = dynamic_cast<VGraphicsNode *>(pElement);
+                if(pNode != nullptr)
+                    p_selectedNodesIds->push_back(pNode->getSimId());
+                break;
+            }
+        }
+    }
+    sel->touch();
+    sel->deselectAll();
+    if (p_selectedNodesIds->size() > 0)
+    {
+        emit viewer->gotNodesSelection(p_selectedNodesIds);
+    }
 }
 
 void VGraphicsViewer::leftWheelPressed(void) { leftWheelStart(); }
