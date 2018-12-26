@@ -45,14 +45,14 @@ private:
     void loadLayer(QXmlStreamReader& xmlReader, std::vector<VLayer::ptr>& layers);
     void loadCloth(QXmlStreamReader& xmlReader, VCloth::ptr &material);
     void loadNodes(QXmlStreamReader& xmlReader, const VCloth::const_ptr &material,
-                   VSimNode::vector_ptr &nodes);
+                   const VSimNode::map_ptr &nodes);
     void loadTrianglesInfos(QXmlStreamReader& xmlReader, std::vector<VTriangleInfo> &trianglesInfos);
     void createTriangles(const std::vector<VTriangleInfo> &trianglesInfos,
                          const VCloth::const_ptr &material,
-                         VSimTriangle::vector_ptr &triangles);
+                         const VSimTriangle::list_ptr &triangles);
 
     void loadNode(QXmlStreamReader& xmlReader,
-                  const VCloth::const_ptr &material, VSimNode::vector_ptr &nodes);
+                  const VCloth::const_ptr &material, const VSimNode::map_ptr &nodes);
     void loadTriangleInfo(QXmlStreamReader& xmlReader, std::vector<VTriangleInfo> &trianglesInfos);
 
     void loadConnection(QXmlStreamReader& xmlReader);
@@ -67,7 +67,7 @@ private:
     bool m_paused;
     bool m_timeLimited;
 
-    std::unordered_map<uint, VSimNode::ptr> m_allNodes;
+    VSimNode::map_t m_allNodes;
 };
 
 #endif // _VMODELIMPORT_H

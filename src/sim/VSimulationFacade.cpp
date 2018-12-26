@@ -42,19 +42,21 @@ VSimulationFacade::VSimulationFacade(QWidget *parent):
 void VSimulationFacade::connectMainSignals()
 {
     connect(m_pGraphicsViewer.get(),
-            SIGNAL(gotNodesSelection(const std::shared_ptr<std::vector<uint> > &)),
+            SIGNAL(gotNodesSelection(const VGraphicsViewer::const_uint_vect_ptr &)),
             this,
-            SLOT(m_on_got_nodes_selection(const std::shared_ptr<std::vector<uint> > &)));
+            SLOT(m_on_got_nodes_selection(const VGraphicsViewer::const_uint_vect_ptr &)));
     connect(m_pGraphicsViewer.get(), SIGNAL(gotPoint(const QVector3D &)),
             this, SLOT(m_on_got_point(const QVector3D &)));
+    connect(m_pGraphicsViewer.get(), SIGNAL(askForDisplayingInfo()),
+            this, SIGNAL(gotNewInfo()));
+    connect(m_pGraphicsViewer.get(), SIGNAL(selectionEnabled(bool)),
+            this, SIGNAL(selectionEnabled(bool)));
     connect(m_pSimulator.get(), SIGNAL(simulationStarted()),
             this, SIGNAL(simulationStarted()));
     connect(m_pSimulator.get(), SIGNAL(simulationPaused()),
             this, SIGNAL(simulationPaused()));
     connect(m_pSimulator.get(), SIGNAL(simulationStopped()),
             this, SIGNAL(simulationStopped()));
-    connect(m_pGraphicsViewer.get(), SIGNAL(askForDisplayingInfo()),
-            this, SIGNAL(gotNewInfo()));
 
     connect(m_pSimulator.get(), SIGNAL(resinChanged()),
             this, SIGNAL(resinChanged()));
@@ -100,6 +102,7 @@ void VSimulationFacade::initLayersProcessor()
 
 void VSimulationFacade::startSimulation() 
 {
+    cancelCuttingLayer();
     m_pSimulator->start();
 }
 
@@ -115,6 +118,7 @@ void VSimulationFacade::pauseSimulation()
 
 void VSimulationFacade::resetSimulation() 
 {
+    cancelCuttingLayer();
     m_pSimulator->reset();
     m_pGraphicsViewer->updateColors();
 }
@@ -322,10 +326,13 @@ void VSimulationFacade::updateConfiguration()
     VSimTriangle::const_vector_ptr triangles = m_pLayersProcessor->getActiveTriangles();
     m_pSimulator->setActiveElements(nodes, triangles);
     m_pGraphicsViewer->setGraphicsElements(nodes, triangles);
+    emit configUpdated();
 }
 
 void VSimulationFacade::waitForInjectionPointSelection(double diameter)
 {
+    cancelCuttingLayer();
+    cancelWaitingForVacuumPointSelection();
     m_selectInjectionPoint = true;
     m_selectVacuumPoint = false;
     m_injectionDiameter = diameter;
@@ -337,12 +344,12 @@ void VSimulationFacade::waitForInjectionPointSelection(double diameter)
 
 void VSimulationFacade::waitForVacuumPointSelection(double diameter)
 {
+    cancelCuttingLayer();
+    cancelWaitingForInjectionPointSelection();
     m_selectVacuumPoint = true;
-    m_selectInjectionPoint = false;
     m_vacuumDiameter = diameter;
     m_pGraphicsViewer->viewFromAbove();
     m_pGraphicsViewer->setViewing(false);
-    emit canceledWaitingForInjectionPoint();
     emit startedWaitingForVacuumPoint();
 }
 
@@ -361,7 +368,39 @@ void VSimulationFacade::cancelWaitingForVacuumPointSelection()
 void VSimulationFacade::startCuttingLayer(uint layer)
 {
     m_pGraphicsViewer->enableSelection(true);
-    //TODO
+    setOnlyOneVisible(layer);
+    m_cuttedLayer = layer;
+}
+
+void VSimulationFacade::performCut()
+{
+    m_pLayersProcessor->cutLayer(m_pGraphicsViewer->getSelectedNodesIds(), m_cuttedLayer);
+    updateConfiguration();
+    emit cutPerformed();
+}
+
+uint VSimulationFacade::getCuttedLayer() const
+{
+    return m_cuttedLayer;
+}
+
+void VSimulationFacade::setAllVisible()
+{
+    for (uint i=0; i < m_pLayersProcessor->getLayersNumber(); ++i)
+        m_pLayersProcessor->setVisibleLayer(i, true);
+    m_pGraphicsViewer->updateVisibility();
+}
+
+void VSimulationFacade::setOnlyOneVisible(uint layer)
+{
+    for (uint i=0; i < m_pLayersProcessor->getLayersNumber(); ++i)
+    {
+        if (i != layer)
+            m_pLayersProcessor->setVisibleLayer(i, false);
+        else
+            m_pLayersProcessor->setVisibleLayer(i, true);
+    }
+    m_pGraphicsViewer->updateVisibility();
 }
 
 void VSimulationFacade::cancelCuttingLayer()
@@ -372,11 +411,13 @@ void VSimulationFacade::cancelCuttingLayer()
 
 void VSimulationFacade::showInjectionPoint()
 {
+    cancelCuttingLayer();
     m_pGraphicsViewer->showInjectionPoint();
 }
 
 void VSimulationFacade::showVacuumPoint()
 {
+    cancelCuttingLayer();
     m_pGraphicsViewer->showVacuumPoint();
 }
 
@@ -469,11 +510,12 @@ void VSimulationFacade::m_on_got_point(const QVector3D &point)
     }
 }
 
-void VSimulationFacade::m_on_got_nodes_selection(const std::shared_ptr<std::vector<uint> > &pSelectedNodesIds)
+void VSimulationFacade::m_on_got_nodes_selection(const VGraphicsViewer::const_uint_vect_ptr &pSelectedNodesIds)
 {
     #ifdef DEBUG_MODE
         qInfo() << "Selected Ids:";
         for (auto id : *pSelectedNodesIds)
             qInfo() << id;
     #endif
+    emit selectionMade();
 }

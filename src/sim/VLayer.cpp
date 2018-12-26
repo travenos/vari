@@ -18,8 +18,8 @@
  * @param triangles
  * @param material
  */
-VLayer::VLayer(const VSimNode::vector_ptr &nodes,
-               const VSimTriangle::vector_ptr &triangles,
+VLayer::VLayer(const VSimNode::map_ptr &nodes,
+               const VSimTriangle::list_ptr &triangles,
                const VCloth::ptr &material):
     m_pNodes(nodes),
     m_pTriangles(triangles),
@@ -53,7 +53,7 @@ void VLayer::setVisible(bool visible)
 void VLayer::p_setVisible(bool visible) 
 {
     for (auto &node : *m_pNodes)
-        node->setVisible(visible);
+        node.second->setVisible(visible);
     for (auto &triangle : *m_pTriangles)
         triangle->setVisible(visible);
     m_visible = visible;
@@ -91,15 +91,12 @@ bool VLayer::isActive() const
 /**
  * @return vector<&VNode::ptr>
  */
-const VSimNode::vector_ptr &VLayer::getNodes() 
+const VSimNode::map_ptr &VLayer::getNodes()
 {
     return m_pNodes;
 }
 
-/**
- * @return vector<&VTriangle::ptr>
- */
-const VSimTriangle::vector_ptr &VLayer::getTriangles() 
+const VSimTriangle::list_ptr &VLayer::getTriangles()
 {
     return m_pTriangles;
 }
@@ -112,7 +109,7 @@ void VLayer::setMateial(const VCloth &material)
 void VLayer::reset() 
 {
     for (auto &node : *m_pNodes)
-        node->reset();
+        node.second->reset();
     for (auto &triangle : *m_pTriangles)
         triangle->reset();
 }
@@ -158,4 +155,32 @@ uint VLayer::getTriangleMinId() const
 uint VLayer::getTriangleMaxId() const
 {
     return m_triangleMaxId;
+}
+
+void VLayer::cut(const VGraphicsViewer::const_uint_vect_ptr &nodesIds)
+{
+    VSimNode::map_ptr p_remainingNodesMap(new VSimNode::map_t);
+    p_remainingNodesMap->reserve(nodesIds->size());
+    for (uint id : *nodesIds)
+    {
+        auto node = m_pNodes->find(id);
+        if (node != m_pNodes->end())
+        {
+            p_remainingNodesMap->insert(*node);
+            m_pNodes->erase(node);
+        }
+    }
+    for (auto &node : *m_pNodes)
+        node.second->isolateAndMarkForRemove();
+    auto it = m_pTriangles->begin();
+    while (it != m_pTriangles->end())
+    {
+        if ((*it)->isMarkedForRemove())
+        {
+            m_pTriangles->erase(it++);
+        }
+        else
+            ++it;
+    }
+    m_pNodes = p_remainingNodesMap;
 }

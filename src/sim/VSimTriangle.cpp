@@ -102,6 +102,14 @@ void VSimTriangle::reset()
     m_color = m_pMaterial->baseColor;
 }
 
+bool VSimTriangle::isMarkedForRemove() const
+{
+    for (auto &node: m_pNodes)
+        if (node->isMarkedForRemove())
+            return true;
+    return false;
+}
+
 bool VSimTriangle::isInjection() const
 {
     return isRole(VSimNode::INJECTION);

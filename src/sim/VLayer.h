@@ -12,6 +12,7 @@
 #include <QColor>
 #include "VSimNode.h"
 #include "VSimTriangle.h"
+#include "VGraphicsViewer.h"
 
 class VLayer
 {
@@ -24,7 +25,8 @@ public:
      * @param material
      */
     VLayer() = delete;
-    VLayer(const VSimNode::vector_ptr &nodes, const VSimTriangle::vector_ptr &triangles, const VCloth::ptr &material);
+    VLayer(const VSimNode::map_ptr &nodes, const VSimTriangle::list_ptr &triangles,
+           const VCloth::ptr &material);
     virtual ~VLayer();
     VLayer(const VLayer& ) = delete; //TODO implement theese methods
     VLayer& operator= (const VLayer& ) = delete; //TODO implement theese methods
@@ -38,8 +40,8 @@ public:
     bool isActive() const ;
     size_t getNodesNumber() const ;
     size_t getTrianglesNumber() const ;
-    const VSimNode::vector_ptr &getNodes() ;
-    const VSimTriangle::vector_ptr &getTriangles() ;
+    const VSimNode::map_ptr &getNodes() ;
+    const VSimTriangle::list_ptr &getTriangles() ;
     void setMateial(const VCloth &material) ;
     void reset() ;
     VCloth::const_ptr getMaterial() const ;
@@ -49,12 +51,13 @@ public:
     uint getNodeMaxId() const;
     uint getTriangleMinId() const;
     uint getTriangleMaxId() const;
+    void cut(const VGraphicsViewer::const_uint_vect_ptr &nodesIds);
 
 private: 
     void p_setVisible(bool visible) ;
 
-    const VSimNode::vector_ptr m_pNodes;
-    const VSimTriangle::vector_ptr m_pTriangles;
+    VSimNode::map_ptr m_pNodes;
+    VSimTriangle::list_ptr m_pTriangles;
     const VCloth::ptr m_pMaterial;
     bool m_visible;
     bool m_wasVisible;

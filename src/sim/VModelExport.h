@@ -45,13 +45,13 @@ private:
     void saveCloth(QXmlStreamWriter &xmlWriter, const VCloth::const_ptr &cloth);
 
     void saveNodes(QXmlStreamWriter &xmlWriter,
-                                     const VSimNode::const_vector_ptr &nodes);
+                                     const VSimNode::const_map_ptr &nodes);
 
     void saveNode(QXmlStreamWriter &xmlWriter,
                                      const VSimNode::const_ptr &node);
 
     void saveTriangles(QXmlStreamWriter &xmlWriter,
-                                     const VSimTriangle::const_vector_ptr &triangles);
+                                     const VSimTriangle::const_list_ptr &triangles);
 
     void saveTriangle(QXmlStreamWriter &xmlWriter,
                                      const VSimTriangle::const_ptr &triangle);

@@ -75,6 +75,11 @@ public:
 
     void startCuttingLayer(uint layer);
     void cancelCuttingLayer();
+    void performCut();
+    uint getCuttedLayer() const;
+
+    void setAllVisible();
+    void setOnlyOneVisible(uint layer);
 
     VSimulationInfo getSimulationInfo() const;
     VSimulationParametres getParametres() const ;
@@ -96,13 +101,14 @@ private:
     bool m_selectVacuumPoint;
     double m_injectionDiameter;
     double m_vacuumDiameter;
+    uint m_cuttedLayer;
 
     std::shared_ptr<std::mutex> m_pNodesLock;
     std::shared_ptr<std::mutex> m_pTrianglesLock;
 
 private slots:
     void m_on_got_point(const QVector3D &point);
-    void m_on_got_nodes_selection(const std::shared_ptr<std::vector<uint> > &pSelectedNodesIds);
+    void m_on_got_nodes_selection(const VGraphicsViewer::const_uint_vect_ptr &pSelectedNodesIds);
 
 signals:
     void layerVisibilityChanged(uint, bool);
@@ -136,6 +142,12 @@ signals:
 
     void modelSaved();
     void modelLoaded();
+
+    void selectionMade();
+    void cutPerformed();
+    void selectionEnabled(bool);
+
+    void configUpdated();
 };
 
 #endif //_VSIMULATIONFACADE_H

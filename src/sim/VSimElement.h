@@ -19,8 +19,9 @@ public:
 
     typedef std::shared_ptr<VSimElement> ptr;
     typedef std::shared_ptr<const VSimElement> const_ptr;
-    typedef std::shared_ptr<std::vector<VSimElement::ptr> > vector_ptr;
-    typedef std::shared_ptr<const std::vector<VSimElement::ptr> > const_vector_ptr;
+    typedef std::vector<ptr> vector_t;
+    typedef std::shared_ptr<vector_t> vector_ptr;
+    typedef std::shared_ptr<const vector_t> const_vector_ptr;
 
     VSimElement(uint id, const VCloth::const_ptr &p_material);
 
@@ -34,6 +35,7 @@ public:
     uint getId() const;
     virtual const QColor& getColor() const ;
     virtual void reset()  = 0;
+    virtual bool isMarkedForRemove() const = 0;
     virtual bool isInjection() const = 0 ;
     virtual bool isVacuum() const = 0 ;
     virtual bool isNormal() const = 0 ;

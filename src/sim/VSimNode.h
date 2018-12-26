@@ -9,6 +9,8 @@
 
 #include <QVector3D>
 #include <vector>
+#include <list>
+#include <unordered_map>
 #include <memory>
 #include <atomic>
 
@@ -23,10 +25,18 @@ public:
 
     typedef std::shared_ptr<VSimNode> ptr;
     typedef std::shared_ptr<const VSimNode> const_ptr;
-    typedef std::shared_ptr<std::vector<VSimNode::ptr> > vector_ptr;
-    typedef std::shared_ptr<const std::vector<VSimNode::ptr> > const_vector_ptr;
-    typedef std::vector< std::pair<double, const VSimNode*> > neighbours_vector_t;
-    typedef neighbours_vector_t layered_neighbours_t[LAYERS_NUMBER];
+    typedef std::vector<ptr> vector_t;
+    typedef std::shared_ptr<vector_t> vector_ptr;
+    typedef std::shared_ptr<const vector_t> const_vector_ptr;
+    typedef std::unordered_map<uint, ptr> map_t;
+    typedef std::shared_ptr<map_t> map_ptr;
+    typedef std::shared_ptr<const map_t> const_map_ptr;
+    typedef std::list<ptr> list_t;
+    typedef std::shared_ptr<list_t> list_ptr;
+    typedef std::shared_ptr<const list_t> const_list_ptr;
+
+    typedef std::list< std::pair<double, VSimNode*> > neighbours_list_t;
+    typedef neighbours_list_t layered_neighbours_t[LAYERS_NUMBER];
 
     enum VLayerSequence { PREVIOUS=0, CURRENT, NEXT };
     enum VNodeRole { NORMAL, INJECTION, VACUUM };
@@ -48,7 +58,7 @@ public:
     double getFilledPart() const override;
 
     void addNeighbourMutually(VSimNode *node, VLayerSequence layer=CURRENT) ;
-    void addNeighbour(const VSimNode *node, VLayerSequence layer=CURRENT) ;
+    void addNeighbour(VSimNode *node, VLayerSequence layer=CURRENT) ;
     void clearAllNeighbours() ;
 
     void clearNeighbours(VLayerSequence layer) ;
@@ -60,11 +70,11 @@ public:
     void setBoundaryPressures(double injectionPressure, double vacuumPressure);
     void getNeighbours(std::vector<const VSimNode *> &neighbours) const ;
     void getNeighbours(std::vector<const VSimNode *> &neighbours, VLayerSequence layer) const ;
-    void getNeighbours(neighbours_vector_t &neighbours) const ;
-    void getNeighbours(neighbours_vector_t &neighbours,
+    void getNeighbours(neighbours_list_t &neighbours) const ;
+    void getNeighbours(neighbours_list_t &neighbours,
                        VLayerSequence layer) const ;
     const layered_neighbours_t &getNeighbours() const;
-    const neighbours_vector_t &getNeighbours(VLayerSequence layer) const;
+    const neighbours_list_t &getNeighbours(VLayerSequence layer) const;
     void getNeighboursId(std::vector<uint> &neighbourId) const ;
     void getNeighboursId(std::vector<uint> &neighbourId, VLayerSequence layer) const;
     size_t getNeighboursNumber() const ;
@@ -73,6 +83,12 @@ public:
     double getPorosity() const ;
     double getPermeability() const ;
 
+    void removeNeighbour(uint id);
+    void removeNeighbour(const VSimNode* node);
+    void isolateNode();
+    void isolateAndMarkForRemove();
+
+    bool isMarkedForRemove() const override;
     bool isInjection() const override;
     bool isVacuum() const override;
     bool isNormal() const override;
@@ -86,6 +102,7 @@ private:
     double m_newPressure;
     VNodeRole m_role;
     size_t m_neighboursNumber;
+    bool m_removeMark;
 };
 
 #endif //_VSIMNODE_H

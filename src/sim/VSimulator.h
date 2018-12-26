@@ -17,7 +17,6 @@
 #include "VSimTriangle.h"
 #include "VGraphicsNode.h"
 #include "VGraphicsTriangle.h"
-#include "VLayer.h"
 #include "core/VNotify.h"
 #include "core/VSimulationInfo.h"
 

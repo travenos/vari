@@ -216,9 +216,9 @@
                 </layout>
                </item>
                <item>
-                <widget class="QPushButton" name="layerEditButton">
+                <widget class="QPushButton" name="layerCutButton">
                  <property name="text">
-                  <string>Редактировать геометрию слоя</string>
+                  <string>Обрезать слой</string>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
@@ -803,7 +803,7 @@
   <tabstop>layerColorButton</tabstop>
   <tabstop>selectMaterialClothButton</tabstop>
   <tabstop>layerRemoveButton</tabstop>
-  <tabstop>layerEditButton</tabstop>
+  <tabstop>layerCutButton</tabstop>
   <tabstop>addLayerButton</tabstop>
   <tabstop>temperatureEdit</tabstop>
   <tabstop>resetTemperatureButton</tabstop>

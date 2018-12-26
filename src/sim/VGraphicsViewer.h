@@ -29,6 +29,9 @@ class VGraphicsViewer: public VSimulationClass, public SoQtExaminerViewer
 public: 
     typedef std::shared_ptr<VGraphicsViewer> ptr;
     typedef std::shared_ptr<const VGraphicsViewer> const_ptr;
+
+    typedef std::shared_ptr<std::vector<uint> > uint_vect_ptr;
+    typedef std::shared_ptr<const std::vector<uint> > const_uint_vect_ptr;
     /**
      * @param parent
      * @param simulator
@@ -41,6 +44,9 @@ public:
     void clearNodes() ;
     void clearTriangles() ;
     void clearAll() ;
+    void clearSelectedIds() ;
+    void shrinkToFit();
+
     void viewFromAbove() ;
 
     void showInjectionPoint();
@@ -51,6 +57,9 @@ public:
     void updateTriangleColors() ;
 
     void enableSelection(bool enable);
+
+    const const_uint_vect_ptr &getSelectedNodesIds() const;
+    bool isSelectionEnabled() const;
 
 public slots:
     void doRender() ;
@@ -107,7 +116,11 @@ private:
     std::unique_ptr<std::thread> m_pRenderWaiterThread;
     mutable VNotify m_renderSuccessNotifier;
     std::atomic<bool> m_renderStopFlag;
+    bool m_selectionEnabled;
     mutable std::mutex m_graphMutex;
+
+    const_uint_vect_ptr m_pSelectedNodesIds;
+
 
 private slots:
     /**
@@ -152,8 +165,9 @@ protected:
 signals:
     void askForRender();
     void askForDisplayingInfo();
+    void selectionEnabled(bool);
     void gotPoint(const QVector3D &point);
-    void gotNodesSelection(const std::shared_ptr<std::vector<uint> > &p_selectedNodes);
+    void gotNodesSelection(const VGraphicsViewer::const_uint_vect_ptr &p_selectedNodes);
 };
 
 #endif //_VGRAPHICSVIEWER_H

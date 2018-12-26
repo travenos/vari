@@ -49,7 +49,9 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_pShapeHints(new SoShapeHints),
     m_pCam(new SoPerspectiveCamera),
     m_pSelection(new SoExtSelection),
-    m_renderStopFlag(false)
+    m_renderStopFlag(false),
+    m_selectionEnabled(false),
+    m_pSelectedNodesIds(new std::vector<uint>)
 {
     setBackgroundColor(SbColor(0.0, 0.0, 0.0));
     setPopupMenuEnabled(false);
@@ -297,6 +299,7 @@ void VGraphicsViewer::clearNodes()
     for (auto node: m_graphicsNodes)
         m_pFigureRoot->removeChild(node);
     m_graphicsNodes.clear();
+    clearSelectedIds();
 }
 
 void VGraphicsViewer::clearTriangles() 
@@ -313,13 +316,35 @@ void VGraphicsViewer::clearAll()
     m_pFigureRoot->removeAllChildren();
     m_graphicsNodes.clear();
     m_graphicsTriangles.clear();
+    clearSelectedIds();
     clearInfo();
+}
+
+void VGraphicsViewer::clearSelectedIds()
+{
+    m_pSelectedNodesIds.reset(new std::vector<uint>);
+}
+
+void VGraphicsViewer::shrinkToFit()
+{
+    m_graphicsNodes.shrink_to_fit();
+    m_graphicsTriangles.shrink_to_fit();
 }
 
 void VGraphicsViewer::enableSelection(bool enable)
 {
-    m_pSelectionButton->setVisible(enable);
-    setSelectionMode(enable);
+    if (enable != m_selectionEnabled)
+    {
+        m_pSelectionButton->setVisible(enable);
+        setSelectionMode(enable);
+        if (!enable)
+        {
+            updateNodeColors();
+            updateTriangleColors();
+            clearSelectedIds();
+        }
+        emit selectionEnabled(enable);
+    }
 }
 
 void VGraphicsViewer::doRender() 
@@ -437,6 +462,17 @@ void VGraphicsViewer::setSelectionMode(bool on)
         m_pRoot->removeChild(m_pRoot->findChild(old_selection));
         m_pRoot->addChild(m_pSelection);
     }
+    m_selectionEnabled = on;
+}
+
+const VGraphicsViewer::const_uint_vect_ptr &VGraphicsViewer::getSelectedNodesIds() const
+{
+    return m_pSelectedNodesIds;
+}
+
+bool VGraphicsViewer::isSelectionEnabled() const
+{
+    return m_selectionEnabled;
 }
 
 void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)
@@ -479,13 +515,16 @@ void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)
 void VGraphicsViewer::selection_finish_cb(void * userdata, SoSelection * sel)
 {
     VGraphicsViewer* viewer = static_cast<VGraphicsViewer*>(userdata);
-    std::shared_ptr<std::vector<uint> > p_selectedNodesIds(new std::vector<uint>);
+    if (!viewer->isSelectionEnabled())
+        return;
 
     viewer->updateNodeColors();
     viewer->updateTriangleColors();
 
+    std::vector<uint> *selectedNodesVector = new std::vector<uint>;
+
     const SoPathList* pListSelected = sel->getList();
-    p_selectedNodesIds->reserve(pListSelected->getLength());
+    selectedNodesVector->reserve(pListSelected->getLength());
     for(int i = 0; i < pListSelected->getLength(); ++i)
     {
         SoPath* path = (*pListSelected)[i];
@@ -497,16 +536,17 @@ void VGraphicsViewer::selection_finish_cb(void * userdata, SoSelection * sel)
                 pElement->markAsSelected();
                 VGraphicsNode * pNode = dynamic_cast<VGraphicsNode *>(pElement);
                 if(pNode != nullptr)
-                    p_selectedNodesIds->push_back(pNode->getSimId());
+                    selectedNodesVector->push_back(pNode->getSimId());
                 break;
             }
         }
     }
     sel->touch();
     sel->deselectAll();
-    if (p_selectedNodesIds->size() > 0)
+    viewer->m_pSelectedNodesIds.reset(selectedNodesVector);
+    if (viewer->m_pSelectedNodesIds->size() > 0)
     {
-        emit viewer->gotNodesSelection(p_selectedNodesIds);
+        emit viewer->gotNodesSelection(viewer->m_pSelectedNodesIds);
     }
 }
 

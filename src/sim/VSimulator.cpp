@@ -555,6 +555,10 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
             node->setNewPressure(newPressure);
         }
     }
+    else
+    {
+        node->setNewPressure(node->getPressure());
+    }
 }
 
 void VSimulator::setResin(const VResin& resin)

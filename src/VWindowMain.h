@@ -25,6 +25,7 @@ class VWindowMain : public QMainWindow
 public:
     static const QString ERROR_TITLE;
     static const QString REMOVE_TITLE;
+    static const QString CUT_TITLE;
     static const QString IMPORT_FROM_FILE_ERROR;
     static const QString EXPORT_TO_FILE_ERROR;
     static const QString IMPORT_WHEN_SIMULATING_ERROR;
@@ -32,6 +33,7 @@ public:
     static const QString CLOTH_INFO_TEXT;
     static const QString RESIN_INFO_TEXT;
     static const QString ASK_FOR_REMOVE;
+    static const QString ASK_FOR_CUT;
     static const QString MODEL_INFO_TEXT;
 
     static const QString OPEN_FILE_DIALOG_TITLE;
@@ -116,6 +118,7 @@ private:
 
     void startCuttingLayer();
     void cancelCuttingLayer();
+    void askForCut();
 
     bool readNumber(const QLineEdit * lineEdit, double &output) const;
 
@@ -161,6 +164,9 @@ private slots:
     void m_on_canceled_waiting_for_injection_point();
     void m_on_canceled_waiing_for_vacuum_point();
     void m_on_model_loaded();
+    void m_on_selection_made();
+    void m_on_model_config_updated();
+    void m_on_selection_enabled(bool checked);
 
     void on_addLayerButton_clicked();
     void on_layersListWidget_itemSelectionChanged();
@@ -198,7 +204,7 @@ private slots:
     void on_resetTimeLimitButton_clicked();
     void on_timeLimitCheckBox_clicked(bool checked);
     void on_timeEdit_timeChanged(const QTime &);
-    void on_layerEditButton_clicked(bool checked);
+    void on_layerCutButton_clicked(bool checked);
 };
 
 #endif // _VWINDOWMAIN_H

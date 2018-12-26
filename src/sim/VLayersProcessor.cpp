@@ -285,12 +285,12 @@ const VSimTriangle::const_vector_ptr &VLayersProcessor::getActiveTriangles() con
     return m_pActiveTriangles;
 }
 
-VSimNode::const_vector_ptr VLayersProcessor::getLayerNodes(uint layer) const
+VSimNode::const_map_ptr VLayersProcessor::getLayerNodes(uint layer) const
 {
     return m_layers.at(layer)->getNodes();
 }
 
-VSimTriangle::const_vector_ptr VLayersProcessor::getLayerTriangles(uint layer) const
+VSimTriangle::const_list_ptr VLayersProcessor::getLayerTriangles(uint layer) const
 {
     return m_layers.at(layer)->getTriangles();
 }
@@ -303,6 +303,12 @@ size_t VLayersProcessor::getLayerNodesNumber(uint layer) const
 size_t VLayersProcessor::getLayerTrianglesNumber(uint layer) const
 {
     return m_layers.at(layer)->getTrianglesNumber();
+}
+
+void VLayersProcessor::cutLayer(const VGraphicsViewer::const_uint_vect_ptr &nodesIds, uint layer)
+{
+    m_layers.at(layer)->cut(nodesIds);
+    updateActiveElementsVectors();
 }
 
 void VLayersProcessor::updateActiveElementsVectors() 
@@ -325,9 +331,13 @@ void VLayersProcessor::updateActiveElementsVectors()
     {
         if (layer->isActive())
         {
-            VSimNode::vector_ptr nodes = layer->getNodes();
-            activeNodes->insert(activeNodes->end(), nodes->begin(), nodes->end());
-            VSimTriangle::vector_ptr triangles = layer->getTriangles();
+            const VSimNode::map_ptr &nodes = layer->getNodes();
+            activeNodes->reserve(activeNodes->size() + nodes->size());
+            for (auto &node : *nodes)
+            {
+                activeNodes->push_back(node.second);
+            }
+            const VSimTriangle::list_ptr &triangles = layer->getTriangles();
             activeTriangles->insert(activeTriangles->end(), triangles->begin(), triangles->end());
         }
     }

@@ -200,8 +200,8 @@ void VModelImport::loadLayer(QXmlStreamReader& xmlReader, std::vector<VLayer::pt
     bool isEnabled=true, isVisible=true;
     uint nodeMinId=0, nodeMaxId=0, triangleMinId=0, triangleMaxId=0;
     uint nodesNumber=0, trianglesNumber=0;
-    VSimNode::vector_ptr nodes(new std::vector<VSimNode::ptr>);
-    VSimTriangle::vector_ptr triangles(new std::vector<VSimTriangle::ptr>);
+    VSimNode::map_ptr nodes(new VSimNode::map_t);
+    VSimTriangle::list_ptr triangles(new VSimTriangle::list_t);
     std::vector<VTriangleInfo> trianglesInfos;
     VCloth::ptr material(new VCloth);
     foreach(const QXmlStreamAttribute &attr, xmlReader.attributes())
@@ -224,7 +224,7 @@ void VModelImport::loadLayer(QXmlStreamReader& xmlReader, std::vector<VLayer::pt
             trianglesNumber = attr.value().toUInt();
     }
     nodes->reserve(nodesNumber);
-    triangles->reserve(trianglesNumber);
+    m_allNodes.reserve(m_allNodes.size() + nodesNumber);
     trianglesInfos.reserve(trianglesNumber);
     READ_ELEMENTS
     (
@@ -262,7 +262,7 @@ void VModelImport::loadCloth(QXmlStreamReader& xmlReader, VCloth::ptr &material)
 }
 
 void VModelImport::loadNodes(QXmlStreamReader& xmlReader,
-                             const VCloth::const_ptr &material, VSimNode::vector_ptr &nodes)
+                             const VCloth::const_ptr &material, const VSimNode::map_ptr &nodes)
 {
     auto &tags = _xLAYERS_TAGS._xLAYER_TAGS._xNODES_TAGS;
     READ_ELEMENTS
@@ -273,7 +273,7 @@ void VModelImport::loadNodes(QXmlStreamReader& xmlReader,
 }
 
 void VModelImport::loadNode(QXmlStreamReader& xmlReader, const VCloth::const_ptr &material,
-                            VSimNode::vector_ptr &nodes)
+                            const VSimNode::map_ptr &nodes)
 {
     auto &tags = _xLAYERS_TAGS._xLAYER_TAGS._xNODES_TAGS._xNODE_TAGS;
     const size_t DIMS = 3;
@@ -302,7 +302,7 @@ void VModelImport::loadNode(QXmlStreamReader& xmlReader, const VCloth::const_ptr
                                    m_param.getVacuumPressure(),
                                    pressure, role));
         if (m_allNodes.insert({id, nodePtr}).second)
-            nodes->push_back(nodePtr);
+            nodes->insert({id, nodePtr});
         else
             throw VImportException();
     }
@@ -348,7 +348,7 @@ void VModelImport::loadTriangleInfo(QXmlStreamReader& xmlReader,
 
 void VModelImport::createTriangles(const std::vector<VTriangleInfo> &trianglesInfos,
                                    const VCloth::const_ptr &material,
-                                   VSimTriangle::vector_ptr &triangles)
+                                   const VSimTriangle::list_ptr &triangles)
 {
     for (auto &trInf : trianglesInfos)
     {

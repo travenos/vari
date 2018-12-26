@@ -22,6 +22,8 @@ const QString VWindowMain::IMPORT_WHEN_SIMULATING_ERROR("Невозможно и
 const QString VWindowMain::INVALID_PARAM_ERROR("Введены некорректные параметры");
 const QString VWindowMain::REMOVE_TITLE("Удалить?");
 const QString VWindowMain::ASK_FOR_REMOVE("Вы уверены, что хотите удалить слой?");
+const QString VWindowMain::CUT_TITLE("Обрезать?");
+const QString VWindowMain::ASK_FOR_CUT("Вы уверены, что хотите выполнить обрезку слоя?");
 const QString VWindowMain::CLOTH_INFO_TEXT("<html><head/><body>"
                                                "Материал: &quot;%1&quot;<br>"
                                                "Толщина: %2 м<br>"
@@ -112,6 +114,12 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_layers_cleared()));
     connect(m_pFacade.get(), SIGNAL(modelLoaded()),
             this, SLOT(m_on_model_loaded()));
+    connect(m_pFacade.get(), SIGNAL(selectionMade()),
+            this, SLOT(m_on_selection_made()));
+    connect(m_pFacade.get(), SIGNAL(configUpdated()),
+            this, SLOT(m_on_model_config_updated()));
+    connect(m_pFacade.get(), SIGNAL(selectionEnabled(bool)),
+            this, SLOT(m_on_selection_enabled(bool)));
 }
 
 void VWindowMain::setupValidators()
@@ -233,6 +241,7 @@ void VWindowMain::selectLayer()
     }
     else
         ui->layerParamBox->setVisible(false);
+    cancelCuttingLayer();
 }
 
 void VWindowMain::showColor(const QColor& color)
@@ -619,7 +628,7 @@ void VWindowMain::activateSimControls(bool enabled)
     ui->layerColorButton->setEnabled(enabled);
     ui->selectMaterialClothButton->setEnabled(enabled);
     ui->layerRemoveButton->setEnabled(enabled);
-    ui->layerEditButton->setEnabled(enabled);
+    ui->layerCutButton->setEnabled(enabled);
     ui->addLayerButton->setEnabled(enabled);
     ui->injectionPressureEdit->setEnabled(enabled);
     ui->saveInjectionPressureButton->setEnabled(enabled);
@@ -721,11 +730,6 @@ void VWindowMain::startCuttingLayer()
     if (ui->layersListWidget->currentIndex().isValid())
     {
         uint layer = ui->layersListWidget->currentRow();
-        for (uint i =0; i < m_pFacade->getLayersNumber(); ++i)
-        {
-            if (i != layer)
-                m_pFacade->setVisible(i, false);
-        }
         m_pFacade->startCuttingLayer(layer);
     }
 }
@@ -733,6 +737,15 @@ void VWindowMain::startCuttingLayer()
 void VWindowMain::cancelCuttingLayer()
 {
     m_pFacade->cancelCuttingLayer();
+}
+
+void VWindowMain::askForCut()
+{
+    if (QMessageBox::question(this, CUT_TITLE,
+                              ASK_FOR_CUT, QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes)
+    {
+        m_pFacade->performCut();
+    }
 }
 
 /**
@@ -824,7 +837,6 @@ void VWindowMain::on_selectMaterialResinButton_clicked()
 void VWindowMain::m_on_layer_removed(uint layer)
 {
     removeLayerFromList(layer);
-    showModelInfo();
 }
 
 void VWindowMain::m_on_material_changed(uint layer)
@@ -835,13 +847,11 @@ void VWindowMain::m_on_material_changed(uint layer)
 void VWindowMain::m_on_layer_enabled(uint layer, bool enable)
 {
     markLayerAsEnabled(layer, enable);
-    showModelInfo();
 }
 
 void VWindowMain::m_on_layer_added()
 {
     showNewLayer();
-    showModelInfo();
 }
 
 void VWindowMain::m_on_injection_point_set()
@@ -929,7 +939,21 @@ void VWindowMain::m_on_layer_visibility_changed(uint layer, bool visible)
 void VWindowMain::m_on_model_loaded()
 {
     reloadLayersList();
+}
+
+void VWindowMain::m_on_selection_made()
+{
+    askForCut();
+}
+
+void VWindowMain::m_on_model_config_updated()
+{
     showModelInfo();
+}
+
+void VWindowMain::m_on_selection_enabled(bool checked)
+{
+    ui->layerCutButton->setChecked(checked);
 }
 
 void VWindowMain::on_injectionPlaceButton_clicked(bool checked)
@@ -1085,7 +1109,7 @@ void VWindowMain::on_timeLimitCheckBox_clicked(bool checked)
     enableTimeLimitMode(checked);
 }
 
-void VWindowMain::on_layerEditButton_clicked(bool checked)
+void VWindowMain::on_layerCutButton_clicked(bool checked)
 {
     if (checked)
         startCuttingLayer();

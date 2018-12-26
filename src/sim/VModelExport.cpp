@@ -176,12 +176,12 @@ void VModelExport::saveCloth(QXmlStreamWriter &xmlWriter, const VCloth::const_pt
 }
 
 void VModelExport::saveNodes(QXmlStreamWriter &xmlWriter,
-                                 const VSimNode::const_vector_ptr &nodes)
+                                 const VSimNode::const_map_ptr &nodes)
 {
     auto &tags = _xLAYERS_TAGS._xLAYER_TAGS._xNODES_TAGS;
     xmlWriter.writeStartElement(tags._NAME);
     for (auto &node : *nodes)
-        saveNode(xmlWriter, node);
+        saveNode(xmlWriter, node.second);
     xmlWriter.writeEndElement();
 }
 
@@ -198,7 +198,7 @@ void VModelExport::saveNode(QXmlStreamWriter &xmlWriter,
 }
 
 void VModelExport::saveTriangles(QXmlStreamWriter &xmlWriter,
-                                 const VSimTriangle::const_vector_ptr &triangles)
+                                 const VSimTriangle::const_list_ptr &triangles)
 {
     auto &tags = _xLAYERS_TAGS._xLAYER_TAGS._xTRIANGLES_TAGS;
     xmlWriter.writeStartElement(tags._NAME);
@@ -224,9 +224,9 @@ void VModelExport::saveConnections(QXmlStreamWriter &xmlWriter)
     xmlWriter.writeStartElement(tags._NAME);
     for (uint i = 0; i < m_pLayersProcessor->getLayersNumber(); ++i)
     {
-        VSimNode::const_vector_ptr nodes = m_pLayersProcessor->getLayerNodes(i);
+        VSimNode::const_map_ptr nodes = m_pLayersProcessor->getLayerNodes(i);
         for (auto &node : *nodes)
-            saveConnection(xmlWriter, node);
+            saveConnection(xmlWriter, node.second);
     }
     xmlWriter.writeEndElement();
 }

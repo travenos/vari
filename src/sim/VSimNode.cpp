@@ -25,8 +25,10 @@ VSimNode::VSimNode(uint id, const QVector3D& pos,
     m_injectionPressure(injectionPressure),
     m_vacuumPressure(vacuumPressure),
     m_currentPressure(pressure),
+    m_newPressure(0),
     m_role(role),
-    m_neighboursNumber(0)
+    m_neighboursNumber(0),
+    m_removeMark(false)
 {
 }
 
@@ -84,7 +86,7 @@ double VSimNode::getFilledPart() const
     return (nom >= den) ? 1 : (nom / den);
 }
 
-void VSimNode::addNeighbour(const VSimNode* node, VLayerSequence layer) 
+void VSimNode::addNeighbour(VSimNode* node, VLayerSequence layer)
 {
     double dist = getDistance(node);    
     m_neighbours[layer].push_back(std::make_pair(dist, node));
@@ -108,6 +110,64 @@ void VSimNode::addNeighbourMutually(VSimNode* node, VLayerSequence layer)
         break;
     }
     node->addNeighbour(this, otherLayer);
+}
+
+void VSimNode::removeNeighbour(uint id)
+{
+    for (uint i = 0; i < LAYERS_NUMBER; ++i)
+    {
+        auto it = m_neighbours[i].begin();
+        while (it != m_neighbours[i].end())
+        {
+            if (it->second->getId() == id)
+            {
+                m_neighbours[i].erase(it++);
+            }
+            else
+                ++it;
+        }
+    }
+}
+
+void VSimNode::removeNeighbour(const VSimNode* node)
+{
+    for (uint i = 0; i < LAYERS_NUMBER; ++i)
+    {
+        auto it = m_neighbours[i].begin();
+        while (it != m_neighbours[i].end())
+        {
+            if (it->second == node)
+            {
+                m_neighbours[i].erase(it++);
+            }
+            else
+                ++it;
+        }
+    }
+}
+
+void VSimNode::isolateNode()
+{
+    for (uint i = 0; i < LAYERS_NUMBER; ++i)
+    {
+        for (auto &neighbour : m_neighbours[i])
+        {
+            neighbour.second->removeNeighbour(this);
+        }
+        m_neighbours[i].clear();
+    }
+    m_neighboursNumber = 0;
+}
+
+void VSimNode::isolateAndMarkForRemove()
+{
+    isolateNode();
+    m_removeMark = true;
+}
+
+bool VSimNode::isMarkedForRemove() const
+{
+    return m_removeMark;
 }
 
 void VSimNode::clearAllNeighbours() 
@@ -171,10 +231,9 @@ void VSimNode::getNeighbours(std::vector<const VSimNode*> &neighbours) const
         neighbours.push_back(neighbour.second);
 }
 
-void VSimNode::getNeighbours(neighbours_vector_t &neighbours) const
+void VSimNode::getNeighbours(neighbours_list_t &neighbours) const
 {
     neighbours.clear();
-    neighbours.reserve(getNeighboursNumber());
     for (uint layer = 0; layer < LAYERS_NUMBER; ++layer)
         std::copy(m_neighbours[layer].begin(), m_neighbours[layer].end(),
                   std::back_inserter(neighbours));
@@ -188,11 +247,10 @@ void VSimNode::getNeighbours(std::vector<const VSimNode*> &neighbours, VLayerSeq
         neighbours.push_back(neighbour.second);
 }
 
-void VSimNode::getNeighbours(neighbours_vector_t &neighbours,
+void VSimNode::getNeighbours(neighbours_list_t &neighbours,
                              VLayerSequence layer) const
 {
     neighbours.clear();
-    neighbours.reserve(getNeighboursNumber(layer));
     std::copy(m_neighbours[layer].begin(), m_neighbours[layer].end(),
               std::back_inserter(neighbours));
 }
@@ -202,7 +260,7 @@ const VSimNode::layered_neighbours_t &VSimNode::getNeighbours() const
     return m_neighbours;
 }
 
-const VSimNode::neighbours_vector_t &VSimNode::getNeighbours(VLayerSequence layer) const
+const VSimNode::neighbours_list_t &VSimNode::getNeighbours(VLayerSequence layer) const
 {
     return m_neighbours[layer];
 }

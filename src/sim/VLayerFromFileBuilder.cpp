@@ -20,8 +20,8 @@ VLayerFromFileBuilder::VLayerFromFileBuilder(const QString &filename,
                                              const VCloth &material,
                                              VUnit units) :
     VLayerAbstractBuilder(material),
-    m_pNodes(new std::vector<VSimNode::ptr>),
-    m_pTriangles(new std::vector<VSimTriangle::ptr>),
+    m_pNodes(new VSimNode::map_t),
+    m_pTriangles(new VSimTriangle::list_t),
     m_file(filename),
     m_units(units)
 {
@@ -99,27 +99,31 @@ void VLayerFromFileBuilder::addNode(int id, QVector3D pos)
     if (currentId > m_nodeMaxId)
         m_nodeMaxId = currentId;
     VSimNode::ptr newNode(new VSimNode(currentId, pos, m_pMaterial));
-    m_nodesMap.insert(std::make_pair(id, newNode));
-    m_pNodes->push_back(newNode);
+    m_pNodes->insert(std::make_pair(currentId, newNode));
 }
 
 void VLayerFromFileBuilder::makeNeighbours(int nodeId, int neighborId) 
 {
     if(nodeId == neighborId)
         return;
-    if(m_nodesMap.find(nodeId) != m_nodesMap.end() && m_nodesMap.find(neighborId) != m_nodesMap.end())
+    nodeId += m_nodeStartId;
+    neighborId += m_nodeStartId;
+    if(m_pNodes->find(nodeId) != m_pNodes->end() && m_pNodes->find(neighborId) != m_pNodes->end())
     {
-        VSimNode::ptr node = m_nodesMap[nodeId];
-        VSimNode::ptr neighbor = m_nodesMap[neighborId];
+        VSimNode::ptr node = (*m_pNodes)[nodeId];
+        VSimNode::ptr neighbor = (*m_pNodes)[neighborId];
         node->addNeighbourMutually(neighbor.get());
     }
 }
 
 void VLayerFromFileBuilder::addTriangle(int nodeId1, int nodeId2, int nodeId3) 
 {
-    VSimNode::const_ptr node1 = (m_nodesMap.find(nodeId1))->second;
-    VSimNode::const_ptr node2 = (m_nodesMap.find(nodeId2))->second;
-    VSimNode::const_ptr node3 = (m_nodesMap.find(nodeId3))->second;
+    nodeId1 += m_nodeStartId;
+    nodeId2 += m_nodeStartId;
+    nodeId3 += m_nodeStartId;
+    VSimNode::const_ptr node1 = (m_pNodes->find(nodeId1))->second;
+    VSimNode::const_ptr node2 = (m_pNodes->find(nodeId2))->second;
+    VSimNode::const_ptr node3 = (m_pNodes->find(nodeId3))->second;
     uint currentId = static_cast<uint>(m_pTriangles->size()) + m_triangleStartId;
     if (currentId > m_triangleMaxId)
         m_triangleMaxId = currentId;

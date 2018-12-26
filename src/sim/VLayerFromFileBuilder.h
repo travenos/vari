@@ -23,10 +23,9 @@ public:
     virtual ~VLayerFromFileBuilder();
     const VLayer::ptr &build();
 
-protected: 
-    std::unordered_map<int, VSimNode::ptr> m_nodesMap;
-    VSimNode::vector_ptr m_pNodes;
-    VSimTriangle::vector_ptr m_pTriangles;
+protected:
+    VSimNode::map_ptr m_pNodes;
+    VSimTriangle::list_ptr m_pTriangles;
     QFile m_file;
     VUnit m_units;
     
