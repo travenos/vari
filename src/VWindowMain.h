@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <memory>
-#include "sim/VLayerAbstractBuilder.h"
+#include "sim/layer_builders/VLayerAbstractBuilder.h"
 
 namespace Ui {
 class VWindowMain;

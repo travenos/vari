@@ -3,12 +3,16 @@
  * @author Alexey Barashkov
  */
 
+#ifdef DEBUG_MODE
+#include <QDebug>
+#endif
+
 #include <Inventor/nodes/SoTranslation.h>
 #include <Inventor/nodes/SoCube.h>
 #include <Inventor/nodes/SoBaseColor.h>
 
 #include "VGraphicsNode.h"
-#include "VSimElement.h"
+#include "../sim_elements/VSimElement.h"
 
 /**
  * VGraphicsNode implementation

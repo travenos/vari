@@ -8,7 +8,7 @@
 #define _VGRAPHICSELEMENT_H
 
 #include <Inventor/nodes/SoSeparator.h>
-#include "VSimElement.h"
+#include "../sim_elements/VSimElement.h"
 
 class SoMaterial;
 class SoDrawStyle;

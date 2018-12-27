@@ -8,7 +8,7 @@
 #define _VGRAPHICSNODE_H
 
 #include "VGraphicsElement.h"
-#include "VSimNode.h"
+#include "../sim_elements/VSimNode.h"
 
 class SoTranslation;
 class SoCube;

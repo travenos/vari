@@ -4,7 +4,7 @@
 #include <QMainWindow>
 
 #include "sim/VGeometryProcessor.h"
-#include "sim/VLayerAbstractBuilder.h"
+#include "sim/layer_builders/VLayerAbstractBuilder.h"
 
 namespace Ui {
 class VWindowLayer;

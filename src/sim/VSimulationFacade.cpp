@@ -11,10 +11,10 @@
 #include <QSettings>
 
 #include "VSimulationFacade.h"
-#include "VLayerFromGmeshBuilder.h"
-#include "VLayerFromAnsysBuilder.h"
-#include "VModelExport.h"
-#include "VModelImport.h"
+#include "layer_builders/VLayerFromGmeshBuilder.h"
+#include "layer_builders/VLayerFromAnsysBuilder.h"
+#include "import_export/VModelExport.h"
+#include "import_export/VModelImport.h"
 #include "core/VExceptions.h"
 
 /**
@@ -322,10 +322,9 @@ void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &
 
 void VSimulationFacade::updateConfiguration() 
 {
-    VSimNode::const_vector_ptr nodes = m_pLayersProcessor->getActiveNodes();
-    VSimTriangle::const_vector_ptr triangles = m_pLayersProcessor->getActiveTriangles();
-    m_pSimulator->setActiveElements(nodes, triangles);
-    m_pGraphicsViewer->setGraphicsElements(nodes, triangles);
+    m_pSimulator->setActiveElements(m_pLayersProcessor->getActiveNodes(),
+                                    m_pLayersProcessor->getActiveTriangles());
+    m_pGraphicsViewer->setGraphicsElements(m_pLayersProcessor->getLayers());
     emit configUpdated();
 }
 

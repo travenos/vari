@@ -12,8 +12,7 @@
 #include <Inventor/Qt/viewers/SoQtExaminerViewer.h>
 #include <QPushButton>
 
-#include "VGraphicsNode.h"
-#include "VGraphicsTriangle.h"
+#include "graphics_elements/VGraphicsLayer.h"
 #include "VSimulator.h"
 
 class SoShapeHints;
@@ -38,14 +37,12 @@ public:
      */
     VGraphicsViewer(QWidget* parent, const VSimulator::ptr &simulator);
     virtual ~VGraphicsViewer();
-    void setGraphicsElements(const VSimNode::const_vector_ptr &nodes,
-                             const VSimTriangle::const_vector_ptr &triangles) ;
+    void setGraphicsElements(const std::vector<VLayer::const_ptr> &layers) ;
     void updateVisibility();
     void clearNodes() ;
     void clearTriangles() ;
     void clearAll() ;
     void clearSelectedIds() ;
-    void shrinkToFit();
 
     void viewFromAbove() ;
 
@@ -67,6 +64,7 @@ public slots:
     void clearInfo() ;
 
 private:
+
     static const QString LEFT_WHEEL_CAPTION;
     static const QString RIGHT_WHEEL_CAPTION;
     static const QString BOTTOM_WHEEL_CAPTION;
@@ -84,15 +82,14 @@ private:
     void stopRender() ;
     void process() ;
 
-    template<typename T1, typename T2>
-    inline void createGraphicsElements(std::vector<T1 *>* gaphics,
-                                       const std::shared_ptr<const std::vector< std::shared_ptr<T2> > > &sim) ;
+//    template<typename T1, typename T2>
+//    inline void createGraphicsElements(std::vector<T1 *>* gaphics,
+//                                       const std::shared_ptr<const std::vector<T2> > &sim) ;
 
     static void event_cb(void * userdata, SoEventCallback * node);
     static void selection_finish_cb(void * userdata, SoSelection * sel);
 
-    std::vector<VGraphicsNode*> m_graphicsNodes;
-    std::vector<VGraphicsTriangle*> m_graphicsTriangles;
+    std::vector<VGraphicsLayer*> m_graphicsLayers;
 
     VSimulator::ptr m_pSimulator;
 

@@ -8,7 +8,7 @@
 #define _VLAYERSPROCESSOR_H
 
 #include "VSimulationClass.h"
-#include "VLayerAbstractBuilder.h"
+#include "layer_builders/VLayerAbstractBuilder.h"
 #include "VLayer.h"
 #include "VSimulator.h"
 #include "VGraphicsViewer.h"
@@ -19,39 +19,19 @@ class VLayersProcessor: public VSimulationClass
 public: 
     typedef std::shared_ptr<VLayersProcessor> ptr;
     typedef std::shared_ptr<const VLayersProcessor> const_ptr;
-    /**
-     * @param simulator
-     */
     VLayersProcessor();
     size_t getLayersNumber() const ;
     size_t getActiveLayersNumber() const ;
     size_t getInactiveLayersNumber() const ;
 
-    /**
-     * @param builder
-     */
     void addLayer(VLayerAbstractBuilder *builder) ;
 
-    /**
-     * @param layer
-     */
     void removeLayer(uint layer) ;
 
-    /**
-     * @param layer
-     * @param visible
-     */
     void setVisibleLayer(uint layer, bool visible) ;
 
-    /**
-     * @param layer
-     */
     void enableLayer(uint layer, bool enable) ;
 
-    /**
-     * @param layer
-     * @param material
-     */
     void setMaterial(uint layer, const VCloth &material) ;
 
     void reset() ;
@@ -68,6 +48,7 @@ public:
     VSimTriangle::const_list_ptr getLayerTriangles(uint layer) const ;
     size_t getLayerNodesNumber(uint layer) const ;
     size_t getLayerTrianglesNumber(uint layer) const ;
+    std::vector<VLayer::const_ptr> getLayers() const;
 
     bool isLayerVisible(uint layer) const ;
     bool isLayerEnabled(uint layer) const ;
@@ -97,28 +78,14 @@ private:
     uint m_nodeNextId;
     uint m_triangleNextId;
     
-    /**
-     * @param layer1
-     * @param layer2
-     */
     void createConnections(uint layer1, uint layer2) ;
 
-    /**
-     * @param layer1
-     * @param layer2
-     */
     void removeConnections(uint layer1, uint layer2) ;
 
-    /**
-     * @param layer
-     */
     void decreasePositions(uint fromLayer) ;
 
     void increasePositions(uint fromLayer) ;
 
-    /**
-     * @param layer
-     */
     void putOnTop(uint layer) ;
 
     void setPoint(const QVector3D &point, double diameter,

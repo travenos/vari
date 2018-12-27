@@ -13,10 +13,8 @@
 #include <atomic>
 
 #include "VSimulationClass.h"
-#include "VSimNode.h"
-#include "VSimTriangle.h"
-#include "VGraphicsNode.h"
-#include "VGraphicsTriangle.h"
+#include "sim_elements/VSimNode.h"
+#include "sim_elements/VSimTriangle.h"
 #include "core/VNotify.h"
 #include "core/VSimulationInfo.h"
 

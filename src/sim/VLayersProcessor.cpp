@@ -305,6 +305,13 @@ size_t VLayersProcessor::getLayerTrianglesNumber(uint layer) const
     return m_layers.at(layer)->getTrianglesNumber();
 }
 
+std::vector<VLayer::const_ptr> VLayersProcessor::getLayers() const
+{
+    std::vector<VLayer::const_ptr> layers;
+    layers.insert(layers.begin(), m_layers.begin(), m_layers.end());
+    return layers;
+}
+
 void VLayersProcessor::cutLayer(const VGraphicsViewer::const_uint_vect_ptr &nodesIds, uint layer)
 {
     m_layers.at(layer)->cut(nodesIds);
@@ -313,8 +320,9 @@ void VLayersProcessor::cutLayer(const VGraphicsViewer::const_uint_vect_ptr &node
 
 void VLayersProcessor::updateActiveElementsVectors() 
 {
-    std::vector<VSimNode::ptr> * activeNodes = new std::vector<VSimNode::ptr>;
-    std::vector<VSimTriangle::ptr> * activeTriangles = new std::vector<VSimTriangle::ptr>;
+    std::vector<VSimNode::ptr> * activeNodes = new VSimNode::vector_t;
+    std::vector<VSimTriangle::ptr> * activeTriangles = new VSimTriangle::vector_t;
+
     size_t nodesSize = 0;
     size_t trianglesSize = 0;
     for (auto &layer : m_layers)
@@ -332,13 +340,12 @@ void VLayersProcessor::updateActiveElementsVectors()
         if (layer->isActive())
         {
             const VSimNode::map_ptr &nodes = layer->getNodes();
-            activeNodes->reserve(activeNodes->size() + nodes->size());
             for (auto &node : *nodes)
-            {
                 activeNodes->push_back(node.second);
-            }
+
             const VSimTriangle::list_ptr &triangles = layer->getTriangles();
-            activeTriangles->insert(activeTriangles->end(), triangles->begin(), triangles->end());
+            for (auto &triangle : *triangles)
+                activeTriangles->push_back(triangle);
         }
     }
     m_pActiveNodes.reset(activeNodes);

@@ -91,12 +91,12 @@ bool VLayer::isActive() const
 /**
  * @return vector<&VNode::ptr>
  */
-const VSimNode::map_ptr &VLayer::getNodes()
+const VSimNode::map_ptr &VLayer::getNodes() const
 {
     return m_pNodes;
 }
 
-const VSimTriangle::list_ptr &VLayer::getTriangles()
+const VSimTriangle::list_ptr &VLayer::getTriangles() const
 {
     return m_pTriangles;
 }
@@ -157,7 +157,7 @@ uint VLayer::getTriangleMaxId() const
     return m_triangleMaxId;
 }
 
-void VLayer::cut(const VGraphicsViewer::const_uint_vect_ptr &nodesIds)
+void VLayer::cut(const std::shared_ptr<const std::vector<uint> > &nodesIds)
 {
     VSimNode::map_ptr p_remainingNodesMap(new VSimNode::map_t);
     p_remainingNodesMap->reserve(nodesIds->size());

@@ -23,6 +23,7 @@
 #include <functional>
 
 #include "VGraphicsViewer.h"
+#include "graphics_elements/VGraphicsNode.h"
 /**
  * VGraphicsViewer implementation
  */
@@ -53,6 +54,7 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_selectionEnabled(false),
     m_pSelectedNodesIds(new std::vector<uint>)
 {
+    setAntialiasing(true, 1);
     setBackgroundColor(SbColor(0.0, 0.0, 0.0));
     setPopupMenuEnabled(false);
 
@@ -104,8 +106,8 @@ VGraphicsViewer::~VGraphicsViewer()
     m_pRenderWaiterThread->join();
     m_pRenderWaiterThread.reset();
     m_pRoot->removeAllChildren();
-    setSceneGraph(NULL);
-    setCamera(NULL);
+    setSceneGraph(nullptr);
+    setCamera(nullptr);
     delete m_pBaseWidget;
 }
 
@@ -250,18 +252,18 @@ void VGraphicsViewer::toggleCameraType(void)
     viewFromAbove();
 }
 
-void VGraphicsViewer::setGraphicsElements(const VSimNode::const_vector_ptr &nodes,
-                                          const VSimTriangle::const_vector_ptr &triangles)
+void VGraphicsViewer::setGraphicsElements(const std::vector<VLayer::const_ptr> &layers)
 {
     clearAll();
-    createGraphicsElements(&m_graphicsNodes, nodes);
-    createGraphicsElements(&m_graphicsTriangles, triangles);
+    for (uint i = 0; i < layers.size(); ++i)
+    {
+        if (layers.at(i)->isActive())
+            m_graphicsLayers.push_back(new VGraphicsLayer(layers.at(i), i));
+    }
     {
         std::lock_guard<std::mutex> locker(m_graphMutex);
-        for (auto node: m_graphicsNodes)
-            m_pFigureRoot->addChild(node);
-        for (auto triangle: m_graphicsTriangles)
-            m_pFigureRoot->addChild(triangle);
+        for (auto layer: m_graphicsLayers)
+            m_pFigureRoot->addChild(layer);
     }
 }
 
@@ -274,48 +276,43 @@ void VGraphicsViewer::updateColors()
 void VGraphicsViewer::updateTriangleColors()
 {
     std::lock_guard<std::mutex> lock(*m_pTrianglesLock);
-    for (auto &triangle : m_graphicsTriangles)
-        triangle->updateColor();
+    for (auto layer : m_graphicsLayers)
+        layer->updateTriangleColors();
 }
 
 void VGraphicsViewer::updateNodeColors()
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
-    for (auto &node : m_graphicsNodes)
-        node->updateColor();
+    for (auto layer : m_graphicsLayers)
+        layer->updateNodeColors();
 }
 
 void VGraphicsViewer::updateVisibility()
 {
-    for (auto &node : m_graphicsNodes)
-        node->updateVisibility();
-    for (auto &triangle : m_graphicsTriangles)
-        triangle->updateVisibility();
+    for (auto layer : m_graphicsLayers)
+        layer->updateVisibility();
 }
 
 void VGraphicsViewer::clearNodes() 
 {
     std::lock_guard<std::mutex> locker(m_graphMutex);
-    for (auto node: m_graphicsNodes)
-        m_pFigureRoot->removeChild(node);
-    m_graphicsNodes.clear();
+    for (auto layer : m_graphicsLayers)
+        layer->clearNodes();
     clearSelectedIds();
 }
 
 void VGraphicsViewer::clearTriangles() 
 {
     std::lock_guard<std::mutex> locker(m_graphMutex);
-    for (auto triangle: m_graphicsTriangles)
-        m_pFigureRoot->removeChild(triangle);
-    m_graphicsTriangles.clear();
+    for (auto layer : m_graphicsLayers)
+        layer->clearTriangles();
 }
 
 void VGraphicsViewer::clearAll() 
 {
     std::lock_guard<std::mutex> locker(m_graphMutex);
     m_pFigureRoot->removeAllChildren();
-    m_graphicsNodes.clear();
-    m_graphicsTriangles.clear();
+    m_graphicsLayers.clear();
     clearSelectedIds();
     clearInfo();
 }
@@ -323,12 +320,6 @@ void VGraphicsViewer::clearAll()
 void VGraphicsViewer::clearSelectedIds()
 {
     m_pSelectedNodesIds.reset(new std::vector<uint>);
-}
-
-void VGraphicsViewer::shrinkToFit()
-{
-    m_graphicsNodes.shrink_to_fit();
-    m_graphicsTriangles.shrink_to_fit();
 }
 
 void VGraphicsViewer::enableSelection(bool enable)
@@ -380,17 +371,19 @@ void VGraphicsViewer::clearInfo()
     m_pIterationLabel->clear();
 }
 
-template<typename T1, typename T2>
-inline void VGraphicsViewer::createGraphicsElements(std::vector<T1 *>* graphics,
-                                                    const std::shared_ptr<const std::vector< std::shared_ptr<T2> > > &sim) 
-{
-    std::lock_guard<std::mutex> locker(m_graphMutex);
-    graphics->clear();
-    graphics->reserve(sim->size());
-    for (auto &simElem : *sim)
-        graphics->push_back(new T1(simElem));
-    graphics->shrink_to_fit();
-}
+//template<typename T1, typename T2>
+//inline void VGraphicsViewer::createGraphicsElements(
+//        std::vector<T1 *>* graphics,
+//        const std::shared_ptr<const std::vector<T2> > &sim)
+//{
+//    std::lock_guard<std::mutex> locker(m_graphMutex);
+//    graphics->clear();
+//    graphics->reserve(sim->size());
+//    for (auto &simElem : *sim)
+//        graphics->push_back(new T1(simElem));
+//    graphics->shrink_to_fit();
+//}
+//TODO REMOVE
 
 void VGraphicsViewer::process() 
 {
@@ -431,17 +424,13 @@ void VGraphicsViewer::viewFromAbove()
 
 void VGraphicsViewer::showInjectionPoint()
 {
-    for (auto &node : m_graphicsNodes)
-        node->colorIfInjection();
-    for (auto &triangle : m_graphicsTriangles)
-        triangle->colorIfInjection();
+    for (auto &layer : m_graphicsLayers)
+        layer->showInjectionPoint();
 }
 void VGraphicsViewer::showVacuumPoint()
 {
-    for (auto &node : m_graphicsNodes)
-        node->colorIfVacuum();
-    for (auto &triangle : m_graphicsTriangles)
-        triangle->colorIfVacuum();
+    for (auto &layer : m_graphicsLayers)
+        layer->showVacuumPoint();
 }
 
 void VGraphicsViewer::setSelectionMode(bool on)
@@ -487,7 +476,7 @@ void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)
         rp.setPoint(event->getPosition());
         rp.apply(viewer->getSceneGraph());
         SoPickedPoint * pickedPoint = rp.getPickedPoint();
-        if (pickedPoint != NULL)
+        if (pickedPoint != nullptr)
         {
             float x, y, z;
             pickedPoint->getPoint().getValue(x, y, z);

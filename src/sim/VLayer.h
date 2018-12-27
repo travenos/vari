@@ -10,15 +10,15 @@
 #include <vector>
 #include <memory>
 #include <QColor>
-#include "VSimNode.h"
-#include "VSimTriangle.h"
-#include "VGraphicsViewer.h"
+#include "sim_elements/VSimNode.h"
+#include "sim_elements/VSimTriangle.h"
 
 class VLayer
 {
 public: 
     typedef std::shared_ptr<VLayer> ptr;
     typedef std::shared_ptr<const VLayer> const_ptr;
+
     /**
      * @param nodes
      * @param triangles
@@ -40,8 +40,8 @@ public:
     bool isActive() const ;
     size_t getNodesNumber() const ;
     size_t getTrianglesNumber() const ;
-    const VSimNode::map_ptr &getNodes() ;
-    const VSimTriangle::list_ptr &getTriangles() ;
+    const VSimNode::map_ptr &getNodes() const;
+    const VSimTriangle::list_ptr &getTriangles() const ;
     void setMateial(const VCloth &material) ;
     void reset() ;
     VCloth::const_ptr getMaterial() const ;
@@ -51,7 +51,7 @@ public:
     uint getNodeMaxId() const;
     uint getTriangleMinId() const;
     uint getTriangleMaxId() const;
-    void cut(const VGraphicsViewer::const_uint_vect_ptr &nodesIds);
+    void cut(const std::shared_ptr<const std::vector<uint> > &nodesIds);
 
 private: 
     void p_setVisible(bool visible) ;

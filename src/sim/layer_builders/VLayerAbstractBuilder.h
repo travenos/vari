@@ -7,7 +7,7 @@
 #ifndef _VLAYERABSTRACTBUILDER_H
 #define _VLAYERABSTRACTBUILDER_H
 
-#include "VLayer.h"
+#include "../VLayer.h"
 
 class VLayerAbstractBuilder
 {

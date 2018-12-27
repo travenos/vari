@@ -10,8 +10,8 @@
 #include <unordered_map>
 #include <QFile>
 #include "VLayerAbstractBuilder.h"
-#include "VSimNode.h"
-#include "VSimTriangle.h"
+#include "../sim_elements/VSimNode.h"
+#include "../sim_elements/VSimTriangle.h"
 
 class VLayerFromFileBuilder: public VLayerAbstractBuilder
 {

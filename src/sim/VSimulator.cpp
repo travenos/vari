@@ -7,6 +7,7 @@
 #endif
 #include <functional>
 #include <cstring>
+#include <cmath>
 #include <QTime>
 
 #include "VSimulator.h"

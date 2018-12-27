@@ -8,7 +8,7 @@
 #define _VGRAPHICSTRIANGLE_H
 
 #include "VGraphicsElement.h"
-#include "VSimTriangle.h"
+#include "../sim_elements/VSimTriangle.h"
 
 class SoCoordinate3;
 class SoTriangleStripSet;

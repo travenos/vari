@@ -26,28 +26,22 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 set(CORE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/core")
 add_subdirectory(${CORE_DIRECTORY})
+set(GRAPHICS_ELEMENTS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/graphics_elements")
+add_subdirectory(${GRAPHICS_ELEMENTS_DIRECTORY})
+set(IMPORT_EXPORT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/import_export")
+add_subdirectory(${IMPORT_EXPORT_DIRECTORY})
+set(LAYER_BUILDERS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/layer_builders")
+add_subdirectory(${LAYER_BUILDERS_DIRECTORY})
+set(SIM_ELEMENTS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/sim_elements")
+add_subdirectory(${SIM_ELEMENTS_DIRECTORY})
 
 set(CMAKE_AUTOMOC ON)
 
 set(HEADER_FILES
     VGeometryProcessor.h
-    VGraphicsElement.h
-    VGraphicsNode.h
-    VGraphicsTriangle.h
     VGraphicsViewer.h
-    VLayerAbstractBuilder.h
-    VLayerFromAnsysBuilder.h
-    VLayerFromFileBuilder.h
-    VLayerFromGmeshBuilder.h
     VLayer.h
-    VLayerManualBuilder.h
     VLayersProcessor.h
-    VModelExport.h
-    VModelImport.h
-    VModelImportExport.h
-    VSimElement.h
-    VSimNode.h
-    VSimTriangle.h
     VSimulationClass.h
     VSimulationFacade.h
     VSimulator.h
@@ -55,22 +49,9 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
     VGeometryProcessor.cpp
-    VGraphicsElement.cpp
-    VGraphicsNode.cpp
-    VGraphicsTriangle.cpp
     VGraphicsViewer.cpp
-    VLayerAbstractBuilder.cpp
     VLayer.cpp
-    VLayerFromAnsysBuilder.cpp
-    VLayerFromFileBuilder.cpp
-    VLayerFromGmeshBuilder.cpp
-    VLayerManualBuilder.cpp
     VLayersProcessor.cpp
-    VModelExport.cpp
-    VModelImport.cpp
-    VSimElement.cpp
-    VSimNode.cpp
-    VSimTriangle.cpp
     VSimulationClass.cpp
     VSimulationFacade.cpp
     VSimulator.cpp
@@ -80,9 +61,18 @@ ADD_MODULE(v_sim
     ${HEADER_FILES}
     ${SOURCE_FILES})
 
-add_dependencies(v_sim v_core)
-target_link_libraries(v_sim v_core)
+add_dependencies(v_sim
+    v_core
+    v_graphics_elements
+    v_import_export
+    v_layer_builders
+    v_sim_elements)
+target_link_libraries(v_sim
+    v_core
+    v_graphics_elements
+    v_import_export
+    v_layer_builders
+    v_sim_elements)
 
 target_link_libraries(v_sim Qt5::Core Qt5::Gui Qt5::Widgets)
 target_link_libraries(v_sim SoQt::SoQt Coin::Coin)
-
