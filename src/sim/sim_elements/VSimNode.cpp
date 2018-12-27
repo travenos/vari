@@ -202,6 +202,11 @@ const QVector3D& VSimNode::getPosition() const
     return m_position;
 }
 
+void VSimNode::setPosition(const QVector3D& pos)
+{
+    m_position = pos;
+}
+
 void VSimNode::reset()
 {
     double pressure;

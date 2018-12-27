@@ -19,6 +19,8 @@ class SoShapeHints;
 class SoPerspectiveCamera;
 class SoEventCallback;
 class SoExtSelection;
+class SoHandleBoxManip;
+class SoTrackballManip;
 class QWidget;
 class QLabel;
 
@@ -31,10 +33,9 @@ public:
 
     typedef std::shared_ptr<std::vector<uint> > uint_vect_ptr;
     typedef std::shared_ptr<const std::vector<uint> > const_uint_vect_ptr;
-    /**
-     * @param parent
-     * @param simulator
-     */
+
+    enum VInteractionMode {PICK, DRAG, ROTATE, SELECT};
+
     VGraphicsViewer(QWidget* parent, const VSimulator::ptr &simulator);
     virtual ~VGraphicsViewer();
     void setGraphicsElements(const std::vector<VLayer::const_ptr> &layers) ;
@@ -56,7 +57,12 @@ public:
     void enableSelection(bool enable);
 
     const const_uint_vect_ptr &getSelectedNodesIds() const;
+
+    bool isPickEnabled() const;
+    bool isDragEnabled() const;
+    bool isRotateEnabled() const;
     bool isSelectionEnabled() const;
+    VInteractionMode getInteractionMode() const;
 
 public slots:
     void doRender() ;
@@ -82,12 +88,14 @@ private:
     void stopRender() ;
     void process() ;
 
-//    template<typename T1, typename T2>
-//    inline void createGraphicsElements(std::vector<T1 *>* gaphics,
-//                                       const std::shared_ptr<const std::vector<T2> > &sim) ;
-
     static void event_cb(void * userdata, SoEventCallback * node);
     static void selection_finish_cb(void * userdata, SoSelection * sel);
+    static void selection_cb(void * userdata, SoPath *selectionPath);
+    static void deselection_cb(void * userdata, SoPath *deselectionPath);
+
+
+    static inline SoPath * createTransformPath(SoPath *inputPath);
+    static bool isTransformable(SoNode *myNode);
 
     std::vector<VGraphicsLayer*> m_graphicsLayers;
 
@@ -109,11 +117,15 @@ private:
     SoPerspectiveCamera* m_pCam;
     SoExtSelection*     m_pSelection;
 
+    SoHandleBoxManip*   m_pHandleBox;
+    SoTrackballManip*   m_pTrackball;
+    SoPath*             m_pDragSelectedPath;
+    SoPath*             m_pRotateSelectedPath;
 
     std::unique_ptr<std::thread> m_pRenderWaiterThread;
     mutable VNotify m_renderSuccessNotifier;
     std::atomic<bool> m_renderStopFlag;
-    bool m_selectionEnabled;
+    VInteractionMode m_interactionMode;
     mutable std::mutex m_graphMutex;
 
     const_uint_vect_ptr m_pSelectedNodesIds;

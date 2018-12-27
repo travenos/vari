@@ -66,6 +66,7 @@ public:
     double getDistance(const VSimNode* node) const ;
     double getDistance(const QVector3D& point) const;
     const QVector3D &getPosition() const ;
+    void setPosition(const QVector3D& pos);
     void reset() override;
     void setBoundaryPressures(double injectionPressure, double vacuumPressure);
     void getNeighbours(std::vector<const VSimNode *> &neighbours) const ;
