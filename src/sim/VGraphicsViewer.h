@@ -19,8 +19,7 @@ class SoShapeHints;
 class SoPerspectiveCamera;
 class SoEventCallback;
 class SoExtSelection;
-class SoHandleBoxManip;
-class SoTrackballManip;
+class SoTransformManip;
 class QWidget;
 class QLabel;
 
@@ -34,7 +33,7 @@ public:
     typedef std::shared_ptr<std::vector<uint> > uint_vect_ptr;
     typedef std::shared_ptr<const std::vector<uint> > const_uint_vect_ptr;
 
-    enum VInteractionMode {PICK, DRAG, ROTATE, SELECT};
+    enum VInteractionMode {PICK, DRAG, SELECT};
 
     VGraphicsViewer(QWidget* parent, const VSimulator::ptr &simulator);
     virtual ~VGraphicsViewer();
@@ -44,6 +43,7 @@ public:
     void clearTriangles() ;
     void clearAll() ;
     void clearSelectedIds() ;
+    void clearDraggedNodes() ;
 
     void viewFromAbove() ;
 
@@ -55,19 +55,22 @@ public:
     void updateTriangleColors() ;
 
     void enableSelection(bool enable);
+    void enableDrag(bool enable);
 
     const const_uint_vect_ptr &getSelectedNodesIds() const;
 
-    bool isPickEnabled() const;
-    bool isDragEnabled() const;
-    bool isRotateEnabled() const;
-    bool isSelectionEnabled() const;
+    bool isPickOn() const;
+    bool isDragOn() const;
+    bool isSelectionOn() const;
     VInteractionMode getInteractionMode() const;
 
 public slots:
     void doRender() ;
     void displayInfo() ;
     void clearInfo() ;
+
+    void setSelectionMode(bool on) ;
+    void setDragMode(bool on) ;
 
 private:
 
@@ -81,7 +84,7 @@ private:
     static const QString FILLED_PERCENT_LABEL_CAPTION;
     static const QString AVERAGE_PRESSURE_LABEL_CAPTION;
 
-    static const int ICON_SIZE = 24;
+    static const int ICON_SIZE;
 
     void initSelection();
 
@@ -91,11 +94,9 @@ private:
     static void event_cb(void * userdata, SoEventCallback * node);
     static void selection_finish_cb(void * userdata, SoSelection * sel);
     static void selection_cb(void * userdata, SoPath *selectionPath);
-    static void deselection_cb(void * userdata, SoPath *deselectionPath);
-
+    static void deselection_cb(void * userdata, SoPath *);
 
     static inline SoPath * createTransformPath(SoPath *inputPath);
-    static bool isTransformable(SoNode *myNode);
 
     std::vector<VGraphicsLayer*> m_graphicsLayers;
 
@@ -110,6 +111,7 @@ private:
     QLabel*             m_pAveragePressureLabel;
     QPushButton*        m_pXYButton;
     QPushButton*        m_pSelectionButton;
+    QPushButton*        m_pDragButton;
 
     SoSeparator*        m_pRoot;
     SoSeparator*        m_pFigureRoot;
@@ -117,15 +119,14 @@ private:
     SoPerspectiveCamera* m_pCam;
     SoExtSelection*     m_pSelection;
 
-    SoHandleBoxManip*   m_pHandleBox;
-    SoTrackballManip*   m_pTrackball;
-    SoPath*             m_pDragSelectedPath;
-    SoPath*             m_pRotateSelectedPath;
+    SoTransformManip*   m_pTransformBox;
+    SoPath*             m_pSelectedPath;
 
     std::unique_ptr<std::thread> m_pRenderWaiterThread;
     mutable VNotify m_renderSuccessNotifier;
     std::atomic<bool> m_renderStopFlag;
     VInteractionMode m_interactionMode;
+    bool m_dragCanceled;
     mutable std::mutex m_graphMutex;
 
     const_uint_vect_ptr m_pSelectedNodesIds;
@@ -164,8 +165,6 @@ private slots:
      */
     void bottomWheelReleased(void);
 
-    void setSelectionMode(bool on) ;
-
 protected:
     QWidget* buildLeftTrim(QWidget * parent);
     QWidget* buildBottomTrim(QWidget * parent);
@@ -174,7 +173,9 @@ protected:
 signals:
     void askForRender();
     void askForDisplayingInfo();
+    void interactionEnabled(bool);
     void selectionEnabled(bool);
+    void dragEnabled(bool);
     void gotPoint(const QVector3D &point);
     void gotNodesSelection(const VGraphicsViewer::const_uint_vect_ptr &p_selectedNodes);
 };

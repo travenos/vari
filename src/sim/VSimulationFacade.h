@@ -75,6 +75,7 @@ public:
 
     void startCuttingLayer(uint layer);
     void cancelCuttingLayer();
+    void cancelDrag();
     void performCut();
     uint getCuttedLayer() const;
 
@@ -109,6 +110,8 @@ private:
 private slots:
     void m_on_got_point(const QVector3D &point);
     void m_on_got_nodes_selection(const VGraphicsViewer::const_uint_vect_ptr &pSelectedNodesIds);
+    void enableInteraction();
+    void disableInteraction();
 
 signals:
     void layerVisibilityChanged(uint, bool);

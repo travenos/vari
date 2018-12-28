@@ -9,6 +9,7 @@
 #include <QLabel>
 #include <QGridLayout>
 #include <QPushButton>
+#include <functional>
 #include <Inventor/actions/SoBoxHighlightRenderAction.h>
 #include <Inventor/nodes/SoBaseColor.h>
 #include <Inventor/nodes/SoShapeHints.h>
@@ -20,13 +21,11 @@
 #include <Inventor/nodes/SoShape.h>
 #include <Inventor/nodes/SoLight.h>
 #include <Inventor/nodes/SoTransform.h>
-#include <Inventor/manips/SoHandleBoxManip.h>
-#include <Inventor/manips/SoTrackballManip.h>
+#include <Inventor/manips/SoCenterballManip.h>
 #include <Inventor/nodekits/SoBaseKit.h>
 #include <Inventor/events/SoMouseButtonEvent.h>
 #include <Inventor/SoPickedPoint.h>
 #include <Inventor/Qt/widgets/SoQtThumbWheel.h>
-#include <functional>
 
 #include "VGraphicsViewer.h"
 #include "graphics_elements/VGraphicsNode.h"
@@ -44,6 +43,17 @@ const QString VGraphicsViewer::ITERATION_LABEL_CAPTION("Номер итерац�
 const QString VGraphicsViewer::FILLED_PERCENT_LABEL_CAPTION("Готовность эксперимента (%):");
 const QString VGraphicsViewer::AVERAGE_PRESSURE_LABEL_CAPTION("Среднее давление (Па):");
 
+const int VGraphicsViewer::ICON_SIZE = 24;
+
+#define UNREF_SO_ELEMENT(element) \
+    if (element != nullptr) \
+    { \
+        int32_t refsCount = element->getRefCount(); \
+        for (int32_t i = 0; i <= refsCount; ++i) \
+            element->unref(); \
+        element = nullptr; \
+    }
+
 /**
  * @param parent
  * @param simulator
@@ -56,12 +66,11 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_pShapeHints(new SoShapeHints),
     m_pCam(new SoPerspectiveCamera),
     m_pSelection(new SoExtSelection),
-    m_pHandleBox(new SoHandleBoxManip),
-    m_pTrackball(new SoTrackballManip),
-    m_pDragSelectedPath(nullptr),
-    m_pRotateSelectedPath(nullptr),
+    m_pTransformBox(nullptr),
+    m_pSelectedPath(nullptr),
     m_renderStopFlag(false),
-    m_interactionMode(DRAG), //TODO : pick
+    m_interactionMode(PICK),
+    m_dragCanceled(false),
     m_pSelectedNodesIds(new std::vector<uint>)
 {
     setAntialiasing(true, 1);
@@ -96,10 +105,10 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
 
 void VGraphicsViewer::initSelection()
 {
+    m_pSelection->ref();
     m_pSelection->lassoPolicy = SoExtSelection::PART;
     m_pSelection->lassoMode = SoExtSelection::ALL_SHAPES;
-    //m_pSelection->policy = SoSelection::DISABLE;
-    m_pSelection->policy = SoSelection::SINGLE; //TODO
+    m_pSelection->policy = SoSelection::SINGLE;
     m_pSelection->lassoType = SoExtSelection::NOLASSO;
 
     m_pSelection->setLassoColor(SbColor(0.9f,0.7f,0.2f));
@@ -118,9 +127,12 @@ VGraphicsViewer::~VGraphicsViewer()
     stopRender();
     m_pRenderWaiterThread->join();
     m_pRenderWaiterThread.reset();
+    m_pSelection->deselectAll();
     m_pRoot->removeAllChildren();
     setSceneGraph(nullptr);
     setCamera(nullptr);
+    UNREF_SO_ELEMENT(m_pTransformBox);
+    UNREF_SO_ELEMENT(m_pSelection);
     delete m_pBaseWidget;
 }
 
@@ -246,7 +258,18 @@ void VGraphicsViewer::createViewerButtons(QWidget * parent, SbPList * buttonlist
     SoQtExaminerViewer::createViewerButtons(parent, buttonlist);
     m_pXYButton = static_cast<QPushButton*>((*buttonlist)[buttonlist->getLength() - 1]);
 
-    m_pSelectionButton = new QPushButton(QIcon(QStringLiteral(":/img/selectpart.png")),
+    m_pDragButton = new QPushButton(QIcon(QStringLiteral(":/img/drag.png")),
+                                                        QStringLiteral(""), parent);
+    m_pDragButton->setFocusPolicy(Qt::NoFocus);
+    m_pDragButton->setIconSize(QSize(ICON_SIZE, ICON_SIZE));
+    m_pDragButton->adjustSize();
+    m_pDragButton->setCheckable(true);
+    m_pDragButton->setChecked(false);
+    m_pDragButton->setVisible(true);
+    connect(m_pDragButton, SIGNAL(toggled(bool)), this, SLOT(setDragMode(bool)));
+    buttonlist->append(m_pDragButton);
+
+    m_pSelectionButton = new QPushButton(QIcon(QStringLiteral(":/img/cut.png")),
                                                         QStringLiteral(""), parent);
     m_pSelectionButton->setFocusPolicy(Qt::NoFocus);
     m_pSelectionButton->setIconSize(QSize(ICON_SIZE, ICON_SIZE));
@@ -254,9 +277,7 @@ void VGraphicsViewer::createViewerButtons(QWidget * parent, SbPList * buttonlist
     m_pSelectionButton->setCheckable(true);
     m_pSelectionButton->setChecked(false);
     m_pSelectionButton->setVisible(false);
-
     connect(m_pSelectionButton, SIGNAL(toggled(bool)), this, SLOT(setSelectionMode(bool)));
-
     buttonlist->append(m_pSelectionButton);
 }
 
@@ -324,9 +345,11 @@ void VGraphicsViewer::clearTriangles()
 void VGraphicsViewer::clearAll() 
 {
     std::lock_guard<std::mutex> locker(m_graphMutex);
+    m_pSelection->deselectAll();
     m_pFigureRoot->removeAllChildren();
     m_graphicsLayers.clear();
     clearSelectedIds();
+    clearDraggedNodes();
     clearInfo();
 }
 
@@ -335,20 +358,9 @@ void VGraphicsViewer::clearSelectedIds()
     m_pSelectedNodesIds.reset(new std::vector<uint>);
 }
 
-void VGraphicsViewer::enableSelection(bool enable)
+void VGraphicsViewer::clearDraggedNodes()
 {
-    if (enable != isSelectionEnabled())
-    {
-        m_pSelectionButton->setVisible(enable);
-        setSelectionMode(enable);
-        if (!enable)
-        {
-            updateNodeColors();
-            updateTriangleColors();
-            clearSelectedIds();
-        }
-        emit selectionEnabled(enable);
-    }
+    //TODO
 }
 
 void VGraphicsViewer::doRender() 
@@ -437,6 +449,9 @@ void VGraphicsViewer::setSelectionMode(bool on)
     m_pSelectionButton->setChecked(on);
     if (on)
     {
+        if (isDragOn())
+            setDragMode(false);
+        m_pSelectionButton->setVisible(true);
         m_pSelection->policy = SoSelection::SHIFT;
         m_pSelection->lassoType = SoExtSelection::LASSO;
         setViewing(false);
@@ -449,9 +464,57 @@ void VGraphicsViewer::setSelectionMode(bool on)
         m_pSelection = new SoExtSelection;
         initSelection();
         m_pRoot->removeChild(m_pRoot->findChild(old_selection));
+        UNREF_SO_ELEMENT(old_selection);
         m_pRoot->addChild(m_pSelection);
         m_interactionMode = PICK;
     }
+}
+
+void VGraphicsViewer::setDragMode(bool on)
+{
+    m_pDragButton->setChecked(on);
+    if (on)
+    {
+        if (isSelectionOn())
+            setSelectionMode(false);
+        m_pDragButton->setVisible(true);
+        setViewing(false);
+        m_interactionMode = DRAG;
+    }
+    else
+    {
+        m_dragCanceled = true;
+        m_pSelection->deselectAll();
+        m_interactionMode = PICK;
+    }
+}
+
+void VGraphicsViewer::enableSelection(bool enable)
+{
+    m_pSelectionButton->setVisible(enable);
+    if (!enable)
+    {
+        if (isSelectionOn())
+            setSelectionMode(false);
+        updateNodeColors();
+        updateTriangleColors();
+        clearSelectedIds();
+    }
+    emit selectionEnabled(enable);
+}
+
+void VGraphicsViewer::enableDrag(bool enable)
+{
+    m_pDragButton->setVisible(enable);
+    if (!enable)
+    {
+        if (isDragOn())
+        {
+            setDragMode(false);
+        }
+        clearDraggedNodes();
+    }
+    emit dragEnabled(enable);
 }
 
 const VGraphicsViewer::const_uint_vect_ptr &VGraphicsViewer::getSelectedNodesIds() const
@@ -459,22 +522,17 @@ const VGraphicsViewer::const_uint_vect_ptr &VGraphicsViewer::getSelectedNodesIds
     return m_pSelectedNodesIds;
 }
 
-bool VGraphicsViewer::isPickEnabled() const
+bool VGraphicsViewer::isPickOn() const
 {
     return (m_interactionMode == PICK);
 }
 
-bool VGraphicsViewer::isDragEnabled() const
+bool VGraphicsViewer::isDragOn() const
 {
     return (m_interactionMode == DRAG);
 }
 
-bool VGraphicsViewer::isRotateEnabled() const
-{
-    return (m_interactionMode == ROTATE);
-}
-
-bool VGraphicsViewer::isSelectionEnabled() const
+bool VGraphicsViewer::isSelectionOn() const
 {
     return (m_interactionMode == SELECT);
 }
@@ -492,7 +550,7 @@ void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)
 
     if (SO_MOUSE_PRESS_EVENT(event, BUTTON1))
     {
-        if (!viewer->isPickEnabled())
+        if (!viewer->isPickOn())
             return;
         SoRayPickAction rp( viewer->getViewportRegion() );
         rp.setPoint(event->getPosition());
@@ -526,7 +584,7 @@ void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)
 void VGraphicsViewer::selection_finish_cb(void * userdata, SoSelection * sel)
 {
     VGraphicsViewer* viewer = static_cast<VGraphicsViewer*>(userdata);
-    if (!viewer->isSelectionEnabled())
+    if (!viewer->isSelectionOn())
         return;
 
     viewer->updateNodeColors();
@@ -563,136 +621,58 @@ void VGraphicsViewer::selection_finish_cb(void * userdata, SoSelection * sel)
 
 void VGraphicsViewer::selection_cb(void * userdata, SoPath *selectionPath)
 {
-   VGraphicsViewer* viewer = static_cast<VGraphicsViewer*>(userdata);
-   // Attach the manipulator.
-   // Use the convenience routine to get a path to
-   // the transform that affects the selected object.
-   SoPath *xformPath = createTransformPath(selectionPath);
-   if (xformPath == nullptr) return;
-   xformPath->ref();
+    VGraphicsViewer* viewer = static_cast<VGraphicsViewer*>(userdata);
 
-   // Attach the handle box to the sphere,
-   // the trackball to the cube
-   // or the transformBox to the wrapperKit
+    if (viewer->isDragOn())
+    {
+        viewer->m_dragCanceled = false;
+        UNREF_SO_ELEMENT(viewer->m_pTransformBox);
+        viewer->m_pTransformBox = new SoCenterballManip;
+        viewer->m_pTransformBox->ref();
+    }
+    else
+        return;
 
-   if (viewer->isDragEnabled())
-   {
-      viewer->m_pDragSelectedPath = xformPath;
-      viewer->m_pHandleBox->replaceNode(xformPath);
-   }
-   else if (viewer->isRotateEnabled())
-   {
-      viewer->m_pRotateSelectedPath = xformPath;
-      viewer->m_pTrackball->replaceNode(xformPath);
-   }
+    SoPath *xformPath = createTransformPath(selectionPath);
+    if (xformPath == nullptr)
+        return;
+    xformPath->ref();
+
+    viewer->m_pSelectedPath = xformPath;
+    viewer->m_pTransformBox->replaceNode(xformPath);
 }
 
-void VGraphicsViewer::deselection_cb(void * userdata, SoPath *deselectionPath)
+void VGraphicsViewer::deselection_cb(void * userdata, SoPath *)
 {
-   VGraphicsViewer* viewer = static_cast<VGraphicsViewer*>(userdata);
-   if (viewer->m_pDragSelectedPath != nullptr)
-   {
-      viewer->m_pHandleBox->replaceManip(viewer->m_pDragSelectedPath, nullptr);
-      viewer->m_pDragSelectedPath->unref();
-      viewer->m_pDragSelectedPath = nullptr;
-   }
-   if (viewer->m_pRotateSelectedPath != nullptr)
-   {
-      viewer->m_pTrackball->replaceManip(viewer->m_pRotateSelectedPath, nullptr);
-      viewer->m_pRotateSelectedPath->unref();
-      viewer->m_pRotateSelectedPath = nullptr;
-   }
+    VGraphicsViewer* viewer = static_cast<VGraphicsViewer*>(userdata);
+    if (viewer->m_pSelectedPath != nullptr)
+    {
+        viewer->m_pTransformBox->replaceManip(viewer->m_pSelectedPath, nullptr);
+        viewer->m_pSelectedPath->unref();
+        viewer->m_pSelectedPath = nullptr;
+        UNREF_SO_ELEMENT(viewer->m_pTransformBox);
+        if (!viewer->m_dragCanceled)
+        {
+            //TODO
+        }
+    }
 }
 
 inline SoPath * VGraphicsViewer::createTransformPath(SoPath *inputPath)
 {
-   int pathLength = inputPath->getLength();
-   if (pathLength < 2) // Won't be able to get parent of tail
-      return nullptr;
-
-   SoNode *tail = inputPath->getTail();
-
-   // CASE 1: The tail is a node kit.
-   // Nodekits have built in policy for creating parts.
-   // The kit copies inputPath, then extends it past the
-   // kit all the way down to the transform. It creates the
-   // transform if necessary.
-   if (tail->isOfType(SoBaseKit::getClassTypeId())) {
-      SoBaseKit *kit = (SoBaseKit *) tail;
-      return kit->createPathToPart("transform", true, inputPath);
-   }
-
-   SoTransform *editXf = nullptr;
-   SoGroup     *parent;
-
-   // CASE 2: The tail is not a group.
-   SbBool isTailGroup;
-   isTailGroup = tail->isOfType(SoGroup::getClassTypeId());
-   if (!isTailGroup) {
-      // 'parent' is node above tail. Search under parent right
-      // to left for a transform. If we find a 'movable' node
-      // insert a transform just left of tail.
-      parent = (SoGroup *) inputPath->getNode(pathLength - 2);
-      int tailIndx = parent->findChild(tail);
-
-      for (int i = tailIndx; (i >= 0) && (editXf == nullptr);i--){
-         SoNode *myNode = parent->getChild(i);
-         if (myNode->isOfType(SoTransform::getClassTypeId()))
-            editXf = (SoTransform *) myNode;
-         else if (i != tailIndx && (isTransformable(myNode)))
-            break;
-      }
-      if (editXf == nullptr) {
-         editXf = new SoTransform;
-         parent->insertChild(editXf, tailIndx);
-      }
-   }
-   // CASE 3: The tail is a group.
-   else {
-      // Search the children from left to right for transform
-      // nodes. Stop the search if we come to a movable node
-      // and insert a transform before it.
-      parent = (SoGroup *) tail;
-      int i = 0;
-      for (i = 0;
-         (i < parent->getNumChildren()) && (editXf == nullptr);
-         i++) {
-         SoNode *myNode = parent->getChild(i);
-         if (myNode->isOfType(SoTransform::getClassTypeId()))
-            editXf = (SoTransform *) myNode;
-         else if (isTransformable(myNode))
-            break;
-      }
-      if (editXf == nullptr) {
-         editXf = new SoTransform;
-         parent->insertChild(editXf, i);
-      }
-   }
-
-   // Create 'pathToXform.' Copy inputPath, then make last
-   // node be editXf.
-   SoPath *pathToXform = nullptr;
-   pathToXform = inputPath->copy();
-   pathToXform->ref();
-   if (!isTailGroup) // pop off the last entry.
-      pathToXform->pop();
-   // add editXf to the end
-   int xfIndex = parent->findChild(editXf);
-   pathToXform->append(xfIndex);
-   pathToXform->unrefNoDelete();
-
-   return(pathToXform);
-}
-
-bool VGraphicsViewer::isTransformable(SoNode *myNode)
-{
-   if (myNode->isOfType(SoGroup::getClassTypeId())
-      || myNode->isOfType(SoShape::getClassTypeId())
-      || myNode->isOfType(SoCamera::getClassTypeId())
-      || myNode->isOfType(SoLight::getClassTypeId()))
-      return true;
-   else
-      return false;
+    SoPath * path = inputPath->copy();
+    for (int j = inputPath->getLength() - 1 ; j >= 0 ; --j)
+    {
+        VGraphicsLayer * pLayer = dynamic_cast<VGraphicsLayer *>(inputPath->getNode(j));
+        if (pLayer != nullptr)
+        {
+            path->append(pLayer->getTransformId());
+            return path;
+        }
+        path->pop();
+    }
+    path->unref();
+    return nullptr;
 }
 
 void VGraphicsViewer::leftWheelPressed(void) { leftWheelStart(); }

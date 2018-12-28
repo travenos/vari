@@ -13,6 +13,7 @@
 
 class VGraphicsNode;
 class VGraphicsTriangle;
+class SoTransform;
 
 class VGraphicsLayer : public SoSeparator
 {
@@ -25,18 +26,22 @@ public:
     inline void addTriangle(const VSimTriangle::const_ptr &simTriangle);
     void clearNodes();
     void clearTriangles();
-    void reserveNodes(size_t n);
-    void reserveTriangles(size_t n);
+    inline void reserveNodes(size_t n);
+    inline void reserveTriangles(size_t n);
     void showInjectionPoint();
     void showVacuumPoint();
     void updateNodeColors();
     void updateTriangleColors();
     void updateVisibility();
     uint getNumber() const;
+    const SoTransform * getTransform() const;
+    int getTransformId() const;
 private:
     uint m_number;
     std::vector<VGraphicsNode*> m_graphicsNodes;
     std::vector<VGraphicsTriangle*> m_graphicsTriangles;
+    SoTransform*  m_pTransform;
+    int m_transformId;
 };
 
 #endif //_VGRAPHICSLAYER_H

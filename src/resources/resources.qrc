@@ -12,6 +12,7 @@
         <file>img/colormap.png</file>
         <file>img/xyplane.png</file>
         <file>qtbase_ru.qm</file>
-        <file>img/selectpart.png</file>
+        <file>img/cut.png</file>
+        <file>img/drag.png</file>
     </qresource>
 </RCC>

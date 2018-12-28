@@ -3,20 +3,25 @@
  * @author Alexey Barashkov
  */
 
+#include <Inventor/nodes/SoTransform.h>
+
 #include "VGraphicsLayer.h"
 
 #include "VGraphicsNode.h"
 #include "VGraphicsTriangle.h"
 
 VGraphicsLayer::VGraphicsLayer(const VLayer::const_ptr &simLayer, uint number) :
-    m_number(number)
+    m_number(number),
+    m_pTransform(new SoTransform)
 {
+    addChild(m_pTransform);
+    m_transformId = findChild(m_pTransform);
     const VSimNode::map_ptr &simNodes = simLayer->getNodes();
-    m_graphicsNodes.reserve(simNodes->size());
+    reserveNodes(simNodes->size());
     for (auto &simNode : *simNodes)
         addNode(simNode.second);
     const VSimTriangle::list_ptr &simTriangles = simLayer->getTriangles();
-    m_graphicsTriangles.reserve(simTriangles->size());
+    reserveTriangles(simTriangles->size());
     for (auto &simTriangle : *simTriangles)
         addTriangle(simTriangle);
 }
@@ -54,12 +59,12 @@ void VGraphicsLayer::clearTriangles()
     m_graphicsTriangles.clear();
 }
 
-void VGraphicsLayer::reserveNodes(size_t n)
+inline void VGraphicsLayer::reserveNodes(size_t n)
 {
     m_graphicsNodes.reserve(n);
 }
 
-void VGraphicsLayer::reserveTriangles(size_t n)
+inline void VGraphicsLayer::reserveTriangles(size_t n)
 {
     m_graphicsTriangles.reserve(n);
 }
@@ -103,4 +108,14 @@ void VGraphicsLayer::updateVisibility()
 uint VGraphicsLayer::getNumber() const
 {
     return m_number;
+}
+
+const SoTransform * VGraphicsLayer::getTransform() const
+{
+    return m_pTransform;
+}
+
+int VGraphicsLayer::getTransformId() const
+{
+    return m_transformId;
 }
