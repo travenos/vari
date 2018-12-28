@@ -32,6 +32,8 @@ public:
 
     typedef std::shared_ptr<std::vector<uint> > uint_vect_ptr;
     typedef std::shared_ptr<const std::vector<uint> > const_uint_vect_ptr;
+    typedef std::shared_ptr<std::vector<std::pair<uint, QVector3D> > > pos_vect_ptr;
+    typedef std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > > const_pos_vect_ptr;
 
     enum VInteractionMode {PICK, DRAG, SELECT};
 
@@ -58,6 +60,8 @@ public:
     void enableDrag(bool enable);
 
     const const_uint_vect_ptr &getSelectedNodesIds() const;
+    const const_pos_vect_ptr &getTransformedNodesCoords() const;
+    uint getTransformedLayerNumber() const;
 
     bool isPickOn() const;
     bool isDragOn() const;
@@ -94,7 +98,7 @@ private:
     static void event_cb(void * userdata, SoEventCallback * node);
     static void selection_finish_cb(void * userdata, SoSelection * sel);
     static void selection_cb(void * userdata, SoPath *selectionPath);
-    static void deselection_cb(void * userdata, SoPath *);
+    static void deselection_cb(void * userdata, SoPath *deselectioPath);
 
     static inline SoPath * createTransformPath(SoPath *inputPath);
 
@@ -130,7 +134,8 @@ private:
     mutable std::mutex m_graphMutex;
 
     const_uint_vect_ptr m_pSelectedNodesIds;
-
+    const_pos_vect_ptr m_pTransformedNodesCoords;
+    uint m_transformedLayerNumber;
 
 private slots:
     /**
@@ -178,6 +183,7 @@ signals:
     void dragEnabled(bool);
     void gotPoint(const QVector3D &point);
     void gotNodesSelection(const VGraphicsViewer::const_uint_vect_ptr &p_selectedNodes);
+    void gotTransformation();
 };
 
 #endif //_VGRAPHICSVIEWER_H

@@ -3,6 +3,10 @@
  * @author Alexey Barashkov
  */
 
+#ifdef DEBUG_MODE
+#include <QDebug>
+#endif
+
 #include <Inventor/nodes/SoTransform.h>
 
 #include "VGraphicsLayer.h"
@@ -28,7 +32,10 @@ VGraphicsLayer::VGraphicsLayer(const VLayer::const_ptr &simLayer, uint number) :
 
 VGraphicsLayer::~VGraphicsLayer()
 {
-
+    removeAllChildren();
+    #ifdef DEBUG_MODE
+        qInfo() << "Graphics Layer Removed";
+    #endif
 }
 
 inline void VGraphicsLayer::addNode(const VSimNode::const_ptr &simNode)
@@ -118,4 +125,15 @@ const SoTransform * VGraphicsLayer::getTransform() const
 int VGraphicsLayer::getTransformId() const
 {
     return m_transformId;
+}
+
+std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > >
+    VGraphicsLayer::getNodesCoords() const
+{
+    std::shared_ptr<std::vector<std::pair<uint, QVector3D> > > coordsVect(
+                new std::vector<std::pair<uint, QVector3D> >);
+    coordsVect->reserve(m_graphicsNodes.size());
+    for (const VGraphicsNode* node : m_graphicsNodes)
+        coordsVect->push_back(std::make_pair(node->getSimId(), node->getPosition()));
+    return coordsVect;
 }

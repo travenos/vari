@@ -71,7 +71,8 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_renderStopFlag(false),
     m_interactionMode(PICK),
     m_dragCanceled(false),
-    m_pSelectedNodesIds(new std::vector<uint>)
+    m_pSelectedNodesIds(new std::vector<uint>),
+    m_pTransformedNodesCoords(new std::vector<std::pair<uint, QVector3D> >)
 {
     setAntialiasing(true, 1);
     setBackgroundColor(SbColor(0.0, 0.0, 0.0));
@@ -127,12 +128,14 @@ VGraphicsViewer::~VGraphicsViewer()
     stopRender();
     m_pRenderWaiterThread->join();
     m_pRenderWaiterThread.reset();
+    m_dragCanceled = true;
     m_pSelection->deselectAll();
+    m_pFigureRoot->removeAllChildren();
     m_pRoot->removeAllChildren();
     setSceneGraph(nullptr);
     setCamera(nullptr);
     UNREF_SO_ELEMENT(m_pTransformBox);
-    UNREF_SO_ELEMENT(m_pSelection);
+    UNREF_SO_ELEMENT(m_pSelectedPath);
     delete m_pBaseWidget;
 }
 
@@ -360,7 +363,7 @@ void VGraphicsViewer::clearSelectedIds()
 
 void VGraphicsViewer::clearDraggedNodes()
 {
-    //TODO
+    m_pTransformedNodesCoords.reset(new std::vector<std::pair<uint, QVector3D> >);
 }
 
 void VGraphicsViewer::doRender() 
@@ -522,6 +525,16 @@ const VGraphicsViewer::const_uint_vect_ptr &VGraphicsViewer::getSelectedNodesIds
     return m_pSelectedNodesIds;
 }
 
+const VGraphicsViewer::const_pos_vect_ptr &VGraphicsViewer::getTransformedNodesCoords() const
+{
+    return m_pTransformedNodesCoords;
+}
+
+uint VGraphicsViewer::getTransformedLayerNumber() const
+{
+    return m_transformedLayerNumber;
+}
+
 bool VGraphicsViewer::isPickOn() const
 {
     return (m_interactionMode == PICK);
@@ -642,7 +655,7 @@ void VGraphicsViewer::selection_cb(void * userdata, SoPath *selectionPath)
     viewer->m_pTransformBox->replaceNode(xformPath);
 }
 
-void VGraphicsViewer::deselection_cb(void * userdata, SoPath *)
+void VGraphicsViewer::deselection_cb(void * userdata, SoPath * deselectionPath)
 {
     VGraphicsViewer* viewer = static_cast<VGraphicsViewer*>(userdata);
     if (viewer->m_pSelectedPath != nullptr)
@@ -651,9 +664,20 @@ void VGraphicsViewer::deselection_cb(void * userdata, SoPath *)
         viewer->m_pSelectedPath->unref();
         viewer->m_pSelectedPath = nullptr;
         UNREF_SO_ELEMENT(viewer->m_pTransformBox);
-        if (!viewer->m_dragCanceled)
+        if (!viewer->m_dragCanceled && deselectionPath != nullptr)
         {
-            //TODO
+            for (int j = deselectionPath->getLength() - 1 ; j >= 0 ; --j)
+            {
+                VGraphicsLayer * pLayer =
+                        dynamic_cast<VGraphicsLayer *>(deselectionPath->getNode(j));
+                if (pLayer != nullptr)
+                {
+                    viewer->m_pTransformedNodesCoords = pLayer->getNodesCoords();
+                    viewer->m_transformedLayerNumber = pLayer->getNumber();
+                    emit viewer->gotTransformation();
+                    break;
+                }
+            }
         }
     }
 }

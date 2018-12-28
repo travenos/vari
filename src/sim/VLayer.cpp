@@ -184,3 +184,16 @@ void VLayer::cut(const std::shared_ptr<const std::vector<uint> > &nodesIds)
     }
     m_pNodes = p_remainingNodesMap;
 }
+
+void VLayer::transformate(const std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > >
+                    &nodesCoords)
+{
+    for (auto &pair : *nodesCoords)
+    {
+        auto node_pair = m_pNodes->find(pair.first);
+        if (node_pair != m_pNodes->end())
+        {
+            node_pair->second->setPosition(pair.second);
+        }
+    }
+}

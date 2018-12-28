@@ -78,6 +78,8 @@ public:
     void cancelDrag();
     void performCut();
     uint getCuttedLayer() const;
+    void performTransformation();
+    uint getTranslatedLayer() const;
 
     void setAllVisible();
     void setOnlyOneVisible(uint layer);
@@ -148,6 +150,8 @@ signals:
 
     void selectionMade();
     void cutPerformed();
+    void translationPerformed();
+    void gotTransformation();
     void selectionEnabled(bool);
 
     void configUpdated();

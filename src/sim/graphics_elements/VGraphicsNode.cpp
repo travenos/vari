@@ -52,3 +52,10 @@ void VGraphicsNode::setCubeSide(float side)
     m_pCube->height = side;
     m_pCube->depth = side;
 }
+
+QVector3D VGraphicsNode::getPosition() const
+{
+    float x, y, z;
+    m_pTranslation->translation.getValue().getValue(x, y, z);
+    return QVector3D(x, y, z);
+}

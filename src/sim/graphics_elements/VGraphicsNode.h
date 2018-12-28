@@ -24,6 +24,7 @@ VGraphicsNode(const VSimNode::const_ptr &simNode);
 virtual ~VGraphicsNode();
 void updatePosition() ;
 void setCubeSide(float side) ;
+QVector3D getPosition() const;
 private:
     VSimNode::const_ptr m_pSimNode;
     SoTranslation* m_pTranslation;

@@ -36,6 +36,7 @@ public:
     uint getNumber() const;
     const SoTransform * getTransform() const;
     int getTransformId() const;
+    std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > > getNodesCoords() const;
 private:
     uint m_number;
     std::vector<VGraphicsNode*> m_graphicsNodes;

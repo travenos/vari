@@ -24,6 +24,8 @@ const QString VWindowMain::REMOVE_TITLE("Удалить?");
 const QString VWindowMain::ASK_FOR_REMOVE("Вы уверены, что хотите удалить слой?");
 const QString VWindowMain::CUT_TITLE("Обрезать?");
 const QString VWindowMain::ASK_FOR_CUT("Вы уверены, что хотите выполнить обрезку слоя?");
+const QString VWindowMain::TRANSFORM_TITLE("Переместить?");
+const QString VWindowMain::ASK_FOR_TRANSFORM("Вы уверены, что хотите изменть положение слоя?");
 const QString VWindowMain::CLOTH_INFO_TEXT("<html><head/><body>"
                                                "Материал: &quot;%1&quot;<br>"
                                                "Толщина: %2 м<br>"
@@ -116,6 +118,8 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_model_loaded()));
     connect(m_pFacade.get(), SIGNAL(selectionMade()),
             this, SLOT(m_on_selection_made()));
+    connect(m_pFacade.get(), SIGNAL(gotTransformation()),
+            this, SLOT(m_on_got_transformation()));
     connect(m_pFacade.get(), SIGNAL(configUpdated()),
             this, SLOT(m_on_model_config_updated()));
     connect(m_pFacade.get(), SIGNAL(selectionEnabled(bool)),
@@ -748,6 +752,19 @@ void VWindowMain::askForCut()
     }
 }
 
+void VWindowMain::askForTransform()
+{
+    if (QMessageBox::question(this, TRANSFORM_TITLE,
+                              ASK_FOR_TRANSFORM, QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes)
+    {
+        m_pFacade->performTransformation();
+    }
+    else
+    {
+        m_pFacade->cancelDrag();
+    }
+}
+
 /**
  * Slots
  */
@@ -944,6 +961,11 @@ void VWindowMain::m_on_model_loaded()
 void VWindowMain::m_on_selection_made()
 {
     askForCut();
+}
+
+void VWindowMain::m_on_got_transformation()
+{
+    askForTransform();
 }
 
 void VWindowMain::m_on_model_config_updated()

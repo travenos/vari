@@ -65,6 +65,8 @@ public:
     uint getTriangleMaxId(uint layer) const;
 
     void cutLayer(const std::shared_ptr<const std::vector<uint> > &nodesIds, uint layer);
+    void transformateLayer(const std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > >
+                        &nodesCoords, uint layer);
 
 private:
     void updateActiveElementsVectors() ;

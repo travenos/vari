@@ -52,6 +52,8 @@ public:
     uint getTriangleMinId() const;
     uint getTriangleMaxId() const;
     void cut(const std::shared_ptr<const std::vector<uint> > &nodesIds);
+    void transformate(const std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > >
+                        &nodesCoords);
 
 private: 
     void p_setVisible(bool visible) ;

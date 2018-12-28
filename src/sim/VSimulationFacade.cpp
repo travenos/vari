@@ -47,6 +47,8 @@ void VSimulationFacade::connectMainSignals()
             SLOT(m_on_got_nodes_selection(const VGraphicsViewer::const_uint_vect_ptr &)));
     connect(m_pGraphicsViewer.get(), SIGNAL(gotPoint(const QVector3D &)),
             this, SLOT(m_on_got_point(const QVector3D &)));
+    connect(m_pGraphicsViewer.get(), SIGNAL(gotTransformation()),
+            this, SIGNAL(gotTransformation()));
     connect(m_pGraphicsViewer.get(), SIGNAL(askForDisplayingInfo()),
             this, SIGNAL(gotNewInfo()));
     connect(m_pGraphicsViewer.get(), SIGNAL(selectionEnabled(bool)),
@@ -395,6 +397,19 @@ uint VSimulationFacade::getCuttedLayer() const
     return m_cuttedLayer;
 }
 
+void VSimulationFacade::performTransformation()
+{
+    m_pLayersProcessor->transformateLayer(m_pGraphicsViewer->getTransformedNodesCoords(),
+                                 m_pGraphicsViewer->getTransformedLayerNumber());
+    updateConfiguration();
+    emit translationPerformed();
+}
+
+uint VSimulationFacade::getTranslatedLayer() const
+{
+    return m_pGraphicsViewer->getTransformedLayerNumber();
+}
+
 void VSimulationFacade::setAllVisible()
 {
     for (uint i=0; i < m_pLayersProcessor->getLayersNumber(); ++i)
@@ -518,6 +533,20 @@ void VSimulationFacade::saveParametres() const
     settings.sync();
 }
 
+void VSimulationFacade::enableInteraction()
+{
+    m_pGraphicsViewer->enableDrag(true);
+}
+
+void VSimulationFacade::disableInteraction()
+{
+    cancelCuttingLayer();
+    cancelDrag();
+    cancelWaitingForVacuumPointSelection();
+    cancelWaitingForInjectionPointSelection();
+    m_pGraphicsViewer->enableDrag(false);
+}
+
 void VSimulationFacade::m_on_got_point(const QVector3D &point)
 {
     if(m_selectInjectionPoint)
@@ -544,18 +573,4 @@ void VSimulationFacade::m_on_got_nodes_selection(const VGraphicsViewer::const_ui
             qInfo() << id;
     #endif
     emit selectionMade();
-}
-
-void VSimulationFacade::enableInteraction()
-{
-    m_pGraphicsViewer->enableDrag(true);
-}
-
-void VSimulationFacade::disableInteraction()
-{
-    cancelCuttingLayer();
-    cancelDrag();
-    cancelWaitingForVacuumPointSelection();
-    cancelWaitingForInjectionPointSelection();
-    m_pGraphicsViewer->enableDrag(false);
 }

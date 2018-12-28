@@ -318,6 +318,13 @@ void VLayersProcessor::cutLayer(const std::shared_ptr<const std::vector<uint> > 
     updateActiveElementsVectors();
 }
 
+void VLayersProcessor::transformateLayer(const std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > >
+                    &nodesCoords, uint layer)
+{
+    m_layers.at(layer)->transformate(nodesCoords);
+    updateActiveElementsVectors();
+}
+
 void VLayersProcessor::updateActiveElementsVectors() 
 {
     std::vector<VSimNode::ptr> * activeNodes = new VSimNode::vector_t;
