@@ -312,7 +312,7 @@ std::vector<VLayer::const_ptr> VLayersProcessor::getLayers() const
     return layers;
 }
 
-void VLayersProcessor::cutLayer(const VGraphicsViewer::const_uint_vect_ptr &nodesIds, uint layer)
+void VLayersProcessor::cutLayer(const std::shared_ptr<const std::vector<uint> > &nodesIds, uint layer)
 {
     m_layers.at(layer)->cut(nodesIds);
     updateActiveElementsVectors();

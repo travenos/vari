@@ -11,7 +11,6 @@
 #include "layer_builders/VLayerAbstractBuilder.h"
 #include "VLayer.h"
 #include "VSimulator.h"
-#include "VGraphicsViewer.h"
 
 class VLayersProcessor: public VSimulationClass
 {
@@ -65,7 +64,7 @@ public:
     uint getTriangleMinId(uint layer) const;
     uint getTriangleMaxId(uint layer) const;
 
-    void cutLayer(const VGraphicsViewer::const_uint_vect_ptr &nodesIds, uint layer);
+    void cutLayer(const std::shared_ptr<const std::vector<uint> > &nodesIds, uint layer);
 
 private:
     void updateActiveElementsVectors() ;
