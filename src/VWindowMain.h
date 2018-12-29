@@ -44,6 +44,7 @@ public:
 
     static const QColor ACTIVE_COLOR;
     static const QColor INACTIVE_COLOR;
+    static const QColor INVISIBLE_COLOR;
 
     explicit VWindowMain(QWidget *parent = nullptr);
     ~VWindowMain();

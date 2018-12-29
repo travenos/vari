@@ -46,7 +46,8 @@ const QString VWindowMain::FILE_DIALOG_FORMATS("Модели VARI (*.vari);;"
                                                 "Все файлы (*)");
 
 const QColor VWindowMain::ACTIVE_COLOR(0, 0, 0);
-const QColor VWindowMain::INACTIVE_COLOR(127, 127, 127);
+const QColor VWindowMain::INACTIVE_COLOR(255, 0, 0);
+const QColor VWindowMain::INVISIBLE_COLOR(127, 127, 127);
 
 VWindowMain::VWindowMain(QWidget *parent) :
     QMainWindow(parent),
@@ -395,7 +396,13 @@ void VWindowMain::markLayerAsEnabled(int layer, bool enable)
 {
     if(layer < ui->layersListWidget->count())
     {
-        QColor textColor = enable ? ACTIVE_COLOR : INACTIVE_COLOR;
+        QColor textColor;
+        if (!m_pFacade->isLayerEnabled(layer))
+            textColor = INACTIVE_COLOR;
+        else if (!m_pFacade->isLayerVisible(layer))
+            textColor = INVISIBLE_COLOR;
+        else
+            textColor = ACTIVE_COLOR;
         ui->layersListWidget->item(layer)->setTextColor(textColor);
         if (ui->layersListWidget->currentRow() == layer)
             ui->layerEnableCheckBox->setChecked(enable);
@@ -404,10 +411,18 @@ void VWindowMain::markLayerAsEnabled(int layer, bool enable)
 
 void VWindowMain::markLayerAsVisible(int layer, bool visible)
 {
-    if(layer < ui->layersListWidget->count()
-       && ui->layersListWidget->currentRow() == layer)
+    if(layer < ui->layersListWidget->count())
     {
-        ui->layerVisibleCheckBox->setChecked(visible);
+        QColor textColor;
+        if (!m_pFacade->isLayerEnabled(layer))
+            textColor = INACTIVE_COLOR;
+        else if (!m_pFacade->isLayerVisible(layer))
+            textColor = INVISIBLE_COLOR;
+        else
+            textColor = ACTIVE_COLOR;
+        ui->layersListWidget->item(layer)->setTextColor(textColor);
+        if (ui->layersListWidget->currentRow() == layer)
+            ui->layerVisibleCheckBox->setChecked(visible);
     }
 }
 
