@@ -90,10 +90,6 @@ void VSimulationFacade::connectMainSignals()
             this, SLOT(disableInteraction()));
     connect(m_pSimulator.get(), SIGNAL(simulationStopped()),
             this, SLOT(enableInteraction()));
-    connect(this, SIGNAL(startedWaitingForInjectionPoint()),
-            this, SLOT(disableInteraction()));
-    connect(this, SIGNAL(startedWaitingForVacuumPoint()),
-            this, SLOT(disableInteraction()));
     connect(this, SIGNAL(canceledWaitingForInjectionPoint()),
             this, SLOT(enableInteraction()));
     connect(this, SIGNAL(canceledWaitingForVacuumPoint()),
@@ -349,6 +345,10 @@ void VSimulationFacade::updateConfiguration()
 
 void VSimulationFacade::waitForInjectionPointSelection(double diameter)
 {
+    cancelCuttingLayer();
+    cancelDrag();
+    cancelWaitingForVacuumPointSelection();
+    m_pGraphicsViewer->enableDrag(false);
     m_selectInjectionPoint = true;
     m_selectVacuumPoint = false;
     m_injectionDiameter = diameter;
@@ -359,6 +359,10 @@ void VSimulationFacade::waitForInjectionPointSelection(double diameter)
 
 void VSimulationFacade::waitForVacuumPointSelection(double diameter)
 {
+    cancelCuttingLayer();
+    cancelDrag();
+    cancelWaitingForInjectionPointSelection();
+    m_pGraphicsViewer->enableDrag(false);
     m_selectVacuumPoint = true;
     m_vacuumDiameter = diameter;
     m_pGraphicsViewer->viewFromAbove();
@@ -380,6 +384,9 @@ void VSimulationFacade::cancelWaitingForVacuumPointSelection()
 
 void VSimulationFacade::startCuttingLayer(uint layer)
 {
+    cancelDrag();
+    cancelWaitingForVacuumPointSelection();
+    cancelWaitingForInjectionPointSelection();
     m_pGraphicsViewer->setSelectionMode(true);
     setOnlyOneVisible(layer);
     m_cuttedLayer = layer;

@@ -16,7 +16,7 @@
 #include "VSimulator.h"
 
 class SoShapeHints;
-class SoPerspectiveCamera;
+class SoCamera;
 class SoEventCallback;
 class SoExtSelection;
 class SoTransformManip;
@@ -120,7 +120,7 @@ private:
     SoSeparator*        m_pRoot;
     SoSeparator*        m_pFigureRoot;
     SoShapeHints*       m_pShapeHints;
-    SoPerspectiveCamera* m_pCam;
+    SoCamera* m_pCam;
     SoExtSelection*     m_pSelection;
 
     SoTransformManip*   m_pTransformBox;
@@ -131,7 +131,7 @@ private:
     std::atomic<bool> m_renderStopFlag;
     VInteractionMode m_interactionMode;
     bool m_dragCanceled;
-    mutable std::mutex m_graphMutex;
+    mutable std::recursive_mutex m_graphMutex;
 
     const_uint_vect_ptr m_pSelectedNodesIds;
     const_pos_vect_ptr m_pTransformedNodesCoords;

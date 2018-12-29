@@ -45,7 +45,7 @@ const QString VGraphicsViewer::AVERAGE_PRESSURE_LABEL_CAPTION("Среднее д
 
 const int VGraphicsViewer::ICON_SIZE = 24;
 
-#define UNREF_SO_ELEMENT(element) \
+#define REMOVE_SO_ELEMENT(element) \
     if (element != nullptr) \
     { \
         int32_t refsCount = element->getRefCount(); \
@@ -64,7 +64,7 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_pRoot(new SoSeparator),
     m_pFigureRoot(new SoSeparator),
     m_pShapeHints(new SoShapeHints),
-    m_pCam(new SoPerspectiveCamera),
+    m_pCam(new SoOrthographicCamera),
     m_pSelection(new SoExtSelection),
     m_pTransformBox(nullptr),
     m_pSelectedPath(nullptr),
@@ -74,6 +74,11 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_pSelectedNodesIds(new std::vector<uint>),
     m_pTransformedNodesCoords(new std::vector<std::pair<uint, QVector3D> >)
 {
+    m_pRoot->ref();
+    m_pFigureRoot->ref();
+    m_pShapeHints->ref();
+    m_pCam->ref();
+    m_pSelection->ref();
     setAntialiasing(true, 1);
     setBackgroundColor(SbColor(0.0, 0.0, 0.0));
     setPopupMenuEnabled(false);
@@ -106,7 +111,6 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
 
 void VGraphicsViewer::initSelection()
 {
-    m_pSelection->ref();
     m_pSelection->lassoPolicy = SoExtSelection::PART;
     m_pSelection->lassoMode = SoExtSelection::ALL_SHAPES;
     m_pSelection->policy = SoSelection::SINGLE;
@@ -134,8 +138,13 @@ VGraphicsViewer::~VGraphicsViewer()
     m_pRoot->removeAllChildren();
     setSceneGraph(nullptr);
     setCamera(nullptr);
-    UNREF_SO_ELEMENT(m_pTransformBox);
-    UNREF_SO_ELEMENT(m_pSelectedPath);
+    REMOVE_SO_ELEMENT(m_pTransformBox);
+    REMOVE_SO_ELEMENT(m_pSelectedPath);
+    m_pRoot->unref();
+    m_pFigureRoot->unref();
+    m_pShapeHints->unref();
+    m_pCam->unref();
+    m_pSelection->unref();
     delete m_pBaseWidget;
 }
 
@@ -298,7 +307,7 @@ void VGraphicsViewer::setGraphicsElements(const std::vector<VLayer::const_ptr> &
             m_graphicsLayers.push_back(new VGraphicsLayer(layers.at(i), i));
     }
     {
-        std::lock_guard<std::mutex> locker(m_graphMutex);
+        std::lock_guard<std::recursive_mutex> locker(m_graphMutex);
         for (auto layer: m_graphicsLayers)
             m_pFigureRoot->addChild(layer);
     }
@@ -332,7 +341,7 @@ void VGraphicsViewer::updateVisibility()
 
 void VGraphicsViewer::clearNodes() 
 {
-    std::lock_guard<std::mutex> locker(m_graphMutex);
+    std::lock_guard<std::recursive_mutex> locker(m_graphMutex);
     for (auto layer : m_graphicsLayers)
         layer->clearNodes();
     clearSelectedIds();
@@ -340,15 +349,16 @@ void VGraphicsViewer::clearNodes()
 
 void VGraphicsViewer::clearTriangles() 
 {
-    std::lock_guard<std::mutex> locker(m_graphMutex);
+    std::lock_guard<std::recursive_mutex> locker(m_graphMutex);
     for (auto layer : m_graphicsLayers)
         layer->clearTriangles();
 }
 
 void VGraphicsViewer::clearAll() 
 {
-    std::lock_guard<std::mutex> locker(m_graphMutex);
-    m_pSelection->deselectAll();
+    std::lock_guard<std::recursive_mutex> locker(m_graphMutex);
+    setDragMode(false);
+    setSelectionMode(false);
     m_pFigureRoot->removeAllChildren();
     m_graphicsLayers.clear();
     clearSelectedIds();
@@ -408,7 +418,7 @@ void VGraphicsViewer::process()
         if (!m_renderStopFlag.load())
         {
             {
-                std::lock_guard<std::mutex> locker(m_graphMutex);
+                std::lock_guard<std::recursive_mutex> locker(m_graphMutex);
                 setAutoRedraw(false);
                 updateTriangleColors();
                 setAutoRedraw(true);
@@ -449,11 +459,13 @@ void VGraphicsViewer::showVacuumPoint()
 
 void VGraphicsViewer::setSelectionMode(bool on)
 {
-    m_pSelectionButton->setChecked(on);
     if (on)
     {
         if (isDragOn())
+        {
+            m_pSelection->deselectAll();
             setDragMode(false);
+        }
         m_pSelectionButton->setVisible(true);
         m_pSelection->policy = SoSelection::SHIFT;
         m_pSelection->lassoType = SoExtSelection::LASSO;
@@ -462,20 +474,20 @@ void VGraphicsViewer::setSelectionMode(bool on)
     }
     else
     {
-        std::lock_guard<std::mutex> locker(m_graphMutex);
-        SoExtSelection* old_selection = m_pSelection;
+        std::lock_guard<std::recursive_mutex> locker(m_graphMutex);
+        m_pRoot->removeChild(m_pRoot->findChild(m_pSelection));
+        m_pSelection->unref();
         m_pSelection = new SoExtSelection;
+        m_pSelection->ref();
         initSelection();
-        m_pRoot->removeChild(m_pRoot->findChild(old_selection));
-        UNREF_SO_ELEMENT(old_selection);
         m_pRoot->addChild(m_pSelection);
         m_interactionMode = PICK;
     }
+    m_pSelectionButton->setChecked(on);
 }
 
 void VGraphicsViewer::setDragMode(bool on)
 {
-    m_pDragButton->setChecked(on);
     if (on)
     {
         if (isSelectionOn())
@@ -490,6 +502,7 @@ void VGraphicsViewer::setDragMode(bool on)
         m_pSelection->deselectAll();
         m_interactionMode = PICK;
     }
+    m_pDragButton->setChecked(on);
 }
 
 void VGraphicsViewer::enableSelection(bool enable)
@@ -591,7 +604,8 @@ void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)
 }
 
 /**
- * Callback function for the lasso selection mode. Should be called when the select action finishes for post processing.
+ * Callback static function for the lasso selection mode. Should be called when the select action finishes for post processing.
+ * @param userdata pointer to master VGraphicsViewer object
  * @param sel Pointer to the used selection object.
  */
 void VGraphicsViewer::selection_finish_cb(void * userdata, SoSelection * sel)
@@ -639,7 +653,7 @@ void VGraphicsViewer::selection_cb(void * userdata, SoPath *selectionPath)
     if (viewer->isDragOn())
     {
         viewer->m_dragCanceled = false;
-        UNREF_SO_ELEMENT(viewer->m_pTransformBox);
+        REMOVE_SO_ELEMENT(viewer->m_pTransformBox);
         viewer->m_pTransformBox = new SoCenterballManip;
         viewer->m_pTransformBox->ref();
     }
@@ -663,21 +677,26 @@ void VGraphicsViewer::deselection_cb(void * userdata, SoPath * deselectionPath)
         viewer->m_pTransformBox->replaceManip(viewer->m_pSelectedPath, nullptr);
         viewer->m_pSelectedPath->unref();
         viewer->m_pSelectedPath = nullptr;
-        UNREF_SO_ELEMENT(viewer->m_pTransformBox);
+        REMOVE_SO_ELEMENT(viewer->m_pTransformBox);
         if (!viewer->m_dragCanceled && deselectionPath != nullptr)
         {
+            SoPath * path = deselectionPath->copy();
             for (int j = deselectionPath->getLength() - 1 ; j >= 0 ; --j)
             {
                 VGraphicsLayer * pLayer =
                         dynamic_cast<VGraphicsLayer *>(deselectionPath->getNode(j));
                 if (pLayer != nullptr)
                 {
-                    viewer->m_pTransformedNodesCoords = pLayer->getNodesCoords();
+                    viewer->m_pTransformedNodesCoords = pLayer->getNodesCoords(
+                                viewer->getViewportRegion(), path);
                     viewer->m_transformedLayerNumber = pLayer->getNumber();
+                    path->unref();
                     emit viewer->gotTransformation();
                     break;
                 }
+                path->pop();
             }
+            path->unref();
         }
     }
 }
@@ -688,7 +707,7 @@ inline SoPath * VGraphicsViewer::createTransformPath(SoPath *inputPath)
     for (int j = inputPath->getLength() - 1 ; j >= 0 ; --j)
     {
         VGraphicsLayer * pLayer = dynamic_cast<VGraphicsLayer *>(inputPath->getNode(j));
-        if (pLayer != nullptr)
+        if (pLayer != nullptr && pLayer->isVisible())
         {
             path->append(pLayer->getTransformId());
             return path;

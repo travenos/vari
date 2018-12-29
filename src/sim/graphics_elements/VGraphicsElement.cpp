@@ -26,13 +26,17 @@ VGraphicsElement::VGraphicsElement(const VSimElement::const_ptr &simElement):
 {
     updateVisibility();
     addChild(m_pDrawStyle);
+    m_pDrawStyle->ref();
     updateColor();
     addChild(m_pGraphicsMaterial);
+    m_pGraphicsMaterial->ref();
 }
 
 VGraphicsElement::~VGraphicsElement()
 {
-
+    m_pGraphicsMaterial->unref();
+    m_pDrawStyle->unref();
+    removeAllChildren();
 }
 
 void VGraphicsElement::updateAll() 

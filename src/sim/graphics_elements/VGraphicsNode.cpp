@@ -31,13 +31,18 @@ VGraphicsNode::VGraphicsNode(const VSimNode::const_ptr &simNode):
 {
     updatePosition();
     addChild(m_pTranslation);
+    m_pTranslation->ref();
+    m_pTranslationId = findChild(m_pTranslation);
 
     setCubeSide(DEFAULT_CUBE_SIDE);
     addChild(m_pCube);
+    m_pCube->ref();
 }
 
 VGraphicsNode::~VGraphicsNode()
 {
+    m_pTranslation->unref();
+    m_pCube->unref();
 }
 
 void VGraphicsNode::updatePosition() 
@@ -53,9 +58,7 @@ void VGraphicsNode::setCubeSide(float side)
     m_pCube->depth = side;
 }
 
-QVector3D VGraphicsNode::getPosition() const
+int VGraphicsNode::getTranslationId() const
 {
-    float x, y, z;
-    m_pTranslation->translation.getValue().getValue(x, y, z);
-    return QVector3D(x, y, z);
+    return m_pTranslationId;
 }

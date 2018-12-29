@@ -12,23 +12,22 @@
 
 class SoTranslation;
 class SoCube;
+class SbViewportRegion;
 
 class VGraphicsNode: public VGraphicsElement {
 public: 
     static const float DEFAULT_CUBE_SIDE;
     
-/**
- * @param simNode
- */
-VGraphicsNode(const VSimNode::const_ptr &simNode);
-virtual ~VGraphicsNode();
-void updatePosition() ;
-void setCubeSide(float side) ;
-QVector3D getPosition() const;
+    VGraphicsNode(const VSimNode::const_ptr &simNode);
+    virtual ~VGraphicsNode();
+    void updatePosition() ;
+    void setCubeSide(float side) ;
+    int getTranslationId() const;
 private:
     VSimNode::const_ptr m_pSimNode;
     SoTranslation* m_pTranslation;
     SoCube* m_pCube;
+    int m_pTranslationId;
 };
 
 #endif //_VGRAPHICSNODE_H

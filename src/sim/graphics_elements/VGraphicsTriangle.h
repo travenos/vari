@@ -13,14 +13,12 @@
 class SoCoordinate3;
 class SoTriangleStripSet;
 
-class VGraphicsTriangle: public VGraphicsElement {
-public: 
-    
-/**
- * @param simTriangle
- */
-VGraphicsTriangle(const VSimTriangle::const_ptr &simTriangle);
-void updatePosition() ;
+class VGraphicsTriangle: public VGraphicsElement
+{
+public:     
+    VGraphicsTriangle(const VSimTriangle::const_ptr &simTriangle);
+    virtual ~VGraphicsTriangle();
+    void updatePosition() ;
 private: 
     VSimTriangle::const_ptr m_pSimTriangle;
     SoCoordinate3* m_pTriangleCoordinates;

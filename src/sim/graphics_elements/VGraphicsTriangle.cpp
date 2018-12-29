@@ -13,9 +13,6 @@
  */
 
 
-/**
- * @param simTriangle
- */
 VGraphicsTriangle::VGraphicsTriangle(const VSimTriangle::const_ptr &simTriangle):
 VGraphicsElement(std::dynamic_pointer_cast<const VSimElement>(simTriangle)),
   m_pSimTriangle(simTriangle),
@@ -24,8 +21,16 @@ VGraphicsElement(std::dynamic_pointer_cast<const VSimElement>(simTriangle)),
 {
     updatePosition();
     addChild(m_pTriangleCoordinates);
+    m_pTriangleCoordinates->ref();
     m_pStrip->numVertices.setValue(m_pSimTriangle->VERTICES_NUMBER);
     addChild(m_pStrip);
+    m_pStrip->ref();
+}
+
+VGraphicsTriangle::~VGraphicsTriangle()
+{
+    m_pTriangleCoordinates->unref();
+    m_pStrip->unref();
 }
 
 void VGraphicsTriangle::updatePosition() 

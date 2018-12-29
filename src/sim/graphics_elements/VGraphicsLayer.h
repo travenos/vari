@@ -14,6 +14,7 @@
 class VGraphicsNode;
 class VGraphicsTriangle;
 class SoTransform;
+class SbViewportRegion;
 
 class VGraphicsLayer : public SoSeparator
 {
@@ -34,13 +35,15 @@ public:
     void updateTriangleColors();
     void updateVisibility();
     uint getNumber() const;
+    bool isVisible() const;
     const SoTransform * getTransform() const;
     int getTransformId() const;
-    std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > > getNodesCoords() const;
+    std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > > getNodesCoords(const SbViewportRegion & viewPortRegion, const SoPath * path) const;
 private:
     uint m_number;
-    std::vector<VGraphicsNode*> m_graphicsNodes;
-    std::vector<VGraphicsTriangle*> m_graphicsTriangles;
+    bool m_visible;
+    std::vector<std::pair<int, VGraphicsNode*> > m_graphicsNodes;
+    std::vector<std::pair<int, VGraphicsTriangle*> > m_graphicsTriangles;
     SoTransform*  m_pTransform;
     int m_transformId;
 };
