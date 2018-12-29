@@ -157,6 +157,7 @@ set(SOURCE_FILES
 
 #Create executable
 add_executable(${EXE_NAME}
+    WIN32
     "main.cpp"
     ${HEADER_FILES}
     ${SOURCE_FILES}
