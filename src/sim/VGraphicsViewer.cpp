@@ -13,14 +13,13 @@
 #include <Inventor/actions/SoBoxHighlightRenderAction.h>
 #include <Inventor/nodes/SoBaseColor.h>
 #include <Inventor/nodes/SoShapeHints.h>
-#include <Inventor/nodes/SoPerspectiveCamera.h>
-#include <Inventor/nodes/SoOrthographicCamera.h>
 #include <Inventor/nodes/SoEventCallback.h>
 #include <Inventor/nodes/SoSelection.h>
 #include <Inventor/nodes/SoExtSelection.h>
 #include <Inventor/nodes/SoShape.h>
 #include <Inventor/nodes/SoLight.h>
 #include <Inventor/nodes/SoTransform.h>
+#include <Inventor/nodes/SoCamera.h>
 #include <Inventor/manips/SoCenterballManip.h>
 #include <Inventor/nodekits/SoBaseKit.h>
 #include <Inventor/events/SoMouseButtonEvent.h>
@@ -55,7 +54,6 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_pRoot(new SoSeparator),
     m_pFigureRoot(new SoSeparator),
     m_pShapeHints(new SoShapeHints),
-    m_pCam(new SoOrthographicCamera),
     m_pSelection(new SoExtSelection),
     m_pTransformBox(nullptr),
     m_pSelectedPath(nullptr),
@@ -68,7 +66,6 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_pRoot->ref();
     m_pFigureRoot->ref();
     m_pShapeHints->ref();
-    m_pCam->ref();
     m_pSelection->ref();
     setAntialiasing(true, 1);
     setBackgroundColor(SbColor(0.7, 0.7, 0.7));
@@ -83,16 +80,11 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
 
     m_pShapeHints->vertexOrdering = SoShapeHints::COUNTERCLOCKWISE;
     m_pRoot->addChild(m_pShapeHints);
-    m_pRoot->addChild(m_pCam);
 
     initSelection();
     m_pRoot->addChild(m_pSelection);
 
     setSceneGraph(m_pRoot);
-
-    m_pXYButton->setIcon(QIcon(QStringLiteral(":/img/xyplane.png")));
-    m_pXYButton->setIconSize(QSize(ICON_SIZE, ICON_SIZE));
-    m_pXYButton->adjustSize();
 
     connect(this, SIGNAL(askForRender()), this, SLOT(doRender()));
     connect(this, SIGNAL(askForDisplayingInfo()), this, SLOT(displayInfo()));
@@ -136,7 +128,6 @@ VGraphicsViewer::~VGraphicsViewer()
     m_pRoot->unref();
     m_pFigureRoot->unref();
     m_pShapeHints->unref();
-    m_pCam->unref();
     m_pSelection->unref();
     delete m_pBaseWidget;
 }
@@ -261,7 +252,22 @@ QWidget* VGraphicsViewer::buildBottomTrim(QWidget * parent)
 void VGraphicsViewer::createViewerButtons(QWidget * parent, SbPList * buttonlist)
 {
     SoQtExaminerViewer::createViewerButtons(parent, buttonlist);
-    m_pXYButton = static_cast<QPushButton*>((*buttonlist)[buttonlist->getLength() - 1]);
+
+    m_pXYButton = new QPushButton(QIcon(QStringLiteral(":/img/xyplane.png")),
+                                   QStringLiteral(""), parent);
+    m_pXYButton->setFocusPolicy(Qt::NoFocus);
+    m_pXYButton->setIconSize(QSize(ICON_SIZE, ICON_SIZE));
+    m_pXYButton->adjustSize();
+    connect(m_pXYButton, SIGNAL(clicked()), this, SLOT(viewFromAbove()));
+    buttonlist->append(m_pXYButton);
+
+    m_pYZButton = new QPushButton(QIcon(QStringLiteral(":/img/yzplane.png")),
+                                   QStringLiteral(""), parent);
+    m_pYZButton->setFocusPolicy(Qt::NoFocus);
+    m_pYZButton->setIconSize(QSize(ICON_SIZE, ICON_SIZE));
+    m_pYZButton->adjustSize();
+    connect(m_pYZButton, SIGNAL(clicked()), this, SLOT(viewFromLeft()));
+    buttonlist->append(m_pYZButton);
 
     m_pDragButton = new QPushButton(QIcon(QStringLiteral(":/img/drag.png")),
                                                         QStringLiteral(""), parent);
@@ -286,9 +292,9 @@ void VGraphicsViewer::createViewerButtons(QWidget * parent, SbPList * buttonlist
     buttonlist->append(m_pSelectionButton);
 }
 
-void VGraphicsViewer::toggleCameraType(void)
+void VGraphicsViewer::setCameraType(SoType type)
 {
-    viewFromAbove();
+    qDebug() << "kek";
 }
 
 void VGraphicsViewer::setGraphicsElements(const std::vector<VLayer::const_ptr> &layers)
@@ -434,9 +440,20 @@ void VGraphicsViewer::stopRender()
 void VGraphicsViewer::viewFromAbove()
 {
     stopAnimating();
-    m_pCam->position.setValue(SbVec3f(0, 0, 1));
-    m_pCam->orientation.setValue(SbVec3f(0, 0, 1), 0);
-    m_pCam->viewAll( m_pFigureRoot, getViewportRegion() );
+    SoCamera * pCam = getCamera();
+    pCam->position.setValue(SbVec3f(0, 0, 1));
+    pCam->orientation.setValue(SbVec3f(0, 0, 1), 0);
+    pCam->viewAll( m_pFigureRoot, getViewportRegion() );
+}
+
+void VGraphicsViewer::viewFromLeft()
+{
+    stopAnimating();
+    float sqrt3 = sqrt(3);
+    SoCamera * pCam = getCamera();
+    pCam->position.setValue(SbVec3f(1, 0, 0));
+    pCam->orientation.setValue(SbVec3f(sqrt3, sqrt3, sqrt3), 2* M_PI / 3);
+    pCam->viewAll( m_pFigureRoot, getViewportRegion() );
 }
 
 void VGraphicsViewer::showInjectionPoint()

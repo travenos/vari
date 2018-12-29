@@ -47,8 +47,6 @@ public:
     void clearSelectedIds() ;
     void clearDraggedNodes() ;
 
-    void viewFromAbove() ;
-
     void showInjectionPoint();
     void showVacuumPoint();
 
@@ -72,6 +70,9 @@ public slots:
     void doRender() ;
     void displayInfo() ;
     void clearInfo() ;
+
+    void viewFromAbove() ;
+    void viewFromLeft() ;
 
     void setSelectionMode(bool on) ;
     void setDragMode(bool on) ;
@@ -114,13 +115,13 @@ private:
     QLabel*             m_pFilledPercentLabel;
     QLabel*             m_pAveragePressureLabel;
     QPushButton*        m_pXYButton;
+    QPushButton*        m_pYZButton;
     QPushButton*        m_pSelectionButton;
     QPushButton*        m_pDragButton;
 
     SoSeparator*        m_pRoot;
     SoSeparator*        m_pFigureRoot;
     SoShapeHints*       m_pShapeHints;
-    SoCamera* m_pCam;
     SoExtSelection*     m_pSelection;
 
     SoTransformManip*   m_pTransformBox;
@@ -174,7 +175,7 @@ protected:
     QWidget* buildLeftTrim(QWidget * parent);
     QWidget* buildBottomTrim(QWidget * parent);
     void createViewerButtons(QWidget * parent, SbPList * buttonlist);
-    void toggleCameraType(void);
+    void setCameraType(SoType type);
 signals:
     void askForRender();
     void askForDisplayingInfo();

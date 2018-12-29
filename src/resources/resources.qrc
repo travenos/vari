@@ -14,5 +14,6 @@
         <file>qtbase_ru.qm</file>
         <file>img/cut.png</file>
         <file>img/drag.png</file>
+        <file>img/yzplane.png</file>
     </qresource>
 </RCC>
