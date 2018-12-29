@@ -71,7 +71,7 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_pCam->ref();
     m_pSelection->ref();
     setAntialiasing(true, 1);
-    setBackgroundColor(SbColor(0.0, 0.0, 0.0));
+    setBackgroundColor(SbColor(0.7, 0.7, 0.7));
     setPopupMenuEnabled(false);
 
     m_pBaseWidget = buildWidget(getParentWidget());
