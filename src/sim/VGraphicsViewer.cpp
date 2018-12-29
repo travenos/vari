@@ -45,15 +45,6 @@ const QString VGraphicsViewer::AVERAGE_PRESSURE_LABEL_CAPTION("Среднее д
 
 const int VGraphicsViewer::ICON_SIZE = 24;
 
-#define REMOVE_SO_ELEMENT(element) \
-    if (element != nullptr) \
-    { \
-        int32_t refsCount = element->getRefCount(); \
-        for (int32_t i = 0; i <= refsCount; ++i) \
-            element->unref(); \
-        element = nullptr; \
-    }
-
 /**
  * @param parent
  * @param simulator
@@ -138,8 +129,10 @@ VGraphicsViewer::~VGraphicsViewer()
     m_pRoot->removeAllChildren();
     setSceneGraph(nullptr);
     setCamera(nullptr);
-    REMOVE_SO_ELEMENT(m_pTransformBox);
-    REMOVE_SO_ELEMENT(m_pSelectedPath);
+	if (m_pTransformBox != nullptr)
+		m_pTransformBox->unref();
+	if (m_pSelectedPath != nullptr)
+		m_pSelectedPath->unref();
     m_pRoot->unref();
     m_pFigureRoot->unref();
     m_pShapeHints->unref();
@@ -658,7 +651,11 @@ void VGraphicsViewer::selection_cb(void * userdata, SoPath *selectionPath)
     if (viewer->isDragOn())
     {
         viewer->m_dragCanceled = false;
-        REMOVE_SO_ELEMENT(viewer->m_pTransformBox);
+		if (viewer->m_pTransformBox != nullptr)
+		{
+			viewer->m_pTransformBox->unref();
+			viewer->m_pTransformBox = nullptr;
+		}
         viewer->m_pTransformBox = new SoCenterballManip;
         viewer->m_pTransformBox->ref();
     }
@@ -677,12 +674,13 @@ void VGraphicsViewer::selection_cb(void * userdata, SoPath *selectionPath)
 void VGraphicsViewer::deselection_cb(void * userdata, SoPath * deselectionPath)
 {
     VGraphicsViewer* viewer = static_cast<VGraphicsViewer*>(userdata);
-    if (viewer->m_pSelectedPath != nullptr)
+	if (viewer->m_pSelectedPath != nullptr && viewer->m_pTransformBox != nullptr)
     {
         viewer->m_pTransformBox->replaceManip(viewer->m_pSelectedPath, nullptr);
         viewer->m_pSelectedPath->unref();
         viewer->m_pSelectedPath = nullptr;
-        REMOVE_SO_ELEMENT(viewer->m_pTransformBox);
+		viewer->m_pTransformBox->unref();
+		viewer->m_pTransformBox = nullptr;
         if (!viewer->m_dragCanceled && deselectionPath != nullptr)
         {
             SoPath * path = deselectionPath->copy();
