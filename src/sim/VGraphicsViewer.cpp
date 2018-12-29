@@ -474,14 +474,22 @@ void VGraphicsViewer::setSelectionMode(bool on)
     }
     else
     {
-        std::lock_guard<std::recursive_mutex> locker(m_graphMutex);
-        m_pRoot->removeChild(m_pRoot->findChild(m_pSelection));
-        m_pSelection->unref();
-        m_pSelection = new SoExtSelection;
-        m_pSelection->ref();
-        initSelection();
-        m_pRoot->addChild(m_pSelection);
-        m_interactionMode = PICK;
+        {
+            std::lock_guard<std::recursive_mutex> locker(m_graphMutex);
+            m_pRoot->removeChild(m_pRoot->findChild(m_pSelection));
+            m_pSelection->unref();
+            m_pSelection = new SoExtSelection;
+            m_pSelection->ref();
+            initSelection();
+            m_pRoot->addChild(m_pSelection);
+            m_interactionMode = PICK;
+        }
+        if (m_pSelectedNodesIds->size() > 0)
+        {
+            updateNodeColors();
+            updateTriangleColors();
+            clearSelectedIds();
+        }
     }
     m_pSelectionButton->setChecked(on);
 }
@@ -512,9 +520,6 @@ void VGraphicsViewer::enableSelection(bool enable)
     {
         if (isSelectionOn())
             setSelectionMode(false);
-        updateNodeColors();
-        updateTriangleColors();
-        clearSelectedIds();
     }
     emit selectionEnabled(enable);
 }

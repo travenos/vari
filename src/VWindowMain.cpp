@@ -246,7 +246,8 @@ void VWindowMain::selectLayer()
     }
     else
         ui->layerParamBox->setVisible(false);
-    cancelCuttingLayer();
+    if (ui->layerCutButton->isChecked())
+        cancelCuttingLayer();
 }
 
 void VWindowMain::showColor(const QColor& color)
