@@ -23,6 +23,7 @@ VGraphicsLayer::VGraphicsLayer(const VLayer::const_ptr &simLayer, uint number) :
 {
     addChild(m_pTransform);
     m_transformId = findChild(m_pTransform);
+    m_pTransform->ref();
     const VSimNode::map_ptr &simNodes = simLayer->getNodes();
     reserveNodes(simNodes->size());
     for (auto &simNode : *simNodes)
@@ -36,6 +37,7 @@ VGraphicsLayer::VGraphicsLayer(const VLayer::const_ptr &simLayer, uint number) :
 VGraphicsLayer::~VGraphicsLayer()
 {
     removeAllChildren();
+    m_pTransform->unref();
     #ifdef DEBUG_MODE
         qInfo() << "VGraphicsLayer destroyed";
     #endif

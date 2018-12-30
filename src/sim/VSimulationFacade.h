@@ -22,6 +22,7 @@ class VSimulationFacade : public QObject
 public: 
     
     VSimulationFacade(QWidget *parent);
+    ~VSimulationFacade();
     VSimulationFacade(const VSimulationFacade& ) = delete;
     VSimulationFacade& operator= (const VSimulationFacade& ) = delete;
     void startSimulation() ;

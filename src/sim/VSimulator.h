@@ -211,6 +211,8 @@ private:
      */
     int m_simT_timeBeforePause;
 
+    std::atomic<bool> m_destroyed;
+
     /**
      * A function, which is being executed in the simulation thread
      */

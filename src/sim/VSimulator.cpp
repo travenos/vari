@@ -35,7 +35,8 @@ VSimulator::VSimulator():
     m_simulatingFlag(false),
     m_pauseFlag(false),
     m_timeLimitFlag(false),
-    m_simT_timeBeforePause(0)
+    m_simT_timeBeforePause(0),
+    m_destroyed(false)
 {
     m_calculationThreads.resize(N_THREADS);
     m_calculationData.resize(N_THREADS);
@@ -45,6 +46,7 @@ VSimulator::VSimulator():
  */
 VSimulator::~VSimulator()
 {
+    m_destroyed = true;
     stop();
 }
 
@@ -71,7 +73,7 @@ void VSimulator::stop()
     bool wasOnPause = m_pauseFlag.load();
     m_pauseFlag.store(false);
     interrupt();
-    if (wasOnPause)
+    if (wasOnPause && !m_destroyed)
         emit simulationStopped();
 }
 
@@ -296,12 +298,14 @@ void VSimulator::simulationCycle()
     if (!m_pauseFlag)
     {
         m_simT_timeBeforePause = 0;
-        emit simulationStopped();
+        if (!m_destroyed)
+            emit simulationStopped();
     }
     else
     {
         m_simT_timeBeforePause += timeMeasurer.elapsed();
-        emit simulationPaused();
+        if (!m_destroyed)
+            emit simulationPaused();
     }
     #ifdef DEBUG_MODE
         qInfo() << "The simulation was stopped";

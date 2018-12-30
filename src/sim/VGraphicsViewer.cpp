@@ -332,6 +332,38 @@ void VGraphicsViewer::updateNodeColors()
         layer->updateNodeColors();
 }
 
+void VGraphicsViewer::updateColors(uint layerNumber)
+{
+    updateTriangleColors(layerNumber);
+    updateNodeColors(layerNumber);
+}
+
+void VGraphicsViewer::updateTriangleColors(uint layerNumber)
+{
+    std::lock_guard<std::mutex> lock(*m_pTrianglesLock);
+    for (auto layer : m_graphicsLayers)
+    {
+        if (layer->getNumber() == layerNumber)
+        {
+            layer->updateTriangleColors();
+            break;
+        }
+    }
+}
+
+void VGraphicsViewer::updateNodeColors(uint layerNumber)
+{
+    std::lock_guard<std::mutex> lock(*m_pNodesLock);
+    for (auto layer : m_graphicsLayers)
+    {
+        if (layer->getNumber() == layerNumber)
+        {
+            layer->updateNodeColors();
+            break;
+        }
+    }
+}
+
 void VGraphicsViewer::updateVisibility()
 {
     for (auto layer : m_graphicsLayers)

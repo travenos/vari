@@ -53,6 +53,9 @@ public:
     void updateColors() ;
     void updateNodeColors() ;
     void updateTriangleColors() ;
+    void updateColors(uint layerNumber) ;
+    void updateNodeColors(uint layerNumber) ;
+    void updateTriangleColors(uint layerNumber) ;
 
     void enableSelection(bool enable);
     void enableDrag(bool enable);

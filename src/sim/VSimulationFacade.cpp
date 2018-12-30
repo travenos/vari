@@ -39,6 +39,13 @@ VSimulationFacade::VSimulationFacade(QWidget *parent):
     initLayersProcessor();
 }
 
+VSimulationFacade::~VSimulationFacade()
+{
+    m_pGraphicsViewer.reset();
+    m_pLayersProcessor.reset();
+    m_pSimulator.reset();
+}
+
 void VSimulationFacade::connectMainSignals()
 {
     connect(m_pGraphicsViewer.get(),
@@ -257,6 +264,7 @@ void VSimulationFacade::loadModel(const QString &filename)
     m_pGraphicsViewer->viewFromAbove();
     emit modelLoaded();
 }
+
 void VSimulationFacade::saveModel(const QString &filename)
 {
     m_pSimulator->pause();
@@ -542,16 +550,22 @@ void VSimulationFacade::saveParametres() const
 
 void VSimulationFacade::enableInteraction()
 {
-    m_pGraphicsViewer->enableDrag(true);
+    if (m_pGraphicsViewer)
+    {
+        m_pGraphicsViewer->enableDrag(true);
+    }
 }
 
 void VSimulationFacade::disableInteraction()
 {
-    cancelCuttingLayer();
-    cancelDrag();
-    cancelWaitingForVacuumPointSelection();
-    cancelWaitingForInjectionPointSelection();
-    m_pGraphicsViewer->enableDrag(false);
+    if (m_pGraphicsViewer)
+    {
+        cancelCuttingLayer();
+        cancelDrag();
+        cancelWaitingForVacuumPointSelection();
+        cancelWaitingForInjectionPointSelection();
+        m_pGraphicsViewer->enableDrag(false);
+    }
 }
 
 void VSimulationFacade::m_on_got_point(const QVector3D &point)
