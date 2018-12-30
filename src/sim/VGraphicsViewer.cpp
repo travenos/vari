@@ -19,7 +19,8 @@
 #include <Inventor/nodes/SoShape.h>
 #include <Inventor/nodes/SoLight.h>
 #include <Inventor/nodes/SoTransform.h>
-#include <Inventor/nodes/SoCamera.h>
+#include <Inventor/nodes/SoPerspectiveCamera.h>
+#include <Inventor/nodes/SoOrthographicCamera.h>
 #include <Inventor/manips/SoCenterballManip.h>
 #include <Inventor/nodekits/SoBaseKit.h>
 #include <Inventor/events/SoMouseButtonEvent.h>
@@ -54,6 +55,7 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_pRoot(new SoSeparator),
     m_pFigureRoot(new SoSeparator),
     m_pShapeHints(new SoShapeHints),
+    m_pCam(new SoOrthographicCamera),
     m_pSelection(new SoExtSelection),
     m_pTransformBox(nullptr),
     m_pSelectedPath(nullptr),
@@ -66,6 +68,7 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_pRoot->ref();
     m_pFigureRoot->ref();
     m_pShapeHints->ref();
+    m_pCam->ref();
     m_pSelection->ref();
     setAntialiasing(true, 1);
     setBackgroundColor(SbColor(0.7, 0.7, 0.7));
@@ -80,6 +83,7 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
 
     m_pShapeHints->vertexOrdering = SoShapeHints::COUNTERCLOCKWISE;
     m_pRoot->addChild(m_pShapeHints);
+    m_pRoot->addChild(m_pCam);
 
     initSelection();
     m_pRoot->addChild(m_pSelection);
@@ -128,6 +132,7 @@ VGraphicsViewer::~VGraphicsViewer()
     m_pRoot->unref();
     m_pFigureRoot->unref();
     m_pShapeHints->unref();
+    m_pCam->unref();
     m_pSelection->unref();
     delete m_pBaseWidget;
 }
@@ -292,11 +297,6 @@ void VGraphicsViewer::createViewerButtons(QWidget * parent, SbPList * buttonlist
     buttonlist->append(m_pSelectionButton);
 }
 
-void VGraphicsViewer::setCameraType(SoType type)
-{
-    qDebug() << "kek";
-}
-
 void VGraphicsViewer::setGraphicsElements(const std::vector<VLayer::const_ptr> &layers)
 {
     clearAll();
@@ -449,10 +449,9 @@ void VGraphicsViewer::viewFromAbove()
 void VGraphicsViewer::viewFromLeft()
 {
     stopAnimating();
-    float sqrt3 = sqrt(3);
     SoCamera * pCam = getCamera();
     pCam->position.setValue(SbVec3f(1, 0, 0));
-    pCam->orientation.setValue(SbVec3f(sqrt3, sqrt3, sqrt3), 2* M_PI / 3);
+    pCam->orientation.setValue(SbVec3f(1, 1, 1), 2 * M_PI / 3);
     pCam->viewAll( m_pFigureRoot, getViewportRegion() );
 }
 

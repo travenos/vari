@@ -122,6 +122,7 @@ private:
     SoSeparator*        m_pRoot;
     SoSeparator*        m_pFigureRoot;
     SoShapeHints*       m_pShapeHints;
+    SoCamera*           m_pCam;
     SoExtSelection*     m_pSelection;
 
     SoTransformManip*   m_pTransformBox;
@@ -175,7 +176,6 @@ protected:
     QWidget* buildLeftTrim(QWidget * parent);
     QWidget* buildBottomTrim(QWidget * parent);
     void createViewerButtons(QWidget * parent, SbPList * buttonlist);
-    void setCameraType(SoType type);
 signals:
     void askForRender();
     void askForDisplayingInfo();
