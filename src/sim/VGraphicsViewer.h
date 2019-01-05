@@ -69,6 +69,9 @@ public:
     bool isSelectionOn() const;
     VInteractionMode getInteractionMode() const;
 
+    void setSelectionMode(bool on) ;
+    void setDragMode(bool on) ;
+
 public slots:
     void doRender() ;
     void displayInfo() ;
@@ -76,9 +79,6 @@ public slots:
 
     void viewFromAbove() ;
     void viewFromLeft() ;
-
-    void setSelectionMode(bool on) ;
-    void setDragMode(bool on) ;
 
 private:
 
@@ -127,6 +127,7 @@ private:
     SoShapeHints*       m_pShapeHints;
     SoCamera*           m_pCam;
     SoExtSelection*     m_pSelection;
+    SoExtSelection*     m_pOldSelection;
 
     SoTransformManip*   m_pTransformBox;
     SoPath*             m_pSelectedPath;
@@ -175,6 +176,9 @@ private slots:
      */
     void bottomWheelReleased(void);
 
+    void selectionModeSwitch(bool on) ;
+    void dragModeSwitch(bool on) ;
+
 protected:
     QWidget* buildLeftTrim(QWidget * parent);
     QWidget* buildBottomTrim(QWidget * parent);
@@ -189,5 +193,6 @@ signals:
     void gotNodesSelection(const VGraphicsViewer::const_uint_vect_ptr &p_selectedNodes);
     void gotTransformation();
 };
+
 
 #endif //_VGRAPHICSVIEWER_H

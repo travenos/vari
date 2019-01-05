@@ -57,6 +57,7 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_pShapeHints(new SoShapeHints),
     m_pCam(new SoOrthographicCamera),
     m_pSelection(new SoExtSelection),
+    m_pOldSelection(nullptr),
     m_pTransformBox(nullptr),
     m_pSelectedPath(nullptr),
     m_renderStopFlag(false),
@@ -129,6 +130,8 @@ VGraphicsViewer::~VGraphicsViewer()
 		m_pTransformBox->unref();
 	if (m_pSelectedPath != nullptr)
 		m_pSelectedPath->unref();
+    if (m_pOldSelection != nullptr)
+        m_pOldSelection->unref();
     m_pRoot->unref();
     m_pFigureRoot->unref();
     m_pShapeHints->unref();
@@ -282,7 +285,7 @@ void VGraphicsViewer::createViewerButtons(QWidget * parent, SbPList * buttonlist
     m_pDragButton->setCheckable(true);
     m_pDragButton->setChecked(false);
     m_pDragButton->setVisible(true);
-    connect(m_pDragButton, SIGNAL(toggled(bool)), this, SLOT(setDragMode(bool)));
+    connect(m_pDragButton, SIGNAL(toggled(bool)), this, SLOT(dragModeSwitch(bool)));
     buttonlist->append(m_pDragButton);
 
     m_pSelectionButton = new QPushButton(QIcon(QStringLiteral(":/img/cut.png")),
@@ -293,7 +296,7 @@ void VGraphicsViewer::createViewerButtons(QWidget * parent, SbPList * buttonlist
     m_pSelectionButton->setCheckable(true);
     m_pSelectionButton->setChecked(false);
     m_pSelectionButton->setVisible(false);
-    connect(m_pSelectionButton, SIGNAL(toggled(bool)), this, SLOT(setSelectionMode(bool)));
+    connect(m_pSelectionButton, SIGNAL(toggled(bool)), this, SLOT(selectionModeSwitch(bool)));
     buttonlist->append(m_pSelectionButton);
 }
 
@@ -498,7 +501,7 @@ void VGraphicsViewer::showVacuumPoint()
         layer->showVacuumPoint();
 }
 
-void VGraphicsViewer::setSelectionMode(bool on)
+void VGraphicsViewer::selectionModeSwitch(bool on)
 {
     if (on)
     {
@@ -513,12 +516,14 @@ void VGraphicsViewer::setSelectionMode(bool on)
         setViewing(false);
         m_interactionMode = SELECT;
     }
-    else
+    else if (isSelectionOn())
     {
         {
             std::lock_guard<std::recursive_mutex> locker(m_graphMutex);
-            m_pRoot->removeChild(m_pRoot->findChild(m_pSelection));
-            m_pSelection->unref();
+            m_pRoot->removeChild(m_pSelection);
+            if (m_pOldSelection != nullptr)
+                m_pOldSelection->unref();
+            m_pOldSelection = m_pSelection;
             m_pSelection = new SoExtSelection;
             m_pSelection->ref();
             initSelection();
@@ -532,10 +537,9 @@ void VGraphicsViewer::setSelectionMode(bool on)
             clearSelectedIds();
         }
     }
-    m_pSelectionButton->setChecked(on);
 }
 
-void VGraphicsViewer::setDragMode(bool on)
+void VGraphicsViewer::dragModeSwitch(bool on)
 {
     if (on)
     {
@@ -545,12 +549,21 @@ void VGraphicsViewer::setDragMode(bool on)
         setViewing(false);
         m_interactionMode = DRAG;
     }
-    else
+    else if (isDragOn())
     {
         m_dragCanceled = true;
         m_pSelection->deselectAll();
         m_interactionMode = PICK;
     }
+}
+
+void VGraphicsViewer::setSelectionMode(bool on)
+{
+    m_pSelectionButton->setChecked(on);
+}
+
+void VGraphicsViewer::setDragMode(bool on)
+{
     m_pDragButton->setChecked(on);
 }
 
