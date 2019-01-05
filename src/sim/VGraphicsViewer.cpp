@@ -9,6 +9,7 @@
 #include <QLabel>
 #include <QGridLayout>
 #include <QPushButton>
+#include <QStyleFactory>
 #include <functional>
 #include <Inventor/actions/SoBoxHighlightRenderAction.h>
 #include <Inventor/nodes/SoBaseColor.h>
@@ -298,6 +299,17 @@ void VGraphicsViewer::createViewerButtons(QWidget * parent, SbPList * buttonlist
     m_pSelectionButton->setVisible(false);
     connect(m_pSelectionButton, SIGNAL(toggled(bool)), this, SLOT(selectionModeSwitch(bool)));
     buttonlist->append(m_pSelectionButton);
+
+#if (defined Q_OS_MAC)
+    QStyle * style = QStyleFactory::create(QStringLiteral("windows"));
+    if (style)
+    {
+        m_pXYButton->setStyle(style);
+        m_pYZButton->setStyle(style);
+        m_pDragButton->setStyle(style);
+        m_pSelectionButton->setStyle(style);
+    }
+#endif
 }
 
 void VGraphicsViewer::setGraphicsElements(const std::vector<VLayer::const_ptr> &layers)
