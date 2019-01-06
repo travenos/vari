@@ -73,7 +73,7 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_pCam->ref();
     m_pSelection->ref();
     setAntialiasing(true, 1);
-    setBackgroundColor(SbColor(0.7, 0.7, 0.7));
+    setBackgroundColor(SbColor(0.7f, 0.7f, 0.7f));
     setPopupMenuEnabled(false);
 
     m_pBaseWidget = buildWidget(getParentWidget());
@@ -498,7 +498,7 @@ void VGraphicsViewer::viewFromLeft()
     stopAnimating();
     SoCamera * pCam = getCamera();
     pCam->position.setValue(SbVec3f(1, 0, 0));
-    pCam->orientation.setValue(SbVec3f(1, 1, 1), 2 * M_PI / 3);
+    pCam->orientation.setValue(SbVec3f(1, 1, 1), 2 * static_cast<float>(M_PI) / 3);
     pCam->viewAll( m_pFigureRoot, getViewportRegion() );
 }
 
