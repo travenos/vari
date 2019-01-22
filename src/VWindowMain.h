@@ -1,3 +1,8 @@
+/**
+ * Project VARI
+ * @author Alexey Barashkov
+ */
+
 #ifndef _VWINDOWMAIN_H
 #define _VWINDOWMAIN_H
 

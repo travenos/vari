@@ -1,3 +1,8 @@
+/**
+ * Project VARI
+ * @author Alexey Barashkov
+ */
+
 #ifndef _VWINDOWRESIN_H
 #define _VWINDOWRESIN_H
 

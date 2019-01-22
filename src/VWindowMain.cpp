@@ -1,3 +1,8 @@
+/**
+ * Project VARI
+ * @author Alexey Barashkov
+ */
+
 #ifdef DEBUG_MODE
 #include <QDebug>
 #endif

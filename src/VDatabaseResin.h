@@ -1,3 +1,8 @@
+/**
+ * Project VARI
+ * @author Alexey Barashkov
+ */
+
 #ifndef _VDATABASERESIN_H
 #define _VDATABASERESIN_H
 

@@ -1,3 +1,8 @@
+/**
+ * Project VARI
+ * @author Alexey Barashkov
+ */
+
 #ifndef _VDATABASEINTERACTOR_H
 #define _VDATABASEINTERACTOR_H
 

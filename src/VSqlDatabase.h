@@ -1,3 +1,8 @@
+/**
+ * Project VARI
+ * @author Alexey Barashkov
+ */
+
 #ifndef _VSQLDATABASE_H
 #define _VSQLDATABASE_H
 

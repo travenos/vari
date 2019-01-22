@@ -1,3 +1,8 @@
+/**
+ * Project VARI
+ * @author Alexey Barashkov
+ */
+
 #include <QString>
 #include "VSqlDatabase.h"
 

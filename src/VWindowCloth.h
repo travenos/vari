@@ -1,3 +1,8 @@
+/**
+ * Project VARI
+ * @author Alexey Barashkov
+ */
+
 #ifndef _VWINDOWCLOTH_H
 #define _VWINDOWCLOTH_H
 

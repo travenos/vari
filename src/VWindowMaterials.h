@@ -1,3 +1,8 @@
+/**
+ * Project VARI
+ * @author Alexey Barashkov
+ */
+
 #ifndef _VWINDOWMATERIALS_H
 #define _VWINDOWMATERIALS_H
 

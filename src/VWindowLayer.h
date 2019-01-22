@@ -1,3 +1,8 @@
+/**
+ * Project VARI
+ * @author Alexey Barashkov
+ */
+
 #ifndef _VWINDOWLAYER_H
 #define _VWINDOWLAYER_H
 
