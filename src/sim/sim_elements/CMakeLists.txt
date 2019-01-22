@@ -12,6 +12,7 @@ set(HEADER_FILES
     VSimNode.h
     VSimTriangle.h
     VLayer.h
+    VNodesVolume.h
     )
 
 set(SOURCE_FILES
@@ -19,6 +20,7 @@ set(SOURCE_FILES
     VSimNode.cpp
     VSimTriangle.cpp
     VLayer.cpp
+    VNodesVolume.cpp
     )
 
 ADD_MODULE(v_sim_elements
