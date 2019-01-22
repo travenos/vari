@@ -11,7 +11,7 @@
 #include <QXmlStreamWriter>
 
 #include "VModelExport.h"
-#include "core/VExceptions.h"
+#include "structures/VExceptions.h"
 
 VModelExport::VModelExport(const VSimulationInfo &info,
                            const VSimulationParametres &param,

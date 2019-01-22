@@ -15,8 +15,8 @@
 #include "VSimulationClass.h"
 #include "sim_elements/VSimNode.h"
 #include "sim_elements/VSimTriangle.h"
-#include "core/VNotify.h"
-#include "core/VSimulationInfo.h"
+#include "structures/VNotify.h"
+#include "structures/VSimulationInfo.h"
 
 class VSimulator: public VSimulationClass
 {

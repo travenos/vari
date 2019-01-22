@@ -15,7 +15,7 @@
 #include "layer_builders/VLayerFromAnsysBuilder.h"
 #include "import_export/VModelExport.h"
 #include "import_export/VModelImport.h"
-#include "core/VExceptions.h"
+#include "structures/VExceptions.h"
 
 /**
  * VSimulationFacade implementation

@@ -20,9 +20,9 @@ set(SOURCE_FILES
     VSimulationParametres.cpp
     )
 
-ADD_MODULE(v_core
+ADD_MODULE(v_structures
     ${HEADER_FILES}
     ${SOURCE_FILES})
 
-target_link_libraries(v_core Qt5::Core Qt5::Gui)
+target_link_libraries(v_structures Qt5::Core Qt5::Gui)
 

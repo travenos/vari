@@ -11,7 +11,7 @@
 #include <QVariant>
 
 #include "VModelImport.h"
-#include "core/VExceptions.h"
+#include "structures/VExceptions.h"
 
 #define READ_ELEMENTS(body) \
     while (!(xmlReader.isEndElement() && !xmlReader.name().compare(tags._NAME)) && !xmlReader.atEnd()) \

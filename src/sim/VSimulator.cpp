@@ -11,8 +11,8 @@
 #include <QTime>
 
 #include "VSimulator.h"
-#include "core/VExceptions.h"
-#include "core/VSimulationParametres.h"
+#include "structures/VExceptions.h"
+#include "structures/VSimulationParametres.h"
 
 /**
  * VSimulator implementation

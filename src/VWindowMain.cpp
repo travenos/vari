@@ -13,7 +13,7 @@
 #include "VWindowResin.h"
 #include "VWindowLayer.h"
 #include "sim/VSimulationFacade.h"
-#include "sim/core/VExceptions.h"
+#include "sim/structures/VExceptions.h"
 
 const QString VWindowMain::ERROR_TITLE("Ошибка");
 const QString VWindowMain::IMPORT_FROM_FILE_ERROR("Ошибка загрузки из файла");

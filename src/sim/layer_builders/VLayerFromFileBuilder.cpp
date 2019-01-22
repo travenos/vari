@@ -5,7 +5,7 @@
 
 
 #include "VLayerFromFileBuilder.h"
-#include "core/VExceptions.h"
+#include "structures/VExceptions.h"
 
 /**
  * VLayerFromFileBuilder implementation

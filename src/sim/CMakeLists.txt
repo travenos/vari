@@ -24,8 +24,8 @@ include_directories(${SoQt_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-set(CORE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/core")
-add_subdirectory(${CORE_DIRECTORY})
+set(STRUCTURES_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/structures")
+add_subdirectory(${STRUCTURES_DIRECTORY})
 set(GRAPHICS_ELEMENTS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/graphics_elements")
 add_subdirectory(${GRAPHICS_ELEMENTS_DIRECTORY})
 set(IMPORT_EXPORT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/import_export")
@@ -62,13 +62,13 @@ ADD_MODULE(v_sim
     ${SOURCE_FILES})
 
 add_dependencies(v_sim
-    v_core
+    v_structures
     v_graphics_elements
     v_import_export
     v_layer_builders
     v_sim_elements)
 target_link_libraries(v_sim
-    v_core
+    v_structures
     v_graphics_elements
     v_import_export
     v_layer_builders
