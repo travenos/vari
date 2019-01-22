@@ -468,14 +468,16 @@ inline double VSimulator::getAverageCellDistance() const
 {
     double distance = 0;
     int counter = 0;
-    std::vector<const VSimNode*> neighbours;
     for(auto &node : *m_pActiveNodes)
     {
-        node->getNeighbours(neighbours);
-        for(auto &neighbour : neighbours)
+        const VSimNode::layered_neighbours_t &neighbours = node->getNeighbours();
+        for (uint layer = 0; layer < VSimNode::LAYERS_NUMBER; ++layer)
         {
-            distance += node->getDistance(neighbour);
-            ++counter;
+            for(auto &neighbour : neighbours[layer])
+            {
+                distance += node->getDistance(neighbour.second);
+                ++counter;
+            }
         }
     }
     if (counter > 0)

@@ -187,12 +187,12 @@ void VSimNode::clearNeighbours(VLayerSequence layer)
             + m_neighbours[NEXT].size();
 }
 
-double VSimNode::getDistance(const VSimNode * node) const 
+float VSimNode::getDistance(const VSimNode * node) const
 {
     return m_position.distanceToPoint(node->getPosition());
 }
 
-double VSimNode::getDistance(const QVector3D& point) const
+float VSimNode::getDistance(const QVector3D& point) const
 {
     return m_position.distanceToPoint(point);
 }

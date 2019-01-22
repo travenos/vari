@@ -196,9 +196,10 @@ bool VLayersProcessor::isLayerEnabled(uint layer) const
 
 void VLayersProcessor::getActiveModelSize(QVector3D &size) const
 {
+    //TODO remake, taking into account VNodesVolume
     if (m_pActiveNodes->size() > 0)
     {
-        const QVector3D &firstNode = m_pActiveNodes->at(0)->getPosition();
+        const QVector3D &firstNode = (*m_pActiveNodes->begin())->getPosition();
         float minX = firstNode.x();
         float maxX = firstNode.x();
         float minY = firstNode.y();
