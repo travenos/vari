@@ -40,7 +40,6 @@ set(CMAKE_AUTOMOC ON)
 set(HEADER_FILES
     VGeometryProcessor.h
     VGraphicsViewer.h
-    VLayer.h
     VLayersProcessor.h
     VSimulationClass.h
     VSimulationFacade.h
@@ -50,7 +49,6 @@ set(HEADER_FILES
 set(SOURCE_FILES
     VGeometryProcessor.cpp
     VGraphicsViewer.cpp
-    VLayer.cpp
     VLayersProcessor.cpp
     VSimulationClass.cpp
     VSimulationFacade.cpp

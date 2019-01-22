@@ -11,12 +11,14 @@ set(HEADER_FILES
     VSimElement.h
     VSimNode.h
     VSimTriangle.h
+    VLayer.h
     )
 
 set(SOURCE_FILES
     VSimElement.cpp
     VSimNode.cpp
     VSimTriangle.cpp
+    VLayer.cpp
     )
 
 ADD_MODULE(v_sim_elements

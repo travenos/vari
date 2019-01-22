@@ -9,7 +9,7 @@
 
 #include "VSimulationClass.h"
 #include "layer_builders/VLayerAbstractBuilder.h"
-#include "VLayer.h"
+#include "sim_elements/VLayer.h"
 #include "VSimulator.h"
 
 class VLayersProcessor: public VSimulationClass

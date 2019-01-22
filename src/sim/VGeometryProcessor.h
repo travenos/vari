@@ -7,7 +7,7 @@
 #ifndef _VGEOMETRYPROCESSOR_H
 #define _VGEOMETRYPROCESSOR_H
 
-#include "VLayer.h"
+#include "sim_elements/VLayer.h"
 
 struct VMatrix {
 };

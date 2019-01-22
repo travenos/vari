@@ -3,15 +3,14 @@
  * @author Alexey Barashkov
  */
 
-
 #ifndef _VLAYER_H
 #define _VLAYER_H
 
 #include <vector>
 #include <memory>
 #include <QColor>
-#include "sim_elements/VSimNode.h"
-#include "sim_elements/VSimTriangle.h"
+#include "VSimNode.h"
+#include "VSimTriangle.h"
 
 class VLayer
 {

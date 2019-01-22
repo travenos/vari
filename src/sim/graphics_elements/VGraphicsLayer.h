@@ -9,7 +9,7 @@
 
 #include <Inventor/nodes/SoSeparator.h>
 
-#include "../VLayer.h"
+#include "../sim_elements/VLayer.h"
 
 class VGraphicsNode;
 class VGraphicsTriangle;
