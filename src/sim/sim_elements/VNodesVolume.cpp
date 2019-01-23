@@ -5,7 +5,6 @@
 #ifdef DEBUG_MODE
 #include <QDebug>
 #endif
-#include <assert.h>
 
 #include <algorithm>
 #include <cmath>
@@ -125,7 +124,7 @@ inline void VNodesVolume::fillArray(const VSimNode::const_map_ptr &nodes)
     {
         const QVector3D &pos = node.second->getPosition();
         int i, j, k;
-        assert(getIndexes(pos, i, j, k));
+        getIndexes(pos, i, j, k);
         m_nodes[i][j][k].push_back(node.second);
     }
 }
