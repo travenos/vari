@@ -35,7 +35,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="createManualLabel">
+        <widget class="QPushButton" name="createManualButton">
          <property name="text">
           <string>Задать форму слоя</string>
          </property>

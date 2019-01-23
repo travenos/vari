@@ -46,6 +46,8 @@ VWindowLayer::VWindowLayer(QWidget *parent) :
     reset();
     loadSavedParametres();
     showColor();
+    //TODO: implement manual creation of layer and remove this string
+    ui->createManualButton->setVisible(false);
 }
 
 VWindowLayer::~VWindowLayer()
