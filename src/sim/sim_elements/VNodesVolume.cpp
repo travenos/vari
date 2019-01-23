@@ -14,8 +14,36 @@
 
 const float VNodesVolume::MIN_STEP = 0.00001f;
 
+VNodesVolume::VNodesVolume()
+{
+    reset();
+}
+
 VNodesVolume::VNodesVolume(const VSimNode::const_map_ptr &nodes)
 {
+    reset(nodes);
+}
+
+VNodesVolume::VNodesVolume(const VSimNode::const_map_ptr &nodes, float step)
+{
+    reset(nodes, step);
+}
+
+void VNodesVolume::reset()
+{
+    deallocate();
+    m_nodes = nullptr;
+    m_step = MIN_STEP;
+    m_averageDistance = 0;
+    m_min = QVector3D(0, 0, 0);
+    m_max = QVector3D(0, 0, 0);
+    m_size = QVector3D(0, 0, 0);
+    m_arrSizes.fill(0);
+}
+
+void VNodesVolume::reset(const VSimNode::const_map_ptr &nodes)
+{
+    deallocate();
     calculateAverageDistance(nodes);
     m_step = (m_averageDistance / 2 >= MIN_STEP) ? m_averageDistance / 2 : MIN_STEP;
     calcSizes(nodes);
@@ -23,8 +51,9 @@ VNodesVolume::VNodesVolume(const VSimNode::const_map_ptr &nodes)
     fillArray(nodes);
 }
 
-VNodesVolume::VNodesVolume(const VSimNode::const_map_ptr &nodes, float step)
+void VNodesVolume::reset(const VSimNode::const_map_ptr &nodes, float step)
 {
+    deallocate();
     calculateAverageDistance(nodes);
     m_step = (step >= MIN_STEP) ? step : MIN_STEP;
     calcSizes(nodes);
@@ -116,15 +145,18 @@ inline void VNodesVolume::allocate()
 
 inline void VNodesVolume::deallocate()
 {
-    for (int i = 0; i < m_arrSizes[0]; ++i)
+    if (m_nodes != nullptr)
     {
-        for (int j = 0; j < m_arrSizes[1]; ++j)
+        for (int i = 0; i < m_arrSizes[0]; ++i)
         {
-            delete [] m_nodes[i][j];
+            for (int j = 0; j < m_arrSizes[1]; ++j)
+            {
+                delete [] m_nodes[i][j];
+            }
+            delete [] m_nodes[i];
         }
-        delete [] m_nodes[i];
+        delete m_nodes;
     }
-    delete m_nodes;
 }
 
 inline bool VNodesVolume::getIndexes(const QVector3D &pos,

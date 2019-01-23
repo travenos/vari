@@ -15,13 +15,17 @@ class VNodesVolume
 {
 public: 
 
-    VNodesVolume() = delete; //TODO
+    VNodesVolume();
     VNodesVolume(const VSimNode::const_map_ptr &nodes);
     VNodesVolume(const VSimNode::const_map_ptr &nodes, float step);
     virtual ~VNodesVolume();
     VNodesVolume(const VNodesVolume& ) = delete; //TODO implement theese methods
     VNodesVolume& operator= (const VNodesVolume& ) = delete; //TODO implement theese methods
     //TODO Also implement move and rvalue
+
+    void reset();
+    void reset(const VSimNode::const_map_ptr &nodes);
+    void reset(const VSimNode::const_map_ptr &nodes, float step);
 
     float getAverageDistance() const;
     float getStep() const;
@@ -56,7 +60,7 @@ private:
     QVector3D m_min;
     QVector3D m_max;
     QVector3D m_size;
-    std::array<int, 3> m_arrSizes { {0, 0, 0} };
+    std::array<int, 3> m_arrSizes;
     VSimNode::list_t *** m_nodes{nullptr};
 };
 
