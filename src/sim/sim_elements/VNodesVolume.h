@@ -7,6 +7,7 @@
 #define _VNODES_VOLUME_H
 
 #include <list>
+#include <array>
 
 #include "VSimNode.h"
 
@@ -55,7 +56,7 @@ private:
     QVector3D m_min;
     QVector3D m_max;
     QVector3D m_size;
-    int m_arrSizes[3]{0, 0, 0};
+    std::array<int, 3> m_arrSizes { {0, 0, 0} };
     VSimNode::list_t *** m_nodes{nullptr};
 };
 

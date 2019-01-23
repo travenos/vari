@@ -12,7 +12,7 @@
 
 #include "VNodesVolume.h"
 
-const float VNodesVolume::MIN_STEP = 0.00001;
+const float VNodesVolume::MIN_STEP = 0.00001f;
 
 VNodesVolume::VNodesVolume(const VSimNode::const_map_ptr &nodes)
 {
