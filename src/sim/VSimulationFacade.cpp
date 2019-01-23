@@ -126,6 +126,8 @@ void VSimulationFacade::initLayersProcessor()
 
 void VSimulationFacade::startSimulation() 
 {
+    if (!m_pLayersProcessor->areLayersConnected())
+        m_pLayersProcessor->createConnections();
     m_pSimulator->start();
 }
 

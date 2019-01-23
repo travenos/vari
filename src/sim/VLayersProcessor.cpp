@@ -16,22 +16,17 @@
  */
 VLayersProcessor::VLayersProcessor():
     m_nodeNextId(0),
-    m_triangleNextId(0)
+    m_triangleNextId(0),
+    m_layersConnected(false)
 {
     updateActiveElementsVectors();
 }
 
-/**
- * @return size_type
- */
 size_t VLayersProcessor::getLayersNumber() const 
 {
     return m_layers.size();
 }
 
-/**
- * @return size_type
- */
 size_t VLayersProcessor::getActiveLayersNumber() const 
 {
     size_t number = 0;
@@ -43,9 +38,6 @@ size_t VLayersProcessor::getActiveLayersNumber() const
     return number;
 }
 
-/**
- * @return size_type
- */
 size_t VLayersProcessor::getInactiveLayersNumber() const 
 {
     size_t number = 0;
@@ -57,9 +49,6 @@ size_t VLayersProcessor::getInactiveLayersNumber() const
     return number;
 }
 
-/**
- * @param builder
- */
 void VLayersProcessor::addLayer(VLayerAbstractBuilder *builder) 
 {
     builder->setNodeStartId(m_nodeNextId);
@@ -70,12 +59,10 @@ void VLayersProcessor::addLayer(VLayerAbstractBuilder *builder)
     //TODO put the layer on the highest position
     m_layers.push_back(p_newLayer);
     updateActiveElementsVectors();
+    m_layersConnected = false;
     emit layerAdded();
 }
 
-/**
- * @param layer
- */
 void VLayersProcessor::removeLayer(uint layer) 
 {
     enableLayer(layer, false);
@@ -85,41 +72,31 @@ void VLayersProcessor::removeLayer(uint layer)
     {
         m_layers.erase(it);
     }
+    m_layersConnected = false;
     emit layerRemoved(layer);
 }
 
-/**
- * @param layer
- * @param visible
- */
 void VLayersProcessor::setVisibleLayer(uint layer, bool visible) 
 {
     m_layers.at(layer)->setVisible(visible);
     emit layerVisibilityChanged(layer, visible);
 }
 
-/**
- * @param disabledLayer
- */
 void VLayersProcessor::enableLayer(uint layer, bool enable) 
 {
     if(enable)
     {
         if (!(m_layers.at(layer)->isActive()))
         {
-            removeConnections(layer - 1, layer + 1);
-            createConnections(layer - 1, layer);
-            createConnections(layer, layer + 1);
             increasePositions(layer + 1);
+            m_layersConnected = false;
         }
     }
     else if (m_layers.at(layer)->isActive())
     {
+        m_layers.at(layer)->disconnect();
         m_layers.at(layer)->reset();
-        removeConnections(layer - 1, layer);
-        removeConnections(layer, layer + 1);
         decreasePositions(layer + 1);
-        createConnections(layer - 1, layer + 1);
     }
     m_layers.at(layer)->markActive(enable);
     updateActiveElementsVectors();
@@ -127,10 +104,6 @@ void VLayersProcessor::enableLayer(uint layer, bool enable)
     emit layerVisibilityChanged(layer, isLayerVisible(layer));
 }
 
-/**
- * @param layer
- * @param material
- */
 void VLayersProcessor::setMaterial(uint layer, const VCloth& material) 
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
@@ -194,6 +167,11 @@ bool VLayersProcessor::isLayerEnabled(uint layer) const
     return m_layers.at(layer)->isActive();
 }
 
+bool VLayersProcessor::areLayersConnected() const
+{
+    return m_layersConnected;
+}
+
 void VLayersProcessor::getActiveModelSize(QVector3D &size) const
 {
     //TODO remake, taking into account VNodesVolume
@@ -240,39 +218,57 @@ size_t VLayersProcessor::getActiveTrianglesNumber() const
     return m_pActiveTriangles->size();
 }
 
-/**
- * @param layer1
- * @param layer2
- */
-void VLayersProcessor::createConnections(uint layer1, uint layer2)  {
-    //TODO find nearest ACTIVE layers to layer1 and layer2
+
+void VLayersProcessor::createConnections()
+{
+    if (!areLayersConnected())
+    {
+        removeConnections();
+        for(uint i = 0; i < m_layers.size(); ++i)
+        {
+            if (isLayerEnabled(i))
+            {
+                for(uint j = i + 1; j < m_layers.size(); ++j)
+                {
+                    if (isLayerEnabled(j))
+                        m_layers.at(i)->connectWith(m_layers.at(j));
+                }
+            }
+        }
+        m_layersConnected = true;
+    }
 }
 
-/**
- * @param layer1
- * @param layer2
- */
-void VLayersProcessor::removeConnections(uint layer1, uint layer2)  {
-    //TODO find nearest ACTIVE layers to layer1 and layer2
+
+void VLayersProcessor::removeConnections()
+{
+    for (auto &layer : m_layers)
+    {
+        const VSimNode::map_ptr &nodes = layer->getNodes();
+        for (auto &node : *nodes)
+        {
+            node.second->clearNeighbours(VSimNode::OTHER);
+        }
+    }
+    m_layersConnected = false;
 }
 
-/**
- * @param layer
- */
+void VLayersProcessor::resetNodesVolumes()
+{
+    for (auto &layer : m_layers)
+    {
+        layer->resetNodesVolume();
+    }
+}
+
 void VLayersProcessor::decreasePositions(uint fromLayer)  {
     //TODO find nearest ACTIVE layers to layer1 and layer2
 }
 
-/**
- * @param layer
- */
 void VLayersProcessor::increasePositions(uint fromLayer)  {
     //TODO find nearest ACTIVE layers to layer1 and layer2
 }
 
-/**
- * @param layer
- */
 void VLayersProcessor::putOnTop(uint layer)  {
 
 }
@@ -317,6 +313,7 @@ void VLayersProcessor::cutLayer(const std::shared_ptr<const std::vector<uint> > 
 {
     m_layers.at(layer)->cut(nodesIds);
     updateActiveElementsVectors();
+    m_layersConnected = false;
 }
 
 void VLayersProcessor::transformateLayer(const std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > >
@@ -324,6 +321,7 @@ void VLayersProcessor::transformateLayer(const std::shared_ptr<const std::vector
 {
     m_layers.at(layer)->transformate(nodesCoords);
     updateActiveElementsVectors();
+    m_layersConnected = false;
 }
 
 void VLayersProcessor::updateActiveElementsVectors() 

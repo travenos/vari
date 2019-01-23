@@ -238,7 +238,6 @@ void VModelExport::saveConnection(QXmlStreamWriter &xmlWriter,
     xmlWriter.writeStartElement(tags._NAME);
     xmlWriter.writeAttribute(tags.ID, QString::number(node->getId()));
     saveConnectionCurrentLayer(xmlWriter, node);
-    saveConnectionPreviousLayer(xmlWriter, node);
     xmlWriter.writeEndElement();
 }
 
@@ -250,20 +249,6 @@ void VModelExport::saveConnectionCurrentLayer(QXmlStreamWriter &xmlWriter,
     if (connections.size() > 0)
     {
         auto &tags = _xCONNECTIONS_TAGS._xCONNECTION_TAGS._xCURRENT_TAGS;
-        xmlWriter.writeStartElement(tags._NAME);
-        xmlWriter.writeCharacters(createString(connections));
-        xmlWriter.writeEndElement();
-    }
-}
-
-void VModelExport::saveConnectionPreviousLayer(QXmlStreamWriter &xmlWriter,
-                                 const VSimNode::const_ptr &node)
-{
-    std::vector<uint> connections;
-    node->getNeighboursId(connections, VSimNode::PREVIOUS);
-    if (connections.size() > 0)
-    {
-        auto &tags = _xCONNECTIONS_TAGS._xCONNECTION_TAGS._xPREVIOUS_TAGS;
         xmlWriter.writeStartElement(tags._NAME);
         xmlWriter.writeCharacters(createString(connections));
         xmlWriter.writeEndElement();

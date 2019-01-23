@@ -140,16 +140,10 @@ protected:
                 VXmlCurLayerConnectionTags() {}
                 const QString _NAME{QStringLiteral("Cur")};
             };
-            struct VXmlPrevLayerConnectionTags
-            {
-                VXmlPrevLayerConnectionTags() {}
-                const QString _NAME{QStringLiteral("Prev")};
-            };
             const QString _NAME{QStringLiteral("Cnt")};
             const QString ID{QStringLiteral("id")};
 
             const VXmlCurLayerConnectionTags _xCURRENT_TAGS;
-            const VXmlPrevLayerConnectionTags _xPREVIOUS_TAGS;
         };
 
         const QString _NAME{QStringLiteral("Connections")};

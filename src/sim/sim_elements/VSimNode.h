@@ -21,7 +21,7 @@ class VSimTriangle;
 class VSimNode: public VSimElement
 {
 public: 
-    static const uint LAYERS_NUMBER = 3;
+    static const uint LAYERS_NUMBER = 2;
 
     typedef std::shared_ptr<VSimNode> ptr;
     typedef std::shared_ptr<const VSimNode> const_ptr;
@@ -38,7 +38,7 @@ public:
     typedef std::list< std::pair<double, VSimNode*> > neighbours_list_t;
     typedef neighbours_list_t layered_neighbours_t[LAYERS_NUMBER];
 
-    enum VLayerSequence { PREVIOUS=0, CURRENT, NEXT };
+    enum VLayerSequence { CURRENT=0, OTHER };
     enum VNodeRole { NORMAL, INJECTION, VACUUM };
 
     VSimNode(uint id, const QVector3D &pos,
@@ -58,12 +58,20 @@ public:
     double getFilledPart() const override;
 
     void addNeighbourMutually(VSimNode *node, VLayerSequence layer=CURRENT) ;
+    void addNeighbourMutually(const VSimNode::ptr &node, VLayerSequence layer=CURRENT);
+    void addNeighbourMutually(VSimNode *node, VLayerSequence layer, float dist) ;
+    void addNeighbourMutually(const VSimNode::ptr &node, VLayerSequence layer, float dist);
     void addNeighbour(VSimNode *node, VLayerSequence layer=CURRENT) ;
+    void addNeighbour(const VSimNode::ptr &node, VLayerSequence layer=CURRENT);
+    void addNeighbour(VSimNode *node, VLayerSequence layer, float dist) ;
+    void addNeighbour(const VSimNode::ptr &node, VLayerSequence layer, float dist);
     void clearAllNeighbours() ;
-
     void clearNeighbours(VLayerSequence layer) ;
+    void clearAllNeighboursMutually() ;
+    void clearNeighboursMutually(VLayerSequence layer) ;
 
     float getDistance(const VSimNode* node) const ;
+    float getDistance(const VSimNode::const_ptr &node) const;
     float getDistance(const QVector3D& point) const;
     const QVector3D &getPosition() const ;
     void setPosition(const QVector3D& pos);
@@ -95,6 +103,8 @@ public:
     bool isNormal() const override;
 
 private:
+    inline size_t calcNeighboursNumber() const;
+
     layered_neighbours_t m_neighbours;
     QVector3D m_position;
     double m_injectionPressure;

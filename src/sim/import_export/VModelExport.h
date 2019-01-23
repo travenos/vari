@@ -64,9 +64,6 @@ private:
     void saveConnectionCurrentLayer(QXmlStreamWriter &xmlWriter,
                                      const VSimNode::const_ptr &node);
 
-    void saveConnectionPreviousLayer(QXmlStreamWriter &xmlWriter,
-                                     const VSimNode::const_ptr &node);
-
     QString createString(const QVector3D &vect) const;
 
     template <typename T>

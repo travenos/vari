@@ -93,6 +93,7 @@ void VModelImport::loadFromFile(const QString &filename)
         #endif
     }
     file.close();
+    m_pLayersProcessor->resetNodesVolumes();
 }
 
 void VModelImport::loadInfo(QXmlStreamReader &xmlReader)
@@ -236,7 +237,7 @@ void VModelImport::loadLayer(QXmlStreamReader& xmlReader, std::vector<VLayer::pt
             loadTrianglesInfos(xmlReader, trianglesInfos);
     );
     createTriangles(trianglesInfos, material, triangles);
-    VLayer::ptr layer(new VLayer(nodes, triangles, material));
+    VLayer::ptr layer(new VLayer(nodes, triangles, material, false));
     layer->markActive(isEnabled);
     layer->setVisible(isVisible);
     layer->setMinMaxIds(nodeMinId, nodeMaxId, triangleMinId, triangleMaxId);
@@ -399,12 +400,7 @@ void VModelImport::loadConnection(QXmlStreamReader& xmlReader)
             if (!xmlReader.name().compare(tags._xCURRENT_TAGS._NAME))
             {
                 QString nbIdStr = xmlReader.readElementText();
-                    createConnection(nbIdStr, id, true);
-            }
-            else if (!xmlReader.name().compare(tags._xPREVIOUS_TAGS._NAME))
-            {
-                QString nbIdStr = xmlReader.readElementText();
-                createConnection(nbIdStr, id, false);
+                    createConnection(nbIdStr, id);
             }
         );
     }
@@ -412,7 +408,7 @@ void VModelImport::loadConnection(QXmlStreamReader& xmlReader)
         throw VImportException();
 }
 
-void VModelImport::createConnection(const QString &nbIdStr, uint id, bool current)
+void VModelImport::createConnection(const QString &nbIdStr, uint id)
 {
     std::vector<uint> nbIdVect;
     makeVector(nbIdStr, nbIdVect);
@@ -426,10 +422,7 @@ void VModelImport::createConnection(const QString &nbIdStr, uint id, bool curren
             if (nbNodeRef != m_allNodes.end())
             {
                 VSimNode::ptr nbNode = nbNodeRef->second;
-                if (current)
-                    node->addNeighbour(nbNode.get());
-                else
-                    node->addNeighbourMutually(nbNode.get(), VSimNode::PREVIOUS);
+                node->addNeighbour(nbNode.get());
             }
             else
                 throw VImportException();

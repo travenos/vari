@@ -8,19 +8,16 @@
 
 #include "VLayer.h"
 
+const float VLayer::SEARCH_ZONE_PART = 0.1f;
+
 /**
  * VLayer implementation
  */
 
-
-/**
- * @param nodes
- * @param triangles
- * @param material
- */
 VLayer::VLayer(const VSimNode::map_ptr &nodes,
                const VSimTriangle::list_ptr &triangles,
-               const VCloth::ptr &material):
+               const VCloth::ptr &material,
+               bool createVolume):
     m_pNodes(nodes),
     m_pTriangles(triangles),
     m_pMaterial(material),
@@ -32,6 +29,8 @@ VLayer::VLayer(const VSimNode::map_ptr &nodes,
     m_triangleMinId(0),
     m_triangleMaxId(0)
 {
+    if(createVolume)
+        resetNodesVolume();
 }
 
 VLayer::~VLayer()
@@ -41,9 +40,11 @@ VLayer::~VLayer()
     #endif
 }
 
-/**
- * @param visible
- */
+void VLayer::resetNodesVolume()
+{
+    m_nodesVolume.reset(m_pNodes);
+}
+
 void VLayer::setVisible(bool visible) 
 {
     p_setVisible(visible);
@@ -59,9 +60,6 @@ void VLayer::p_setVisible(bool visible)
     m_visible = visible;
 }
 
-/**
- * @return bool
- */
 bool VLayer::isVisible() const 
 {
     return m_visible;
@@ -80,17 +78,11 @@ void VLayer::markActive(bool active)
     m_active = active;
 }
 
-/**
- * @return bool
- */
 bool VLayer::isActive() const 
 {
     return m_active;
 }
 
-/**
- * @return vector<&VNode::ptr>
- */
 const VSimNode::map_ptr &VLayer::getNodes() const
 {
     return m_pNodes;
@@ -183,6 +175,7 @@ void VLayer::cut(const std::shared_ptr<const std::vector<uint> > &nodesIds)
             ++it;
     }
     m_pNodes = p_remainingNodesMap;
+    resetNodesVolume();
 }
 
 void VLayer::transformate(const std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > >
@@ -195,5 +188,44 @@ void VLayer::transformate(const std::shared_ptr<const std::vector<std::pair<uint
         {
             node_pair->second->setPosition(pair.second);
         }
+    }
+    if (nodesCoords->size() > 0)
+        resetNodesVolume();
+}
+
+void VLayer::connectWith(const VLayer::ptr &otherLayer)
+{
+    if (otherLayer && otherLayer.get() != this)
+    {
+        if (otherLayer->m_nodesVolume.isEmpty() && otherLayer->m_pNodes->size() > 0)
+            otherLayer->resetNodesVolume();
+        float avgRadius = otherLayer->m_nodesVolume.getAverageDistance();
+        float radiusMin = avgRadius * (1 - SEARCH_ZONE_PART);
+        float radiusMax = avgRadius * (1 + SEARCH_ZONE_PART);
+        for (auto &node : *m_pNodes)
+        {
+            VSimNode * nd_ptr = node.second.get();
+            VSimNode::list_t candidatesList;
+            otherLayer->m_nodesVolume.getPointsBetweenSpheres(candidatesList,
+                                                              nd_ptr->getPosition(),
+                                                              radiusMax, radiusMin, false);
+            for (auto &neighbour : candidatesList)
+            {
+                float distance = neighbour->getDistance(nd_ptr);
+                if (distance >= radiusMin && distance <= radiusMax)
+                {
+                    nd_ptr->addNeighbourMutually(neighbour, VSimNode::OTHER, distance);
+                }
+            }
+        }
+    }
+}
+
+void VLayer::disconnect()
+{
+    for (auto &node : *m_pNodes)
+    {
+        VSimNode * nd_ptr = node.second.get();
+        nd_ptr->clearNeighboursMutually(VSimNode::OTHER);
     }
 }

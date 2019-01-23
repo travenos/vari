@@ -9,8 +9,10 @@
 #include <vector>
 #include <memory>
 #include <QColor>
+
 #include "VSimNode.h"
 #include "VSimTriangle.h"
+#include "VNodesVolume.h"
 
 class VLayer
 {
@@ -25,14 +27,13 @@ public:
      */
     VLayer() = delete;
     VLayer(const VSimNode::map_ptr &nodes, const VSimTriangle::list_ptr &triangles,
-           const VCloth::ptr &material);
+           const VCloth::ptr &material, bool createVolume=true);
     virtual ~VLayer();
     VLayer(const VLayer& ) = delete; //TODO implement theese methods
     VLayer& operator= (const VLayer& ) = delete; //TODO implement theese methods
     //TODO Also implement move and rvalue
-    /**
-     * @param visible
-     */
+
+    void resetNodesVolume();
     void setVisible(bool visible) ;
     bool isVisible() const ;
     void markActive(bool active) ;
@@ -54,6 +55,11 @@ public:
     void transformate(const std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > >
                         &nodesCoords);
 
+    void connectWith(const VLayer::ptr &otherLayer);
+    void disconnect();
+
+    static const float SEARCH_ZONE_PART;
+
 private: 
     void p_setVisible(bool visible) ;
 
@@ -68,6 +74,8 @@ private:
     uint m_nodeMaxId;
     uint m_triangleMinId;
     uint m_triangleMaxId;
+
+    VNodesVolume m_nodesVolume;
 };
 
 #endif //_VLAYER_H

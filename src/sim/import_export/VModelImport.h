@@ -56,7 +56,7 @@ private:
     void loadTriangleInfo(QXmlStreamReader& xmlReader, std::vector<VTriangleInfo> &trianglesInfos);
 
     void loadConnection(QXmlStreamReader& xmlReader);
-    void createConnection(const QString &nbIdStr, uint id, bool current);
+    void createConnection(const QString &nbIdStr, uint id);
 
     template <typename T>
     void makeVector(const QString &numbersStr, std::vector<T> &numbersVect);

@@ -52,6 +52,8 @@ public:
     bool isLayerVisible(uint layer) const ;
     bool isLayerEnabled(uint layer) const ;
 
+    bool areLayersConnected() const;
+
     void setInjectionPoint(const QVector3D &point, double diameter);
     void setVacuumPoint(const QVector3D &point, double diameter);
 
@@ -68,6 +70,10 @@ public:
     void transformateLayer(const std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > >
                         &nodesCoords, uint layer);
 
+    void createConnections() ;
+    void removeConnections() ;
+    void resetNodesVolumes() ;
+
 private:
     void updateActiveElementsVectors() ;
     void updateNextIds();
@@ -78,10 +84,8 @@ private:
 
     uint m_nodeNextId;
     uint m_triangleNextId;
-    
-    void createConnections(uint layer1, uint layer2) ;
 
-    void removeConnections(uint layer1, uint layer2) ;
+    bool m_layersConnected;
 
     void decreasePositions(uint fromLayer) ;
 

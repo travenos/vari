@@ -11,7 +11,7 @@
 
 #include "VNodesVolume.h"
 
-const float VNodesVolume::MIN_STEP = 0.00001f;
+const float VNodesVolume::MIN_STEP = 0.001f;
 
 VNodesVolume::VNodesVolume()
 {
@@ -64,7 +64,7 @@ VNodesVolume::~VNodesVolume()
 {
     deallocate();
     #ifdef DEBUG_MODE
-        qInfo() << "VNodusVolume destroyed";
+        qInfo() << "VNodesVolume destroyed";
     #endif
 }
 
@@ -265,9 +265,9 @@ void VNodesVolume::getPointsBetweenSpheres(VSimNode::list_t &nodesList,
     }
 }
 
-void VNodesVolume::getCylinder(VSimNode::list_t &nodesList,
-                               const QVector3D &point, float radius, float height,
-                               bool strict) const
+void VNodesVolume::getPointsInCylinder(VSimNode::list_t &nodesList,
+                                       const QVector3D &point, float radius, float height,
+                                       bool strict) const
 {
     nodesList.clear();
     int i0, j0, k0, r, half_h;
@@ -305,6 +305,11 @@ VSimNode::ptr VNodesVolume::getNearestNode(const QVector3D &point) const
 {
     //TODO
     return VSimNode::ptr();
+}
+
+bool VNodesVolume::isEmpty() const
+{
+    return (m_arrSizes[0] <= 0);
 }
 
 inline float VNodesVolume::projectioXYLength(const QVector3D &vect)

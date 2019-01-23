@@ -37,10 +37,12 @@ public:
     void getPointsBetweenSpheres(VSimNode::list_t &nodesList, const QVector3D &point,
                                  float radius1, float radius2,
                                  bool strict=false) const;
-    void getCylinder(VSimNode::list_t &nodesList, const QVector3D &point,
-                     float radius, float height,
-                     bool strict=false) const;
+    void getPointsInCylinder(VSimNode::list_t &nodesList, const QVector3D &point,
+                             float radius, float height,
+                             bool strict=false) const;
     VSimNode::ptr getNearestNode(const QVector3D &point) const;
+
+    bool isEmpty() const;
 
     static inline float projectioXYLength(const QVector3D &vect);
 
