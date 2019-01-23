@@ -18,15 +18,9 @@
  * VSimulator implementation
  */
 
-/**
- * Number of threads for calculations during the simulation
- */
 const uint VSimulator::N_THREADS =
         (std::thread::hardware_concurrency()>1)?std::thread::hardware_concurrency()-1:1;
 
-/**
- * Default constructor
- */
 VSimulator::VSimulator():
     m_nodesThreadPart(1),
     m_trianglesThreadPart(1),
@@ -41,18 +35,13 @@ VSimulator::VSimulator():
     m_calculationThreads.resize(N_THREADS);
     m_calculationData.resize(N_THREADS);
 }
-/**
- * Destructor
- */
+
 VSimulator::~VSimulator()
 {
     m_destroyed = true;
     stop();
 }
 
-/**
- * Start the simulation thread
- */
 void VSimulator::start() 
 {
     if (!isSimulating())
@@ -65,9 +54,6 @@ void VSimulator::start()
     }
 }
 
-/**
- * Finish the simulation using a flag m_stopFlag
- */
 void VSimulator::stop() 
 {
     bool wasOnPause = m_pauseFlag.load();
@@ -97,10 +83,6 @@ void VSimulator::interrupt()
     }
 }
 
-/**
- * Check if simulation thread is currently active
- * @return bool
- */
 bool VSimulator::isSimulating() const 
 {
     return m_simulatingFlag.load();
@@ -116,9 +98,6 @@ bool VSimulator::isTimeLimitModeOn() const
     return m_timeLimitFlag.load();
 }
 
-/**
- * Stop the simulation if it is active and set the default state for all nodes
- */
 void VSimulator::reset() 
 {
     stop();
@@ -179,11 +158,6 @@ void VSimulator::setSimulationParametres(const VSimulationInfo &info,
     m_newDataNotifier.notifyAll();
 }
 
-
-/**
- * Update an information about active nodes and triangles (m_activeNodes, m_triangles)
- * @param layers
- */
 void VSimulator::setActiveElements(const VSimNode::const_vector_ptr &nodes,
                                 const VSimTriangle::const_vector_ptr &triangles) 
 {
@@ -202,43 +176,28 @@ void VSimulator::setActiveElements(const VSimNode::const_vector_ptr &nodes,
         throw VSimulatorException();
 }
 
-/**
- * Get the information about the current state of the simulation
- * @param info: output information about the current state of the simulation
- */
 VSimulationInfo VSimulator::getSimulationInfo() const
 {
     std::lock_guard<std::mutex> lock(m_infoLock);
     return m_info;
 }
 
-/**
- * Get number of current iteration
- * @return int
- */
 int VSimulator::getIterationNumber() const  
 {
     std::lock_guard<std::mutex> lock(m_infoLock);
     return m_info.iteration;
 }
-/**
- * Wait until some nodes state is changed
- */
+
 void VSimulator::waitForNewData() const 
 {
     m_newDataNotifier.wait();
 }
-/**
- * Make waiting thread stop waiting and make it think that the simulation state has changed
- */
+
 void VSimulator::cancelWaitingForNewData() const 
 {
     m_newDataNotifier.notifyAll();
 }
 
-/**
- * A function, which is being executed in the simulation thread
- */
 void VSimulator::simulationCycle() 
 {
     emit simulationStarted();

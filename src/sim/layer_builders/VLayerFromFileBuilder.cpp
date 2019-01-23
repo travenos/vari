@@ -12,10 +12,6 @@
  */
 
 
-/**
- * @param filename
- * @param param VSimParam::const_ptr
- */
 VLayerFromFileBuilder::VLayerFromFileBuilder(const QString &filename,
                                              const VCloth &material,
                                              VUnit units) :

@@ -20,9 +20,6 @@
 
 const float VGraphicsNode::DEFAULT_CUBE_SIDE = 1.5e-3f;
 
-/**
- * @param simNode
- */
 VGraphicsNode::VGraphicsNode(const VSimNode::const_ptr &simNode):
     VGraphicsElement(std::dynamic_pointer_cast<const VSimElement>(simNode)),
     m_pSimNode(simNode),

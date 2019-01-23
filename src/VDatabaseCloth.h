@@ -1,3 +1,8 @@
+/**
+ * Project VARI
+ * @author Alexey Barashkov
+ */
+
 #ifndef _VDATABASECLOTH_H
 #define _VDATABASECLOTH_H
 

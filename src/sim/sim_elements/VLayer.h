@@ -20,18 +20,14 @@ public:
     typedef std::shared_ptr<VLayer> ptr;
     typedef std::shared_ptr<const VLayer> const_ptr;
 
-    /**
-     * @param nodes
-     * @param triangles
-     * @param material
-     */
     VLayer() = delete;
     VLayer(const VSimNode::map_ptr &nodes, const VSimTriangle::list_ptr &triangles,
            const VCloth::ptr &material, bool createVolume=true);
     virtual ~VLayer();
     VLayer(const VLayer& ) = delete; //TODO implement theese methods
     VLayer& operator= (const VLayer& ) = delete; //TODO implement theese methods
-    //TODO Also implement move and rvalue
+    VLayer(VLayer&&) = delete; //TODO implement theese methods
+    VLayer& operator= (VLayer&& ) = delete;//TODO implement theese methods
 
     void resetNodesVolume();
     bool isNodesVolumeValid() const;

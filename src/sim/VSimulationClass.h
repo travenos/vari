@@ -19,10 +19,7 @@ public:
     virtual ~VSimulationClass() = default;
     VSimulationClass(const VSimulationClass& ) = delete;
     VSimulationClass& operator= (const VSimulationClass& ) = delete;
-/**
- * @param nodesLock
- * @param trianglesLock
- */
+
 void setMutexes(mutex_ptr nodesLock, mutex_ptr trianglesLock) ;
 
 protected:

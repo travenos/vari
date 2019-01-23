@@ -46,10 +46,7 @@ const QString VGraphicsViewer::AVERAGE_PRESSURE_LABEL_CAPTION("Среднее д
 
 const int VGraphicsViewer::ICON_SIZE = 24;
 
-/**
- * @param parent
- * @param simulator
- */
+
 VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulator) :
     SoQtExaminerViewer (parent, nullptr, true, SoQtFullViewer::BUILD_ALL, SoQtFullViewer::BROWSER, false),
     m_pSimulator(simulator),
@@ -674,11 +671,6 @@ void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)
     }
 }
 
-/**
- * Callback static function for the lasso selection mode. Should be called when the select action finishes for post processing.
- * @param userdata pointer to master VGraphicsViewer object
- * @param sel Pointer to the used selection object.
- */
 void VGraphicsViewer::selection_finish_cb(void * userdata, SoSelection * sel)
 {
     VGraphicsViewer* viewer = static_cast<VGraphicsViewer*>(userdata);

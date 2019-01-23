@@ -26,41 +26,41 @@ public:
     typedef std::shared_ptr<const VSimulator> const_ptr;
 
     /**
- * Default constructor
- */
+     * Default constructor
+     */
     VSimulator();
 
     /**
- * Destructor
- */
+     * Destructor
+     */
     virtual ~VSimulator();
     /**
- * Start the simulation thread
- */
+     * Start the simulation thread
+     */
     void start() ;
     /**
- * Finish the simulation
- */
+     * Finish the simulation
+     */
     void stop() ;
     /**
- * Pause the simulation
- */
+     * Pause the simulation
+     */
     void pause() ;
     /**
- * Check if simulation thread is currently active
- */
+     * Check if simulation thread is currently active
+     */
     bool isSimulating() const ;
     /**
- * Check if simulation is set on pause
- */
+     * Check if simulation is set on pause
+     */
     bool isPaused() const ;
     /**
     * Check if time timit mode is on
     */
     bool isTimeLimitModeOn() const ;
     /**
- * Stop the simulation and reset all nodes states
- */
+     * Stop the simulation and reset all nodes states
+     */
     void reset() ;
     /**
      * Stop the simulation and remove all pointers to simulation elements
@@ -75,29 +75,28 @@ public:
      */
     void resetInfo() ;
     /**
- * Update an information about active nodes and triangles (m_activeNodes, m_triangles)
- * @param layers
- */
+     * Update an information about active nodes and triangles (m_activeNodes, m_triangles)
+     * @param layers
+     */
     void setActiveElements(const VSimNode::const_vector_ptr &nodes,
-                        const VSimTriangle::const_vector_ptr &triangles) ;
+                           const VSimTriangle::const_vector_ptr &triangles) ;
     /**
- * Get the information about the current state of the simulation
- * @param info: output information about the current state of the simulation
- */
+     * Get the information about the current state of the simulation
+     * @param info: output information about the current state of the simulation
+     */
     VSimulationInfo getSimulationInfo() const ;
     /**
-
- * Get number of current iteration
- * @return int
- */
+     * Get number of current iteration
+     * @return int
+     */
     int getIterationNumber() const ;
     /**
- * Wait until some nodes state is changed
- */
+     * Wait until some nodes state is changed
+     */
     void waitForNewData() const ;
     /**
- * Make waiting thread stop waiting and make it think that the simulation state has changed
- */
+     * Make waiting thread stop waiting and make it think that the simulation state has changed
+     */
     void cancelWaitingForNewData() const ;
 
     /**
@@ -147,23 +146,23 @@ private:
      * Number of triangles, which are calculated in the same thread
      */
     size_t m_trianglesThreadPart;
-     /**
+    /**
      * Vector of pointers to all nodes which can be processed
      */
     VSimNode::const_vector_ptr m_pActiveNodes;
-     /**
+    /**
      * Vector of all triangles which can be processed
      */
     VSimTriangle::const_vector_ptr m_pTriangles;
-     /**
+    /**
      * A thread, where simulation cycle is being processed
      */
     std::unique_ptr<std::thread> m_pSimulationThread;
-     /**
+    /**
      * Flag, representing if the simulation process is currently active
      */
     std::atomic<bool> m_simulatingFlag;
-     /**
+    /**
      * Flag, used to stop the simulation
      */
     std::atomic<bool> m_stopFlag;

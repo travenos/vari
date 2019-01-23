@@ -14,10 +14,10 @@
 
 
 VGraphicsTriangle::VGraphicsTriangle(const VSimTriangle::const_ptr &simTriangle):
-VGraphicsElement(std::dynamic_pointer_cast<const VSimElement>(simTriangle)),
-  m_pSimTriangle(simTriangle),
-  m_pTriangleCoordinates(new SoCoordinate3),
-  m_pStrip(new SoTriangleStripSet)
+    VGraphicsElement(std::dynamic_pointer_cast<const VSimElement>(simTriangle)),
+    m_pSimTriangle(simTriangle),
+    m_pTriangleCoordinates(new SoCoordinate3),
+    m_pStrip(new SoTriangleStripSet)
 {
     updatePosition();
     addChild(m_pTriangleCoordinates);

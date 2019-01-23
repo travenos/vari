@@ -16,9 +16,6 @@ const QColor VGraphicsElement::INJECTION_COLOR = QColor(0,0,255);
 const QColor VGraphicsElement::VACUUM_COLOR = QColor(0,255,255);
 const QColor VGraphicsElement::SELECTION_COLOR = QColor(255,0,255);
 
-/**
- * @param simElement
- */
 VGraphicsElement::VGraphicsElement(const VSimElement::const_ptr &simElement):
     m_pSimElement(simElement),
     m_pDrawStyle(new SoDrawStyle),

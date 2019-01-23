@@ -100,6 +100,11 @@ private:
     void process() ;
 
     static void event_cb(void * userdata, SoEventCallback * node);
+    /**
+     * Callback static function for the lasso selection mode. Should be called when the select action finishes for post processing.
+     * @param userdata pointer to master VGraphicsViewer object
+     * @param sel Pointer to the used selection object.
+     */
     static void selection_finish_cb(void * userdata, SoSelection * sel);
     static void selection_cb(void * userdata, SoPath *selectionPath);
     static void deselection_cb(void * userdata, SoPath *deselectioPath);

@@ -11,16 +11,11 @@
  */
 
 
-/**
- * @param filename
- * @param param VSimParam::const_ptr
- */
 VLayerFromGmeshBuilder::VLayerFromGmeshBuilder(const QString &filename,
                                                const VCloth &material,
                                                VUnit units):
-VLayerFromFileBuilder(filename, material, units)
+    VLayerFromFileBuilder(filename, material, units)
 {
-
 }
 
 bool VLayerFromGmeshBuilder::importNodes() 

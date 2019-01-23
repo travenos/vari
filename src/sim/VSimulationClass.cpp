@@ -15,10 +15,6 @@ VSimulationClass::VSimulationClass():
     m_pTrianglesLock(new std::mutex)
 {}
 
-/**
- * @param nodesLock
- * @param trianglesLock
- */
 void VSimulationClass::setMutexes(mutex_ptr nodesLock, mutex_ptr trianglesLock)  {
     m_pNodesLock = nodesLock;
     m_pTrianglesLock = trianglesLock;

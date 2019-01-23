@@ -29,38 +29,32 @@ public:
     typedef std::shared_ptr<const list_t> const_list_ptr;
 
     static const uint VERTICES_NUMBER = 3;
-/**
- * @param p_material
- * @param p_param
- * @param p_node0
- * @param p_node1
- * @param p_node2
- */
-VSimTriangle(uint id, const VCloth::const_ptr &p_material,
-             const VSimNode::const_ptr &p_node0,
-             const VSimNode::const_ptr &p_node1,
-             const VSimNode::const_ptr &p_node2);
 
-VSimTriangle(uint id, const VCloth::const_ptr &p_material,
-             const VSimNode::const_ptr &p_node0,
-             const VSimNode::const_ptr &p_node1,
-             const VSimNode::const_ptr &p_node2,
-             const QColor &color);
+    VSimTriangle(uint id, const VCloth::const_ptr &p_material,
+                 const VSimNode::const_ptr &p_node0,
+                 const VSimNode::const_ptr &p_node1,
+                 const VSimNode::const_ptr &p_node2);
 
-virtual ~VSimTriangle();
+    VSimTriangle(uint id, const VCloth::const_ptr &p_material,
+                 const VSimNode::const_ptr &p_node0,
+                 const VSimNode::const_ptr &p_node1,
+                 const VSimNode::const_ptr &p_node2,
+                 const QColor &color);
 
-void getVertices(QVector3D vertices[VERTICES_NUMBER]) const ;
-QVector3D getVerticesId() const ;
-void updateColor() ;
-const QColor& getColor() const override;
-double getPressure() const override;
-double getFilledPart() const override;
-void reset()  override;
+    virtual ~VSimTriangle();
 
-bool isMarkedForRemove() const override;
-bool isInjection() const override;
-bool isVacuum() const override;
-bool isNormal() const override;
+    void getVertices(QVector3D vertices[VERTICES_NUMBER]) const ;
+    QVector3D getVerticesId() const ;
+    void updateColor() ;
+    const QColor& getColor() const override;
+    double getPressure() const override;
+    double getFilledPart() const override;
+    void reset()  override;
+
+    bool isMarkedForRemove() const override;
+    bool isInjection() const override;
+    bool isVacuum() const override;
+    bool isNormal() const override;
 
 private:
     QColor m_color;

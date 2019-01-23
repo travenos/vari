@@ -11,10 +11,6 @@
  */
 
 
-/**
- * @param filename const QString
- * @param param VSimulationParametres::const_ptr
- */
 VLayerFromAnsysBuilder::VLayerFromAnsysBuilder(const QString &filename,
                                                const VCloth &material,
                                                VUnit units):
@@ -51,14 +47,14 @@ bool VLayerFromAnsysBuilder::importNodes()
                         QString token = (*it);
 
                         switch(pos){
-                                                case 0:
+                        case 0:
                             nodeId = token.toInt(&ok);
                             if(!ok)
                                 return false;
                             break;
-                                                case 3:
-                                                case 4:
-                                                case 5:
+                        case 3:
+                        case 4:
+                        case 5:
                             double coord = token.toDouble(&ok);
                             if(!ok)
                                 return false;

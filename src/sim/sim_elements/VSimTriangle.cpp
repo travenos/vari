@@ -13,13 +13,6 @@
  * VSimTriangle implementation
  */
 
-/**
- * @param p_material
- * @param p_param
- * @param p_node0
- * @param p_node1
- * @param p_node2
- */
 VSimTriangle::VSimTriangle(uint id, const VCloth::const_ptr &p_material,
                            const VSimNode::const_ptr &p_node0,
                            const VSimNode::const_ptr &p_node1,
@@ -50,9 +43,6 @@ VSimTriangle::~VSimTriangle()
     #endif
 }
 
-/**
- * @return std::vector<QVector3D>
- */
 void VSimTriangle::getVertices(QVector3D vertices[VERTICES_NUMBER]) const 
 {
     for (uint i = 0; i < VERTICES_NUMBER; ++i)
@@ -73,9 +63,6 @@ void VSimTriangle::updateColor()
     m_color.setRgb(RGB_MAX * filledPart, RGB_MAX * (1-filledPart), 0);
 }
 
-/**
- * @return QColor&
- */
 const QColor &VSimTriangle::getColor() const 
 {
     return m_color;
