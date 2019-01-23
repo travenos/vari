@@ -78,7 +78,7 @@ public slots:
     void clearInfo() ;
 
     void viewFromAbove() ;
-    void viewFromLeft() ;
+    void viewFromRight() ;
 
 private:
 

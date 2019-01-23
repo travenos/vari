@@ -14,7 +14,7 @@ class VNodesVolume
 {
 public: 
 
-    VNodesVolume() = delete;
+    VNodesVolume() = delete; //TODO
     VNodesVolume(const VSimNode::const_map_ptr &nodes);
     VNodesVolume(const VSimNode::const_map_ptr &nodes, float step);
     virtual ~VNodesVolume();
@@ -50,13 +50,13 @@ private:
 
     inline bool getIndexes(const QVector3D &pos, int &i, int &j, int &k) const;
 
-    float m_step;
-    float m_averageDistance;
+    float m_step{MIN_STEP};
+    float m_averageDistance{0};
     QVector3D m_min;
     QVector3D m_max;
     QVector3D m_size;
-    int m_arrSizes[3];
-    VSimNode::list_t *** m_nodes;
+    int m_arrSizes[3]{0, 0, 0};
+    VSimNode::list_t *** m_nodes{nullptr};
 };
 
 #endif //_VNODES_VOLUME_H

@@ -275,7 +275,7 @@ void VGraphicsViewer::createViewerButtons(QWidget * parent, SbPList * buttonlist
     m_pYZButton->setFocusPolicy(Qt::NoFocus);
     m_pYZButton->setIconSize(QSize(ICON_SIZE, ICON_SIZE));
     m_pYZButton->adjustSize();
-    connect(m_pYZButton, SIGNAL(clicked()), this, SLOT(viewFromLeft()));
+    connect(m_pYZButton, SIGNAL(clicked()), this, SLOT(viewFromRight()));
     buttonlist->append(m_pYZButton);
 
     m_pDragButton = new QPushButton(QIcon(QStringLiteral(":/img/drag.png")),
@@ -493,7 +493,7 @@ void VGraphicsViewer::viewFromAbove()
     pCam->viewAll( m_pFigureRoot, getViewportRegion() );
 }
 
-void VGraphicsViewer::viewFromLeft()
+void VGraphicsViewer::viewFromRight()
 {
     stopAnimating();
     SoCamera * pCam = getCamera();

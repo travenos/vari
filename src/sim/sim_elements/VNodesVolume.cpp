@@ -96,8 +96,7 @@ inline void VNodesVolume::fillArray(const VSimNode::const_map_ptr &nodes)
     {
         const QVector3D &pos = node.second->getPosition();
         int i, j, k;
-        bool result = getIndexes(pos, i, j, k);
-        assert(!result);
+        assert(getIndexes(pos, i, j, k));
         m_nodes[i][j][k].push_back(node.second);
     }
 }
@@ -274,6 +273,7 @@ void VNodesVolume::getCylinder(VSimNode::list_t &nodesList,
 VSimNode::ptr VNodesVolume::getNearestNode(const QVector3D &point) const
 {
     //TODO
+    return VSimNode::ptr();
 }
 
 inline float VNodesVolume::projectioXYLength(const QVector3D &vect)
