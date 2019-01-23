@@ -28,6 +28,59 @@ VNodesVolume::VNodesVolume(const VSimNode::const_map_ptr &nodes, float step)
     reset(nodes, step);
 }
 
+VNodesVolume::VNodesVolume(const VNodesVolume& copy):
+    m_step(copy.m_step),
+    m_averageDistance(copy.m_averageDistance),
+    m_min(copy.m_min),
+    m_max(copy.m_max),
+    m_size(copy.m_size),
+    m_arrSizes(copy.m_arrSizes),
+    m_nodes(copy.getNodesArrCopy())
+{
+}
+
+VNodesVolume& VNodesVolume::operator= (const VNodesVolume& copy)
+{
+    if(this != &copy)
+    {
+        m_step = copy.m_step;
+        m_averageDistance = copy.m_averageDistance;
+        m_min = copy.m_min;
+        m_max = copy.m_max;
+        m_size = copy.m_size;
+        m_arrSizes = copy.m_arrSizes;
+        m_nodes = copy.getNodesArrCopy();
+    }
+    return *this;
+}
+
+VNodesVolume::VNodesVolume(VNodesVolume&& temp):
+    m_step(temp.m_step),
+    m_averageDistance(temp.m_averageDistance),
+    m_min(temp.m_min),
+    m_max(temp.m_max),
+    m_size(temp.m_size),
+    m_arrSizes(temp.m_arrSizes),
+    m_nodes(temp.m_nodes)
+{
+    temp.m_nodes = nullptr;
+    temp.reset();
+}
+
+VNodesVolume& VNodesVolume::operator=(VNodesVolume&& temp)
+{
+    m_step = temp.m_step;
+    m_averageDistance = temp.m_averageDistance;
+    m_min = temp.m_min;
+    m_max = temp.m_max;
+    m_size = temp.m_size;
+    m_arrSizes = temp.m_arrSizes;
+    m_nodes = temp.m_nodes;
+    temp.m_nodes = nullptr;
+    temp.reset();
+    return *this;
+}
+
 void VNodesVolume::reset()
 {
     deallocate();
@@ -291,7 +344,7 @@ void VNodesVolume::getPointsInCylinder(VSimNode::list_t &nodesList,
                         const QVector3D &nodePos = nodePtr->getPosition();
                         QVector3D diffVector = nodePos - point;
                         if (fabs(diffVector.z()) <= height
-                            && projectioXYLength(diffVector) <= radius)
+                            && projectionXYLength(diffVector) <= radius)
                         {
                             nodesList.push_back(nodePtr);
                         }
@@ -303,8 +356,39 @@ void VNodesVolume::getPointsInCylinder(VSimNode::list_t &nodesList,
 
 VSimNode::ptr VNodesVolume::getNearestNode(const QVector3D &point) const
 {
-    //TODO
-    return VSimNode::ptr();
+    if (isEmpty())
+        return VSimNode::ptr();
+    int r = 0;
+    int i0, j0, k0;
+    getIndexes(point, i0, j0, k0);
+    VSimNode::list_t nodesList;
+    while(true)
+    {
+        int r_sq = r * r;
+        for(int i = std::max(i0-r, 0); i <= std::min(i0+r, m_arrSizes[0] - 1); ++i)
+        {
+            int d_i_sq = (i - i0) * (i - i0);
+            int r_j = static_cast<int>(sqrt(r_sq - d_i_sq) + 0.5);
+            for(int j = std::max(j0-r_j, 0); i <= std::min(j0+r_j, m_arrSizes[1] - 1); ++j)
+            {
+                int d_j_sq = (j - j0) * (j - j0);
+                int k_base = static_cast<int>(sqrt(r_sq - d_i_sq - d_j_sq) + 0.5);
+                int k1 = k_base + k0;
+                int k2 = -k_base + k0;
+                nodesList.insert(nodesList.end(), m_nodes[i][j][k1].begin(), m_nodes[i][j][k1].end());
+                nodesList.insert(nodesList.end(), m_nodes[i][j][k2].begin(), m_nodes[i][j][k2].end());
+            }
+        }
+        if (nodesList.size() > 0)
+            break;
+        ++r;
+    }
+    auto compare = [&point] (const VSimNode::ptr &node1, const VSimNode::ptr &node2) -> bool
+    {
+        return node1->getDistance(point) < node2->getDistance(point);
+    };
+    VSimNode::ptr minNode = *std::min_element(nodesList.begin(), nodesList.end(), compare);
+    return minNode;
 }
 
 bool VNodesVolume::isEmpty() const
@@ -312,7 +396,23 @@ bool VNodesVolume::isEmpty() const
     return (m_arrSizes[0] <= 0);
 }
 
-inline float VNodesVolume::projectioXYLength(const QVector3D &vect)
+inline float VNodesVolume::projectionXYLength(const QVector3D &vect)
 {
     return sqrt(vect.x() * vect.x() + vect.y() * vect.y());
+}
+
+inline VSimNode::list_t *** VNodesVolume::getNodesArrCopy() const
+{
+    VSimNode::list_t *** nodesCopy;
+    nodesCopy = new VSimNode::list_t ** [ m_arrSizes[0] ];
+    for (int i = 0; i < m_arrSizes[0]; ++i)
+    {
+        nodesCopy[i] = new VSimNode::list_t * [ m_arrSizes[1] ];
+        for (int j = 0; j < m_arrSizes[1]; ++j)
+        {
+            nodesCopy[i][j] = new VSimNode::list_t[ m_arrSizes[2] ];
+            std::copy(m_nodes[i][j], m_nodes[i][j] + m_arrSizes[2], nodesCopy[i][j]);
+        }
+    }
+    return nodesCopy;
 }

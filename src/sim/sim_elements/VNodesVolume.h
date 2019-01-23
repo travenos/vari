@@ -18,10 +18,11 @@ public:
     VNodesVolume();
     VNodesVolume(const VSimNode::const_map_ptr &nodes);
     VNodesVolume(const VSimNode::const_map_ptr &nodes, float step);
+    VNodesVolume(const VNodesVolume& copy);
+    VNodesVolume& operator= (const VNodesVolume& copy);
+    VNodesVolume(VNodesVolume&& temp);
+    VNodesVolume& operator=(VNodesVolume&& temp);
     virtual ~VNodesVolume();
-    VNodesVolume(const VNodesVolume& ) = delete; //TODO implement theese methods
-    VNodesVolume& operator= (const VNodesVolume& ) = delete; //TODO implement theese methods
-    //TODO Also implement move and rvalue
 
     void reset();
     void reset(const VSimNode::const_map_ptr &nodes);
@@ -44,7 +45,7 @@ public:
 
     bool isEmpty() const;
 
-    static inline float projectioXYLength(const QVector3D &vect);
+    static inline float projectionXYLength(const QVector3D &vect);
 
     static const float MIN_STEP;
 
@@ -54,6 +55,7 @@ private:
     inline void fillArray(const VSimNode::const_map_ptr &nodes);
     inline void allocate();
     inline void deallocate();
+    inline VSimNode::list_t *** getNodesArrCopy() const;
 
     inline bool getIndexes(const QVector3D &pos, int &i, int &j, int &k) const;
 

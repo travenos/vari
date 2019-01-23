@@ -34,6 +34,8 @@ public:
     //TODO Also implement move and rvalue
 
     void resetNodesVolume();
+    bool isNodesVolumeValid() const;
+    void getSize(QVector3D &size) const;
     void setVisible(bool visible) ;
     bool isVisible() const ;
     void markActive(bool active) ;

@@ -45,6 +45,16 @@ void VLayer::resetNodesVolume()
     m_nodesVolume.reset(m_pNodes);
 }
 
+void VLayer::getSize(QVector3D &size) const
+{
+    m_nodesVolume.getSize(size);
+}
+
+bool VLayer::isNodesVolumeValid() const
+{
+    return !(m_nodesVolume.isEmpty() && m_pNodes->size() > 0);
+}
+
 void VLayer::setVisible(bool visible) 
 {
     p_setVisible(visible);
@@ -197,7 +207,7 @@ void VLayer::connectWith(const VLayer::ptr &otherLayer)
 {
     if (otherLayer && otherLayer.get() != this)
     {
-        if (otherLayer->m_nodesVolume.isEmpty() && otherLayer->m_pNodes->size() > 0)
+        if (!otherLayer->isNodesVolumeValid())
             otherLayer->resetNodesVolume();
         float avgRadius = otherLayer->m_nodesVolume.getAverageDistance();
         float radiusMin = avgRadius * (1 - SEARCH_ZONE_PART);

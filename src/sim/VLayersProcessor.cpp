@@ -11,9 +11,6 @@
  */
 
 
-/**
- * @param simulator
- */
 VLayersProcessor::VLayersProcessor():
     m_nodeNextId(0),
     m_triangleNextId(0),
@@ -174,37 +171,16 @@ bool VLayersProcessor::areLayersConnected() const
 
 void VLayersProcessor::getActiveModelSize(QVector3D &size) const
 {
-    //TODO remake, taking into account VNodesVolume
-    if (m_pActiveNodes->size() > 0)
+    size = QVector3D(0, 0, 0);
+    for (auto &layer : m_layers)
     {
-        const QVector3D &firstNode = (*m_pActiveNodes->begin())->getPosition();
-        float minX = firstNode.x();
-        float maxX = firstNode.x();
-        float minY = firstNode.y();
-        float maxY = firstNode.y();
-        float minZ = firstNode.z();
-        float maxZ = firstNode.z();
-        for(auto &node : *m_pActiveNodes)
+        if (layer->isActive())
         {
-            const QVector3D &pos = node->getPosition();
-            if (pos.x() < minX)
-                minX = pos.x();
-            else if (pos.x() > maxX)
-                maxX = pos.x();
-            if (pos.y() < minY)
-                minY = pos.y();
-            else if (pos.y() > maxY)
-                maxY = pos.y();
-            if (pos.z() < minZ)
-                minZ = pos.z();
-            else if (pos.z() > maxZ)
-                maxZ = pos.z();
+            QVector3D layerSize;
+            layer->getSize(layerSize);
+            for (uint i = 0; i < 3; ++i)
+                size[i] = std::max(size[i], layerSize[i]);
         }
-        size = QVector3D(maxX - minX, maxY - minY, maxZ - minZ);
-    }
-    else
-    {
-        size = QVector3D(0, 0, 0);
     }
 }
 
