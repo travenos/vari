@@ -191,6 +191,7 @@ protected:
 signals:
     void askForRender();
     void askForDisplayingInfo();
+    void canceledDrag();
     void interactionEnabled(bool);
     void selectionEnabled(bool);
     void dragEnabled(bool);

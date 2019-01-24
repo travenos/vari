@@ -60,6 +60,8 @@ void VSimulationFacade::connectMainSignals()
             this, SIGNAL(gotNewInfo()));
     connect(m_pGraphicsViewer.get(), SIGNAL(selectionEnabled(bool)),
             this, SIGNAL(selectionEnabled(bool)));
+    connect(m_pGraphicsViewer.get(), SIGNAL(canceledDrag()),
+            this, SLOT(updateGraphics()));
     connect(m_pSimulator.get(), SIGNAL(simulationStarted()),
             this, SIGNAL(simulationStarted()));
     connect(m_pSimulator.get(), SIGNAL(simulationPaused()),
@@ -353,6 +355,12 @@ void VSimulationFacade::updateConfiguration()
     emit configUpdated();
 }
 
+void VSimulationFacade::updateGraphics()
+{
+    m_pGraphicsViewer->setGraphicsElements(m_pLayersProcessor->getLayers());
+    //TODO write more effective method. May be use SoResetTransform
+}
+
 void VSimulationFacade::waitForInjectionPointSelection(double diameter)
 {
     cancelCuttingLayer();
@@ -419,6 +427,8 @@ void VSimulationFacade::performTransformation()
     m_pLayersProcessor->transformateLayer(m_pGraphicsViewer->getTransformedNodesCoords(),
                                  m_pGraphicsViewer->getTransformedLayerNumber());
     updateConfiguration();
+    //updateGraphics(); do not use updateConfiguration
+    //TODO write more effective method. May be use SoResetTransform
     emit translationPerformed();
 }
 
@@ -457,7 +467,7 @@ void VSimulationFacade::cancelDrag()
     if (m_pGraphicsViewer->isDragOn())
     {
         m_pGraphicsViewer->setDragMode(false);
-        m_pGraphicsViewer->setGraphicsElements(m_pLayersProcessor->getLayers());
+        updateGraphics();
     }
 }
 

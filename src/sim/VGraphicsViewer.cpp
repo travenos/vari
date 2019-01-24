@@ -563,6 +563,7 @@ void VGraphicsViewer::dragModeSwitch(bool on)
         m_dragCanceled = true;
         m_pSelection->deselectAll();
         m_interactionMode = PICK;
+        emit canceledDrag();
     }
 }
 
