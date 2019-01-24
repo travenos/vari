@@ -375,8 +375,10 @@ VSimNode::ptr VNodesVolume::getNearestNode(const QVector3D &point) const
                 int k_base = static_cast<int>(sqrt(r_sq - d_i_sq - d_j_sq) + 0.5);
                 int k1 = k_base + k0;
                 int k2 = -k_base + k0;
-                nodesList.insert(nodesList.end(), m_nodes[i][j][k1].begin(), m_nodes[i][j][k1].end());
-                nodesList.insert(nodesList.end(), m_nodes[i][j][k2].begin(), m_nodes[i][j][k2].end());
+                if (k1 >= 0 && k1 <= m_arrSizes[2] - 1)
+                    nodesList.insert(nodesList.end(), m_nodes[i][j][k1].begin(), m_nodes[i][j][k1].end());
+                if (k2 >= 0 && k2 <= m_arrSizes[2] - 1)
+                    nodesList.insert(nodesList.end(), m_nodes[i][j][k2].begin(), m_nodes[i][j][k2].end());
             }
         }
         if (nodesList.size() > 0)
