@@ -171,17 +171,36 @@ bool VLayersProcessor::areLayersConnected() const
 
 void VLayersProcessor::getActiveModelSize(QVector3D &size) const
 {
-    size = QVector3D(0, 0, 0);
+    QVector3D min;
+    QVector3D max;
+    bool minMaxInitialized = false;
     for (auto &layer : m_layers)
     {
         if (layer->isActive())
         {
-            QVector3D layerSize;
-            layer->getSize(layerSize);
-            for (uint i = 0; i < 3; ++i)
-                size[i] = std::max(size[i], layerSize[i]);
+            QVector3D layerMin;
+            QVector3D layerMax;
+            layer->getConstrains(layerMin, layerMax);
+            if (minMaxInitialized)
+            {
+                for (uint i = 0; i < 3; ++i)
+                {
+                    min[i] = std::min(min[i], layerMin[i]);
+                    max[i] = std::max(max[i], layerMax[i]);
+                }
+            }
+            else
+            {
+                min = layerMin;
+                max = layerMax;
+                minMaxInitialized = true;
+            }
         }
     }
+    if (minMaxInitialized)
+        size = max - min;
+    else
+        size = QVector3D(0, 0, 0);
 }
 
 size_t VLayersProcessor::getActiveNodesNumber() const

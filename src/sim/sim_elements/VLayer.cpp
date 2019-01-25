@@ -50,6 +50,12 @@ void VLayer::getSize(QVector3D &size) const
     m_nodesVolume.getSize(size);
 }
 
+void VLayer::getConstrains(QVector3D &min, QVector3D &max) const
+{
+    m_nodesVolume.getConstraints(min, max);
+}
+
+
 bool VLayer::isNodesVolumeValid() const
 {
     return !(m_nodesVolume.isEmpty() && m_pNodes->size() > 0);
