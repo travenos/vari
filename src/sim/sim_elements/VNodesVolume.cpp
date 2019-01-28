@@ -12,6 +12,7 @@
 #include "VNodesVolume.h"
 
 const float VNodesVolume::MIN_STEP = 0.001f;
+const float VNodesVolume::STEP_COEF = static_cast<float>(sqrt(2.0 / 3.0));
 
 VNodesVolume::VNodesVolume()
 {
@@ -97,7 +98,7 @@ void VNodesVolume::reset(const VSimNode::const_map_ptr &nodes)
 {
     deallocate();
     calculateAverageDistance(nodes);
-    m_step = (m_averageDistance / 2 >= MIN_STEP) ? m_averageDistance / 2 : MIN_STEP;
+    m_step = std::max(m_averageDistance * STEP_COEF, MIN_STEP);
     calcSizes(nodes);
     allocate();
     fillArray(nodes);

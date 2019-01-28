@@ -48,6 +48,7 @@ public:
     static inline float projectionXYLength(const QVector3D &vect);
 
     static const float MIN_STEP;
+    static const float STEP_COEF;
 
 private: 
     inline void calculateAverageDistance(const VSimNode::const_map_ptr &nodes);
