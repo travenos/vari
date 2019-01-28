@@ -273,7 +273,7 @@ void VSimulationFacade::saveModel(const QString &filename)
 {
     m_pSimulator->pause();
     VSimulationInfo info = m_pSimulator->getSimulationInfo();
-    VSimulationParametres param = m_pSimulator->getSimulationParametres();
+    VSimulationParameters param = m_pSimulator->getSimulationParametres();
     bool paused = m_pSimulator->isPaused();
     bool timeLimited = m_pSimulator->isTimeLimitModeOn();
     VModelExport saver(info, param, m_pLayersProcessor, paused, timeLimited);
@@ -286,7 +286,7 @@ VCloth::const_ptr VSimulationFacade::getMaterial(uint layer) const
     return m_pLayersProcessor->getMaterial(layer);
 }
 
-VSimulationParametres VSimulationFacade::getParametres() const
+VSimulationParameters VSimulationFacade::getParametres() const
 {
     return m_pSimulator->getSimulationParametres();
 }
@@ -497,7 +497,7 @@ VSimulationInfo VSimulationFacade::getSimulationInfo() const
 void VSimulationFacade::loadSavedParametres()
 {
     QSettings settings;
-    VSimulationParametres param = m_pSimulator->getSimulationParametres();
+    VSimulationParameters param = m_pSimulator->getSimulationParametres();
     VResin resin = param.getResin();
 
     VResin newResin;
@@ -538,7 +538,7 @@ void VSimulationFacade::loadSavedParametres()
 void VSimulationFacade::saveParametres() const
 {
     QSettings settings;
-    VSimulationParametres param = m_pSimulator->getSimulationParametres();
+    VSimulationParameters param = m_pSimulator->getSimulationParametres();
     VResin resin = param.getResin();
     settings.setValue(QStringLiteral("sim/resinName"), resin.name);
     settings.setValue(QStringLiteral("sim/defaultViscosity"), resin.defaultViscosity);

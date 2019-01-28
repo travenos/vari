@@ -12,7 +12,7 @@
 
 #include "VSimulator.h"
 #include "structures/VExceptions.h"
-#include "structures/VSimulationParametres.h"
+#include "structures/VSimulationParameters.h"
 
 /**
  * VSimulator implementation
@@ -118,14 +118,14 @@ void VSimulator::resetTriangleColors()
     trianglesAction([](const VSimTriangle::ptr& triangle){triangle->reset();});
 }
 
-VSimulationParametres VSimulator::getSimulationParametres() const
+VSimulationParameters VSimulator::getSimulationParametres() const
 {
     std::lock_guard<std::mutex> locker(*m_pNodesLock);
     return m_param;
 }
 
 void VSimulator::setSimulationParametres(const VSimulationInfo &info,
-                                         const VSimulationParametres &param,
+                                         const VSimulationParameters &param,
                                          bool isPaused,
                                          bool isTimeLimited)
 {

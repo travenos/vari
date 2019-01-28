@@ -137,7 +137,7 @@ void VWindowMain::setupValidators()
     m_pTemperatureValidator->setLocale(QLocale::C);
     m_pPressureValidator->setLocale(QLocale::C);
     m_pDiameterValidator->setLocale(QLocale::C);
-    m_pTemperatureValidator->setBottom(-VSimulationParametres::KELVINS_IN_0_CELSIUS);
+    m_pTemperatureValidator->setBottom(-VSimulationParameters::KELVINS_IN_0_CELSIUS);
     m_pPressureValidator->setBottom(0);
     m_pDiameterValidator->setBottom(0);
     ui->temperatureEdit->setValidator(m_pTemperatureValidator);

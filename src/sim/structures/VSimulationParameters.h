@@ -4,27 +4,27 @@
  */
 
 
-#ifndef _VSIMULATIONPARAMETRES_H
-#define _VSIMULATIONPARAMETRES_H
+#ifndef _VSIMULATIONPARAMETERS_H
+#define _VSIMULATIONPARAMETERS_H
 
 #include <memory>
 
 #include "VMaterials.h"
 
 
-class VSimulationParametres
+class VSimulationParameters
 {
 public:
-    typedef std::shared_ptr<VSimulationParametres> ptr;
-    typedef std::shared_ptr<const VSimulationParametres> const_ptr;
+    typedef std::shared_ptr<VSimulationParameters> ptr;
+    typedef std::shared_ptr<const VSimulationParameters> const_ptr;
 
     static const double DEFAULT_TEMPERATURE;
     static const double KELVINS_IN_0_CELSIUS;
     static const double MIN_PRESSURE;
 
-    VSimulationParametres() = default;
-    VSimulationParametres(const VSimulationParametres &other) = default;
-    VSimulationParametres& operator= (const VSimulationParametres& other) = default;
+    VSimulationParameters() = default;
+    VSimulationParameters(const VSimulationParameters &other) = default;
+    VSimulationParameters& operator= (const VSimulationParameters& other) = default;
 
     double getInjectionDiameter() const ;
     void setInjectionDiameter(double diameter) ;
@@ -97,4 +97,4 @@ private:
     double calculateViscosity() const ;
 };
 
-#endif //_VSIMULATIONPARAMETRES_H
+#endif //_VSIMULATIONPARAMETERS_H

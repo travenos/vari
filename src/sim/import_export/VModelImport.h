@@ -18,7 +18,7 @@ class VModelImport : public VModelImportExport
 public:
     VModelImport();
     const VSimulationInfo& getInfo() const;
-    const VSimulationParametres &getSimulationParametres() const;
+    const VSimulationParameters &getSimulationParametres() const;
     const VLayersProcessor::ptr& getLayersProcessor() const;
     bool getPaused() const;
     bool getTimeLimited() const;
@@ -40,7 +40,7 @@ private:
     void loadLayers(QXmlStreamReader &xmlReader);
     void loadConnections(QXmlStreamReader& xmlReader);
 
-    void loadResin(QXmlStreamReader& xmlReader, VSimulationParametres &param);
+    void loadResin(QXmlStreamReader& xmlReader, VSimulationParameters &param);
 
     void loadLayer(QXmlStreamReader& xmlReader, std::vector<VLayer::ptr>& layers);
     void loadCloth(QXmlStreamReader& xmlReader, VCloth::ptr &material);
@@ -62,7 +62,7 @@ private:
     void makeVector(const QString &numbersStr, std::vector<T> &numbersVect);
 
     VSimulationInfo m_info;
-    VSimulationParametres m_param;
+    VSimulationParameters m_param;
     VLayersProcessor::ptr m_pLayersProcessor;
     bool m_paused;
     bool m_timeLimited;

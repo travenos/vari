@@ -104,7 +104,7 @@ public:
      */
     void resetTriangleColors();
 
-    VSimulationParametres getSimulationParametres() const ;
+    VSimulationParameters getSimulationParametres() const ;
 
     /**
      * Set simulation state
@@ -113,7 +113,7 @@ public:
      * @param isPaused
      */
     void setSimulationParametres(const VSimulationInfo &info,
-                                 const VSimulationParametres &param,
+                                 const VSimulationParameters &param,
                                  bool isPaused=false, bool isTimeLimited=false);
 
     void setResin(const VResin &resin) ;
@@ -187,7 +187,7 @@ private:
      * A struct, containing all parametres needed for simulation.
      * Should be accessed only when m_pNodesLock is locked
      */
-    VSimulationParametres m_param;
+    VSimulationParameters m_param;
 
     /**
      * A struct, containing all parametres, which describe current simulation status

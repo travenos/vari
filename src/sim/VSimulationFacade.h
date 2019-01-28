@@ -86,7 +86,7 @@ public:
     void setOnlyOneVisible(uint layer);
 
     VSimulationInfo getSimulationInfo() const;
-    VSimulationParametres getParametres() const ;
+    VSimulationParameters getParametres() const ;
 
     void loadSavedParametres();
     void saveParametres() const;

@@ -35,7 +35,7 @@ const VSimulationInfo& VModelImport::getInfo() const
     return m_info;
 }
 
-const VSimulationParametres& VModelImport::getSimulationParametres() const
+const VSimulationParameters &VModelImport::getSimulationParametres() const
 {
     return m_param;
 }
@@ -151,7 +151,7 @@ void VModelImport::loadParametres(QXmlStreamReader& xmlReader)
     );
 }
 
-void VModelImport::loadResin(QXmlStreamReader &xmlReader, VSimulationParametres &param)
+void VModelImport::loadResin(QXmlStreamReader &xmlReader, VSimulationParameters &param)
 {
     auto &tags = _xPARAM_TAGS._xRESIN_TAGS;
     VResin resin;

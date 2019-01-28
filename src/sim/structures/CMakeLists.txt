@@ -12,12 +12,12 @@ set(HEADER_FILES
     VMaterials.h
     VNotify.h
     VSimulationInfo.h
-    VSimulationParametres.h
+    VSimulationParameters.h
     )
 
 set(SOURCE_FILES
     VNotify.cpp
-    VSimulationParametres.cpp
+    VSimulationParameters.cpp
     )
 
 ADD_MODULE(v_structures

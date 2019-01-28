@@ -14,7 +14,7 @@
 #include "structures/VExceptions.h"
 
 VModelExport::VModelExport(const VSimulationInfo &info,
-                           const VSimulationParametres &param,
+                           const VSimulationParameters &param,
                            const VLayersProcessor::const_ptr &layersProcessor,
                            bool paused, bool timeLimited):
     m_info(info),
@@ -29,7 +29,7 @@ void VModelExport::setInfo(const VSimulationInfo &info)
     m_info= info;
 }
 
-void VModelExport::setSimulationParametres(const VSimulationParametres &param)
+void VModelExport::setSimulationParametres(const VSimulationParameters &param)
 {
     m_param = param;
 }
