@@ -168,7 +168,6 @@ void VSimulator::setActiveElements(const VSimNode::const_vector_ptr &nodes,
         m_pTriangles = triangles;
         m_nodesThreadPart = m_pActiveNodes->size() / N_THREADS + 1;
         m_trianglesThreadPart = m_pTriangles->size() / N_THREADS + 1;
-        m_param.setAverageCellDistance(getAverageCellDistance());
         m_pNodesLock->unlock();
         m_pTrianglesLock->unlock();
     }
@@ -208,9 +207,11 @@ void VSimulator::simulationCycle()
         m_pauseFlag.store(false);
         resetState();
         double avgPerm = getAveragePermeability();
+        double avgDist = getAverageCellDistance();
         {
             std::lock_guard<std::mutex> locker(*m_pNodesLock);
             m_param.setAveragePermeability(avgPerm);
+            m_param.setAverageCellDistance(avgDist);
             m_param.setNumberOfFullNodes(0);
         }
     }
