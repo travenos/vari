@@ -4,3 +4,4 @@ coin3d
 pkg-vari
 *.user*
 .directory
+*.bak
