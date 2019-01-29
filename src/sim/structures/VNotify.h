@@ -12,7 +12,7 @@
 #include <mutex>
 
 /**
-* This class is used for notification when the something is changed.
+* This class is used for notification when something is changed.
 */
 class VNotify
 {
