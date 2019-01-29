@@ -243,7 +243,7 @@ private:
     inline double calcAverage(Callable&& func) const;
 
     inline void calculatePressure();
-    inline bool commitPressure();
+    inline bool moveToNextStep();
     inline void updateColors();
 
     void calculateNewPressure(const VSimNode::ptr &node);

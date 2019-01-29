@@ -236,7 +236,7 @@ void VSimulator::simulationCycle()
             #endif
         }
         calculatePressure();
-        madeChangesInCycle = commitPressure();
+        madeChangesInCycle = moveToNextStep();
         updateColors();
         m_newDataNotifier.notifyAll();
         if (!madeChangesInCycle)
@@ -368,7 +368,7 @@ inline void VSimulator::calculatePressure()
     nodesAction(calcFunc);
 }
 
-inline bool VSimulator::commitPressure()
+inline bool VSimulator::moveToNextStep()
 {
     std::atomic<bool> madeChangesInCycle(false);
     std::atomic<int> fullNodesCount(0);
