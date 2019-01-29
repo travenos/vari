@@ -112,6 +112,13 @@ void VSimNode::addNeighbourMutually(const VSimNode::ptr &node, VLayerSequence la
 
 void VSimNode::addNeighbour(VSimNode* node, VLayerSequence layer, float dist)
 {
+    if (node == this)
+        return;
+    for (auto &neighbour: m_neighbours[layer])
+    {
+        if (neighbour.second == node)
+            return;
+    }
     m_neighbours[layer].push_back(std::make_pair(dist, node));
     ++m_neighboursNumber;
 }
