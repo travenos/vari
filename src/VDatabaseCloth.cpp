@@ -76,7 +76,7 @@ void VDatabaseCloth::loadFromFile(const QString &fileName)
         while (!in.atEnd())
         {
             QString name;
-            float cavityheight, permeability, porosity;
+            float cavityheight=0, permeability=0, porosity=0;
             QString line = in.readLine();
             QStringList paramList = line.split(",");
             if (paramList.length() != PARAM_NUMBER + 1)

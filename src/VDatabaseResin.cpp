@@ -75,7 +75,7 @@ void VDatabaseResin::loadFromFile(const QString &fileName)
         while (!in.atEnd())
         {
             QString name;
-            float viscosity, tempcoef;
+            float viscosity=0, tempcoef=0;
             QString line = in.readLine();
             QStringList paramList = line.split(",");
             if (paramList.length() != PARAM_NUMBER + 1)
