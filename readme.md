@@ -2,7 +2,7 @@
 Software for simulating the VARI process
 
 ## BUILD dependencies
-sudo apt install make g++ cmake fakeroot qt5-default qt5-qmake mercurial doxygen
+sudo apt install make g++ cmake fakeroot qt5-default qt5-qmake mercurial doxygen libc-bin
 
 ## Building a DEB package
 For building a **DEB** package, run script **make_deb.sh**.  
@@ -43,3 +43,4 @@ Usage:
 
 ## Installing on Windows
 Before installation of VARI, install [PostgresSQL](https://www.openscg.com/bigsql/postgresql/installers.jsp/) . Make sure that it is added to *PATH*.
+

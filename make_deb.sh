@@ -16,6 +16,8 @@ PACKAGE_SOURCE_DIR="package"
 PACKAGE_DEST_DIR="$PREFIX/DEBIAN"
 
 CONTROL_NAME="control"
+CREATE_SQL_SOURCE_FILE="share/vari/sql/create.sql"
+CREATE_DEST_SOURCE_FILE="$PREFIX/usr/share/vari/sql/create.sql"
 
 LIBC_VER=$(dpkg -s libc6 | grep '^Version: ')
 LIBC_VER=${LIBC_VER%-*}
@@ -137,6 +139,8 @@ mkdir -p "$SHARE_DEST_DIR"
 cp -ar "$SHARE_SOURCE_DIR"/* "$SHARE_DEST_DIR" || exit
 mkdir -p "$PACKAGE_DEST_DIR"
 cp -ar "$PACKAGE_SOURCE_DIR"/* "$PACKAGE_DEST_DIR" || exit
+
+iconv -f CP1251 -t UTF-8 "$CREATE_SQL_SOURCE_FILE" > "$CREATE_DEST_SOURCE_FILE"
 
 #Set package parametres
 sed -i "s/@version@/${VERSION}/g" "$PACKAGE_DEST_DIR/$CONTROL_NAME"
