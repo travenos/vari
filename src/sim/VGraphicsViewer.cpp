@@ -382,9 +382,14 @@ void VGraphicsViewer::updateVisibility()
         layer->updateVisibility();
 }
 
-void VGraphicsViewer::updatePosition(uint layer)
+void VGraphicsViewer::updateVisibility(uint layerNumber)
 {
-    m_graphicsLayers.at(layer)->updatePosition();
+    m_graphicsLayers.at(layerNumber)->updateVisibility();
+}
+
+void VGraphicsViewer::updatePosition(uint layerNumber)
+{
+    m_graphicsLayers.at(layerNumber)->updatePosition();
 }
 
 void VGraphicsViewer::updatePositions()

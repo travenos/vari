@@ -41,6 +41,7 @@ public:
     virtual ~VGraphicsViewer();
     void setGraphicsElements(const std::vector<VLayer::const_ptr> &layers) ;
     void updateVisibility();
+    void updateVisibility(uint layerNumber);
     void clearNodes() ;
     void clearTriangles() ;
     void clearAll() ;
@@ -57,7 +58,7 @@ public:
     void updateNodeColors(uint layerNumber) ;
     void updateTriangleColors(uint layerNumber) ;
 
-    void updatePosition(uint layer) ;
+    void updatePosition(uint layerNumber) ;
     void updatePositions() ;
 
     void enableSelection(bool enable);

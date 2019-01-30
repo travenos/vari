@@ -61,7 +61,7 @@ void VSimulationFacade::connectMainSignals()
     connect(m_pGraphicsViewer.get(), SIGNAL(selectionEnabled(bool)),
             this, SIGNAL(selectionEnabled(bool)));
     connect(m_pGraphicsViewer.get(), SIGNAL(canceledDrag()),
-            this, SLOT(updateGraphics()));
+            this, SLOT(updateGraphicsPositions()));
     connect(m_pSimulator.get(), SIGNAL(simulationStarted()),
             this, SIGNAL(simulationStarted()));
     connect(m_pSimulator.get(), SIGNAL(simulationPaused()),
@@ -182,7 +182,7 @@ void VSimulationFacade::getModelSize(QVector3D &size) const
 void VSimulationFacade::setVisible(uint layer, bool visible)
 {
     m_pLayersProcessor->setVisibleLayer(layer, visible);
-    m_pGraphicsViewer->updateVisibility();
+    m_pGraphicsViewer->updateVisibility(layer);
 }
 
 void VSimulationFacade::removeLayer(uint layer)
@@ -200,8 +200,7 @@ void VSimulationFacade::enableLayer(uint layer, bool enable)
 void VSimulationFacade::setMaterial(uint layer, const VCloth &material)
 {
     m_pLayersProcessor->setMaterial(layer, material);
-    m_pSimulator->resetTriangleColors();
-    m_pGraphicsViewer->updateColors();
+    m_pGraphicsViewer->updateColors(layer);
 }
 
 void VSimulationFacade::setResin(const VResin& resin)
@@ -355,7 +354,7 @@ void VSimulationFacade::updateConfiguration()
     emit configUpdated();
 }
 
-void VSimulationFacade::updateGraphics()
+void VSimulationFacade::updateGraphicsPositions()
 {
     m_pGraphicsViewer->updatePositions();
 }
@@ -465,7 +464,7 @@ void VSimulationFacade::cancelDrag()
     if (m_pGraphicsViewer->isDragOn())
     {
         m_pGraphicsViewer->setDragMode(false);
-        updateGraphics();
+        updateGraphicsPositions();
     }
 }
 

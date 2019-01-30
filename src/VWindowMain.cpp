@@ -782,7 +782,7 @@ void VWindowMain::askForTransform()
     }
     else
     {
-        m_pFacade->cancelDrag();
+        m_pFacade->updateGraphicsPositions();
     }
 }
 

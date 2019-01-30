@@ -91,6 +91,9 @@ public:
     void loadSavedParametres();
     void saveParametres() const;
 
+public slots:
+    void updateGraphicsPositions();
+
 private:
     void connectMainSignals() ;
     void initLayersProcessor() ;
@@ -115,7 +118,6 @@ private slots:
     void m_on_got_nodes_selection(const VGraphicsViewer::const_uint_vect_ptr &pSelectedNodesIds);
     void enableInteraction();
     void disableInteraction();
-    void updateGraphics();
 
 signals:
     void layerVisibilityChanged(uint, bool);
