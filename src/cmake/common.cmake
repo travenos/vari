@@ -91,3 +91,38 @@ MACRO(SUBDIRLIST result curdir)
   ENDFOREACH()
   SET(${result} ${dirlist})
 ENDMACRO()
+
+#==============================================================================
+# Copyright (c) 2019 Alexey Barashkov
+
+MACRO(SET_PROJECT_VER version_str)
+    set(PROJECT_VERSION_MAJOR 0)
+    set(PROJECT_VERSION_MINOR 0)
+    set(PROJECT_VERSION_PATCH 0)
+    set(PROJECT_VERSION_TWEAK 0)
+
+    set(VERSION_LIST "")
+
+    string(REPLACE "-" "." DOT_SEPARATED ${version_str})
+    string(REPLACE "." ";" DOT_SEPARATED ${DOT_SEPARATED})
+    foreach(VERSION_PART ${DOT_SEPARATED})
+        if (VERSION_PART MATCHES "^[0-9]+$")
+            math(EXPR VERSION_PART "${VERSION_PART}")
+            list(APPEND VERSION_LIST "${VERSION_PART}")
+        endif()
+    endforeach(VERSION_PART)
+
+    list(LENGTH VERSION_LIST VERSION_LIST_LENGTH)
+    if(${VERSION_LIST_LENGTH} GREATER 0)
+        list(GET VERSION_LIST 0 PROJECT_VERSION_MAJOR)
+    endif()
+    if(${VERSION_LIST_LENGTH} GREATER 1)
+        list(GET VERSION_LIST 1 PROJECT_VERSION_MINOR)
+    endif()
+    if(${VERSION_LIST_LENGTH} GREATER 2)
+        list(GET VERSION_LIST 2 PROJECT_VERSION_PATCH)
+    endif()
+    if(${VERSION_LIST_LENGTH} GREATER 3)
+        list(GET VERSION_LIST 3 PROJECT_VERSION_TWEAK)
+    endif()
+ENDMACRO()

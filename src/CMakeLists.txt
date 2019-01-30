@@ -1,3 +1,6 @@
+# Project VARI
+# @author Alexey Barashkov
+
 cmake_minimum_required(VERSION 3.1.0)
 
 project(vari)
@@ -9,12 +12,14 @@ set(EXE_NAME ${PROJECT_NAME})
 
 message(STATUS "CREATING VARI APP\n")
 
-#Set application version
-set(PROJECT_VERSION_MAJOR 0)
-set(PROJECT_VERSION_MINOR 4)
-set(PROJECT_VERSION_PATCH 0)
-set(PROJECT_VERSION_TWEAK 2)
+#Find modules
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+include_directories(${PROJECT_SOURCE_DIR})
+set(MODULES_FOLDERS "modules")
 
+include(common)
+
+#Set application version
 find_package(Git REQUIRED)
 set(GIT_RES_LONG  FALSE)
 set(GIT_FILE_VERSION_LONG  "${CMAKE_CURRENT_BINARY_DIR}/git.version.long")
@@ -29,7 +34,9 @@ if(NOT NO_VERSION)
 else()
     set(PROJECT_VERSION_LONG "1.0")
 endif()
-message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION_LONG}\n")
+SET_PROJECT_VER("${PROJECT_VERSION_LONG}")
+message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION_LONG}")
+message(STATUS "Project version: ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}.${PROJECT_VERSION_TWEAK}\n")
 
 #Get information about the compilation time
 string(TIMESTAMP CURRENT_YEAR "%Y")
@@ -67,13 +74,6 @@ else()
     message(STATUS "C++ Flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE}")
     message(STATUS "C Flags: ${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE}\n")
 endif()
-
-#Find modules
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
-include_directories(${PROJECT_SOURCE_DIR})
-set(MODULES_FOLDERS "modules")
-
-include(common)
 
 #Find packages
 find_package(Qt5Core    REQUIRED)
