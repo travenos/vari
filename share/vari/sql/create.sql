@@ -8,7 +8,7 @@ CREATE TABLE cloth (
     "permeability"	REAL NOT NULL,
     "porosity"	REAL NOT NULL
     );
-INSERT INTO cloth (name, cavityheight, permeability, porosity) VALUES ('РџСЂРёРјРµСЂ РЅР°РїРѕР»РЅРёС‚РµР»СЏ', 0.002, 2e-9, 0.5);
+INSERT INTO cloth (name, cavityheight, permeability, porosity) VALUES ('Пример наполнителя', 0.002, 2e-9, 0.5);
 ALTER TABLE cloth OWNER TO vari;
 CREATE TABLE resin (
     "id"	SERIAL UNIQUE,
@@ -16,5 +16,5 @@ CREATE TABLE resin (
     "viscosity"	REAL NOT NULL,
     "tempcoef"	REAL NOT NULL
     );
-INSERT INTO resin (name, viscosity, tempcoef) VALUES ('РџСЂРёРјРµСЂ СЃРІСЏР·СѓСЋС‰РµРіРѕ', 0.1, 0.8);
+INSERT INTO resin (name, viscosity, tempcoef) VALUES ('Пример связующего', 0.1, 0.8);
 ALTER TABLE resin OWNER TO vari;
