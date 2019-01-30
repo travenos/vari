@@ -357,8 +357,7 @@ void VSimulationFacade::updateConfiguration()
 
 void VSimulationFacade::updateGraphics()
 {
-    m_pGraphicsViewer->setGraphicsElements(m_pLayersProcessor->getLayers());
-    //TODO write more effective method. May be use SoResetTransform
+    m_pGraphicsViewer->updatePositions();
 }
 
 void VSimulationFacade::waitForInjectionPointSelection(double diameter)
@@ -424,11 +423,10 @@ uint VSimulationFacade::getCuttedLayer() const
 
 void VSimulationFacade::performTransformation()
 {
+    uint layer = m_pGraphicsViewer->getTransformedLayerNumber();
     m_pLayersProcessor->transformateLayer(m_pGraphicsViewer->getTransformedNodesCoords(),
-                                 m_pGraphicsViewer->getTransformedLayerNumber());
-    updateConfiguration();
-    //updateGraphics(); do not use updateConfiguration
-    //TODO write more effective method. May be use SoResetTransform
+                                 layer);
+    m_pGraphicsViewer->updatePosition(layer);
     emit translationPerformed();
 }
 

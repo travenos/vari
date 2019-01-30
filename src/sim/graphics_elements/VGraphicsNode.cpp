@@ -29,7 +29,7 @@ VGraphicsNode::VGraphicsNode(const VSimNode::const_ptr &simNode):
     updatePosition();
     addChild(m_pTranslation);
     m_pTranslation->ref();
-    m_pTranslationId = findChild(m_pTranslation);
+    m_translationId = findChild(m_pTranslation);
 
     setCubeSide(DEFAULT_CUBE_SIDE);
     addChild(m_pCube);
@@ -57,5 +57,5 @@ void VGraphicsNode::setCubeSide(float side)
 
 int VGraphicsNode::getTranslationId() const
 {
-    return m_pTranslationId;
+    return m_translationId;
 }

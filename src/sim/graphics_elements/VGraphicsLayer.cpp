@@ -10,6 +10,7 @@
 #include <Inventor/nodes/SoTransform.h>
 #include <Inventor/SbViewportRegion.h>
 #include <Inventor/actions/SoGetMatrixAction.h>
+#include <Inventor/misc/SoChildList.h>
 
 #include "VGraphicsLayer.h"
 
@@ -129,6 +130,29 @@ void VGraphicsLayer::updateVisibility()
         triangle.second->updateVisibility();
         if (triangle.second->isVisible())
             m_visible = true;
+    }
+}
+
+void VGraphicsLayer::updatePosition()
+{
+    resetTransform();
+    for (auto &node : m_graphicsNodes)
+    {
+        node.second->updatePosition();
+    }
+    for (auto &triangle : m_graphicsTriangles)
+    {
+        triangle.second->updatePosition();
+    }
+}
+
+void VGraphicsLayer::resetTransform()
+{
+    for (int i = 0; i < children->getLength(); ++i)
+    {
+        SoNode * node = dynamic_cast<SoTransform *>((*children)[i]);
+        if (node != nullptr && node != m_pTransform)
+            this->replaceChild(node, m_pTransform);
     }
 }
 

@@ -57,6 +57,9 @@ public:
     void updateNodeColors(uint layerNumber) ;
     void updateTriangleColors(uint layerNumber) ;
 
+    void updatePosition(uint layer) ;
+    void updatePositions() ;
+
     void enableSelection(bool enable);
     void enableDrag(bool enable);
 

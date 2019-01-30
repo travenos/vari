@@ -34,6 +34,8 @@ public:
     void updateNodeColors();
     void updateTriangleColors();
     void updateVisibility();
+    void updatePosition();
+    void resetTransform();
     uint getNumber() const;
     bool isVisible() const;
     const SoTransform * getTransform() const;

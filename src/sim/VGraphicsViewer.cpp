@@ -382,6 +382,17 @@ void VGraphicsViewer::updateVisibility()
         layer->updateVisibility();
 }
 
+void VGraphicsViewer::updatePosition(uint layer)
+{
+    m_graphicsLayers.at(layer)->updatePosition();
+}
+
+void VGraphicsViewer::updatePositions()
+{
+    for (auto layer : m_graphicsLayers)
+        layer->updatePosition();
+}
+
 void VGraphicsViewer::clearNodes() 
 {
     std::lock_guard<std::recursive_mutex> locker(m_graphMutex);
@@ -745,8 +756,8 @@ void VGraphicsViewer::deselection_cb(void * userdata, SoPath * deselectionPath)
         viewer->m_pTransformBox->replaceManip(viewer->m_pSelectedPath, nullptr);
         viewer->m_pSelectedPath->unref();
         viewer->m_pSelectedPath = nullptr;
-		viewer->m_pTransformBox->unref();
-		viewer->m_pTransformBox = nullptr;
+        viewer->m_pTransformBox->unref();
+        viewer->m_pTransformBox = nullptr;
         if (!viewer->m_dragCanceled && deselectionPath != nullptr)
         {
             SoPath * path = deselectionPath->copy();

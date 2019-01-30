@@ -27,7 +27,7 @@ private:
     VSimNode::const_ptr m_pSimNode;
     SoTranslation* m_pTranslation;
     SoCube* m_pCube;
-    int m_pTranslationId;
+    int m_translationId;
 };
 
 #endif //_VGRAPHICSNODE_H
