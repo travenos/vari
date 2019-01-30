@@ -30,6 +30,7 @@ private:
 protected:
     static const QString OPEN_ERROR_STRING;
     static const QString FILE_ERROR_STRING;
+    static const QString NAME_ERROR_STRING;
     static const QString GET_NAME_QUERY;
     static const QString DELETE_BY_ID_QUERY;
     static const QString COPY_FROM_FILE_QUERY;
@@ -41,10 +42,11 @@ protected:
 
 public:
     VDatabaseInteractor(const QString &tableName);
+    virtual ~VDatabaseInteractor() = default;
     void getNames(std::deque<QString> &outputDeque, bool sort = true) const ;
     void removeMaterial(int id) ;
-    void saveToFile(const QString &fileName) const ;
-    void loadFromFile(const QString &fileName) ;
+    virtual void saveToFile(const QString &fileName) const ;
+    virtual void loadFromFile(const QString &fileName) ;
 
 };
 

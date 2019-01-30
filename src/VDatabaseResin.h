@@ -17,10 +17,14 @@ private:
     static const QString UPDATE_INFO_QUERY;
     static const QString INSERT_INFO_QUERY;
 
+    static const int PARAM_NUMBER;
+
 public:
     VDatabaseResin();
     void materialInfo(const QString &name, int &id, float &viscosity, float &tempcoef) const ;
     void saveMaterial(const QString &name, int id, float viscosity, float tempcoef) ;
+
+    void loadFromFile(const QString &fileName) override;
 };
 
 #endif // _VDATABASERESIN_H

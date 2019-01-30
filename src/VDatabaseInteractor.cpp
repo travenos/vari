@@ -14,6 +14,7 @@
 
 const QString VDatabaseInteractor::OPEN_ERROR_STRING("Невозможно открыть базу данных");
 const QString VDatabaseInteractor::FILE_ERROR_STRING("Ошибка обработки файла");
+const QString VDatabaseInteractor::NAME_ERROR_STRING("Некорректное название материала");
 
 const QString VDatabaseInteractor::GET_NAME_QUERY("SELECT name FROM %1;");
 const QString VDatabaseInteractor::DELETE_BY_ID_QUERY("DELETE FROM %1 WHERE id=%2;");
