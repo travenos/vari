@@ -152,7 +152,10 @@ void VGraphicsLayer::resetTransform()
     {
         SoNode * node = dynamic_cast<SoTransform *>((*children)[i]);
         if (node != nullptr && node != m_pTransform)
+        {
             this->replaceChild(node, m_pTransform);
+            break;
+        }
     }
 }
 
