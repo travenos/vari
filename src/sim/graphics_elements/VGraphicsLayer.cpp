@@ -148,14 +148,10 @@ void VGraphicsLayer::updatePosition()
 
 void VGraphicsLayer::resetTransform()
 {
-    for (int i = 0; i < children->getLength(); ++i)
+    SoNode * currentTransform = getChild(m_transformId);
+    if (currentTransform != m_pTransform)
     {
-        SoNode * node = dynamic_cast<SoTransform *>((*children)[i]);
-        if (node != nullptr && node != m_pTransform)
-        {
-            this->replaceChild(node, m_pTransform);
-            break;
-        }
+        this->replaceChild(currentTransform, m_pTransform);
     }
 }
 
