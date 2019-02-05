@@ -1,3 +1,6 @@
+# Project VARI
+# @author Alexey Barashkov
+
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{COINDIR})
 
 find_package(Coin REQUIRED)
@@ -38,7 +41,6 @@ add_subdirectory(${SIM_ELEMENTS_DIRECTORY})
 set(CMAKE_AUTOMOC ON)
 
 set(HEADER_FILES
-    VGeometryProcessor.h
     VGraphicsViewer.h
     VLayersProcessor.h
     VSimulationClass.h
@@ -47,7 +49,6 @@ set(HEADER_FILES
     )
 
 set(SOURCE_FILES
-    VGeometryProcessor.cpp
     VGraphicsViewer.cpp
     VLayersProcessor.cpp
     VSimulationClass.cpp

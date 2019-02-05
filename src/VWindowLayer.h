@@ -8,13 +8,13 @@
 
 #include <QMainWindow>
 
-#include "sim/VGeometryProcessor.h"
-#include "sim/layer_builders/VLayerAbstractBuilder.h"
+#include "sim/layer_builders/VLayerManualBuilder.h"
 
 namespace Ui {
 class VWindowLayer;
 }
 class VWindowCloth;
+class VWindowPolygon;
 
 class VWindowLayer : public QMainWindow
 {
@@ -53,6 +53,8 @@ private slots:
 
     void on_colorButton_clicked();
 
+    void on_createManualButton_clicked();
+
 private:
     void reset();
     void reject();
@@ -60,12 +62,14 @@ private:
     void tryToEnableAcceptButton();
     void openFile();
     void showWindowCloth();
+    void showWindowPolygon();
     void selectColor();
     void showColor();
     virtual void closeEvent(QCloseEvent *) override;
 
     Ui::VWindowLayer *ui;
     std::unique_ptr<VWindowCloth> m_pWindowCloth;
+    std::unique_ptr<VWindowPolygon> m_pWindowPolygon;
     bool m_selectedMaterial;
     bool m_selectedFile;
     bool m_createdGeometry;

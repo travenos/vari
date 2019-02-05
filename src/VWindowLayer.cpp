@@ -14,6 +14,7 @@
 #include "VWindowLayer.h"
 #include "ui_VWindowLayer.h"
 #include "VWindowCloth.h"
+#include "VWindowPolygon.h"
 
 const QString VWindowLayer::NO_MATERIAL_TEXT("Материал слоя не задан");
 const QString VWindowLayer::NO_GEOMETRY_TEXT("Форма слоя не задана");
@@ -46,8 +47,6 @@ VWindowLayer::VWindowLayer(QWidget *parent) :
     reset();
     loadSavedParametres();
     showColor();
-    //TODO: implement manual creation of layer and remove this string
-    ui->createManualButton->setVisible(false);
 }
 
 VWindowLayer::~VWindowLayer()
@@ -55,6 +54,7 @@ VWindowLayer::~VWindowLayer()
     saveParametres();
     delete ui;
     m_pWindowCloth.reset();
+    m_pWindowPolygon.reset();
     #ifdef DEBUG_MODE
         qInfo() << "VWindowLayer destroyed";
     #endif
@@ -142,6 +142,17 @@ void VWindowLayer::openFile()
     }
 }
 
+void VWindowLayer::showWindowPolygon()
+{
+    if(!m_pWindowPolygon)
+    {
+        m_pWindowPolygon.reset(new VWindowPolygon(this));
+        //TODO Connect signals
+    }
+    m_pWindowPolygon->show();
+    m_pWindowPolygon->activateWindow();
+}
+
 void VWindowLayer::showWindowCloth()
 {
     if(!m_pWindowCloth)
@@ -216,4 +227,9 @@ void VWindowLayer::on_chooseMaterialButton_clicked()
 void VWindowLayer::on_colorButton_clicked()
 {
     selectColor();
+}
+
+void VWindowLayer::on_createManualButton_clicked()
+{
+    showWindowPolygon();
 }

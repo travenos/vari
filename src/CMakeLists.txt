@@ -107,6 +107,10 @@ include_directories(${Qt5Sql_INCLUDE_DIRS})
 set(SIMULATOR_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/sim")
 add_subdirectory(${SIMULATOR_DIRECTORY})
 
+#Add third-party modules
+set(THIRD_PARTY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
+add_subdirectory(${THIRD_PARTY_DIRECTORY})
+
 #Add user interface
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
@@ -129,6 +133,7 @@ set(QT_UI_FORMS
     VWindowMain.ui
     VWindowMaterials.ui
     VWindowLayer.ui
+    VWindowPolygon.ui
     )
 
 set(HEADER_FILES
@@ -137,6 +142,7 @@ set(HEADER_FILES
     VWindowCloth.h
     VWindowResin.h
     VWindowLayer.h
+    VWindowPolygon.h
     VDatabaseInteractor.h
     VDatabaseCloth.h
     VDatabaseResin.h
@@ -149,6 +155,7 @@ set(SOURCE_FILES
     VWindowCloth.cpp
     VWindowResin.cpp
     VWindowLayer.cpp
+    VWindowPolygon.cpp
     VDatabaseInteractor.cpp
     VDatabaseCloth.cpp
     VDatabaseResin.cpp
@@ -172,6 +179,8 @@ target_link_libraries(${EXE_NAME} Qt5::Widgets)
 target_link_libraries(${EXE_NAME} Qt5::Sql)
 add_dependencies(${EXE_NAME} v_sim)
 target_link_libraries(${EXE_NAME} v_sim)
+add_dependencies(${EXE_NAME} v_third_party)
+target_link_libraries(${EXE_NAME} v_third_party)
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})

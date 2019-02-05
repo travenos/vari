@@ -8,7 +8,7 @@
 
 #include <QMainWindow>
 #include <memory>
-#include "sim/layer_builders/VLayerAbstractBuilder.h"
+#include "sim/layer_builders/VLayerManualBuilder.h"
 
 namespace Ui {
 class VWindowMain;
@@ -20,7 +20,6 @@ class VWindowLayer;
 class VWindowCloth;
 class VWindowResin;
 struct VCloth;
-struct VPolygon;
 struct VSimulationInfo;
 
 class VWindowMain : public QMainWindow

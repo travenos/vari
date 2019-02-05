@@ -1,3 +1,6 @@
+# Project VARI
+# @author Alexey Barashkov
+
 find_package(Qt5Core    REQUIRED)
 
 include_directories(${Qt5Core_INCLUDE_DIRS})

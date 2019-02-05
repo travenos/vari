@@ -93,7 +93,7 @@ MACRO(SUBDIRLIST result curdir)
 ENDMACRO()
 
 #==============================================================================
-# Copyright (c) 2019 Alexey Barashkov
+# Copyright (c) 2019 Alexey Barashkov <barasher@yandex.ru>
 
 MACRO(SET_PROJECT_VER version_str)
     set(PROJECT_VERSION_MAJOR 0)
