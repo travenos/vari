@@ -3,16 +3,28 @@ $BUILD_TYPE="Release"
 
 $COIN_REPO_URL="https://bitbucket.org/Coin3D/coin"
 $SOQT_REPO_URL="https://bitbucket.org/Coin3D/soqt"
+$GMSH_URL="http://gmsh.info/bin/Windows/gmsh-4.1.4-Windows64-sdk.zip"
 $COIN_CHANGESET_HASH="11932:acee8063042f"
 $SOQT_CHANGESET_HASH="2021:fd7ae3be0e28"
 
 $env:COINDIR="C:\coin3d"
+$env:GMSH_DIR="C:\gmsh"
+
+$GMSH_ZIP_OUTPUT="gmsh-win64.zip"
 
 function check_exit_code([int]$value) {
      if($value -ne 0) {
             throw "Check exit code error"
             exit 1
     }
+}
+
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+function Unzip
+{
+    param([string]$zipfile, [string]$outpath)
+
+    [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outpath)
 }
 
 if (!(test-path coin3d)) {mkdir coin3d}
@@ -69,10 +81,20 @@ $SLN_NAME="SoQt.sln"
 devenv $SLN_NAME /Build $BUILD_TYPE /Project INSTALL
 check_exit_code($LASTEXITCODE)
 
-#BUILD VARI
+#GO TO BUILD DIRECTORY
 cd ../../..
 if (!(test-path build)) {mkdir build}
 cd build
+
+#GET GMSH
+if (!(test-path "$env:GMSH_DIR"))
+{
+	Invoke-WebRequest -Uri "$GMSH_URL" -OutFile "$GMSH_ZIP_OUTPUT"
+	Unzip "$GMSH_ZIP_OUTPUT" "$env:GMSH_DIR"
+	check_exit_code($LASTEXITCODE)
+}
+
+#BUILD VARI
 $CMAKE_BUILD_ARG="CMAKE_BUILD_TYPE=$BUILD_TYPE"
 $CMAKE_PREFIX_PATH_ARG="CMAKE_PREFIX_PATH=$env:COINDIR;$env:QTDIR"
 cmake "-D$CMAKE_BUILD_ARG" "-D$CMAKE_PREFIX_PATH_ARG" -G $GENERATOR_NAME ../src

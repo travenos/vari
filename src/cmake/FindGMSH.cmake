@@ -13,36 +13,39 @@
 #
 #  Minor changes by Alexey Barashkov <barasher@yandex.ru>
 if (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
-  # in cache already
-  set(GMSH_FOUND TRUE)
+    # in cache already
+    set(GMSH_FOUND TRUE)
 else (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
-  find_path(GMSH_INCLUDE_DIR NAMES gmsh/Gmsh.h
-      PATHS "${GMSH_DIR}/include"
-            "${GMSH_DIR}/../install/include"
-            "${GMSH_INSTALL_DIR}/include"
-             NO_DEFAULT_PATH
-  )
-  find_path(GMSH_INCLUDE_DIR NAMES gmsh/Gmsh.h
-  )
+    if(NOT DEFINED GMSH_DIR)
+        set(GMSH_DIR $ENV{GMSH_DIR})
+    endif()
+    find_path(GMSH_INCLUDE_DIR NAMES gmsh/Gmsh.h
+        PATHS "${GMSH_DIR}/include"
+        "${GMSH_DIR}/../install/include"
+        "${GMSH_INSTALL_DIR}/include"
+        NO_DEFAULT_PATH
+        )
+    find_path(GMSH_INCLUDE_DIR NAMES gmsh/Gmsh.h
+        )
 
-  find_library(GMSH_LIBRARY NAMES Gmsh gmsh PATHS "${GMSH_DIR_LIB}"
-                                             "${GMSH_DIR_LIB}/../../install/lib"
-                                             "${GMSH_INSTALL_DIR}/lib"
-  )
+    find_library(GMSH_LIBRARY NAMES Gmsh gmsh PATHS "${GMSH_DIR_LIB}"
+        "${GMSH_DIR_LIB}/../../install/lib"
+        "${GMSH_INSTALL_DIR}/lib"
+        )
 
-  set(GMSH_INCLUDE_DIRS
-    ${GMSH_INCLUDE_DIR} CACHE PATH "Path to GMSH headers"
-  )
+    set(GMSH_INCLUDE_DIRS
+        ${GMSH_INCLUDE_DIR} CACHE PATH "Path to GMSH headers"
+        )
 
-  set(GMSH_LIBRARIES
-      ${GMSH_LIBRARY}
-  )
+    set(GMSH_LIBRARIES
+        ${GMSH_LIBRARY}
+        )
 
-  include(FindPackageHandleStandardArgs)
-  # handle the QUIETLY and REQUIRED arguments and set GMSH_FOUND to TRUE
-  # if all listed variables are TRUE
-  find_package_handle_standard_args(GMSH DEFAULT_MSG
-                                  GMSH_LIBRARIES GMSH_INCLUDE_DIRS)
-  mark_as_advanced(GMSH_INCLUDE_DIRS GMSH_LIBRARIES)
+    include(FindPackageHandleStandardArgs)
+    # handle the QUIETLY and REQUIRED arguments and set GMSH_FOUND to TRUE
+    # if all listed variables are TRUE
+    find_package_handle_standard_args(GMSH DEFAULT_MSG
+        GMSH_LIBRARIES GMSH_INCLUDE_DIRS)
+    mark_as_advanced(GMSH_INCLUDE_DIRS GMSH_LIBRARIES)
 endif (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
 
