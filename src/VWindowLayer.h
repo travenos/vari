@@ -8,7 +8,7 @@
 
 #include <QMainWindow>
 
-#include "sim/layer_builders/VLayerManualBuilder.h"
+#include "sim/layer_builders/VLayerAbstractBuilder.h"
 
 namespace Ui {
 class VWindowLayer;
@@ -76,12 +76,12 @@ private:
     QString m_filename;
     QString m_lastDir;
     VCloth m_material;
-    VPolygon m_polygon;
+    QPolygonF m_polygon;
 
 signals:
     void creationFromFileAvailable(const VCloth &material, const QString &fileName,
                                    VLayerAbstractBuilder::VUnit units);
-    void creationManualAvailable(const VCloth &material, const VPolygon &polygon,
+    void creationManualAvailable(const VCloth &material, const QPolygonF &polygon,
                                  VLayerAbstractBuilder::VUnit units);
     void creationCanceled();
     void windowClosed();

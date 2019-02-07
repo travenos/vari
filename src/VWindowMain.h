@@ -8,7 +8,7 @@
 
 #include <QMainWindow>
 #include <memory>
-#include "sim/layer_builders/VLayerManualBuilder.h"
+#include "sim/layer_builders/VLayerAbstractBuilder.h"
 
 namespace Ui {
 class VWindowMain;
@@ -63,7 +63,7 @@ private:
     void deleteWindowResin();
     void addLayerFromFile(const VCloth& material,const QString& filename,
                           VLayerAbstractBuilder::VUnit units);
-    void addLayerFromPolygon(const VCloth& material,const VPolygon& polygon,
+    void addLayerFromPolygon(const VCloth& material,const QPolygonF& polygon,
                              VLayerAbstractBuilder::VUnit units);
     void selectLayer();
     void enableLayer(bool enable);
@@ -149,7 +149,7 @@ private slots:
     void m_on_got_resin(const QString & name , float viscosity, float tempcoef);
     void m_on_layer_creation_from_file_available(const VCloth& material, const QString& filename,
                                                  VLayerAbstractBuilder::VUnit units);
-    void m_on_layer_creation_manual_available(const VCloth& material, const VPolygon& polygon,
+    void m_on_layer_creation_manual_available(const VCloth& material, const QPolygonF& polygon,
                                               VLayerAbstractBuilder::VUnit units);
     void m_on_layer_removed(uint layer);
     void m_on_material_changed(uint layer);

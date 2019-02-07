@@ -11,8 +11,6 @@
 
 #include "VLayerAbstractBuilder.h"
 
-typedef std::list< std::pair<float, float> > VPolygon;
-
 class VLayerManualBuilder: public VLayerAbstractBuilder {
 public: 
     

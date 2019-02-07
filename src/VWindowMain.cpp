@@ -208,7 +208,7 @@ void VWindowMain::addLayerFromFile(const VCloth& material,const QString& filenam
     }
 }
 
-void VWindowMain::addLayerFromPolygon(const VCloth& material, const VPolygon& polygon,
+void VWindowMain::addLayerFromPolygon(const VCloth& material, const QPolygonF& polygon,
                                       VLayerAbstractBuilder::VUnit units)
 {
     //TODO
@@ -224,9 +224,9 @@ void VWindowMain::showWindowLayer()
                 this,
                 SLOT(m_on_layer_creation_from_file_available(const VCloth&,const QString&,VLayerAbstractBuilder::VUnit)));
         connect(m_pWindowLayer,
-                SIGNAL(creationManualAvailable(const VCloth&,const VPolygon&, VLayerAbstractBuilder::VUnit)),
+                SIGNAL(creationManualAvailable(const VCloth&,const QPolygonF&, VLayerAbstractBuilder::VUnit)),
                 this,
-                SLOT(m_on_layer_creation_manual_available(const VCloth&,const VPolygon&, VLayerAbstractBuilder::VUnit)));
+                SLOT(m_on_layer_creation_manual_available(const VCloth&,const QPolygonF&, VLayerAbstractBuilder::VUnit)));
         connect(m_pWindowLayer,SIGNAL(windowClosed()), this, SLOT(m_on_layer_window_closed()));
     }
     m_pWindowLayer->show();
@@ -796,7 +796,7 @@ void VWindowMain::m_on_layer_creation_from_file_available(const VCloth& material
     addLayerFromFile(material, filename, units);
 }
 
-void VWindowMain::m_on_layer_creation_manual_available(const VCloth& material,const VPolygon& polygon,
+void VWindowMain::m_on_layer_creation_manual_available(const VCloth& material,const QPolygonF& polygon,
                                                        VLayerAbstractBuilder::VUnit units)
 {
     addLayerFromPolygon(material, polygon, units);

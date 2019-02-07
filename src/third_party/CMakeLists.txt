@@ -3,8 +3,6 @@
 
 find_package(Qt5 COMPONENTS Core Gui Widgets PrintSupport  REQUIRED)
 
-include_directories(${Qt5_INCLUDE_DIRS})
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${Qt5Core_INCLUDE_DIRS})
