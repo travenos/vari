@@ -18,6 +18,7 @@
  */
 
 const QString VLayerManualBuilder::TEMP_FILE_NAME("temp_vari_mesh.gmsh");
+const double VLayerManualBuilder::GMSH_VERSION = 2.2;
 
 VLayerManualBuilder::VLayerManualBuilder(const QPolygonF &polygon,
                                          const VCloth &material,
@@ -91,7 +92,7 @@ void VLayerManualBuilder::exportToFile(const QPolygonF &polygon, const QString &
     m->addPlanarFace(edges);
     // Create mesh
     m->mesh(2);
-    int result = m->writeMSH(filename.toStdString());
+    int result = m->writeMSH(filename.toStdString(), GMSH_VERSION);
     delete m;
 
     GmshFinalize();

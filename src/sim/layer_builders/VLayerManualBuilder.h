@@ -22,6 +22,7 @@ public:
 
 protected:
     static const QString TEMP_FILE_NAME;
+    static const double GMSH_VERSION;
     QPolygonF m_polygon;
     VUnit m_units;
 };
