@@ -13,8 +13,9 @@
 #include "ui_VWindowPolygon.h"
 
 #include "sim/structures/VExceptions.h"
+#include "sim/layer_builders/VLayerManualBuilder.h"
 
-const QCPRange VWindowPolygon::X_RANGE(-0.5, 0.5);
+const QCPRange VWindowPolygon::X_RANGE(-1, 1);
 const QCPRange VWindowPolygon::Y_RANGE(-0.5, 0.5);
 const int VWindowPolygon::MIN_POLYGON_SIZE = 3;
 
@@ -164,7 +165,7 @@ void VWindowPolygon::getPolygon(QPolygonF &polygon) const
     int polySize = getPolygonSize();
     for(int i = 0; i < polySize; ++i)
     {
-        polygon.append(QPointF(static_cast<float>(m_qvX[i]), static_cast<float>(m_qvY[i])));
+        polygon.append(QPointF(m_qvX[i], m_qvY[i]));
     }
 }
 
@@ -180,7 +181,9 @@ void VWindowPolygon::closeEvent(QCloseEvent *)
 
 void VWindowPolygon::exportMeshToFile(const QString &filename) const
 {
-
+    QPolygonF polygon;
+    getPolygon(polygon);
+    VLayerManualBuilder::exportToFile(polygon, filename);
 }
 
 void VWindowPolygon::meshExportProcedure()

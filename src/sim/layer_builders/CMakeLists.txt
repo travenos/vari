@@ -1,9 +1,17 @@
 # Project VARI
 # @author Alexey Barashkov
 
+find_package(GMSH REQUIRED)
 find_package(Qt5Core    REQUIRED)
+find_package(Qt5Gui    REQUIRED)
 
+if (${GMSH_FOUND})
+    message(STATUS "Found GMSH Library: ${GMSH_LIBRARY}\n")
+endif()
+
+include_directories(${GMSH_INCLUDE_DIR})
 include_directories(${Qt5Core_INCLUDE_DIRS})
+include_directories(${Qt5Gui_INCLUDE_DIRS})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -29,4 +37,5 @@ ADD_MODULE(v_layer_builders
     ${SOURCE_FILES})
 
 target_link_libraries(v_layer_builders Qt5::Core)
-
+target_link_libraries(v_layer_builders Qt5::Gui)
+target_link_libraries(v_layer_builders ${GMSH_LIBRARIES})

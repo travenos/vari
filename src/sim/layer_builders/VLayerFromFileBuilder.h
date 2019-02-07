@@ -21,7 +21,7 @@ public:
                           const VCloth &material,
                           VUnit units=M);
     virtual ~VLayerFromFileBuilder();
-    const VLayer::ptr &build();
+    const VLayer::ptr &build() override;
 
 protected:
     VSimNode::map_ptr m_pNodes;

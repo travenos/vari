@@ -13,6 +13,7 @@
 #include "VSimulationFacade.h"
 #include "layer_builders/VLayerFromGmeshBuilder.h"
 #include "layer_builders/VLayerFromAnsysBuilder.h"
+#include "layer_builders/VLayerManualBuilder.h"
 #include "import_export/VModelExport.h"
 #include "import_export/VModelImport.h"
 #include "structures/VExceptions.h"
@@ -344,6 +345,25 @@ void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &
     }
     else
         throw VImportException();
+}
+
+void VSimulationFacade::newLayerFromPolygon(const VCloth &material, const QPolygonF &polygon,
+                                         VLayerAbstractBuilder::VUnit units)
+{
+    VLayerManualBuilder * p_layerBuilder;
+    p_layerBuilder = new VLayerManualBuilder(polygon, material, units);
+    try
+    {
+        m_pLayersProcessor->addLayer(p_layerBuilder);
+        delete p_layerBuilder;
+        updateConfiguration();
+        m_pGraphicsViewer->viewFromAbove();
+    }
+    catch(VImportException &e)
+    {
+        delete p_layerBuilder;
+        throw e;
+    }
 }
 
 void VSimulationFacade::updateConfiguration() 

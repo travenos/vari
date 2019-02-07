@@ -211,7 +211,18 @@ void VWindowMain::addLayerFromFile(const VCloth& material,const QString& filenam
 void VWindowMain::addLayerFromPolygon(const VCloth& material, const QPolygonF& polygon,
                                       VLayerAbstractBuilder::VUnit units)
 {
-    //TODO
+    try
+    {
+        m_pFacade->newLayerFromPolygon(material, polygon, units);
+    }
+    catch (VImportException)
+    {
+        QMessageBox::warning(this, ERROR_TITLE, IMPORT_FROM_FILE_ERROR);
+    }
+    catch (VSimulatorException)
+    {
+        QMessageBox::warning(this, ERROR_TITLE, IMPORT_WHEN_SIMULATING_ERROR);
+    }
 }
 
 void VWindowMain::showWindowLayer()
