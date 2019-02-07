@@ -35,7 +35,7 @@ LIBGMSH_NAME=
 if dpkg -s libgmsh2 > /dev/null 2>&1; then LIBGMSH_NAME=libgmsh2; fi
 if dpkg -s libgmsh2v5 > /dev/null 2>&1; then LIBGMSH_NAME=libgmsh2v5; fi
 if dpkg -s libgmsh3 > /dev/null 2>&1; then LIBGMSH_NAME=libgmsh3; fi
-if [[ -z ${LIBGMSH_NAME} ]
+if [[ -z ${LIBGMSH_NAME} ]]
 then
     >&2 echo "Error. No Gmsh package found in the system"
     exit 2

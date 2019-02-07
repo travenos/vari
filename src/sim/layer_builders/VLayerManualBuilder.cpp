@@ -9,6 +9,8 @@
 #include <QPolygonF>
 #include <QDir>
 
+#include <values.h>
+
 #include "VLayerManualBuilder.h"
 #include "VLayerFromGmeshBuilder.h"
 #include "../structures/VExceptions.h"
