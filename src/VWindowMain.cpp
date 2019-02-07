@@ -72,7 +72,7 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_pFacade.reset(new VSimulationFacade(ui->viewerWidget));
     connectSimulationSignals();
     setupValidators();
-    m_pFacade->loadSavedParametres();
+    m_pFacade->loadSavedParameters();
 }
 
 void VWindowMain::connectSimulationSignals()
@@ -149,7 +149,7 @@ void VWindowMain::setupValidators()
 
 VWindowMain::~VWindowMain()
 {
-    m_pFacade->saveParametres();
+    m_pFacade->saveParameters();
     m_pFacade.reset();
     delete ui;
     deleteWindowLayer();
@@ -393,7 +393,7 @@ void VWindowMain::updateLayerMaterialInfo(int layer)
 
 void VWindowMain::updateResinInfo()
 {
-    VResin resin = m_pFacade->getParametres().getResin();
+    VResin resin = m_pFacade->getParameters().getResin();
     ui->resinInfoLabel->setText(RESIN_INFO_TEXT.arg(resin.name).arg(resin.defaultViscosity)
                                          .arg(resin.tempcoef));
 }
@@ -538,21 +538,21 @@ void VWindowMain::saveTimeLimit()
 
 void VWindowMain::showTemperature()
 {
-    double temperature = m_pFacade->getParametres().getTemperature();
+    double temperature = m_pFacade->getParameters().getTemperature();
     ui->temperatureEdit->setText(QString::number(temperature));
     ui->resetTemperatureButton->setEnabled(false);
 }
 
 void VWindowMain::showInjectionPressure()
 {
-    double injectionPressure = m_pFacade->getParametres().getInjectionPressure();
+    double injectionPressure = m_pFacade->getParameters().getInjectionPressure();
     ui->injectionPressureEdit->setText(QString::number(injectionPressure));
     ui->resetInjectionPressureButton->setEnabled(false);
 }
 
 void VWindowMain::showInjectionDiameter()
 {
-    double injectionDiameter = m_pFacade->getParametres().getInjectionDiameter();
+    double injectionDiameter = m_pFacade->getParameters().getInjectionDiameter();
     ui->injectionDiameterEdit->setText(QString::number(injectionDiameter));
     ui->resetInjectionDiameterButton->setEnabled(false);
 }
@@ -564,21 +564,21 @@ void VWindowMain::showInjectionPoint()
 
 void VWindowMain::showVacuumPressure()
 {
-    double vacuumPressure = m_pFacade->getParametres().getVacuumPressure();
+    double vacuumPressure = m_pFacade->getParameters().getVacuumPressure();
     ui->vacuumPressureEdit->setText(QString::number(vacuumPressure));
     ui->resetVacuumPressureButton->setEnabled(false);
 }
 
 void VWindowMain::showVacuumDiameter()
 {
-    double vacuumDiameter = m_pFacade->getParametres().getVacuumDiameter();
+    double vacuumDiameter = m_pFacade->getParameters().getVacuumDiameter();
     ui->vacuumDiameterEdit->setText(QString::number(vacuumDiameter));
     ui->resetVacuumDiameterButton->setEnabled(false);
 }
 
 void VWindowMain::showTimeLimit()
 {
-    double timeLimit = m_pFacade->getParametres().getTimeLimit();
+    double timeLimit = m_pFacade->getParameters().getTimeLimit();
     QDateTime dateTime = QDateTime::fromMSecsSinceEpoch(timeLimit * 1000, QTimeZone::utc());
     ui->timeEdit->setTime(dateTime.time());
     ui->resetTimeLimitButton->setEnabled(false);

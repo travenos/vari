@@ -21,7 +21,7 @@ public:
                  bool paused = false,
                  bool timeLimited = false);
     void setInfo(const VSimulationInfo &info);
-    void setSimulationParametres(const VSimulationParameters &param);
+    void setSimulationParameters(const VSimulationParameters &param);
     void setLayersProcessor(const VLayersProcessor::const_ptr &layersProcesor);
     void setPaused(bool paused);
     void setTimeLimited(bool timeLimited);
@@ -30,7 +30,7 @@ public:
 private:
     void saveInfo(QXmlStreamWriter &xmlWriter);
 
-    void saveParametres(QXmlStreamWriter &xmlWriter);
+    void saveParameters(QXmlStreamWriter &xmlWriter);
 
     void saveResin(QXmlStreamWriter &xmlWriter, const VResin &resin);
 

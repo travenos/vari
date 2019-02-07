@@ -262,7 +262,7 @@ void VSimulationFacade::loadModel(const QString &filename)
     m_pLayersProcessor = loader.getLayersProcessor();
     initLayersProcessor();
     updateConfiguration();
-    m_pSimulator->setSimulationParametres(loader.getInfo(), loader.getSimulationParametres(),
+    m_pSimulator->setSimulationParameters(loader.getInfo(), loader.getSimulationParameters(),
                                           loader.getPaused(), loader.getTimeLimited());
     m_pGraphicsViewer->viewFromAbove();
     emit modelLoaded();
@@ -272,7 +272,7 @@ void VSimulationFacade::saveModel(const QString &filename)
 {
     m_pSimulator->pause();
     VSimulationInfo info = m_pSimulator->getSimulationInfo();
-    VSimulationParameters param = m_pSimulator->getSimulationParametres();
+    VSimulationParameters param = m_pSimulator->getSimulationParameters();
     bool paused = m_pSimulator->isPaused();
     bool timeLimited = m_pSimulator->isTimeLimitModeOn();
     VModelExport saver(info, param, m_pLayersProcessor, paused, timeLimited);
@@ -285,9 +285,9 @@ VCloth::const_ptr VSimulationFacade::getMaterial(uint layer) const
     return m_pLayersProcessor->getMaterial(layer);
 }
 
-VSimulationParameters VSimulationFacade::getParametres() const
+VSimulationParameters VSimulationFacade::getParameters() const
 {
-    return m_pSimulator->getSimulationParametres();
+    return m_pSimulator->getSimulationParameters();
 }
 
 bool VSimulationFacade::isLayerVisible(uint layer) const
@@ -491,10 +491,10 @@ VSimulationInfo VSimulationFacade::getSimulationInfo() const
     return m_pSimulator->getSimulationInfo();
 }
 
-void VSimulationFacade::loadSavedParametres()
+void VSimulationFacade::loadSavedParameters()
 {
     QSettings settings;
-    VSimulationParameters param = m_pSimulator->getSimulationParametres();
+    VSimulationParameters param = m_pSimulator->getSimulationParameters();
     VResin resin = param.getResin();
 
     VResin newResin;
@@ -532,10 +532,10 @@ void VSimulationFacade::loadSavedParametres()
     m_pSimulator->setTimeLimitMode(timeLimitMode);
 }
 
-void VSimulationFacade::saveParametres() const
+void VSimulationFacade::saveParameters() const
 {
     QSettings settings;
-    VSimulationParameters param = m_pSimulator->getSimulationParametres();
+    VSimulationParameters param = m_pSimulator->getSimulationParameters();
     VResin resin = param.getResin();
     settings.setValue(QStringLiteral("sim/resinName"), resin.name);
     settings.setValue(QStringLiteral("sim/defaultViscosity"), resin.defaultViscosity);

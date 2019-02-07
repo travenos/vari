@@ -29,7 +29,7 @@ void VModelExport::setInfo(const VSimulationInfo &info)
     m_info= info;
 }
 
-void VModelExport::setSimulationParametres(const VSimulationParameters &param)
+void VModelExport::setSimulationParameters(const VSimulationParameters &param)
 {
     m_param = param;
 }
@@ -59,7 +59,7 @@ void VModelExport::saveToFile(const QString &filename)
     xmlWriter.writeStartDocument();
     xmlWriter.writeStartElement(HEAD_TAG_NAME);
     saveInfo(xmlWriter);
-    saveParametres(xmlWriter);
+    saveParameters(xmlWriter);
     savePaused(xmlWriter);
     saveTimeLimit(xmlWriter);
     saveLayers(xmlWriter);
@@ -82,7 +82,7 @@ void VModelExport::saveInfo(QXmlStreamWriter &xmlWriter)
     xmlWriter.writeEndElement();
 }
 
-void VModelExport::saveParametres(QXmlStreamWriter &xmlWriter)
+void VModelExport::saveParameters(QXmlStreamWriter &xmlWriter)
 {
     auto &tags = _xPARAM_TAGS;
     xmlWriter.writeStartElement(tags._NAME);

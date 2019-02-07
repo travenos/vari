@@ -35,7 +35,7 @@ const VSimulationInfo& VModelImport::getInfo() const
     return m_info;
 }
 
-const VSimulationParameters &VModelImport::getSimulationParametres() const
+const VSimulationParameters &VModelImport::getSimulationParameters() const
 {
     return m_param;
 }
@@ -73,7 +73,7 @@ void VModelImport::loadFromFile(const QString &filename)
             if (!xmlReader.name().compare(_xINFO_TAGS._NAME))
                 loadInfo(xmlReader);
             else if (!xmlReader.name().compare(_xPARAM_TAGS._NAME))
-                loadParametres(xmlReader);
+                loadParameters(xmlReader);
             else if (!xmlReader.name().compare(_xPAUSED_TAGS._NAME))
                 loadPaused(xmlReader);
             else if (!xmlReader.name().compare(_xTIMELIMIT_TAGS._NAME))
@@ -116,7 +116,7 @@ void VModelImport::loadInfo(QXmlStreamReader &xmlReader)
     }
 }
 
-void VModelImport::loadParametres(QXmlStreamReader& xmlReader)
+void VModelImport::loadParameters(QXmlStreamReader& xmlReader)
 {
     auto &tags = _xPARAM_TAGS;
     foreach(const QXmlStreamAttribute &attr, xmlReader.attributes())

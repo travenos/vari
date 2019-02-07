@@ -86,10 +86,10 @@ public:
     void setOnlyOneVisible(uint layer);
 
     VSimulationInfo getSimulationInfo() const;
-    VSimulationParameters getParametres() const ;
+    VSimulationParameters getParameters() const ;
 
-    void loadSavedParametres();
-    void saveParametres() const;
+    void loadSavedParameters();
+    void saveParameters() const;
 
 public slots:
     void updateGraphicsPositions();

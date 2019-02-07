@@ -118,13 +118,13 @@ void VSimulator::resetTriangleColors()
     trianglesAction([](const VSimTriangle::ptr& triangle){triangle->reset();});
 }
 
-VSimulationParameters VSimulator::getSimulationParametres() const
+VSimulationParameters VSimulator::getSimulationParameters() const
 {
     std::lock_guard<std::mutex> locker(*m_pNodesLock);
     return m_param;
 }
 
-void VSimulator::setSimulationParametres(const VSimulationInfo &info,
+void VSimulator::setSimulationParameters(const VSimulationInfo &info,
                                          const VSimulationParameters &param,
                                          bool isPaused,
                                          bool isTimeLimited)

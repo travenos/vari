@@ -18,7 +18,7 @@ class VModelImport : public VModelImportExport
 public:
     VModelImport();
     const VSimulationInfo& getInfo() const;
-    const VSimulationParameters &getSimulationParametres() const;
+    const VSimulationParameters &getSimulationParameters() const;
     const VLayersProcessor::ptr& getLayersProcessor() const;
     bool getPaused() const;
     bool getTimeLimited() const;
@@ -34,7 +34,7 @@ private:
     };
 
     void loadInfo(QXmlStreamReader& xmlReader);
-    void loadParametres(QXmlStreamReader &xmlReader);
+    void loadParameters(QXmlStreamReader &xmlReader);
     void loadPaused(QXmlStreamReader& xmlReader);
     void loadTimeLimit(QXmlStreamReader& xmlReader);
     void loadLayers(QXmlStreamReader &xmlReader);

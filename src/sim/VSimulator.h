@@ -104,7 +104,7 @@ public:
      */
     void resetTriangleColors();
 
-    VSimulationParameters getSimulationParametres() const ;
+    VSimulationParameters getSimulationParameters() const ;
 
     /**
      * Set simulation state
@@ -112,7 +112,7 @@ public:
      * @param info
      * @param isPaused
      */
-    void setSimulationParametres(const VSimulationInfo &info,
+    void setSimulationParameters(const VSimulationInfo &info,
                                  const VSimulationParameters &param,
                                  bool isPaused=false, bool isTimeLimited=false);
 
@@ -184,13 +184,13 @@ private:
     mutable std::vector<double> m_calculationData;
 
     /**
-     * A struct, containing all parametres needed for simulation.
+     * A struct, containing all parameters needed for simulation.
      * Should be accessed only when m_pNodesLock is locked
      */
     VSimulationParameters m_param;
 
     /**
-     * A struct, containing all parametres, which describe current simulation status
+     * A struct, containing all parameters, which describe current simulation status
      */
     VSimulationInfo m_info;
     /**
