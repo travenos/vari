@@ -20,8 +20,8 @@ const QString VWindowLayer::NO_MATERIAL_TEXT("Материал слоя не з�
 const QString VWindowLayer::NO_GEOMETRY_TEXT("Форма слоя не задана");
 const QString VWindowLayer::COLOR_DIALOG_TITLE("Выбор цвета по умолчанию для слоя");
 const QString VWindowLayer::FILE_DIALOG_TITLE("Импорт формы слоя");
-const QString VWindowLayer::FILE_DIALOG_FORMATS("Поддерживаемые форматы (*.msh *.iges *.igs *.db *.ansys);;"
-                                                "Файлы gmsh(*.msh *.iges *.igs);;"
+const QString VWindowLayer::FILE_DIALOG_FORMATS("Поддерживаемые форматы (*.msh *.db *.ansys);;"
+                                                "Файлы gmsh(*.msh);;"
                                                 "Файлы Ansys (*.db *.ansys);;"
                                                 "Все файлы (*)");
 const QString VWindowLayer::GEOMETRY_FROM_FILE_TEXT("Форма слоя будет импортирована из файла:\n%1");
@@ -45,13 +45,13 @@ VWindowLayer::VWindowLayer(QWidget *parent) :
 {
     ui->setupUi(this);
     reset();
-    loadSavedParametres();
+    loadSavedParameters();
     showColor();
 }
 
 VWindowLayer::~VWindowLayer()
 {
-    saveParametres();
+    saveParameters();
     delete ui;
     m_pWindowCloth.reset();
     m_pWindowPolygon.reset();
@@ -72,7 +72,7 @@ void VWindowLayer::reset()
     m_createdGeometry = false;
 }
 
-void VWindowLayer::loadSavedParametres()
+void VWindowLayer::loadSavedParameters()
 {
     QSettings settings;
     bool mm_selected;
@@ -86,7 +86,7 @@ void VWindowLayer::loadSavedParametres()
     m_material.baseColor = color.value<QColor>();
 }
 
-void VWindowLayer::saveParametres() const
+void VWindowLayer::saveParameters() const
 {
     QSettings settings;
     bool mm_selected = ui->mmRadioButton->isChecked();
@@ -147,7 +147,8 @@ void VWindowLayer::showWindowPolygon()
     if(!m_pWindowPolygon)
     {
         m_pWindowPolygon.reset(new VWindowPolygon(this));
-        //TODO Connect signals
+        connect(m_pWindowPolygon.get(), SIGNAL(polygonAvailable(const QPolygonF &)),
+                this, SLOT(m_on_got_polygon(const QPolygonF &)));
     }
     m_pWindowPolygon->show();
     m_pWindowPolygon->activateWindow();
@@ -202,6 +203,19 @@ void VWindowLayer::m_on_got_material(const QString &name, float cavityheight, fl
     ui->materialStatusLabel->setStyleSheet(QStringLiteral("QLabel { color : black; }"));
     m_selectedMaterial = true;
     tryToEnableAcceptButton();
+}
+
+void VWindowLayer::m_on_got_polygon(const QPolygonF &polygon)
+{
+    m_polygon = polygon;
+    if (polygon.size() >= VWindowPolygon::MIN_POLYGON_SIZE)
+    {
+        ui->geometryStatusLabel->setText(GEOMETRY_MANUAL_TEXT);
+        ui->geometryStatusLabel->setStyleSheet(QStringLiteral("QLabel { color : black; }"));
+        m_selectedFile = false;
+        m_createdGeometry = true;
+        tryToEnableAcceptButton();
+    }
 }
 
 void VWindowLayer::on_buttonBox_rejected()

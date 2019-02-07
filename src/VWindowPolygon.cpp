@@ -12,9 +12,18 @@
 #include "VWindowPolygon.h"
 #include "ui_VWindowPolygon.h"
 
-const QCPRange X_RANGE(-0.5, 0.5);
-const QCPRange Y_RANGE(-0.5, 0.5);
-const int MIN_POLYGON_SIZE = 3;
+#include "sim/structures/VExceptions.h"
+
+const QCPRange VWindowPolygon::X_RANGE(-0.5, 0.5);
+const QCPRange VWindowPolygon::Y_RANGE(-0.5, 0.5);
+const int VWindowPolygon::MIN_POLYGON_SIZE = 3;
+
+const QString VWindowPolygon::SAVE_FILE_DIALOG_TITLE("Создание и сохранение слоя в файл");
+const QString VWindowPolygon::FILE_DIALOG_FORMATS("Файлы gmsh(*.msh);;"
+                                                  "Все файлы (*)");
+const QString VWindowPolygon::ERROR_TITLE("Ошибка");
+const QString VWindowPolygon::EXPORT_TO_FILE_ERROR("Ошибка сохранения в файл");
+
 
 VWindowPolygon::VWindowPolygon(QWidget *parent) :
     QMainWindow(parent),
@@ -29,17 +38,23 @@ VWindowPolygon::VWindowPolygon(QWidget *parent) :
 
     ui->plotWidget->setInteraction(QCP::iRangeDrag, true);
     ui->plotWidget->setInteraction(QCP::iRangeZoom, true);
-    ui->plotWidget->addGraph();
-    ui->plotWidget->graph(0)->setScatterStyle(QCPScatterStyle::ssPlusCircle);
-    ui->plotWidget->graph(0)->setLineStyle(QCPGraph::lsLine);
     connect(ui->plotWidget, SIGNAL(beforeReplot()), this, SLOT(pl_on_before_report()));
     connect(ui->plotWidget, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(pl_on_mouse_release(QMouseEvent*)));
     connect(ui->plotWidget, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(pl_on_mouse_press(QMouseEvent*)));
     connect(ui->plotWidget, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(pl_on_mouse_move(QMouseEvent*)));
+
+    m_pPlotCurve = new QCPCurve(ui->plotWidget->xAxis, ui->plotWidget->yAxis);
+    m_pPlotCurve->setScatterStyle(QCPScatterStyle::ssPlusCircle);
+    m_pCloseCurve = new QCPCurve(ui->plotWidget->xAxis, ui->plotWidget->yAxis);
+    m_pCloseCurve->setPen(QColor(Qt::red));
+
+    loadSavedParameters();
 }
 
 VWindowPolygon::~VWindowPolygon()
 {
+    m_pPlotCurve->deleteLater();
+    m_pCloseCurve->deleteLater();
     delete ui;
     #ifdef DEBUG_MODE
         qInfo() << "VWindowPolygon destroyed";
@@ -57,6 +72,7 @@ void VWindowPolygon::accept()
 
 void VWindowPolygon::reset()
 {
+    m_qvT.clear();
     m_qvX.clear();
     m_qvY.clear();
     plot();
@@ -80,6 +96,7 @@ void VWindowPolygon::reject()
 
 void VWindowPolygon::addPoint(double x, double y)
 {
+    m_qvT.append(m_qvT.size());
     m_qvX.append(x);
     m_qvY.append(y);
     plot();
@@ -88,6 +105,8 @@ void VWindowPolygon::addPoint(double x, double y)
 
 void VWindowPolygon::removeLast()
 {
+    if (m_qvT.size() > 0)
+        m_qvT.pop_back();
     if (m_qvX.size() > 0)
         m_qvX.pop_back();
     if (m_qvY.size() > 0)
@@ -98,21 +117,32 @@ void VWindowPolygon::removeLast()
 
 void VWindowPolygon::plot()
 {
-    ui->plotWidget->graph(0)->setData(m_qvX, m_qvY, true);
+    m_pPlotCurve->setData(m_qvT, m_qvX, m_qvY, true);
+    m_pCloseCurve->data()->clear();
     ui->plotWidget->replot();
     ui->plotWidget->update();
 }
 
 void VWindowPolygon::plotEnclosed()
 {
-    QVector<double> coordX, coordY;
-    coordX = m_qvX;
-    coordY = m_qvY;
-    if (coordX.size() > 1)
-        coordX.push_back(coordX[0]);
-    if (coordY.size() > 1)
-        coordY.push_back(coordY[0]);
-    ui->plotWidget->graph(0)->setData(coordX, coordY, true);
+    QVector<double> coordX, coordY, coordT;
+    if (m_qvT.size() > 1)
+    {
+        coordT.push_back(0);
+        coordT.push_back(1);
+    }
+    if (m_qvX.size() > 1)
+    {
+        coordX.push_back(m_qvX.last());
+        coordX.push_back(m_qvX.first());
+    }
+    if (m_qvY.size() > 1)
+    {
+        coordY.push_back(m_qvY.last());
+        coordY.push_back(m_qvY.first());
+    }
+    m_pPlotCurve->setData(m_qvT, m_qvX, m_qvY, true);
+    m_pCloseCurve->setData(coordT, coordX, coordY, true);
     ui->plotWidget->replot();
     ui->plotWidget->update();
 }
@@ -122,6 +152,7 @@ void VWindowPolygon::updateButtonsStates()
     bool hasValidPolygon = (getPolygonSize() >= MIN_POLYGON_SIZE);
     ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok)->setEnabled(hasValidPolygon);
     ui->exportButton->setEnabled(hasValidPolygon);
+    ui->encloseButton->setEnabled(hasValidPolygon);
     bool hasPoints = (getPolygonSize() > 0);
     ui->undoButton->setEnabled(hasPoints);
     ui->clearButton->setEnabled(hasPoints);
@@ -133,7 +164,7 @@ void VWindowPolygon::getPolygon(QPolygonF &polygon) const
     int polySize = getPolygonSize();
     for(int i = 0; i < polySize; ++i)
     {
-        polygon.append(QPointF(m_qvX[i], m_qvY[i]));
+        polygon.append(QPointF(static_cast<float>(m_qvX[i]), static_cast<float>(m_qvY[i])));
     }
 }
 
@@ -145,6 +176,45 @@ int VWindowPolygon::getPolygonSize() const
 void VWindowPolygon::closeEvent(QCloseEvent *)
 {
     emit windowClosed();
+}
+
+void VWindowPolygon::exportMeshToFile(const QString &filename) const
+{
+
+}
+
+void VWindowPolygon::meshExportProcedure()
+{
+    QString filename = QFileDialog::getSaveFileName(this, SAVE_FILE_DIALOG_TITLE, m_lastDir,
+                                                    FILE_DIALOG_FORMATS);
+    if (!filename.isEmpty())
+    {
+        m_lastDir = QFileInfo(filename).absolutePath();
+        try
+        {
+            exportMeshToFile(filename);
+        }
+        catch (VExportException)
+        {
+            QMessageBox::warning(this, ERROR_TITLE, EXPORT_TO_FILE_ERROR);
+        }
+        QSettings settings;
+        settings.setValue(QStringLiteral("import/lastDir"), m_lastDir);
+        settings.sync();
+    }
+}
+
+void VWindowPolygon::loadSavedParameters()
+{
+    QSettings settings;
+    m_lastDir = settings.value(QStringLiteral("import/lastDir"), QDir::homePath()).toString();
+}
+
+void VWindowPolygon::saveParameters() const
+{
+    QSettings settings;
+    settings.setValue(QStringLiteral("import/lastDir"), m_lastDir);
+    settings.sync();
 }
 
 void VWindowPolygon::on_buttonBox_rejected()
@@ -217,12 +287,12 @@ void VWindowPolygon::on_resetViewButton_clicked()
     resetView();
 }
 
-void VWindowPolygon::on_enclosedButton_clicked()
+void VWindowPolygon::on_encloseButton_clicked()
 {
     plotEnclosed();
 }
 
 void VWindowPolygon::on_exportButton_clicked()
 {
-    //TODO
+    meshExportProcedure();
 }

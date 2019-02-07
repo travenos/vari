@@ -8,6 +8,9 @@
 
 #include <QMainWindow>
 
+class QCPCurve;
+class QCPRange;
+
 namespace Ui {
 class VWindowPolygon;
 }
@@ -17,22 +20,19 @@ class VWindowPolygon : public QMainWindow
     Q_OBJECT
 
 public:
+    static const QCPRange X_RANGE;
+    static const QCPRange Y_RANGE;
+    static const int MIN_POLYGON_SIZE;
+
+    static const QString SAVE_FILE_DIALOG_TITLE;
+    static const QString FILE_DIALOG_FORMATS;
+    static const QString ERROR_TITLE;
+    static const QString EXPORT_TO_FILE_ERROR;
+
     VWindowPolygon(QWidget *parent = nullptr);
     virtual ~VWindowPolygon();
 
-private:
-    Ui::VWindowPolygon *ui;
-
-    bool m_mousePressed;
-    bool m_plotDragged;
-
-    QVector<double> m_qvX;
-    QVector<double> m_qvY;
-
     void reset();
-    void reject();
-    void accept();
-
     void resetView();
 
     void addPoint(double x, double y);
@@ -42,6 +42,28 @@ private:
     void updateButtonsStates();
     void getPolygon(QPolygonF &polygon) const;
     int getPolygonSize() const;
+    void exportMeshToFile(const QString &filename) const;
+
+    void loadSavedParameters();
+    void saveParameters() const;
+
+private:
+    Ui::VWindowPolygon *ui;
+    QCPCurve * m_pPlotCurve;
+    QCPCurve * m_pCloseCurve;
+
+    bool m_mousePressed;
+    bool m_plotDragged;
+
+    QVector<double> m_qvT;
+    QVector<double> m_qvX;
+    QVector<double> m_qvY;
+
+    QString m_lastDir;
+
+    void reject();
+    void accept();
+    void meshExportProcedure();
 
 private slots:
     void on_buttonBox_rejected();
@@ -58,7 +80,7 @@ private slots:
 
     void on_resetViewButton_clicked();
 
-    void on_enclosedButton_clicked();
+    void on_encloseButton_clicked();
 
     void on_exportButton_clicked();
 

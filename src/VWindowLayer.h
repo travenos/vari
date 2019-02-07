@@ -35,13 +35,15 @@ public:
 
     VWindowLayer(QWidget *parent = nullptr);
     virtual ~VWindowLayer();
-    void saveParametres() const;
-    void loadSavedParametres();
+    void saveParameters() const;
+    void loadSavedParameters();
 
 public slots:
 
 private slots:
     void m_on_got_material(const QString &name, float cavityheight, float permeability, float porosity);
+
+    void m_on_got_polygon(const QPolygonF &polygon);
 
     void on_buttonBox_rejected();
 
