@@ -31,16 +31,8 @@ LIBSTDCXX_VER=${LIBSTDCXX_VER:9}
 QT_VER=$(dpkg -s qt5-default | grep '^Version: ')
 QT_VER=${QT_VER%-*}
 QT_VER=${QT_VER:9}
-LIBGMSH_NAME=
-if dpkg -s libgmsh2 > /dev/null 2>&1; then LIBGMSH_NAME=libgmsh2; fi
-if dpkg -s libgmsh2v5 > /dev/null 2>&1; then LIBGMSH_NAME=libgmsh2v5; fi
-if dpkg -s libgmsh3 > /dev/null 2>&1; then LIBGMSH_NAME=libgmsh3; fi
-if [[ -z ${LIBGMSH_NAME} ]]
-then
-    >&2 echo "Error. No Gmsh package found in the system"
-    exit 2
-fi
-DEPENDENCIES="libc6 (>= ${LIBC_VER}), libgcc1 (>= ${LIBGCC1_VER}), libgl1-mesa-glx | libgl1, libstdc++6 (>= ${LIBSTDCXX_VER}), libx11-6, libxi6, qt5-default (>= ${QT_VER}), postgresql, libqt5sql5-psql, ${LIBGMSH_NAME}"
+#TODO Remove -dev from provided and conflicts
+DEPENDENCIES="libc6 (>= ${LIBC_VER}), libgcc1 (>= ${LIBGCC1_VER}), libgl1-mesa-glx | libgl1, libstdc++6 (>= ${LIBSTDCXX_VER}), libx11-6, libxi6, qt5-default (>= ${QT_VER}), postgresql, libqt5sql5-psql"
 CONFLICTS="libsoqt3-20, libsoqt4-20, libsoqt4-dev, libcoin80v5, libcoin80-dev, libcoin80-runtime"
 PROVIDES="libcoin80v5, libcoin80-dev"
 
@@ -126,6 +118,11 @@ INSTALL_DIR="$WORKSPACE/$PREFIX"
 #Remove deb build directory if it existed
 rm -rf "$INSTALL_DIR" || exit
 
+mkdir -p gmsh
+export GMSH_DIR=$(readlink -f gmsh/installed)
+./make_gmsh.sh -w gmsh -i "$GMSH_DIR" -j $THREADS_NUMBER || exit
+
+#TODO: build in separate directory, not include headers to final install
 ./make_coin_soqt.sh -w coin3d -i "$INSTALL_DIR" -j $THREADS_NUMBER || exit
 export PATH=${PATH}:"${INSTALL_DIR}/usr"
 export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:"${INSTALL_DIR}/usr"

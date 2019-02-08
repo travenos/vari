@@ -1,6 +1,7 @@
 *.deb
 build*
 coin3d
+gmsh
 pkg-vari
 *.user*
 .directory
