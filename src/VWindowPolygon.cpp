@@ -100,7 +100,7 @@ void VWindowPolygon::addPoint(double x, double y)
     m_qvT.append(m_qvT.size());
     m_qvX.append(x);
     m_qvY.append(y);
-    plot();
+    plotEnclosed();
     updateButtonsStates();
 }
 
@@ -112,7 +112,7 @@ void VWindowPolygon::removeLast()
         m_qvX.pop_back();
     if (m_qvY.size() > 0)
         m_qvY.pop_back();
-    plot();
+    plotEnclosed();
     updateButtonsStates();
 }
 
@@ -127,17 +127,17 @@ void VWindowPolygon::plot()
 void VWindowPolygon::plotEnclosed()
 {
     QVector<double> coordX, coordY, coordT;
-    if (m_qvT.size() > 1)
+    if (m_qvT.size() >= MIN_POLYGON_SIZE)
     {
         coordT.push_back(0);
         coordT.push_back(1);
     }
-    if (m_qvX.size() > 1)
+    if (m_qvX.size() >= MIN_POLYGON_SIZE)
     {
         coordX.push_back(m_qvX.last());
         coordX.push_back(m_qvX.first());
     }
-    if (m_qvY.size() > 1)
+    if (m_qvY.size() >= MIN_POLYGON_SIZE)
     {
         coordY.push_back(m_qvY.last());
         coordY.push_back(m_qvY.first());
@@ -153,7 +153,6 @@ void VWindowPolygon::updateButtonsStates()
     bool hasValidPolygon = (getPolygonSize() >= MIN_POLYGON_SIZE);
     ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok)->setEnabled(hasValidPolygon);
     ui->exportButton->setEnabled(hasValidPolygon);
-    ui->encloseButton->setEnabled(hasValidPolygon);
     bool hasPoints = (getPolygonSize() > 0);
     ui->undoButton->setEnabled(hasPoints);
     ui->clearButton->setEnabled(hasPoints);
@@ -288,11 +287,6 @@ void VWindowPolygon::on_clearButton_clicked()
 void VWindowPolygon::on_resetViewButton_clicked()
 {
     resetView();
-}
-
-void VWindowPolygon::on_encloseButton_clicked()
-{
-    plotEnclosed();
 }
 
 void VWindowPolygon::on_exportButton_clicked()

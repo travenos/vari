@@ -80,8 +80,6 @@ private slots:
 
     void on_resetViewButton_clicked();
 
-    void on_encloseButton_clicked();
-
     void on_exportButton_clicked();
 
 protected:
