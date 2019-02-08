@@ -21,16 +21,24 @@ else (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
     endif()
     find_path(GMSH_INCLUDE_DIR NAMES gmsh/Gmsh.h
         PATHS "${GMSH_DIR}/include"
+        "${GMSH_DIR}"
         "${GMSH_DIR}/../install/include"
         "${GMSH_INSTALL_DIR}/include"
         NO_DEFAULT_PATH
         )
+
     find_path(GMSH_INCLUDE_DIR NAMES gmsh/Gmsh.h
         )
 
-    find_library(GMSH_LIBRARY NAMES Gmsh gmsh PATHS "${GMSH_DIR_LIB}"
+    find_library(GMSH_LIBRARY NAMES Gmsh gmsh gmshvari
+        PATHS "${GMSH_DIR_LIB}"
+        "${GMSH_DIR}"
+        "${GMSH_DIR}/lib"
         "${GMSH_DIR_LIB}/../../install/lib"
         "${GMSH_INSTALL_DIR}/lib"
+        NO_DEFAULT_PATH
+        )
+    find_path(GMSH_LIBRARY NAMES Gmsh gmsh gmshvari
         )
 
     set(GMSH_INCLUDE_DIRS
@@ -41,11 +49,35 @@ else (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
         ${GMSH_LIBRARY}
         )
 
+    set(GMSH_VERSION_FILE "${GMSH_INCLUDE_DIR}/gmsh/GmshVersion.h")
+    if(GMSH_INCLUDE_DIR AND EXISTS "${GMSH_VERSION_FILE}")
+            file(STRINGS "${GMSH_VERSION_FILE}" gmsh_version_str
+                     REGEX "#define GMSH_VERSION[ ]*\"([0-9]+).([0-9]+).([0-9]+)\"")
+
+            if(gmsh_version_str)
+                    string(REGEX REPLACE "#define GMSH_VERSION[ ]*" "" GMSH_VERSION ${gmsh_version_str})
+                    string(REPLACE "\"" "" GMSH_VERSION ${GMSH_VERSION})
+            else()
+                    set(GMSH_VERSION 0.0.0)
+            endif()
+    else()
+            set(GMSH_VERSION 0.0.0)
+    endif()
+
     include(FindPackageHandleStandardArgs)
     # handle the QUIETLY and REQUIRED arguments and set GMSH_FOUND to TRUE
     # if all listed variables are TRUE
     find_package_handle_standard_args(GMSH DEFAULT_MSG
-        GMSH_LIBRARIES GMSH_INCLUDE_DIRS)
-    mark_as_advanced(GMSH_INCLUDE_DIRS GMSH_LIBRARIES)
+        GMSH_LIBRARIES GMSH_INCLUDE_DIRS GMSH_VERSION)
+
+    if (GMSH_FIND_VERSION)
+        if(NOT ${GMSH_FIND_VERSION} VERSION_EQUAL ${GMSH_VERSION})
+            set(GMSH_VERSION_EXACT False)
+            set(GMSH_FOUND False)
+            message(FATAL_ERROR "INCOMPAGLE GMESH VERSION: ${GMSH_VERSION}. ${GMSH_FIND_VERSION} is required." )
+        endif()
+    endif()
+
+    mark_as_advanced(GMSH_INCLUDE_DIRS GMSH_LIBRARIES GMSH_VERSION)
 endif (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
 

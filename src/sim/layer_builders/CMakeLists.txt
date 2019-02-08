@@ -1,13 +1,9 @@
 # Project VARI
 # @author Alexey Barashkov
 
-find_package(GMSH REQUIRED)
+find_package(GMSH 3.0.6 REQUIRED)
 find_package(Qt5Core    REQUIRED)
 find_package(Qt5Gui    REQUIRED)
-
-if (${GMSH_FOUND})
-    message(STATUS "Found GMSH Library: ${GMSH_LIBRARY}\n")
-endif()
 
 include_directories(${GMSH_INCLUDE_DIR})
 include_directories(${Qt5Core_INCLUDE_DIRS})
