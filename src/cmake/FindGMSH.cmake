@@ -8,12 +8,8 @@
 #
 #  Copyright (c) 2019 Alexey Barashkov <barasher@yandex.ru>
 #
-#  Based on CMake script of Anna Perduta
+#  Based on CMake script originally made by Anna Perduta
 #  Copyright (c) 2012 Anna Perduta <aperduta@l5.pk.edu.pl>
-#
-#  Redistribution and use is allowed according to the terms of the New
-#  BSD license.
-#  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 
 if (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
@@ -24,8 +20,9 @@ else (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
         set(GMSH_DIR $ENV{GMSH_DIR})
     endif()
     find_path(GMSH_INCLUDE_DIR NAMES gmsh/Gmsh.h
-        PATHS "${GMSH_DIR}/include"
-        "${GMSH_DIR}"
+        PATHS "${GMSH_DIR}"
+        "${GMSH_DIR}/include"
+        "${GMSH_DIR}/usr/include"
         "${GMSH_DIR}/../install/include"
         "${GMSH_INSTALL_DIR}/include"
         NO_DEFAULT_PATH
@@ -38,6 +35,7 @@ else (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
         PATHS "${GMSH_DIR_LIB}"
         "${GMSH_DIR}"
         "${GMSH_DIR}/lib"
+        "${GMSH_DIR}/usr/lib"
         "${GMSH_DIR_LIB}/../../install/lib"
         "${GMSH_INSTALL_DIR}/lib"
         NO_DEFAULT_PATH
