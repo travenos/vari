@@ -31,6 +31,7 @@ A directory containing *devenv* should be added to a *PATH* environment variable
 - [Inno Setup Compiler](http://www.jrsoftware.org/isdl.php)  
   
 *QTDIR* environment variable should be specified.  
+For all dependencies, all directories, which binary files (exe and dll) should be added to *PATH*.  
   
 For building an **EXE** installer, run script **create_windows_installer.ps1**.  
 For using it, you should enable PowerShell script execution first (as administrator):  
