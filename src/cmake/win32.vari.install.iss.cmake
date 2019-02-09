@@ -40,6 +40,7 @@ Source: "$ENV{QTDIR}/bin/Qt5Gui.dll";     DestDir: "{app}"
 Source: "$ENV{QTDIR}/bin/Qt5Widgets.dll"; DestDir: "{app}"
 Source: "$ENV{QTDIR}/bin/Qt5Sql.dll";     DestDir: "{app}"
 Source: "$ENV{QTDIR}/bin/Qt5OpenGL.dll";  DestDir: "{app}"
+Source: "$ENV{QTDIR}/bin/Qt5PrintSupport.dll";  DestDir: "{app}"
 Source: "$ENV{QTDIR}/plugins/platforms/qwindows.dll";  DestDir: "{app}/platforms"
 Source: "$ENV{QTDIR}/plugins/sqldrivers/qsqlpsql.dll";  DestDir: "{app}/sqldrivers"
 

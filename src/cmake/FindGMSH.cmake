@@ -48,8 +48,9 @@ else (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
         )
 
     if(WIN32)
-        find_library(WINMM_LIBRARY winmm)
-        find_library(WS2_32_LIBRARY Ws2_32)
+        set(WINSDK "c:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Lib/x64")
+        find_library(WINMM_LIBRARY winmm PATHS "${WINSDK}")
+        find_library(WS2_32_LIBRARY Ws2_32 PATHS "${WINSDK}")
         set(GMSH_LIBRARIES
             ${GMSH_LIBRARY}
             ${WINMM_LIBRARY}
