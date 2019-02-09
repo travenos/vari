@@ -87,7 +87,9 @@ else
 	git pull
 }
 git checkout $GMSH_TAG
-#TODO patch source
+# Patch code
+sed -i "s/set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)/set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS FALSE)/g" CMakeLists.txt
+sed -i "2196s/using Field::operator();//g" Mesh/Field.cpp
 if (!(test-path build)) {mkdir build}
 cd build
 $CMAKE_INST_PREFIX_ARG="CMAKE_INSTALL_PREFIX=$env:GMSH_DIR"

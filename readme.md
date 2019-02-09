@@ -18,16 +18,17 @@ Possible arguments:
   
 
 ## Building for Windows
-Building with MSVC (Visual Studio 12 2013 Win64).  
+Building with MSVC **(Visual Studio 12 2013 Win64)**.  
 A directory containing *devenv* should be added to a *PATH* environment variable.  
   
 **Dependencies:**  
-- Qt 5.9.5  
-- CMake (>= 3.1)  
-- Git  
-- Doxygen  
-- TortoiseHG  
-- Inno Setup Compiler  
+- [Qt 5.9.5](https://download.qt.io/official_releases/qt/5.9/5.9.5/)  
+- [CMake (>= 3.1)](https://cmake.org/download/)  
+- [Git](https://git-scm.com/download/win)  
+- [Doxygen](http://doxygen.nl/files/doxygen-1.8.15-setup.exe)  
+- [TortoiseHG](https://tortoisehg.bitbucket.io/download/index.html)  
+- [Sed](http://sourceforge.net/projects/gnuwin32/files//sed/4.2.1/sed-4.2.1-setup.exe/download)  
+- [Inno Setup Compiler](http://www.jrsoftware.org/isdl.php)  
   
 *QTDIR* environment variable should be specified.  
   
