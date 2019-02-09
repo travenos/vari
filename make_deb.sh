@@ -153,6 +153,7 @@ mkdir -p "$SHARE_DEST_DIR"
 cp -ar "$SHARE_SOURCE_DIR"/* "$SHARE_DEST_DIR" || exit
 mkdir -p "$PACKAGE_DEST_DIR"
 cp -ar "$PACKAGE_SOURCE_DIR"/* "$PACKAGE_DEST_DIR" || exit
+mkdir -p "$LIB_DEST_DIR"
 for file in ${COIN3D_LIBS[@]}
 do
 	cp -ar "${COINDIR}/lib/$file" "$LIB_DEST_DIR"
