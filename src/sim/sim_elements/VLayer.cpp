@@ -112,6 +112,8 @@ const VSimTriangle::list_ptr &VLayer::getTriangles() const
 void VLayer::setMateial(const VCloth &material) 
 {
     (*m_pMaterial) = material;
+    for (auto &triangle : *m_pTriangles)
+        triangle->reset();
 }
 
 void VLayer::reset() 
