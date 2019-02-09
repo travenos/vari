@@ -22,6 +22,7 @@
 
 const QString VWindowMain::ERROR_TITLE("Ошибка");
 const QString VWindowMain::IMPORT_FROM_FILE_ERROR("Ошибка загрузки из файла");
+const QString VWindowMain::IMPORT_MANUAL_ERROR("Ошибка создания слоя");
 const QString VWindowMain::EXPORT_TO_FILE_ERROR("Ошибка сохранения в файл");
 const QString VWindowMain::IMPORT_WHEN_SIMULATING_ERROR("Невозможно импортировать во время симуляции");
 const QString VWindowMain::INVALID_PARAM_ERROR("Введены некорректные параметры");
@@ -217,7 +218,7 @@ void VWindowMain::addLayerFromPolygon(const VCloth& material, const QPolygonF& p
     }
     catch (VImportException)
     {
-        QMessageBox::warning(this, ERROR_TITLE, IMPORT_FROM_FILE_ERROR);
+        QMessageBox::warning(this, ERROR_TITLE, IMPORT_MANUAL_ERROR);
     }
     catch (VSimulatorException)
     {

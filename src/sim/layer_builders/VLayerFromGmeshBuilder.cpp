@@ -31,6 +31,7 @@ bool VLayerFromGmeshBuilder::importNodes()
             while(!line.contains("$EndNodes",Qt::CaseInsensitive))
             {
                 int nodeId = 0;
+                line.replace(',', '.');
                 QStringList tokens = line.split(QRegExp("\\s+"), QString::SkipEmptyParts);
 
                 std::vector<double> coords;

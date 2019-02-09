@@ -156,7 +156,7 @@ cp -ar "$PACKAGE_SOURCE_DIR"/* "$PACKAGE_DEST_DIR" || exit
 mkdir -p "$LIB_DEST_DIR"
 for file in ${COIN3D_LIBS[@]}
 do
-	cp -ar "${COINDIR}/lib/$file" "$LIB_DEST_DIR"
+	cp "${COINDIR}/lib/$file" "$LIB_DEST_DIR"
 done
 
 iconv -f CP1251 -t UTF-8 "$CREATE_SQL_SOURCE_FILE" > "$CREATE_DEST_SOURCE_FILE"
