@@ -6,7 +6,7 @@ Architecture: @architecture@
 Depends: @dependencies@
 Conflicts: @conflicts@
 Provides: @provides@
-Maintainer: Alexey Barashkov <travenos@robot-develop.org>
+Maintainer: Alexey Barashkov <barasher@yandex.ru>
 Homepage: https://wicron.com/
 Installed-Size: @size@
-Description: Software for simulating the VARI process
+Description: Software for simulating the vacuum infusion process

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2018 Alexey Barashkov <travenos@robot-develop.org>
+# Copyright (c) 2018 Alexey Barashkov <barasher@yandex.ru>
 PACKAGE_NAME="vari"
 
 CODE_SOURCE_DIR="src"
@@ -11,6 +11,9 @@ BIN_FILE="vari"
 
 SHARE_SOURCE_DIR="share"
 SHARE_DEST_DIR="$PREFIX/usr/share"
+COIN3D_LIBS=("libCoin.so.80" "libSoQt.so.20")
+
+LIB_DEST_DIR="$PREFIX/usr/lib"
 
 PACKAGE_SOURCE_DIR="package"
 PACKAGE_DEST_DIR="$PREFIX/DEBIAN"
@@ -31,10 +34,9 @@ LIBSTDCXX_VER=${LIBSTDCXX_VER:9}
 QT_VER=$(dpkg -s qt5-default | grep '^Version: ')
 QT_VER=${QT_VER%-*}
 QT_VER=${QT_VER:9}
-#TODO Remove -dev from provided and conflicts
-DEPENDENCIES="libc6 (>= ${LIBC_VER}), libgcc1 (>= ${LIBGCC1_VER}), libgl1-mesa-glx | libgl1, libstdc++6 (>= ${LIBSTDCXX_VER}), libx11-6, libxi6, qt5-default (>= ${QT_VER}), postgresql, libqt5sql5-psql"
-CONFLICTS="libsoqt3-20, libsoqt4-20, libsoqt4-dev, libcoin80v5, libcoin80-dev, libcoin80-runtime"
-PROVIDES="libcoin80v5, libcoin80-dev"
+DEPENDENCIES="libc6 (>= ${LIBC_VER}), libgcc1 (>= ${LIBGCC1_VER}), libgl1-mesa-glx | libgl1, libstdc++6 (>= ${LIBSTDCXX_VER}), libx11-6, libxi6, qt5-default (>= ${QT_VER}), libqt5core5a (>= ${QT_VER}), libqt5gui5 (>= ${QT_VER}), libqt5sql5 (>= ${QT_VER}), libqt5widgets5 (>= ${QT_VER}), libqt5xml5 (>= ${QT_VER}), libqt5sql5-psql (>= ${QT_VER}), libqt5printsupport5 (>= ${QT_VER}), postgresql"
+CONFLICTS="libsoqt3-20, libsoqt4-20, libcoin80v5, libcoin80-runtime"
+PROVIDES="libcoin80v5"
 
 VERSION_ARG=-v
 THREADS_ARG=-j
@@ -105,7 +107,7 @@ fi
 #Setting version
 if [[ -z "$VERSION" ]]
 then
-     VERSION=$(git describe --tags 2> /dev/null) || VERSION=1.0
+     VERSION=$(git describe --tags 2> /dev/null) || VERSION=0.0
      if [[ ${VERSION:0:1} == "v" ]]
      then
         VERSION=${VERSION:1}
@@ -118,17 +120,23 @@ INSTALL_DIR="$WORKSPACE/$PREFIX"
 #Remove deb build directory if it existed
 rm -rf "$INSTALL_DIR" || exit
 
+# Build Gmsh
 mkdir -p gmsh
 export GMSH_DIR=$(readlink -f gmsh/installed)
 ./make_gmsh.sh -w gmsh -i "$GMSH_DIR" -j $THREADS_NUMBER || exit
 
-#TODO: build in separate directory, not include headers to final install
-./make_coin_soqt.sh -w coin3d -i "$INSTALL_DIR" -j $THREADS_NUMBER || exit
-export PATH=${PATH}:"${INSTALL_DIR}/usr"
-export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:"${INSTALL_DIR}/usr"
-export LD_LIBRARY_PATH="${INSTALL_DIR}/usr/lib":${LD_LIBRARY_PATH}
-export CPLUS_INCLUDE_PATH=${CPLUS_INCLUDE_PATH}:"${INSTALL_DIR}/usr/include"
+# Build Coin3D
+mkdir -p coin3d
+export COINDIR=$(readlink -f coin3d/installed)
+./make_coin_soqt.sh -w coin3d -i "$COINDIR" -j $THREADS_NUMBER || exit
 
+# Add built libraries to default paths
+export PATH=${PATH}:"${INSTALL_DIR}/usr"
+export CMAKE_PREFIX_PATH="${COINDIR}":"${GMSH_DIR}":${CMAKE_PREFIX_PATH}
+export LD_LIBRARY_PATH="${COINDIR}/lib":"${GMSH_DIR}/lib":${LD_LIBRARY_PATH}
+export CPLUS_INCLUDE_PATH="${COINDIR}/include":"${GMSH_DIR}/include":${CPLUS_INCLUDE_PATH}
+
+# Building VARI and creating a package
 echo "Starting to build package $PACKAGE_NAME. Architecture: $SYSTEM_ARCHITECTURE. Version: $VERSION. Making build in directory $BUILD_DIR. Using $THREADS_NUMBER threads."
 
 mkdir -p "$BUILD_DIR" || exit
@@ -145,6 +153,10 @@ mkdir -p "$SHARE_DEST_DIR"
 cp -ar "$SHARE_SOURCE_DIR"/* "$SHARE_DEST_DIR" || exit
 mkdir -p "$PACKAGE_DEST_DIR"
 cp -ar "$PACKAGE_SOURCE_DIR"/* "$PACKAGE_DEST_DIR" || exit
+for file in ${COIN3D_LIBS[@]}
+do
+	cp -ar "${COINDIR}/lib/$file" "$LIB_DEST_DIR"
+done
 
 iconv -f CP1251 -t UTF-8 "$CREATE_SQL_SOURCE_FILE" > "$CREATE_DEST_SOURCE_FILE"
 

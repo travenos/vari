@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2019 Alexey Barashkov <travenos@robot-develop.org>
+# Copyright (c) 2019 Alexey Barashkov <barasher@yandex.ru>
 PREFIX="pkg-vari"
 
 GMSH_REPO_URL="https://gitlab.onelab.info/gmsh/gmsh.git"
@@ -81,7 +81,6 @@ if [[ -z "$INSTALL_DIR" ]]
 then
     INSTALL_DIR="$WORKSPACE/$INSTALL_DIR_NAME"
 fi
-INSTALL_DIR="$INSTALL_DIR/usr"
 
 mkdir -p "$WORK_DIR" || exit
 cd "$WORK_DIR" || exit

@@ -3,28 +3,19 @@ $BUILD_TYPE="Release"
 
 $COIN_REPO_URL="https://bitbucket.org/Coin3D/coin"
 $SOQT_REPO_URL="https://bitbucket.org/Coin3D/soqt"
-$GMSH_URL="http://gmsh.info/bin/Windows/gmsh-4.1.4-Windows64-sdk.zip"
+$GMSH_REPO_URL="https://gitlab.onelab.info/gmsh/gmsh.git"
 $COIN_CHANGESET_HASH="11932:acee8063042f"
 $SOQT_CHANGESET_HASH="2021:fd7ae3be0e28"
+$GMSH_TAG="gmsh_3_0_6"
 
 $env:COINDIR="C:\coin3d"
 $env:GMSH_DIR="C:\gmsh"
-
-$GMSH_ZIP_OUTPUT="gmsh-win64.zip"
 
 function check_exit_code([int]$value) {
      if($value -ne 0) {
             throw "Check exit code error"
             exit 1
     }
-}
-
-Add-Type -AssemblyName System.IO.Compression.FileSystem
-function Unzip
-{
-    param([string]$zipfile, [string]$outpath)
-
-    [System.IO.Compression.ZipFile]::ExtractToDirectory($zipfile, $outpath)
 }
 
 if (!(test-path coin3d)) {mkdir coin3d}
@@ -81,22 +72,38 @@ $SLN_NAME="SoQt.sln"
 devenv $SLN_NAME /Build $BUILD_TYPE /Project INSTALL
 check_exit_code($LASTEXITCODE)
 
-#GO TO BUILD DIRECTORY
+#BUILD GMSH
 cd ../../..
-if (!(test-path build)) {mkdir build}
-cd build
-
-#GET GMSH
-if (!(test-path "$env:GMSH_DIR"))
+$GMSH_REPO_PATH="gmsh"
+if (!(test-path "$GMSH_REPO_PATH"))
 {
-	Invoke-WebRequest -Uri "$GMSH_URL" -OutFile "$GMSH_ZIP_OUTPUT"
-	Unzip "$GMSH_ZIP_OUTPUT" "$env:GMSH_DIR"
+	git clone $GMSH_REPO_URL
+	cd "$GMSH_REPO_PATH"
 	check_exit_code($LASTEXITCODE)
 }
+else
+{
+	cd "$GMSH_REPO_PATH"
+	git pull
+}
+git checkout $GMSH_TAG
+#TODO patch source
+if (!(test-path build)) {mkdir build}
+cd build
+$CMAKE_INST_PREFIX_ARG="CMAKE_INSTALL_PREFIX=$env:GMSH_DIR"
+$CMAKE_BUILD_ARG="CMAKE_BUILD_TYPE=$BUILD_TYPE"
+cmake "-D$CMAKE_INST_PREFIX_ARG" "-D$CMAKE_BUILD_ARG" -DENABLE_BLAS_LAPACK=OFF -DENABLE_GMP=OFF -DENABLE_BUILD_LIB=ON -G $GENERATOR_NAME ..
+check_exit_code($LASTEXITCODE)
+$SLN_NAME="gmsh.sln"
+devenv $SLN_NAME /Build $BUILD_TYPE /Project INSTALL
+check_exit_code($LASTEXITCODE)
 
 #BUILD VARI
+cd ../..
+if (!(test-path build)) {mkdir build}
+cd build
 $CMAKE_BUILD_ARG="CMAKE_BUILD_TYPE=$BUILD_TYPE"
-$CMAKE_PREFIX_PATH_ARG="CMAKE_PREFIX_PATH=$env:COINDIR;$env:QTDIR"
+$CMAKE_PREFIX_PATH_ARG="CMAKE_PREFIX_PATH=$env:COINDIR;$env:QTDIR;$env:GMSH_DIR"
 cmake "-D$CMAKE_BUILD_ARG" "-D$CMAKE_PREFIX_PATH_ARG" -G $GENERATOR_NAME ../src
 check_exit_code($LASTEXITCODE)
 $SLN_NAME="vari.sln"
