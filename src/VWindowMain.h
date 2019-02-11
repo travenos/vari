@@ -51,6 +51,8 @@ public:
     static const QColor INACTIVE_COLOR;
     static const QColor INVISIBLE_COLOR;
 
+    static const float MAX_CUBE_SIDE;
+
     explicit VWindowMain(QWidget *parent = nullptr);
     ~VWindowMain();
 
@@ -131,6 +133,12 @@ private:
 
     bool readNumber(const QLineEdit * lineEdit, double &output) const;
 
+    void updateCubeSide(int value);
+    void showCubeSide();
+
+    void saveSizes();
+    void loadSizes();
+
     Ui::VWindowMain *ui;
     std::unique_ptr<VSimulationFacade> m_pFacade;
     VWindowLayer * m_pWindowLayer;
@@ -140,7 +148,8 @@ private:
     QDoubleValidator * const m_pTemperatureValidator;
     QDoubleValidator * const m_pPressureValidator;
     QDoubleValidator * const m_pDiameterValidator;
-
+protected:
+    virtual void closeEvent(QCloseEvent *);
 private slots:
     void m_on_layer_window_closed();
     void m_on_cloth_window_closed();
@@ -177,6 +186,7 @@ private slots:
     void m_on_got_transformation();
     void m_on_model_config_updated();
     void m_on_selection_enabled(bool checked);
+    void m_on_cube_side_changed(float side);
 
     void on_addLayerButton_clicked();
     void on_layersListWidget_itemSelectionChanged();
@@ -215,6 +225,7 @@ private slots:
     void on_timeLimitCheckBox_clicked(bool checked);
     void on_timeEdit_timeChanged(const QTime &);
     void on_layerCutButton_clicked(bool checked);
+    void on_cubeSideSlider_valueChanged(int value);
 };
 
 #endif // _VWINDOWMAIN_H

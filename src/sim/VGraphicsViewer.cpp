@@ -10,6 +10,7 @@
 #include <QGridLayout>
 #include <QPushButton>
 #include <QStyleFactory>
+#include <QSlider>
 #include <functional>
 #include <Inventor/actions/SoBoxHighlightRenderAction.h>
 #include <Inventor/nodes/SoBaseColor.h>
@@ -62,7 +63,8 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_interactionMode(PICK),
     m_dragCanceled(false),
     m_pSelectedNodesIds(new std::vector<uint>),
-    m_pTransformedNodesCoords(new std::vector<std::pair<uint, QVector3D> >)
+    m_pTransformedNodesCoords(new std::vector<std::pair<uint, QVector3D> >),
+    m_cubeSide(VGraphicsNode::DEFAULT_CUBE_SIDE)
 {
     m_pRoot->ref();
     m_pFigureRoot->ref();
@@ -315,7 +317,7 @@ void VGraphicsViewer::setGraphicsElements(const std::vector<VLayer::const_ptr> &
     for (uint i = 0; i < layers.size(); ++i)
     {
         if (layers.at(i)->isActive())
-            m_graphicsLayers.push_back(new VGraphicsLayer(layers.at(i), i));
+            m_graphicsLayers.push_back(new VGraphicsLayer(layers.at(i), i, m_cubeSide));
     }
     {
         std::lock_guard<std::recursive_mutex> locker(m_graphMutex);
@@ -651,6 +653,39 @@ bool VGraphicsViewer::isSelectionOn() const
 VGraphicsViewer::VInteractionMode VGraphicsViewer::getInteractionMode() const
 {
     return m_interactionMode;
+}
+
+void VGraphicsViewer::setCubeSide(float side)
+{
+    if (side != m_cubeSide)
+    {
+        m_cubeSide = std::max(side, 0.0f);
+        for (auto &layer : m_graphicsLayers)
+            layer->setCubeSide(m_cubeSide);
+        emit cubeSideChanged(side);
+    }
+}
+
+float VGraphicsViewer::getCubeSide() const
+{
+    return m_cubeSide;
+}
+
+bool VGraphicsViewer::isCameraOrthographic() const
+{
+    SoOrthographicCamera * camera = dynamic_cast<SoOrthographicCamera *>(getCamera());
+    return (camera != nullptr);
+}
+
+void VGraphicsViewer::setCameraOrthographic(bool on)
+{
+    if (on != isCameraOrthographic())
+    {
+        if (on)
+            setCameraType(SoOrthographicCamera::getClassTypeId());
+        else
+            setCameraType(SoPerspectiveCamera::getClassTypeId());
+    }
 }
 
 void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)

@@ -4,6 +4,7 @@
  */
 
 #include <cmath>
+#include <algorithm>
 
 #include "VSimulationParameters.h"
 
@@ -22,9 +23,7 @@ double VSimulationParameters::getInjectionDiameter() const
 
 void VSimulationParameters::setInjectionDiameter(double diameter)
 {
-    if (diameter < 0)
-        diameter = 0;
-    m_injectionDiameter = diameter;
+    m_injectionDiameter = std::max(diameter, 0.0);
 }
 
 double VSimulationParameters::getVacuumDiameter() const
@@ -33,9 +32,7 @@ double VSimulationParameters::getVacuumDiameter() const
 }
 void VSimulationParameters::setVacuumDiameter(double diameter)
 {
-    if (diameter < 0)
-        diameter = 0;
-    m_vacuumDiameter = diameter;
+    m_vacuumDiameter = std::max(diameter, 0.0);
 }
 
 double VSimulationParameters::getViscosity() const
@@ -82,9 +79,7 @@ double VSimulationParameters::getInjectionPressure() const
 }
 void VSimulationParameters::setInjectionPressure(double pressure)
 {
-    if (pressure < MIN_PRESSURE)
-        pressure = MIN_PRESSURE;
-    m_injectionPressure = pressure;
+    m_injectionPressure = std::max(pressure, MIN_PRESSURE);
 }
 
 double VSimulationParameters::getVacuumPressure() const
@@ -93,9 +88,7 @@ double VSimulationParameters::getVacuumPressure() const
 }
 void VSimulationParameters::setVacuumPressure(double pressure)
 {
-    if (pressure < MIN_PRESSURE)
-        pressure = MIN_PRESSURE;
-    m_vacuumPressure = pressure;
+    m_vacuumPressure = std::max(pressure, MIN_PRESSURE);
 }
 
 double VSimulationParameters::getQ() const
@@ -104,9 +97,7 @@ double VSimulationParameters::getQ() const
 }
 void VSimulationParameters::setQ(double q)
 {
-    if (q < 1)
-        q = 1;
-    m_q = q;
+    m_q = std::max(q, 0.0);
 }
 
 double VSimulationParameters::getR() const
@@ -115,9 +106,7 @@ double VSimulationParameters::getR() const
 }
 void VSimulationParameters::setR(double r)
 {
-    if (r < 1)
-        r = 1;
-    m_r = r;
+    m_r = std::max(r, 0.0);
 }
 
 double VSimulationParameters::getS() const
@@ -126,9 +115,7 @@ double VSimulationParameters::getS() const
 }
 void VSimulationParameters::setS(double s)
 {
-    if (s < 1)
-        s = 1;
-    m_s = s;
+    m_s = std::max(s, 0.0);
 }
 
 double VSimulationParameters::getAveragePermeability() const
@@ -168,9 +155,7 @@ double VSimulationParameters::getTimeLimit() const
 
 void VSimulationParameters::setTimeLimit(double limit)
 {
-    if (limit < 0)
-        limit = 0;
-    m_timeLimit = limit;
+    m_timeLimit = std::max(limit, 0.0);
 }
 
 double VSimulationParameters::calculateViscosity() const

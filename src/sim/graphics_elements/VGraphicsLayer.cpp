@@ -14,10 +14,10 @@
 
 #include "VGraphicsLayer.h"
 
-#include "VGraphicsNode.h"
 #include "VGraphicsTriangle.h"
 
-VGraphicsLayer::VGraphicsLayer(const VLayer::const_ptr &simLayer, uint number) :
+VGraphicsLayer::VGraphicsLayer(const VLayer::const_ptr &simLayer, uint number,
+                               float cubeSide) :
     m_number(number),
     m_visible(false),
     m_pTransform(new SoTransform)
@@ -28,7 +28,7 @@ VGraphicsLayer::VGraphicsLayer(const VLayer::const_ptr &simLayer, uint number) :
     const VSimNode::map_ptr &simNodes = simLayer->getNodes();
     reserveNodes(simNodes->size());
     for (auto &simNode : *simNodes)
-        addNode(simNode.second);
+        addNode(simNode.second, cubeSide);
     const VSimTriangle::list_ptr &simTriangles = simLayer->getTriangles();
     reserveTriangles(simTriangles->size());
     for (auto &simTriangle : *simTriangles)
@@ -44,9 +44,9 @@ VGraphicsLayer::~VGraphicsLayer()
     #endif
 }
 
-inline void VGraphicsLayer::addNode(const VSimNode::const_ptr &simNode)
+inline void VGraphicsLayer::addNode(const VSimNode::const_ptr &simNode, float cubeSide)
 {
-    VGraphicsNode * node = new VGraphicsNode(simNode);
+    VGraphicsNode * node = new VGraphicsNode(simNode, cubeSide);
     addChild(node);
     int id = findChild(node);
     m_graphicsNodes.push_back(std::make_pair(id, node));
@@ -173,6 +173,55 @@ const SoTransform * VGraphicsLayer::getTransform() const
 int VGraphicsLayer::getTransformId() const
 {
     return m_transformId;
+}
+
+void VGraphicsLayer::setCubeSide(float side)
+{
+    for (auto &node : m_graphicsNodes)
+    {
+        node.second->setCubeSide(side);
+    }
+}
+
+float VGraphicsLayer::getMinCubeSide(bool *sidesEqual) const
+{
+    if (m_graphicsNodes.size() > 0)
+    {
+        bool allEqual = true;
+        auto nodeIt = m_graphicsNodes.begin();
+        float minSide = nodeIt->second->getCubeSide();
+        std::advance(nodeIt, 1);
+        for (;nodeIt < m_graphicsNodes.end(); ++nodeIt)
+        {
+            float nodeSide = nodeIt->second->getCubeSide();
+            if (nodeSide < minSide)
+            {
+                minSide = nodeSide;
+                allEqual = false;
+            }
+        }
+        if (sidesEqual != nullptr)
+            *sidesEqual = allEqual;
+        return minSide;
+    }
+    else
+    {
+        if (sidesEqual != nullptr)
+            *sidesEqual = false;
+        return VGraphicsNode::DEFAULT_CUBE_SIDE;
+    }
+}
+
+float VGraphicsLayer::getFirstCubeSide() const
+{
+    if (m_graphicsNodes.size() > 0)
+    {
+        return m_graphicsNodes.begin()->second->getCubeSide();
+    }
+    else
+    {
+        return VGraphicsNode::DEFAULT_CUBE_SIDE;
+    }
 }
 
 std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > >

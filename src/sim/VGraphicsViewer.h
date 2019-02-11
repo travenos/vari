@@ -76,6 +76,12 @@ public:
     void setSelectionMode(bool on) ;
     void setDragMode(bool on) ;
 
+    void setCubeSide(float side);
+    float getCubeSide() const;
+
+    bool isCameraOrthographic() const;
+    void setCameraOrthographic(bool on);
+
 public slots:
     void doRender() ;
     void displayInfo() ;
@@ -152,6 +158,8 @@ private:
     const_pos_vect_ptr m_pTransformedNodesCoords;
     uint m_transformedLayerNumber;
 
+    float m_cubeSide;
+
 private slots:
     /**
      * Slot that should be called when the left rotary wheel is pressed, to get ready for a movement.
@@ -202,6 +210,7 @@ signals:
     void gotPoint(const QVector3D &point);
     void gotNodesSelection(const VGraphicsViewer::const_uint_vect_ptr &p_selectedNodes);
     void gotTransformation();
+    void cubeSideChanged(float side);
 };
 
 

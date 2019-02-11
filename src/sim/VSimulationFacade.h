@@ -93,6 +93,9 @@ public:
     void loadSavedParameters();
     void saveParameters() const;
 
+    void setCubeSide(float side);
+    float getCubeSide() const;
+
 public slots:
     void updateGraphicsPositions();
 
@@ -158,6 +161,7 @@ signals:
     void cutPerformed();
     void translationPerformed();
     void gotTransformation();
+    void cubeSideChanged(float side);
     void selectionEnabled(bool);
 
     void configUpdated();

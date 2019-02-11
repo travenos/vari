@@ -69,6 +69,40 @@
          </widget>
         </item>
         <item>
+         <layout class="QHBoxLayout" name="cubeSideLayout">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetFixedSize</enum>
+          </property>
+          <item>
+           <spacer name="cubeSideSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="cubeSideLabel">
+            <property name="text">
+             <string>Размер кубиков в узлах:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSlider" name="cubeSideSlider">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
          <widget class="QWidget" name="viewerWidget" native="true"/>
         </item>
        </layout>

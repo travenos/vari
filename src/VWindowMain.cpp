@@ -55,6 +55,8 @@ const QColor VWindowMain::ACTIVE_COLOR(0, 0, 0);
 const QColor VWindowMain::INACTIVE_COLOR(255, 0, 0);
 const QColor VWindowMain::INVISIBLE_COLOR(127, 127, 127);
 
+const float VWindowMain::MAX_CUBE_SIDE = 0.0125;
+
 VWindowMain::VWindowMain(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::VWindowMain),
@@ -74,6 +76,7 @@ VWindowMain::VWindowMain(QWidget *parent) :
     connectSimulationSignals();
     setupValidators();
     m_pFacade->loadSavedParameters();
+    loadSizes();
 }
 
 void VWindowMain::connectSimulationSignals()
@@ -131,6 +134,8 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_model_config_updated()));
     connect(m_pFacade.get(), SIGNAL(selectionEnabled(bool)),
             this, SLOT(m_on_selection_enabled(bool)));
+    connect(m_pFacade.get(), SIGNAL(cubeSideChanged(float)),
+            this, SLOT(m_on_cube_side_changed(float)));
 }
 
 void VWindowMain::setupValidators()
@@ -163,6 +168,11 @@ VWindowMain::~VWindowMain()
     #ifdef DEBUG_MODE
         qInfo() << "VWindowMain destroyed";
     #endif
+}
+
+void VWindowMain::closeEvent(QCloseEvent *)
+{
+    saveSizes();
 }
 
 void VWindowMain::deleteWindowLayer()
@@ -798,6 +808,37 @@ void VWindowMain::askForTransform()
     }
 }
 
+void VWindowMain::updateCubeSide(int value)
+{
+    int maxValue = ui->cubeSideSlider->maximum();
+    float side = static_cast<float>(value) / maxValue * MAX_CUBE_SIDE;
+    m_pFacade->setCubeSide(side);
+}
+
+void VWindowMain::showCubeSide()
+{
+    int maxValue = ui->cubeSideSlider->maximum();
+    float side = m_pFacade->getCubeSide();
+    int value = static_cast<int>(side / MAX_CUBE_SIDE * maxValue + 0.5);
+    if (value != ui->cubeSideSlider->value())
+        ui->cubeSideSlider->setValue(value);
+}
+
+void VWindowMain::saveSizes()
+{
+    QSettings settings;
+    settings.setValue("window/geometry", saveGeometry());
+    settings.setValue("window/windowState", saveState());
+    settings.sync();
+}
+
+void VWindowMain::loadSizes()
+{
+    QSettings settings;
+    restoreGeometry(settings.value("window/geometry").toByteArray());
+    restoreState(settings.value("window/windowState").toByteArray());
+}
+
 /**
  * Slots
  */
@@ -1011,6 +1052,11 @@ void VWindowMain::m_on_selection_enabled(bool checked)
     ui->layerCutButton->setChecked(checked);
 }
 
+void VWindowMain::m_on_cube_side_changed(float)
+{
+    showCubeSide();
+}
+
 void VWindowMain::on_injectionPlaceButton_clicked(bool checked)
 {
     if (checked)
@@ -1170,4 +1216,9 @@ void VWindowMain::on_layerCutButton_clicked(bool checked)
         startCuttingLayer();
     else
         cancelCuttingLayer();
+}
+
+void VWindowMain::on_cubeSideSlider_valueChanged(int value)
+{
+    updateCubeSide(value);
 }

@@ -20,7 +20,7 @@
 
 const float VGraphicsNode::DEFAULT_CUBE_SIDE = 1.5e-3f;
 
-VGraphicsNode::VGraphicsNode(const VSimNode::const_ptr &simNode):
+VGraphicsNode::VGraphicsNode(const VSimNode::const_ptr &simNode, float cubeSide):
     VGraphicsElement(std::dynamic_pointer_cast<const VSimElement>(simNode)),
     m_pSimNode(simNode),
     m_pTranslation(new SoTranslation),
@@ -31,7 +31,7 @@ VGraphicsNode::VGraphicsNode(const VSimNode::const_ptr &simNode):
     m_pTranslation->ref();
     m_translationId = findChild(m_pTranslation);
 
-    setCubeSide(DEFAULT_CUBE_SIDE);
+    setCubeSide(cubeSide);
     addChild(m_pCube);
     m_pCube->ref();
 }
@@ -53,6 +53,11 @@ void VGraphicsNode::setCubeSide(float side)
     m_pCube->width = side;
     m_pCube->height = side;
     m_pCube->depth = side;
+}
+
+float VGraphicsNode::getCubeSide() const
+{
+    return m_pCube->width.getValue();
 }
 
 int VGraphicsNode::getTranslationId() const

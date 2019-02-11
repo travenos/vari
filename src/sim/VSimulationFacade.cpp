@@ -57,6 +57,8 @@ void VSimulationFacade::connectMainSignals()
             this, SLOT(m_on_got_point(const QVector3D &)));
     connect(m_pGraphicsViewer.get(), SIGNAL(gotTransformation()),
             this, SIGNAL(gotTransformation()));
+    connect(m_pGraphicsViewer.get(), SIGNAL(cubeSideChanged(float)),
+            this, SIGNAL(cubeSideChanged(float)));
     connect(m_pGraphicsViewer.get(), SIGNAL(askForDisplayingInfo()),
             this, SIGNAL(gotNewInfo()));
     connect(m_pGraphicsViewer.get(), SIGNAL(selectionEnabled(bool)),
@@ -550,6 +552,13 @@ void VSimulationFacade::loadSavedParameters()
     m_pSimulator->setS(s);    
     m_pSimulator->setTimeLimit(timeLimit);
     m_pSimulator->setTimeLimitMode(timeLimitMode);
+
+    bool isOrthographic;
+    float cubeSide;
+    isOrthographic = settings.value(QStringLiteral("graphics/cameraType"), m_pGraphicsViewer->isCameraOrthographic()).toBool();
+    cubeSide = settings.value(QStringLiteral("graphics/cubeSide"), m_pGraphicsViewer->getCubeSide()).toFloat();
+    m_pGraphicsViewer->setCameraOrthographic(isOrthographic);
+    m_pGraphicsViewer->setCubeSide(cubeSide);
 }
 
 void VSimulationFacade::saveParameters() const
@@ -574,6 +583,9 @@ void VSimulationFacade::saveParameters() const
 
     settings.setValue(QStringLiteral("sim/timeLimit"), param.getTimeLimit());
     settings.setValue(QStringLiteral("sim/timeLimitMode"), m_pSimulator->isTimeLimitModeOn());
+
+    settings.setValue(QStringLiteral("graphics/cameraType"), m_pGraphicsViewer->isCameraOrthographic());
+    settings.setValue(QStringLiteral("graphics/cubeSide"), m_pGraphicsViewer->getCubeSide());
     settings.sync();
 }
 
@@ -583,6 +595,16 @@ void VSimulationFacade::enableInteraction()
     {
         m_pGraphicsViewer->enableDrag(true);
     }
+}
+
+void VSimulationFacade::setCubeSide(float side)
+{
+    m_pGraphicsViewer->setCubeSide(side);
+}
+
+float VSimulationFacade::getCubeSide() const
+{
+    return m_pGraphicsViewer->getCubeSide();
 }
 
 void VSimulationFacade::disableInteraction()
