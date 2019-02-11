@@ -61,27 +61,18 @@ else (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
 		"${CMAKE_FIND_ROOT_PATH}"
         )
 
-    if(WIN32)
-		if(GMSH_LIBRARY_RELEASE)
-			set(GMSH_LIBRARIES_RELEASE
-				"optimized" 
-				${GMSH_LIBRARY_RELEASE}
-				)
-		endif()
-		if(GMSH_LIBRARY_DEBUG)
-			set(GMSH_LIBRARIES_DEBUG
-				"debug"
-				${GMSH_LIBRARY_DEBUG}
-				)
-		endif()
-    else()
+    if(GMSH_LIBRARY_RELEASE)
 		set(GMSH_LIBRARIES_RELEASE
-            ${GMSH_RELEASE_LIBRARY}
-            )
-        set(GMSH_LIBRARIES_DEBUG
-            ${GMSH_DEBUG_LIBRARY}
-            )
-    endif()
+			"optimized" 
+			${GMSH_LIBRARY_RELEASE}
+			)
+	endif()
+	if(GMSH_LIBRARY_DEBUG)
+		set(GMSH_LIBRARIES_DEBUG
+			"debug"
+			${GMSH_LIBRARY_DEBUG}
+			)
+	endif()
 	if(GMSH_LIBRARY_RELEASE)
 		set(GMSH_LIBRARIES ${GMSH_LIBRARIES} ${GMSH_LIBRARIES_RELEASE})
 	endif()
