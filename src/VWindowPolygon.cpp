@@ -49,8 +49,8 @@ VWindowPolygon::VWindowPolygon(QWidget *parent) :
     ui->stepSpinBox->setMinimum(MIN_CHARACTERISTIC_LENGTH);
     ui->stepSpinBox->setLocale(QLocale::C);
 
-    ui->plotWidget->xAxis->setLabel(QStringLiteral("x, м"));
-    ui->plotWidget->yAxis->setLabel(QStringLiteral("y, м"));
+    ui->plotWidget->xAxis->setLabel(QStringLiteral("x, m"));
+    ui->plotWidget->yAxis->setLabel(QStringLiteral("y, m"));
     ui->plotWidget->setInteraction(QCP::iRangeDrag, true);
     ui->plotWidget->setInteraction(QCP::iRangeZoom, true);
     connect(ui->plotWidget, SIGNAL(beforeReplot()), this, SLOT(pl_on_before_report()));
