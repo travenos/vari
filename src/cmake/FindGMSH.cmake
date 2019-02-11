@@ -29,38 +29,69 @@ else (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
         )
 
     find_path(GMSH_INCLUDE_DIR NAMES gmsh/Gmsh.h
-        )
-
-    find_library(GMSH_LIBRARY NAMES Gmsh gmsh
-        PATHS "${GMSH_DIR_LIB}"
-        "${GMSH_DIR}"
-        "${GMSH_DIR}/lib"
-        "${GMSH_DIR}/usr/lib"
-        "${GMSH_DIR_LIB}/../../install/lib"
-        "${GMSH_INSTALL_DIR}/lib"
-        NO_DEFAULT_PATH
-        )
-    find_library(GMSH_LIBRARY NAMES Gmsh gmsh
-        )
-
+		"${CMAKE_FIND_ROOT_PATH}"
+        )		
+	
     set(GMSH_INCLUDE_DIRS
         ${GMSH_INCLUDE_DIR} CACHE PATH "Path to GMSH headers"
         )
 
+	set(LIB_PATHS "${GMSH_DIR_LIB}"
+        "${GMSH_DIR}"
+        "${GMSH_DIR}/lib"
+        "${GMSH_DIR}/usr/lib"
+        "${GMSH_DIR_LIB}/../../install/lib"
+        "${GMSH_INSTALL_DIR}/lib")
+
+    find_library(GMSH_LIBRARY_RELEASE NAMES Gmsh gmsh
+        PATHS
+		${LIB_PATHS}
+        NO_DEFAULT_PATH
+        )
+    find_library(GMSH_LIBRARY_RELEASE NAMES Gmsh gmsh
+		"${CMAKE_FIND_ROOT_PATH}"
+        )
+		
+	find_library(GMSH_LIBRARY_DEBUG NAMES Gmshd gmshd
+        PATHS
+		${LIB_PATHS}
+        NO_DEFAULT_PATH
+        )
+    find_library(GMSH_LIBRARY_DEBUG NAMES Gmshd gmshd
+		"${CMAKE_FIND_ROOT_PATH}"
+        )
+
     if(WIN32)
-        set(WINSDK "c:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Lib/x64")
-        find_library(WINMM_LIBRARY winmm PATHS "${WINSDK}")
-        find_library(WS2_32_LIBRARY Ws2_32 PATHS "${WINSDK}")
-        set(GMSH_LIBRARIES
-            ${GMSH_LIBRARY}
-            ${WINMM_LIBRARY}
-            ${WS2_32_LIBRARY}
-            )
+		if(GMSH_LIBRARY_RELEASE)
+			set(GMSH_LIBRARIES_RELEASE
+				"optimized" 
+				${GMSH_LIBRARY_RELEASE}
+				)
+		endif()
+		if(GMSH_LIBRARY_DEBUG)
+			set(GMSH_LIBRARIES_DEBUG
+				"debug"
+				${GMSH_LIBRARY_DEBUG}
+				)
+		endif()
     else()
-        set(GMSH_LIBRARIES
-            ${GMSH_LIBRARY}
+		set(GMSH_LIBRARIES_RELEASE
+            ${GMSH_RELEASE_LIBRARY}
+            )
+        set(GMSH_LIBRARIES_DEBUG
+            ${GMSH_DEBUG_LIBRARY}
             )
     endif()
+	if(GMSH_LIBRARY_RELEASE)
+		set(GMSH_LIBRARIES ${GMSH_LIBRARIES} ${GMSH_LIBRARIES_RELEASE})
+	endif()
+	if(GMSH_LIBRARY_DEBUG)
+		set(GMSH_LIBRARIES ${GMSH_LIBRARIES} ${GMSH_LIBRARIES_DEBUG})
+	endif()
+	
+	if(WIN32 AND GMSH_LIBRARIES)
+		set(GMSH_LIBRARIES winmm Ws2_32 ${GMSH_LIBRARIES})
+	endif()
 
     set(GMSH_VERSION_FILE "${GMSH_INCLUDE_DIR}/gmsh/GmshVersion.h")
     if(GMSH_INCLUDE_DIR AND EXISTS "${GMSH_VERSION_FILE}")
