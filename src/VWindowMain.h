@@ -64,8 +64,8 @@ private:
     void deleteWindowResin();
     void addLayerFromFile(const VCloth& material,const QString& filename,
                           VLayerAbstractBuilder::VUnit units);
-    void addLayerFromPolygon(const VCloth& material,const QPolygonF& polygon,
-                             VLayerAbstractBuilder::VUnit units);
+    void addLayerFromPolygon(const VCloth& material, const QPolygonF& polygon,
+                             double characteristicLength);
     void selectLayer();
     void enableLayer(bool enable);
     void setVisibleLayer(bool visible);
@@ -151,7 +151,7 @@ private slots:
     void m_on_layer_creation_from_file_available(const VCloth& material, const QString& filename,
                                                  VLayerAbstractBuilder::VUnit units);
     void m_on_layer_creation_manual_available(const VCloth& material, const QPolygonF& polygon,
-                                              VLayerAbstractBuilder::VUnit units);
+                                              double characteristicLength);
     void m_on_layer_removed(uint layer);
     void m_on_material_changed(uint layer);
     void m_on_layer_enabled(uint layer, bool enable);

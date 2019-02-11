@@ -23,13 +23,14 @@
 
 const QString VLayerManualBuilder::TEMP_FILE_NAME("temp_vari_mesh.gmsh");
 const double VLayerManualBuilder::GMSH_VERSION = 2.2;
+const double VLayerManualBuilder::DEVIATION_PART = 0.1;
 
 VLayerManualBuilder::VLayerManualBuilder(const QPolygonF &polygon,
                                          const VCloth &material,
-                                         VUnit units) :
+                                         double characteristicLength) :
     VLayerAbstractBuilder(material),
     m_polygon(polygon),
-    m_units(units)
+    m_characteristicLength(characteristicLength)
 {
 
 }
@@ -39,13 +40,13 @@ const VLayer::ptr& VLayerManualBuilder::build()
     QString tempFileName = QDir::cleanPath(QDir::tempPath() + QDir::separator() + TEMP_FILE_NAME);
     try
     {
-        exportToFile(m_polygon, tempFileName);
+        exportToFile(m_polygon, tempFileName, m_characteristicLength);
     }
     catch(VExportException &)
     {
         throw VImportException();
     }
-    VLayerFromGmeshBuilder gmshLoader(tempFileName, *m_pMaterial, m_units);
+    VLayerFromGmeshBuilder gmshLoader(tempFileName, *m_pMaterial, M);
     gmshLoader.setNodeStartId(m_nodeStartId);
     gmshLoader.setTriangleStartId(m_triangleStartId);
     QFile tempFile(tempFileName);
@@ -64,12 +65,15 @@ const VLayer::ptr& VLayerManualBuilder::build()
     return m_pLayer;
 }
 
-void VLayerManualBuilder::exportToFile(const QPolygonF &polygon, const QString &filename)
+void VLayerManualBuilder::exportToFile(const QPolygonF &polygon, const QString &filename,
+                                       double characteristicLength)
 {
     const double lc = MAXFLOAT;
+    double lengthMin = characteristicLength * (1 - DEVIATION_PART);
+    double lengthMax = characteristicLength * (1 + DEVIATION_PART);
     GmshInitialize();
-    GmshSetOption("Mesh", "CharacteristicLengthMin", 0.009);  //TODO
-    GmshSetOption("Mesh", "CharacteristicLengthMax", 0.011);  //TODO
+    GmshSetOption("Mesh", "CharacteristicLengthMin", lengthMin);
+    GmshSetOption("Mesh", "CharacteristicLengthMax", lengthMax);
 
     GModel *m = new GModel;
     m->setFactory("Gmsh");

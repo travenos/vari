@@ -210,11 +210,11 @@ void VWindowMain::addLayerFromFile(const VCloth& material,const QString& filenam
 }
 
 void VWindowMain::addLayerFromPolygon(const VCloth& material, const QPolygonF& polygon,
-                                      VLayerAbstractBuilder::VUnit units)
+                                      double characteristicLength)
 {
     try
     {
-        m_pFacade->newLayerFromPolygon(material, polygon, units);
+        m_pFacade->newLayerFromPolygon(material, polygon, characteristicLength);
     }
     catch (VImportException)
     {
@@ -236,9 +236,9 @@ void VWindowMain::showWindowLayer()
                 this,
                 SLOT(m_on_layer_creation_from_file_available(const VCloth&,const QString&,VLayerAbstractBuilder::VUnit)));
         connect(m_pWindowLayer,
-                SIGNAL(creationManualAvailable(const VCloth&,const QPolygonF&, VLayerAbstractBuilder::VUnit)),
+                SIGNAL(creationManualAvailable(const VCloth&,const QPolygonF&, double)),
                 this,
-                SLOT(m_on_layer_creation_manual_available(const VCloth&,const QPolygonF&, VLayerAbstractBuilder::VUnit)));
+                SLOT(m_on_layer_creation_manual_available(const VCloth&,const QPolygonF&, double)));
         connect(m_pWindowLayer,SIGNAL(windowClosed()), this, SLOT(m_on_layer_window_closed()));
     }
     m_pWindowLayer->show();
@@ -809,9 +809,9 @@ void VWindowMain::m_on_layer_creation_from_file_available(const VCloth& material
 }
 
 void VWindowMain::m_on_layer_creation_manual_available(const VCloth& material,const QPolygonF& polygon,
-                                                       VLayerAbstractBuilder::VUnit units)
+                                                       double characteristicLength)
 {
-    addLayerFromPolygon(material, polygon, units);
+    addLayerFromPolygon(material, polygon, characteristicLength);
 }
 
 void VWindowMain::m_on_got_cloth(const QString & name, float cavityheight, float permeability, float porosity)

@@ -35,7 +35,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Отменить</string>
+         <string>Убрать последнюю точку</string>
         </property>
        </widget>
       </item>
@@ -91,7 +91,7 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
        <widget class="QDialogButtonBox" name="buttonBox">
         <property name="sizePolicy">
@@ -111,7 +111,43 @@
         </property>
        </widget>
       </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="stepLabel">
+          <property name="text">
+           <string>Средний шаг сетки, м</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="stepSpinBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="decimals">
+           <number>4</number>
+          </property>
+          <property name="minimum">
+           <double>0.001000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.001000000000000</double>
+          </property>
+          <property name="value">
+           <double>0.010000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2"/>
     </item>
    </layout>
   </widget>

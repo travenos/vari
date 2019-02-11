@@ -42,32 +42,37 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="createFromFileButton">
-         <property name="text">
-          <string>Импортировать форму слоя из файла</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="unitsBox">
-         <property name="title">
-          <string>Единицы, в которых заданы размеры слоя:</string>
+        <widget class="QGroupBox" name="importBox">
+         <property name="flat">
+          <bool>false</bool>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item>
-           <widget class="QRadioButton" name="mmRadioButton">
+           <widget class="QPushButton" name="createFromFileButton">
             <property name="text">
-             <string>Миллиметры</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
+             <string>Импортировать форму слоя из файла</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="mRadioButton">
+           <widget class="QCheckBox" name="mmCheckBox">
             <property name="text">
-             <string>Метры</string>
+             <string>Размеры заданы в миллиметрах</string>
             </property>
            </widget>
           </item>
@@ -187,6 +192,13 @@
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>chooseMaterialButton</tabstop>
+  <tabstop>createManualButton</tabstop>
+  <tabstop>createFromFileButton</tabstop>
+  <tabstop>mmCheckBox</tabstop>
+  <tabstop>colorButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

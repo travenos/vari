@@ -14,17 +14,19 @@ class VLayerManualBuilder: public VLayerAbstractBuilder
 public:
     VLayerManualBuilder(const QPolygonF &polygon,
                         const VCloth &material,
-                        VUnit units=M);
+                        double characteristicLength);
     
     const VLayer::ptr &build() override;
 
-    static void exportToFile(const QPolygonF &polygon, const QString &filename);
+    static void exportToFile(const QPolygonF &polygon, const QString &filename,
+                             double characteristicLength);
 
 protected:
     static const QString TEMP_FILE_NAME;
     static const double GMSH_VERSION;
+    static const double DEVIATION_PART;
     QPolygonF m_polygon;
-    VUnit m_units;
+    double m_characteristicLength;
 };
 
 #endif //_VLAYERMANUALBUILDER_H

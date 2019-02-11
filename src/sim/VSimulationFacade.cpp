@@ -348,10 +348,10 @@ void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &
 }
 
 void VSimulationFacade::newLayerFromPolygon(const VCloth &material, const QPolygonF &polygon,
-                                         VLayerAbstractBuilder::VUnit units)
+                                            double characteristicLength)
 {
     VLayerManualBuilder * p_layerBuilder;
-    p_layerBuilder = new VLayerManualBuilder(polygon, material, units);
+    p_layerBuilder = new VLayerManualBuilder(polygon, material, characteristicLength);
     try
     {
         m_pLayersProcessor->addLayer(p_layerBuilder);

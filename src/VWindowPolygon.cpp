@@ -18,12 +18,18 @@
 const QCPRange VWindowPolygon::X_RANGE(-1, 1);
 const QCPRange VWindowPolygon::Y_RANGE(-0.5, 0.5);
 const int VWindowPolygon::MIN_POLYGON_SIZE = 3;
+const double VWindowPolygon::MIN_CHARACTERISTIC_LENGTH = 0.001;
+const double VWindowPolygon::DEFAULT_CHARACTERISTIC_LENGTH = 0.01;
+const double VWindowPolygon::MIN_CHARACTERISTIC_RATIO = 0.005;
 
 const QString VWindowPolygon::SAVE_FILE_DIALOG_TITLE("Создание и сохранение слоя в файл");
 const QString VWindowPolygon::FILE_DIALOG_FORMATS("Файлы gmsh(*.msh);;"
                                                   "Все файлы (*)");
 const QString VWindowPolygon::ERROR_TITLE("Ошибка");
 const QString VWindowPolygon::EXPORT_TO_FILE_ERROR("Ошибка сохранения в файл");
+const QString VWindowPolygon::TOO_SMALL_STEP_ERROR("Задан слишком маленький средний шаг сетки для текущих"
+                                                   " габаритов слоя. Необходимо увеличить шаг сетки"
+                                                   " как минимум в %1 раз");
 
 
 VWindowPolygon::VWindowPolygon(QWidget *parent) :
@@ -34,9 +40,17 @@ VWindowPolygon::VWindowPolygon(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    m_pUndoShortcut = new QShortcut(QKeySequence("Ctrl+Z"), this);
+    QObject::connect(m_pUndoShortcut, SIGNAL(activated()), this, SLOT(on_undoButton_clicked()));
+
     updateButtonsStates();
     resetView();
 
+    ui->stepSpinBox->setMinimum(MIN_CHARACTERISTIC_LENGTH);
+    ui->stepSpinBox->setLocale(QLocale::C);
+
+    ui->plotWidget->xAxis->setLabel(QStringLiteral("x, м"));
+    ui->plotWidget->yAxis->setLabel(QStringLiteral("y, м"));
     ui->plotWidget->setInteraction(QCP::iRangeDrag, true);
     ui->plotWidget->setInteraction(QCP::iRangeZoom, true);
     connect(ui->plotWidget, SIGNAL(beforeReplot()), this, SLOT(pl_on_before_report()));
@@ -54,8 +68,10 @@ VWindowPolygon::VWindowPolygon(QWidget *parent) :
 
 VWindowPolygon::~VWindowPolygon()
 {
+    saveParameters();
     m_pPlotCurve->deleteLater();
     m_pCloseCurve->deleteLater();
+    m_pUndoShortcut->deleteLater();
     delete ui;
     #ifdef DEBUG_MODE
         qInfo() << "VWindowPolygon destroyed";
@@ -64,11 +80,17 @@ VWindowPolygon::~VWindowPolygon()
 
 void VWindowPolygon::accept()
 {
-    hide();
-    QPolygonF polygon;
-    getPolygon(polygon);
-    emit polygonAvailable(polygon);
-    close();
+    double ratio = getStepRatio();
+    if (ratio >= MIN_CHARACTERISTIC_RATIO)
+    {
+        hide();
+        QPolygonF polygon;
+        getPolygon(polygon);
+        emit polygonAvailable(polygon, m_characteristicLength);
+        close();
+    }
+    else
+        showRatioError(ratio);
 }
 
 void VWindowPolygon::reset()
@@ -182,41 +204,80 @@ void VWindowPolygon::exportMeshToFile(const QString &filename) const
 {
     QPolygonF polygon;
     getPolygon(polygon);
-    VLayerManualBuilder::exportToFile(polygon, filename);
+    VLayerManualBuilder::exportToFile(polygon, filename, m_characteristicLength);
 }
 
 void VWindowPolygon::meshExportProcedure()
 {
-    QString filename = QFileDialog::getSaveFileName(this, SAVE_FILE_DIALOG_TITLE, m_lastDir,
-                                                    FILE_DIALOG_FORMATS);
-    if (!filename.isEmpty())
+    double ratio = getStepRatio();
+    if (ratio >= MIN_CHARACTERISTIC_RATIO)
     {
-        m_lastDir = QFileInfo(filename).absolutePath();
-        try
+        QString filename = QFileDialog::getSaveFileName(this, SAVE_FILE_DIALOG_TITLE, m_lastDir,
+                                                        FILE_DIALOG_FORMATS);
+        if (!filename.isEmpty())
         {
-            exportMeshToFile(filename);
+            m_lastDir = QFileInfo(filename).absolutePath();
+            try
+            {
+                exportMeshToFile(filename);
+            }
+            catch (VExportException)
+            {
+                QMessageBox::warning(this, ERROR_TITLE, EXPORT_TO_FILE_ERROR);
+            }
+            QSettings settings;
+            settings.setValue(QStringLiteral("import/lastDir"), m_lastDir);
+            settings.sync();
         }
-        catch (VExportException)
-        {
-            QMessageBox::warning(this, ERROR_TITLE, EXPORT_TO_FILE_ERROR);
-        }
-        QSettings settings;
-        settings.setValue(QStringLiteral("import/lastDir"), m_lastDir);
-        settings.sync();
     }
+    else
+        showRatioError(ratio);
 }
 
 void VWindowPolygon::loadSavedParameters()
 {
     QSettings settings;
     m_lastDir = settings.value(QStringLiteral("import/lastDir"), QDir::homePath()).toString();
+    bool ok;
+    m_characteristicLength = settings.value(QStringLiteral("mesh/meshStep"), DEFAULT_CHARACTERISTIC_LENGTH).toDouble(&ok);
+    if (!ok || m_characteristicLength < MIN_CHARACTERISTIC_LENGTH)
+        m_characteristicLength = DEFAULT_CHARACTERISTIC_LENGTH;
+    showCharacteristicLength();
 }
 
 void VWindowPolygon::saveParameters() const
 {
     QSettings settings;
     settings.setValue(QStringLiteral("import/lastDir"), m_lastDir);
+    settings.setValue(QStringLiteral("mesh/meshStep"), m_characteristicLength);
     settings.sync();
+}
+
+void VWindowPolygon::showCharacteristicLength()
+{
+    ui->stepSpinBox->setValue(m_characteristicLength);
+}
+
+double VWindowPolygon::getStepRatio() const
+{
+    if (m_qvX.size() >= MIN_POLYGON_SIZE && m_qvY.size() >= MIN_POLYGON_SIZE)
+    {
+        auto xMinMax = std::minmax_element(m_qvX.begin(), m_qvX.end());
+        auto yMinMax = std::minmax_element(m_qvY.begin(), m_qvY.end());
+        double maxSide = std::max(*(xMinMax.second) - *(xMinMax.first),
+                                  *(yMinMax.second) - *(yMinMax.first));
+        double ratio = m_characteristicLength / maxSide;
+        return ratio;
+    }
+    else
+        return 0;
+}
+
+void VWindowPolygon::showRatioError(double ratio)
+{
+    double times = MIN_CHARACTERISTIC_RATIO / ratio;
+    QMessageBox::warning(this, ERROR_TITLE,
+                         TOO_SMALL_STEP_ERROR.arg(QString::number(times, 'g', 4)));
 }
 
 void VWindowPolygon::on_buttonBox_rejected()
@@ -292,4 +353,9 @@ void VWindowPolygon::on_resetViewButton_clicked()
 void VWindowPolygon::on_exportButton_clicked()
 {
     meshExportProcedure();
+}
+
+void VWindowPolygon::on_stepSpinBox_valueChanged(double arg1)
+{
+    m_characteristicLength = arg1;
 }

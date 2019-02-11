@@ -43,7 +43,7 @@ public slots:
 private slots:
     void m_on_got_material(const QString &name, float cavityheight, float permeability, float porosity);
 
-    void m_on_got_polygon(const QPolygonF &polygon);
+    void m_on_got_polygon(const QPolygonF &polygon, double characteristicLength);
 
     void on_buttonBox_rejected();
 
@@ -61,7 +61,7 @@ private:
     void reset();
     void reject();
     void accept();
-    void tryToEnableAcceptButton();
+    void updateButtonsStates();
     void openFile();
     void showWindowCloth();
     void showWindowPolygon();
@@ -79,12 +79,13 @@ private:
     QString m_lastDir;
     VCloth m_material;
     QPolygonF m_polygon;
+    double m_characteristicLength;
 
 signals:
     void creationFromFileAvailable(const VCloth &material, const QString &fileName,
                                    VLayerAbstractBuilder::VUnit units);
     void creationManualAvailable(const VCloth &material, const QPolygonF &polygon,
-                                 VLayerAbstractBuilder::VUnit units);
+                                 double characteristicLength);
     void creationCanceled();
     void windowClosed();
 };

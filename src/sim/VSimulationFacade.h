@@ -71,7 +71,7 @@ public:
     void newLayerFromFile(const VCloth &material, const QString &filename,
                           VLayerAbstractBuilder::VUnit units=VLayerAbstractBuilder::M);
     void newLayerFromPolygon(const VCloth &material, const QPolygonF &polygon,
-                             VLayerAbstractBuilder::VUnit units=VLayerAbstractBuilder::M);
+                             double characteristicLength);
 
     void showInjectionPoint();
     void showVacuumPoint();

@@ -51,10 +51,10 @@ VWindowLayer::VWindowLayer(QWidget *parent) :
 
 VWindowLayer::~VWindowLayer()
 {
-    saveParameters();
-    delete ui;
     m_pWindowCloth.reset();
     m_pWindowPolygon.reset();
+    saveParameters();
+    delete ui;
     #ifdef DEBUG_MODE
         qInfo() << "VWindowLayer destroyed";
     #endif
@@ -67,6 +67,7 @@ void VWindowLayer::reset()
     ui->geometryStatusLabel->setStyleSheet(QStringLiteral("QLabel { color : red; }"));
     ui->geometryStatusLabel->setText(NO_GEOMETRY_TEXT);
     ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok)->setEnabled(false);
+    ui->mmCheckBox->setEnabled(false);
     m_selectedMaterial = false;
     m_selectedFile = false;
     m_createdGeometry = false;
@@ -76,12 +77,9 @@ void VWindowLayer::loadSavedParameters()
 {
     QSettings settings;
     bool mm_selected;
-    mm_selected = settings.value(QStringLiteral("import/sizeInMM"), true).toBool();
+    mm_selected = settings.value(QStringLiteral("import/sizeInMM"), false).toBool();
     m_lastDir = settings.value(QStringLiteral("import/lastDir"), QDir::homePath()).toString();
-    if (mm_selected)
-        ui->mmRadioButton->setChecked(true);
-    else
-        ui->mRadioButton->setChecked(true);
+    ui->mmCheckBox->setChecked(mm_selected);
     QVariant color = settings.value(QStringLiteral("import/color"), DEFAULT_COLOR);
     m_material.baseColor = color.value<QColor>();
 }
@@ -89,7 +87,7 @@ void VWindowLayer::loadSavedParameters()
 void VWindowLayer::saveParameters() const
 {
     QSettings settings;
-    bool mm_selected = ui->mmRadioButton->isChecked();
+    bool mm_selected = ui->mmCheckBox->isChecked();
     settings.setValue(QStringLiteral("import/sizeInMM"), mm_selected);
     settings.setValue(QStringLiteral("import/lastDir"), m_lastDir);
     settings.setValue(QStringLiteral("import/color"), m_material.baseColor);
@@ -100,14 +98,14 @@ void VWindowLayer::accept()
 {
     hide();
     VLayerAbstractBuilder::VUnit units;
-    if (ui->mmRadioButton->isChecked())
+    if (ui->mmCheckBox->isChecked())
         units = VLayerAbstractBuilder::MM;
     else
         units = VLayerAbstractBuilder::M;
     if (m_selectedMaterial && m_selectedFile)
         emit creationFromFileAvailable(m_material, m_filename, units);
     else if (m_selectedMaterial && m_createdGeometry)
-        emit creationManualAvailable(m_material, m_polygon, units);
+        emit creationManualAvailable(m_material, m_polygon, m_characteristicLength);
     reset();
     close();
 }
@@ -120,10 +118,11 @@ void VWindowLayer::reject()
     close();
 }
 
-void VWindowLayer::tryToEnableAcceptButton()
+void VWindowLayer::updateButtonsStates()
 {
     bool enable = (m_selectedMaterial && (m_selectedFile || m_createdGeometry));
     ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok)->setEnabled(enable);
+    ui->mmCheckBox->setEnabled(m_selectedFile);
 }
 
 void VWindowLayer::openFile()
@@ -138,7 +137,7 @@ void VWindowLayer::openFile()
         ui->geometryStatusLabel->setStyleSheet(QStringLiteral("QLabel { color : black; }"));
         m_selectedFile = true;
         m_createdGeometry = false;
-        tryToEnableAcceptButton();
+        updateButtonsStates();
     }
 }
 
@@ -147,8 +146,8 @@ void VWindowLayer::showWindowPolygon()
     if(!m_pWindowPolygon)
     {
         m_pWindowPolygon.reset(new VWindowPolygon(this));
-        connect(m_pWindowPolygon.get(), SIGNAL(polygonAvailable(const QPolygonF &)),
-                this, SLOT(m_on_got_polygon(const QPolygonF &)));
+        connect(m_pWindowPolygon.get(), SIGNAL(polygonAvailable(const QPolygonF &, double)),
+                this, SLOT(m_on_got_polygon(const QPolygonF &, double)));
     }
     m_pWindowPolygon->show();
     m_pWindowPolygon->activateWindow();
@@ -202,19 +201,20 @@ void VWindowLayer::m_on_got_material(const QString &name, float cavityheight, fl
                                          .arg(permeability).arg(porosity));
     ui->materialStatusLabel->setStyleSheet(QStringLiteral("QLabel { color : black; }"));
     m_selectedMaterial = true;
-    tryToEnableAcceptButton();
+    updateButtonsStates();
 }
 
-void VWindowLayer::m_on_got_polygon(const QPolygonF &polygon)
+void VWindowLayer::m_on_got_polygon(const QPolygonF &polygon, double characteristicLength)
 {
     m_polygon = polygon;
+    m_characteristicLength = characteristicLength;
     if (polygon.size() >= VWindowPolygon::MIN_POLYGON_SIZE)
     {
         ui->geometryStatusLabel->setText(GEOMETRY_MANUAL_TEXT);
         ui->geometryStatusLabel->setStyleSheet(QStringLiteral("QLabel { color : black; }"));
         m_selectedFile = false;
         m_createdGeometry = true;
-        tryToEnableAcceptButton();
+        updateButtonsStates();
     }
 }
 
