@@ -33,7 +33,7 @@ else
 	cd "$COIN_REPO_PATH"
 	hg pull
 }
-hg update default
+#hg update default
 hg checkout $COIN_CHANGESET_HASH
 if (!(test-path coin_build)) {mkdir coin_build}
 cd coin_build
@@ -59,7 +59,7 @@ else
 	cd "$SOQT_REPO_PATH"
 	hg pull
 }
-hg update default
+#hg update default
 hg checkout $SOQT_CHANGESET_HASH
 if (!(test-path soqt_build)) {mkdir soqt_build}
 cd soqt_build

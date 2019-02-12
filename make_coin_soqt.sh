@@ -96,7 +96,7 @@ else
 	cd "$COIN_REPO_PATH"
 	hg pull
 fi
-hg update default
+#hg update default
 hg checkout $COIN_CHANGESET_HASH
 
 echo "Starting to build Coin3D. Making build in directory $WORK_DIR. It will be installed to directory $INSTALL_DIR. Using $THREADS_NUMBER threads."
@@ -119,7 +119,7 @@ else
 	cd "$SOQT_REPO_PATH"
 	hg pull
 fi
-hg update default
+#hg update default
 hg checkout $SOQT_CHANGESET_HASH
 
 echo "Starting to build SoQt. Making build in directory $WORK_DIR. It will be installed to directory $INSTALL_DIR. Using $THREADS_NUMBER threads."
