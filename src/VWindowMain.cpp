@@ -55,7 +55,7 @@ const QColor VWindowMain::ACTIVE_COLOR(0, 0, 0);
 const QColor VWindowMain::INACTIVE_COLOR(255, 0, 0);
 const QColor VWindowMain::INVISIBLE_COLOR(127, 127, 127);
 
-const float VWindowMain::MAX_CUBE_SIDE = 0.0125;
+const float VWindowMain::MAX_CUBE_SIDE = 0.0125f;
 
 VWindowMain::VWindowMain(QWidget *parent) :
     QMainWindow(parent),
