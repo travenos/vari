@@ -76,6 +76,7 @@ VWindowMain::VWindowMain(QWidget *parent) :
     connectSimulationSignals();
     setupValidators();
     m_pFacade->loadSavedParameters();
+    showCubeSide();
     loadSizes();
 }
 
@@ -810,9 +811,11 @@ void VWindowMain::askForTransform()
 
 void VWindowMain::updateCubeSide(int value)
 {
+    const int PRECISION = 3;
     int maxValue = ui->cubeSideSlider->maximum();
     float side = static_cast<float>(value) / maxValue * MAX_CUBE_SIDE;
     m_pFacade->setCubeSide(side);
+    ui->cubeSideValue->setText(QString::number(side * 1000, 'g', PRECISION));
 }
 
 void VWindowMain::showCubeSide()
@@ -829,6 +832,8 @@ void VWindowMain::saveSizes()
     QSettings settings;
     settings.setValue("window/geometry", saveGeometry());
     settings.setValue("window/windowState", saveState());
+    settings.setValue("window/splitter", ui->splitter->saveGeometry());
+    settings.setValue("window/splitterState", ui->splitter->saveState());
     settings.sync();
 }
 
@@ -837,6 +842,8 @@ void VWindowMain::loadSizes()
     QSettings settings;
     restoreGeometry(settings.value("window/geometry").toByteArray());
     restoreState(settings.value("window/windowState").toByteArray());
+    ui->splitter->restoreGeometry(settings.value("window/splitter").toByteArray());
+    ui->splitter->restoreState(settings.value("window/splitterState").toByteArray());
 }
 
 /**
