@@ -82,6 +82,11 @@ public:
     bool isCameraOrthographic() const;
     void setCameraOrthographic(bool on);
 
+    void startSlideshow();
+    void stopSlideshow();
+    bool isSlideshowOn() const;
+    void slideshowCycle(const QString &slideShowDir) const;
+    bool takePicture(const QString &filename) const;
 public slots:
     void doRender() ;
     void displayInfo() ;
@@ -159,6 +164,14 @@ private:
     uint m_transformedLayerNumber;
 
     float m_cubeSide;
+
+    std::unique_ptr<std::thread> m_pSlideshowThread;
+    std::unique_ptr<std::thread> m_pVideoThread;
+
+    std::atomic<bool> m_slideshowFlag;
+    std::atomic<bool> m_videoFlag;
+    std::atomic<bool> m_stopSlideshowFlag;
+    std::atomic<bool> m_stopVideoFlag;
 
 private slots:
     /**

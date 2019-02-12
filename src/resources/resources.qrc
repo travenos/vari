@@ -15,5 +15,7 @@
         <file>img/cut.png</file>
         <file>img/drag.png</file>
         <file>img/yzplane.png</file>
+        <file>img/snapshot.png</file>
+        <file>img/video.png</file>
     </qresource>
 </RCC>

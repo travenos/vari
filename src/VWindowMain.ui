@@ -101,7 +101,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>999</width>
+              <width>1179</width>
               <height>865</height>
              </rect>
             </property>
@@ -737,7 +737,7 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>1013</width>
+              <width>1193</width>
               <height>848</height>
              </rect>
             </property>
@@ -823,6 +823,9 @@
    <addaction name="actionPause"/>
    <addaction name="actionStop"/>
    <addaction name="actionReset"/>
+   <addaction name="separator"/>
+   <addaction name="actionSlideshow"/>
+   <addaction name="actionVideo"/>
   </widget>
   <action name="actionNew">
    <property name="icon">
@@ -894,6 +897,36 @@
    </property>
    <property name="toolTip">
     <string>Пауза симуляции</string>
+   </property>
+  </action>
+  <action name="actionVideo">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/img/video.png</normaloff>:/img/video.png</iconset>
+   </property>
+   <property name="text">
+    <string>Запись видео</string>
+   </property>
+   <property name="toolTip">
+    <string>Запись видео</string>
+   </property>
+  </action>
+  <action name="actionSlideshow">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/img/snapshot.png</normaloff>:/img/snapshot.png</iconset>
+   </property>
+   <property name="text">
+    <string>Серия кадров</string>
+   </property>
+   <property name="toolTip">
+    <string>Запись серии кадров</string>
    </property>
   </action>
  </widget>

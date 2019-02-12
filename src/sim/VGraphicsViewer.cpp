@@ -11,6 +11,7 @@
 #include <QPushButton>
 #include <QStyleFactory>
 #include <QSlider>
+#include <QDir>
 #include <functional>
 #include <Inventor/actions/SoBoxHighlightRenderAction.h>
 #include <Inventor/nodes/SoBaseColor.h>
@@ -28,6 +29,7 @@
 #include <Inventor/events/SoMouseButtonEvent.h>
 #include <Inventor/SoPickedPoint.h>
 #include <Inventor/Qt/widgets/SoQtThumbWheel.h>
+#include <Inventor/SoOffscreenRenderer.h>
 
 #include "VGraphicsViewer.h"
 #include "graphics_elements/VGraphicsNode.h"
@@ -64,7 +66,9 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_dragCanceled(false),
     m_pSelectedNodesIds(new std::vector<uint>),
     m_pTransformedNodesCoords(new std::vector<std::pair<uint, QVector3D> >),
-    m_cubeSide(VGraphicsNode::DEFAULT_CUBE_SIDE)
+    m_cubeSide(VGraphicsNode::DEFAULT_CUBE_SIDE),
+    m_slideshowFlag(false),
+    m_videoFlag(false)
 {
     m_pRoot->ref();
     m_pFigureRoot->ref();
@@ -95,6 +99,8 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     connect(this, SIGNAL(askForDisplayingInfo()), this, SLOT(displayInfo()));
     m_pRenderWaiterThread.reset(new std::thread(std::bind(&VGraphicsViewer::process, this)));
     m_renderSuccessNotifier.notifyOne();
+
+    startSlideshow();//TODO
 }
 
 void VGraphicsViewer::initSelection()
@@ -439,6 +445,7 @@ void VGraphicsViewer::clearDraggedNodes()
 
 void VGraphicsViewer::doRender() 
 {
+    std::lock_guard<std::recursive_mutex> locker(m_graphMutex);
     render();
     m_renderSuccessNotifier.notifyOne();
 }
@@ -686,6 +693,85 @@ void VGraphicsViewer::setCameraOrthographic(bool on)
         else
             setCameraType(SoPerspectiveCamera::getClassTypeId());
     }
+}
+
+void VGraphicsViewer::startSlideshow()
+{
+    if (!isSlideshowOn())
+    {
+        if (m_pSlideshowThread && m_pSlideshowThread->joinable())
+                m_pSlideshowThread->join();
+        m_stopSlideshowFlag.store(false);
+        m_slideshowFlag.store(true);
+        using namespace std::placeholders;
+        QString slideshowDir(QStringLiteral("~/slides")); // TODO!!!!
+        m_pSlideshowThread.reset(new std::thread(std::bind(&VGraphicsViewer::slideshowCycle, this, _1), slideshowDir));
+    }
+}
+
+void VGraphicsViewer::stopSlideshow()
+{
+    m_stopSlideshowFlag.store(true);
+    if (m_pSlideshowThread)
+    {
+        if (m_pSlideshowThread->joinable())
+            m_pSlideshowThread->detach(); //TODO
+        m_pSlideshowThread.reset();
+    }
+    m_slideshowFlag.store(false);
+}
+
+bool VGraphicsViewer::isSlideshowOn() const
+{
+    return m_slideshowFlag.load();
+}
+
+void VGraphicsViewer::slideshowCycle(const QString &slideShowDir) const
+{
+    //TODO emit start
+    typedef std::chrono::duration<double, std::ratio<1> > second_t;
+    typedef std::chrono::high_resolution_clock clock_t;
+    auto startMoment = clock_t::now();
+    int sleepTime = 100; //TODO
+    const QString BASE_NAME("slide_%1.png"); //TODO
+    while(true)
+    {
+        if (!m_stopSlideshowFlag.load())
+        {
+            double seconds = std::chrono::duration_cast<second_t>(clock_t::now() - startMoment).count();
+            QString filename = QDir::cleanPath(slideShowDir + QDir::separator() + BASE_NAME.arg(seconds));
+            bool result = takePicture(filename);
+            //if (!result) //TODO
+            //    break; //TODO emit stop ???
+        }
+        else
+            break;
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
+    }
+    //TODO emit stop
+}
+
+bool VGraphicsViewer::takePicture(const QString &filename) const
+{
+    //TODO
+    bool saveResult = false;
+    QImage * image = nullptr;
+    {
+        std::lock_guard<std::recursive_mutex> locker(m_graphMutex);
+        SoOffscreenRenderer imgRenderer(getViewportRegion());
+        imgRenderer.setBackgroundColor(getBackgroundColor());
+        imgRenderer.render(m_pRoot);
+        SbVec2s size = imgRenderer.getViewportRegion().getViewportSizePixels();
+        image = new QImage(imgRenderer.getBuffer(), size[0],
+                size[1], QImage::Format_ARGB32); //TODO
+    }
+    if (image != nullptr)
+    {
+        saveResult = image->rgbSwapped().save(filename, "png");
+        qDebug() << filename << saveResult;
+        delete image;
+    }
+    return saveResult;
 }
 
 void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)
