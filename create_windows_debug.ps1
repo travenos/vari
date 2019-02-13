@@ -8,8 +8,8 @@ $COIN_CHANGESET_HASH="11932:acee8063042f"
 $SOQT_CHANGESET_HASH="2021:fd7ae3be0e28"
 $GMSH_TAG="gmsh_3_0_6"
 
-$env:COINDIR="C:\coin3d_debug"
-$env:GMSH_DIR="C:\gmsh_debug"
+$env:COINDIR="C:\coin3d"
+$env:GMSH_DIR="C:\gmsh"
 
 function check_exit_code([int]$value) {
      if($value -ne 0) {

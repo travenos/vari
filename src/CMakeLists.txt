@@ -76,6 +76,8 @@ else()
 endif()
 
 #Find packages
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{QTDIR})
+
 find_package(Qt5Core    REQUIRED)
 find_package(Qt5Gui     REQUIRED)
 find_package(Qt5Widgets     REQUIRED)

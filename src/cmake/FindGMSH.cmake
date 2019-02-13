@@ -29,7 +29,9 @@ else (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
         )
 
     find_path(GMSH_INCLUDE_DIR NAMES gmsh/Gmsh.h
+        PATHS
         "${CMAKE_FIND_ROOT_PATH}"
+        "${CMAKE_FIND_ROOT_PATH}/include"
         )
 
     set(GMSH_INCLUDE_DIRS
@@ -49,7 +51,9 @@ else (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
         NO_DEFAULT_PATH
         )
     find_library(GMSH_LIBRARY_RELEASE NAMES Gmsh gmsh
+        PATHS
         "${CMAKE_FIND_ROOT_PATH}"
+        "${CMAKE_FIND_ROOT_PATH}/lib"
         )
 
     find_library(GMSH_LIBRARY_DEBUG NAMES Gmshd gmshd
@@ -58,7 +62,9 @@ else (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
         NO_DEFAULT_PATH
         )
     find_library(GMSH_LIBRARY_DEBUG NAMES Gmshd gmshd
+        PATHS
         "${CMAKE_FIND_ROOT_PATH}"
+        "${CMAKE_FIND_ROOT_PATH}/lib"
         )
 
     if(WIN32 OR (GMSH_LIBRARY_RELEASE AND GMSH_LIBRARY_DEBUG))
