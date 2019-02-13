@@ -65,6 +65,11 @@ void VSimulationFacade::connectMainSignals()
             this, SIGNAL(selectionEnabled(bool)));
     connect(m_pGraphicsViewer.get(), SIGNAL(canceledDrag()),
             this, SLOT(updateGraphicsPositions()));
+    connect(m_pGraphicsViewer.get(), SIGNAL(slideshowStarted()), this, SIGNAL(slideshowStarted()));
+    connect(m_pGraphicsViewer.get(), SIGNAL(slideshowStopped()), this, SIGNAL(slideshowStopped()));
+    connect(m_pGraphicsViewer.get(), SIGNAL(videoStarted()), this, SIGNAL(videoStarted()));
+    connect(m_pGraphicsViewer.get(), SIGNAL(videoStopped()), this, SIGNAL(videoStopped()));
+
     connect(m_pSimulator.get(), SIGNAL(simulationStarted()),
             this, SIGNAL(simulationStarted()));
     connect(m_pSimulator.get(), SIGNAL(simulationPaused()),

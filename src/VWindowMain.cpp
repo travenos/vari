@@ -137,6 +137,11 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_selection_enabled(bool)));
     connect(m_pFacade.get(), SIGNAL(cubeSideChanged(float)),
             this, SLOT(m_on_cube_side_changed(float)));
+
+    connect(m_pFacade.get(), SIGNAL(slideshowStarted()), this, SLOT(m_on_slideshow_started()));
+    connect(m_pFacade.get(), SIGNAL(slideshowStopped()), this, SLOT(m_on_slideshow_stopped()));
+    connect(m_pFacade.get(), SIGNAL(videoStarted()), this, SLOT(m_on_video_started()));
+    connect(m_pFacade.get(), SIGNAL(videoStopped()), this, SLOT(m_on_video_stopped()));
 }
 
 void VWindowMain::setupValidators()
@@ -1062,6 +1067,28 @@ void VWindowMain::m_on_selection_enabled(bool checked)
 void VWindowMain::m_on_cube_side_changed(float)
 {
     showCubeSide();
+}
+
+void VWindowMain::m_on_slideshow_started()
+{
+    //TODO
+    setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint | Qt::Dialog | Qt::WindowTitleHint);
+}
+
+void VWindowMain::m_on_slideshow_stopped()
+{
+ //TODO
+}
+
+void VWindowMain::m_on_video_started()
+{
+ //TODO
+    setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint | Qt::Dialog | Qt::WindowTitleHint);
+}
+
+void VWindowMain::m_on_video_stopped()
+{
+ //TODO
 }
 
 void VWindowMain::on_injectionPlaceButton_clicked(bool checked)

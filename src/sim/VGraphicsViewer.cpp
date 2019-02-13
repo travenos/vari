@@ -11,7 +11,6 @@
 #include <QPushButton>
 #include <QStyleFactory>
 #include <QSlider>
-#include <QDir>
 #include <functional>
 #include <Inventor/actions/SoBoxHighlightRenderAction.h>
 #include <Inventor/nodes/SoBaseColor.h>
@@ -32,6 +31,7 @@
 #include <Inventor/SoOffscreenRenderer.h>
 
 #include "VGraphicsViewer.h"
+#include "VScreenShooter.h"
 #include "graphics_elements/VGraphicsNode.h"
 /**
  * VGraphicsViewer implementation
@@ -67,8 +67,8 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_pSelectedNodesIds(new std::vector<uint>),
     m_pTransformedNodesCoords(new std::vector<std::pair<uint, QVector3D> >),
     m_cubeSide(VGraphicsNode::DEFAULT_CUBE_SIDE),
-    m_slideshowFlag(false),
-    m_videoFlag(false)
+    m_pSlideshowShooter(new VScreenShooter),
+    m_pVideoShooter(new VScreenShooter)
 {
     m_pRoot->ref();
     m_pFigureRoot->ref();
@@ -100,7 +100,12 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_pRenderWaiterThread.reset(new std::thread(std::bind(&VGraphicsViewer::process, this)));
     m_renderSuccessNotifier.notifyOne();
 
-    startSlideshow();//TODO
+    m_pSlideshowShooter->setWidget(getGLWidget());
+    m_pVideoShooter->setWidget(getGLWidget());
+    connect(m_pSlideshowShooter.get(), SIGNAL(processStarted()), this, SIGNAL(slideshowStarted()));
+    connect(m_pSlideshowShooter.get(), SIGNAL(processStopped()), this, SIGNAL(slideshowStopped()));
+    connect(m_pVideoShooter.get(), SIGNAL(processStarted()), this, SIGNAL(videoStarted()));
+    connect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(saveVideo()));
 }
 
 void VGraphicsViewer::initSelection()
@@ -123,6 +128,14 @@ void VGraphicsViewer::initSelection()
 
 VGraphicsViewer::~VGraphicsViewer()
 {
+    disconnect(m_pSlideshowShooter.get(), SIGNAL(processStarted()), this, SIGNAL(slideshowStarted()));
+    disconnect(m_pSlideshowShooter.get(), SIGNAL(processStopped()), this, SIGNAL(slideshowStopped()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(processStarted()), this, SIGNAL(videoStarted()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(saveVideo()));
+    stopVideo();
+    saveVideo();
+    m_pSlideshowShooter.reset();
+    m_pVideoShooter.reset();
     stopRender();
     m_pRenderWaiterThread->join();
     m_pRenderWaiterThread.reset();
@@ -695,83 +708,71 @@ void VGraphicsViewer::setCameraOrthographic(bool on)
     }
 }
 
+void VGraphicsViewer::setSlideshowDir(const QString &dir)
+{
+    m_pSlideshowShooter->setDirName(dir);
+}
+
+void VGraphicsViewer::setSlideshowPeriod(float period)
+{
+    m_pSlideshowShooter->setPeriod(period);
+}
+
+void VGraphicsViewer::setVideoFile(const QString &file)
+{
+    m_videoFile = file;
+}
+
+void VGraphicsViewer::setVideoPeriod(float period)
+{
+    m_pVideoShooter->setPeriod(period);
+}
+
+const QString & VGraphicsViewer::getSlideshowDir() const
+{
+    return m_pSlideshowShooter->getDirName();
+}
+
+float VGraphicsViewer::getSlideshowPeriod() const
+{
+    return m_pSlideshowShooter->getPeriod();
+}
+
 void VGraphicsViewer::startSlideshow()
 {
-    if (!isSlideshowOn())
-    {
-        if (m_pSlideshowThread && m_pSlideshowThread->joinable())
-                m_pSlideshowThread->join();
-        m_stopSlideshowFlag.store(false);
-        m_slideshowFlag.store(true);
-        using namespace std::placeholders;
-        QString slideshowDir(QStringLiteral("~/slides")); // TODO!!!!
-        m_pSlideshowThread.reset(new std::thread(std::bind(&VGraphicsViewer::slideshowCycle, this, _1), slideshowDir));
-    }
+    m_pSlideshowShooter->start();
 }
 
 void VGraphicsViewer::stopSlideshow()
 {
-    m_stopSlideshowFlag.store(true);
-    if (m_pSlideshowThread)
-    {
-        if (m_pSlideshowThread->joinable())
-            m_pSlideshowThread->detach(); //TODO
-        m_pSlideshowThread.reset();
-    }
-    m_slideshowFlag.store(false);
+    m_pSlideshowShooter->stop();
 }
 
-bool VGraphicsViewer::isSlideshowOn() const
+const QString & VGraphicsViewer::getVideoFile() const
 {
-    return m_slideshowFlag.load();
+    return m_videoFile;
 }
 
-void VGraphicsViewer::slideshowCycle(const QString &slideShowDir) const
+float VGraphicsViewer::getVideoPeriod() const
 {
-    //TODO emit start
-    typedef std::chrono::duration<double, std::ratio<1> > second_t;
-    typedef std::chrono::high_resolution_clock clock_t;
-    auto startMoment = clock_t::now();
-    int sleepTime = 100; //TODO
-    const QString BASE_NAME("slide_%1.png"); //TODO
-    while(true)
-    {
-        if (!m_stopSlideshowFlag.load())
-        {
-            double seconds = std::chrono::duration_cast<second_t>(clock_t::now() - startMoment).count();
-            QString filename = QDir::cleanPath(slideShowDir + QDir::separator() + BASE_NAME.arg(seconds));
-            bool result = takePicture(filename);
-            //if (!result) //TODO
-            //    break; //TODO emit stop ???
-        }
-        else
-            break;
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
-    }
-    //TODO emit stop
+    return m_pVideoShooter->getPeriod();
 }
 
-bool VGraphicsViewer::takePicture(const QString &filename) const
+void VGraphicsViewer::startVideo()
+{
+    m_pVideoShooter->start();
+}
+
+void VGraphicsViewer::stopVideo()
+{
+    m_pVideoShooter->stop();
+}
+
+void VGraphicsViewer::saveVideo()
 {
     //TODO
-    bool saveResult = false;
-    QImage * image = nullptr;
-    {
-        std::lock_guard<std::recursive_mutex> locker(m_graphMutex);
-        SoOffscreenRenderer imgRenderer(getViewportRegion());
-        imgRenderer.setBackgroundColor(getBackgroundColor());
-        imgRenderer.render(m_pRoot);
-        SbVec2s size = imgRenderer.getViewportRegion().getViewportSizePixels();
-        image = new QImage(imgRenderer.getBuffer(), size[0],
-                size[1], QImage::Format_ARGB32); //TODO
-    }
-    if (image != nullptr)
-    {
-        saveResult = image->rgbSwapped().save(filename, "png");
-        qDebug() << filename << saveResult;
-        delete image;
-    }
-    return saveResult;
+    //TODO clear temporary folder
+    emit videoStopped();
 }
 
 void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)

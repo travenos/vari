@@ -165,6 +165,11 @@ signals:
     void selectionEnabled(bool);
 
     void configUpdated();
+
+    void slideshowStarted();
+    void slideshowStopped();
+    void videoStarted();
+    void videoStopped();
 };
 
 #endif //_VSIMULATIONFACADE_H

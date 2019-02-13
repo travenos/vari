@@ -187,6 +187,10 @@ private slots:
     void m_on_model_config_updated();
     void m_on_selection_enabled(bool checked);
     void m_on_cube_side_changed(float side);
+    void m_on_slideshow_started();
+    void m_on_slideshow_stopped();
+    void m_on_video_started();
+    void m_on_video_stopped();
 
     void on_addLayerButton_clicked();
     void on_layersListWidget_itemSelectionChanged();

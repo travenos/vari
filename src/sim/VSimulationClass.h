@@ -15,12 +15,14 @@ class VSimulationClass : public QObject
 {
 public: 
     typedef std::shared_ptr<std::mutex> mutex_ptr;
-    VSimulationClass();    
+    VSimulationClass();
     virtual ~VSimulationClass() = default;
     VSimulationClass(const VSimulationClass& ) = delete;
     VSimulationClass& operator= (const VSimulationClass& ) = delete;
+    VSimulationClass(VSimulationClass&& temp) = delete;
+    VSimulationClass& operator=(VSimulationClass&& temp) = delete;
 
-void setMutexes(mutex_ptr nodesLock, mutex_ptr trianglesLock) ;
+    void setMutexes(mutex_ptr nodesLock, mutex_ptr trianglesLock) ;
 
 protected:
     mutable mutex_ptr m_pNodesLock;
