@@ -22,7 +22,6 @@ class SoExtSelection;
 class SoTransformManip;
 class QWidget;
 class QLabel;
-class VScreenShooter;
 
 class VGraphicsViewer: public VSimulationClass, public SoQtExaminerViewer
 {
@@ -83,18 +82,6 @@ public:
     bool isCameraOrthographic() const;
     void setCameraOrthographic(bool on);
 
-    void setSlideshowDir(const QString &dir);
-    void setSlideshowPeriod(float period);
-    void setVideoFile(const QString &file);
-    void setVideoPeriod(float period);
-    const QString & getSlideshowDir() const;
-    float getSlideshowPeriod() const;
-    void startSlideshow();
-    void stopSlideshow();
-    const QString & getVideoFile() const;
-    float getVideoPeriod() const;
-    void startVideo();
-    void stopVideo();
 public slots:
     void doRender() ;
     void displayInfo() ;
@@ -102,6 +89,7 @@ public slots:
 
     void viewFromAbove() ;
     void viewFromRight() ;
+
 private:
 
     static const QString LEFT_WHEEL_CAPTION;
@@ -172,11 +160,6 @@ private:
 
     float m_cubeSide;
 
-    std::shared_ptr<VScreenShooter> m_pSlideshowShooter;
-    std::shared_ptr<VScreenShooter> m_pVideoShooter;
-
-    QString m_videoFile;
-
 private slots:
     /**
      * Slot that should be called when the left rotary wheel is pressed, to get ready for a movement.
@@ -213,8 +196,6 @@ private slots:
     void selectionModeSwitch(bool on) ;
     void dragModeSwitch(bool on) ;
 
-    void saveVideo() ;
-
 protected:
     QWidget* buildLeftTrim(QWidget * parent);
     QWidget* buildBottomTrim(QWidget * parent);
@@ -230,11 +211,6 @@ signals:
     void gotNodesSelection(const VGraphicsViewer::const_uint_vect_ptr &p_selectedNodes);
     void gotTransformation();
     void cubeSideChanged(float side);
-    void askForSaving(const QString &file);
-    void slideshowStarted();
-    void slideshowStopped();
-    void videoStarted();
-    void videoStopped();
 };
 
 

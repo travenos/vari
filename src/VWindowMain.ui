@@ -60,7 +60,7 @@
       </widget>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="simTab">
         <attribute name="title">
@@ -101,8 +101,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>1179</width>
-              <height>865</height>
+              <width>1193</width>
+              <height>848</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout">
@@ -627,61 +627,6 @@
                 <property name="bottomMargin">
                  <number>3</number>
                 </property>
-                <item>
-                 <widget class="QCheckBox" name="timeLimitCheckBox">
-                  <property name="text">
-                   <string>Ограничивать время процесса</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_2">
-                  <property name="spacing">
-                   <number>4</number>
-                  </property>
-                  <item>
-                   <widget class="QLabel" name="timeLimitLabel">
-                    <property name="text">
-                     <string>Макс. время процесса (чч:мм:сс):</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <spacer name="horizontalSpacer_2">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                  <item>
-                   <widget class="QTimeEdit" name="timeEdit">
-                    <property name="displayFormat">
-                     <string>hh:mm:ss</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="resetTimeLimitButton">
-                    <property name="text">
-                     <string>Отменить</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="saveTimeLimitButton">
-                    <property name="text">
-                     <string>Сохранить</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
                </layout>
               </widget>
              </item>
@@ -754,6 +699,19 @@
                   </widget>
                  </item>
                  <item>
+                  <spacer name="horizontalSpacer_3">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item>
                   <widget class="QLabel" name="cubeSideValue">
                    <property name="text">
                     <string>0</string>
@@ -769,6 +727,299 @@
                 <widget class="QSlider" name="cubeSideSlider">
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="slideshowBox">
+               <property name="title">
+                <string>Параметры слайдшоу</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_14">
+                <property name="spacing">
+                 <number>4</number>
+                </property>
+                <property name="leftMargin">
+                 <number>3</number>
+                </property>
+                <property name="topMargin">
+                 <number>3</number>
+                </property>
+                <property name="rightMargin">
+                 <number>3</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>3</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="slideshowCaption">
+                  <property name="text">
+                   <string>Папка для сохранения слайдшоу</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_5">
+                  <item>
+                   <widget class="QLabel" name="slideshowDirLabel">
+                    <property name="text">
+                     <string>~</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_4">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="chooseSlideshowDirButton">
+                    <property name="text">
+                     <string>Выбрать папку</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_4">
+                  <item>
+                   <widget class="QLabel" name="slideshowPeriodLabel">
+                    <property name="text">
+                     <string>Период снятия кадров, с</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_5">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QDoubleSpinBox" name="slideshowPeriodSpinBox">
+                    <property name="suffix">
+                     <string> с</string>
+                    </property>
+                    <property name="decimals">
+                     <number>2</number>
+                    </property>
+                    <property name="minimum">
+                     <double>0.040000000000000</double>
+                    </property>
+                    <property name="maximum">
+                     <double>60.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.020000000000000</double>
+                    </property>
+                    <property name="value">
+                     <double>1.000000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="resetSlideshowPeriodButton">
+                    <property name="text">
+                     <string>Отменить</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="saveSlideshowPeriodButton">
+                    <property name="text">
+                     <string>Сохранить</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="videoBox">
+               <property name="title">
+                <string>Параметры видео</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_15">
+                <property name="spacing">
+                 <number>4</number>
+                </property>
+                <property name="leftMargin">
+                 <number>3</number>
+                </property>
+                <property name="topMargin">
+                 <number>3</number>
+                </property>
+                <property name="rightMargin">
+                 <number>3</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>3</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="videoCaption">
+                  <property name="text">
+                   <string>Папка для сохранения видео</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_6">
+                  <item>
+                   <widget class="QLabel" name="videoDirLabel">
+                    <property name="text">
+                     <string>~</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_6">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="chooseVideoDirButton">
+                    <property name="text">
+                     <string>Выбрать папку</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_3">
+                  <item>
+                   <widget class="QLabel" name="videoFrequencyLabel">
+                    <property name="text">
+                     <string>Частота кадров, Гц</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_7">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QSpinBox" name="videoFrequencySpinBox">
+                    <property name="suffix">
+                     <string> Гц</string>
+                    </property>
+                    <property name="minimum">
+                     <number>5</number>
+                    </property>
+                    <property name="maximum">
+                     <number>30</number>
+                    </property>
+                    <property name="value">
+                     <number>10</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="resetVideoFrequencyButton">
+                    <property name="text">
+                     <string>Отменить</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="saveVideoFrequencyButton">
+                    <property name="text">
+                     <string>Сохранить</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="timeLimitCheckBox">
+               <property name="text">
+                <string>Ограничивать время процесса</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
+               <property name="spacing">
+                <number>4</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="timeLimitLabel">
+                 <property name="text">
+                  <string>Макс. время процесса (чч:мм:сс):</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_2">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QTimeEdit" name="timeEdit">
+                 <property name="displayFormat">
+                  <string>hh:mm:ss</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="resetTimeLimitButton">
+                 <property name="text">
+                  <string>Отменить</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="saveTimeLimitButton">
+                 <property name="text">
+                  <string>Сохранить</string>
                  </property>
                 </widget>
                </item>
@@ -931,6 +1182,50 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>controlWidget</tabstop>
+  <tabstop>layersListWidget</tabstop>
+  <tabstop>layerColorButton</tabstop>
+  <tabstop>layerEnableCheckBox</tabstop>
+  <tabstop>layerVisibleCheckBox</tabstop>
+  <tabstop>selectMaterialClothButton</tabstop>
+  <tabstop>layerRemoveButton</tabstop>
+  <tabstop>layerCutButton</tabstop>
+  <tabstop>addLayerButton</tabstop>
+  <tabstop>temperatureEdit</tabstop>
+  <tabstop>resetTemperatureButton</tabstop>
+  <tabstop>saveTemperatureButton</tabstop>
+  <tabstop>selectMaterialResinButton</tabstop>
+  <tabstop>injectionPressureEdit</tabstop>
+  <tabstop>resetInjectionPressureButton</tabstop>
+  <tabstop>saveInjectionPressureButton</tabstop>
+  <tabstop>injectionDiameterEdit</tabstop>
+  <tabstop>resetInjectionDiameterButton</tabstop>
+  <tabstop>injectionPlaceButton</tabstop>
+  <tabstop>showInjectionPlace</tabstop>
+  <tabstop>vacuumPressureEdit</tabstop>
+  <tabstop>resetVacuumPressureButton</tabstop>
+  <tabstop>saveVacuumPressureButton</tabstop>
+  <tabstop>vacuumDiameterEdit</tabstop>
+  <tabstop>resetVacuumDiameterButton</tabstop>
+  <tabstop>vacuumPlaceButton</tabstop>
+  <tabstop>showVacuumPlaceButton</tabstop>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>cubeSideSlider</tabstop>
+  <tabstop>chooseSlideshowDirButton</tabstop>
+  <tabstop>slideshowPeriodSpinBox</tabstop>
+  <tabstop>resetSlideshowPeriodButton</tabstop>
+  <tabstop>saveSlideshowPeriodButton</tabstop>
+  <tabstop>chooseVideoDirButton</tabstop>
+  <tabstop>videoFrequencySpinBox</tabstop>
+  <tabstop>resetVideoFrequencyButton</tabstop>
+  <tabstop>saveVideoFrequencyButton</tabstop>
+  <tabstop>timeLimitCheckBox</tabstop>
+  <tabstop>timeEdit</tabstop>
+  <tabstop>resetTimeLimitButton</tabstop>
+  <tabstop>saveTimeLimitButton</tabstop>
+ </tabstops>
  <resources>
   <include location="resources/resources.qrc"/>
  </resources>

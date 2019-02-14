@@ -17,6 +17,7 @@
 #include "VWindowCloth.h"
 #include "VWindowResin.h"
 #include "VWindowLayer.h"
+#include "VScreenShooter.h"
 #include "sim/VSimulationFacade.h"
 #include "sim/structures/VExceptions.h"
 
@@ -57,6 +58,13 @@ const QColor VWindowMain::INVISIBLE_COLOR(127, 127, 127);
 
 const float VWindowMain::MAX_CUBE_SIDE = 0.0125f;
 
+const QString VWindowMain::SLIDESHOW_DIR_DIALOG_TITLE("Путь сохранения слайдов");
+const QString VWindowMain::VIDEO_FILE_DIALOG_TITLE("Файл, в который будет записано видео");
+const Qt::WindowFlags VWindowMain::ON_TOP_FLAGS = (Qt::CustomizeWindowHint | Qt::X11BypassWindowManagerHint | Qt::WindowStaysOnBottomHint | Qt::WindowStaysOnTopHint | Qt::Dialog | Qt::WindowTitleHint);
+const QString VWindowMain::BASE_VIDEO_DIR_NAME("_VARI_SLIDES_FOR_VIDEO_"); //TODO
+const QString VWindowMain::VIDEO_DIR_PATH = QDir::cleanPath(QDir::tempPath() + QDir::separator() + VWindowMain::BASE_VIDEO_DIR_NAME); //TODO
+const QString VWindowMain::BASE_SLIDESHOW_DIR_NAME("VARI_slideshow"); //TODO
+
 VWindowMain::VWindowMain(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::VWindowMain),
@@ -65,7 +73,9 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_pWindowResin(nullptr),
     m_pTemperatureValidator(new QDoubleValidator),
     m_pPressureValidator(new QDoubleValidator),
-    m_pDiameterValidator(new QDoubleValidator)
+    m_pDiameterValidator(new QDoubleValidator),
+    m_pSlideshowShooter(new VScreenShooter),
+    m_pVideoShooter(new VScreenShooter)
 {
     ui->setupUi(this);
     ui->splitter->setStretchFactor(0,1);
@@ -78,6 +88,11 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_pFacade->loadSavedParameters();
     showCubeSide();
     loadSizes();
+    m_pSlideshowShooter->setWidget(m_pFacade->getGLWidget());
+    m_pVideoShooter->setWidget(m_pFacade->getGLWidget());
+    m_pVideoShooter->setDirName(VIDEO_DIR_PATH);
+
+    loadShootersSettings();
 }
 
 void VWindowMain::connectSimulationSignals()
@@ -138,10 +153,14 @@ void VWindowMain::connectSimulationSignals()
     connect(m_pFacade.get(), SIGNAL(cubeSideChanged(float)),
             this, SLOT(m_on_cube_side_changed(float)));
 
-    connect(m_pFacade.get(), SIGNAL(slideshowStarted()), this, SLOT(m_on_slideshow_started()));
-    connect(m_pFacade.get(), SIGNAL(slideshowStopped()), this, SLOT(m_on_slideshow_stopped()));
-    connect(m_pFacade.get(), SIGNAL(videoStarted()), this, SLOT(m_on_video_started()));
-    connect(m_pFacade.get(), SIGNAL(videoStopped()), this, SLOT(m_on_video_stopped()));
+    connect(m_pSlideshowShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_slideshow_started()));
+    connect(m_pSlideshowShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_slideshow_stopped()));
+    connect(m_pSlideshowShooter.get(), SIGNAL(directoryChanged()), this, SLOT(m_on_slideshow_directory_changed()));
+    connect(m_pSlideshowShooter.get(), SIGNAL(periodChanged()), this, SLOT(m_on_slideshow_period_changed()));
+    connect(m_pVideoShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_video_started()));
+    connect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_video_stopped()));
+    connect(m_pVideoShooter.get(), SIGNAL(directoryChanged()), this, SLOT(m_on_video_directory_changed()));
+    connect(m_pVideoShooter.get(), SIGNAL(periodChanged()), this, SLOT(m_on_video_period_changed()));
 }
 
 void VWindowMain::setupValidators()
@@ -161,6 +180,15 @@ void VWindowMain::setupValidators()
 
 VWindowMain::~VWindowMain()
 {
+    disconnect(m_pSlideshowShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_slideshow_started()));
+    disconnect(m_pSlideshowShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_slideshow_stopped()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_video_started()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_video_stopped()));
+    stopVideo();
+    saveVideo();
+    saveSootersSettings();
+    m_pSlideshowShooter.reset();
+    m_pVideoShooter.reset();
     m_pFacade->saveParameters();
     m_pFacade.reset();
     delete ui;
@@ -852,6 +880,135 @@ void VWindowMain::loadSizes()
 }
 
 /**
+  * Slideshow methods
+  */
+
+void VWindowMain::setSlideshowDir(const QString &dir)
+{
+    m_pSlideshowShooter->setDirName(dir);
+}
+
+void VWindowMain::setSlideshowPeriod(float period)
+{
+    m_pSlideshowShooter->setPeriod(period);
+}
+
+void VWindowMain::setVideoFile(const QString &file)
+{
+    m_videoFile = file;
+}
+
+void VWindowMain::setVideoPeriod(float period)
+{
+    m_pVideoShooter->setPeriod(period);
+}
+
+const QString & VWindowMain::getSlideshowDir() const
+{
+    return m_pSlideshowShooter->getDirName();
+}
+
+float VWindowMain::getSlideshowPeriod() const
+{
+    return m_pSlideshowShooter->getPeriod();
+}
+
+void VWindowMain::startSlideshow()
+{
+    m_pSlideshowShooter->start();
+}
+
+void VWindowMain::stopSlideshow()
+{
+    m_pSlideshowShooter->stop();
+}
+
+const QString & VWindowMain::getVideoFile() const
+{
+    //TODO
+    return m_videoFile;
+}
+
+float VWindowMain::getVideoPeriod() const
+{
+    //TODO
+    return m_pVideoShooter->getPeriod();
+}
+
+void VWindowMain::startVideo()
+{
+    //TODO
+    QDir videoDir(VIDEO_DIR_PATH);
+    if (videoDir.exists())
+    {
+        bool result = videoDir.removeRecursively();
+        if (!result)
+            return;
+    }
+    m_pVideoShooter->start();
+}
+
+void VWindowMain::stopVideo()
+{
+    m_pVideoShooter->stop();
+}
+
+void VWindowMain::saveVideo()
+{
+    //TODO
+    //TODO clear temporary folder
+}
+
+void VWindowMain::showSlideshowPeriod()
+{
+    float period = m_pSlideshowShooter->getPeriod();
+    ui->slideshowPeriodSpinBox->setValue(period);
+    ui->resetSlideshowPeriodButton->setEnabled(false);
+}
+
+void VWindowMain::showVideoFrequency()
+{
+
+}
+
+void VWindowMain::loadShootersSettings()
+{
+    QSettings settings;
+    QString slideShowDir, videoDir;
+    float slideshowPeriod;
+    int videoFrequency;
+
+    slideShowDir = settings.value(QStringLiteral("slideshow/directory"), m_pSlideshowShooter->getDirName()).toString();
+    slideshowPeriod = settings.value(QStringLiteral("slideshow/period"), m_pSlideshowShooter->getPeriod()).toFloat();
+
+    videoDir = settings.value(QStringLiteral("video/directory"), m_pVideoShooter->getDirName()).toString();
+    //videoFrequency= settings.value(QStringLiteral("video/frequency"), m_pVideoShooter->getFrequency()).toInt(); //TODO
+    m_pSlideshowShooter->setDirName(slideShowDir);
+    m_pSlideshowShooter->setPeriod(slideshowPeriod);
+    m_pVideoShooter->setDirName(videoDir);
+    //m_pVideoShooter->setFrequency(videoFrequency); //TODO
+}
+
+void VWindowMain::saveSootersSettings()
+{
+    QSettings settings;
+    settings.setValue(QStringLiteral("slideshow/directory"), m_pSlideshowShooter->getDirName());
+    settings.setValue(QStringLiteral("slideshow/period"), m_pSlideshowShooter->getPeriod());
+
+    settings.setValue(QStringLiteral("video/directory"), m_pVideoShooter->getDirName());
+    //settings.setValue(QStringLiteral("video/frequency"), m_pVideoShooter->getFrequency()); //TODO
+    settings.sync();
+}
+
+void VWindowMain::enableButtonsShootingWindows(bool enable)
+{
+    ui->chooseSlideshowDirButton->setEnabled(enable);
+    ui->chooseVideoDirButton->setEnabled(enable);
+    ui->actionOpen->setEnabled(enable);
+    ui->actionSave->setEnabled(enable);
+}
+
+/**
  * Slots
  */
 
@@ -1071,22 +1228,55 @@ void VWindowMain::m_on_cube_side_changed(float)
 
 void VWindowMain::m_on_slideshow_started()
 {
-    //TODO
-    setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint | Qt::Dialog | Qt::WindowTitleHint);
+    enableButtonsShootingWindows(false);
+    ui->actionSlideshow->setChecked(true);
+    setWindowFlags(windowFlags() | ON_TOP_FLAGS);
+    show();
 }
 
 void VWindowMain::m_on_slideshow_stopped()
 {
- //TODO
+    enableButtonsShootingWindows(true);
+    ui->actionSlideshow->setChecked(false);
+    setWindowFlags(windowFlags() ^ ON_TOP_FLAGS);
+    show();
+}
+
+void VWindowMain::m_on_slideshow_directory_changed()
+{
+    const QString& dir = m_pSlideshowShooter->getDirName();
+    ui->slideshowDirLabel->setText(dir);
+}
+
+void VWindowMain::m_on_slideshow_period_changed()
+{
+    showSlideshowPeriod();
 }
 
 void VWindowMain::m_on_video_started()
 {
- //TODO
-    setWindowFlags(windowFlags() | Qt::WindowStaysOnTopHint | Qt::Dialog | Qt::WindowTitleHint);
+    enableButtonsShootingWindows(false);
+    ui->actionVideo->setChecked(true);
+    setWindowFlags(windowFlags() | ON_TOP_FLAGS);
+    show();
 }
 
 void VWindowMain::m_on_video_stopped()
+{
+    enableButtonsShootingWindows(true);
+    ui->actionVideo->setChecked(false);
+    setWindowFlags(windowFlags() ^ ON_TOP_FLAGS);
+    show();
+    saveVideo();
+}
+
+void VWindowMain::m_on_video_directory_changed()
+{
+    const QString& dir = m_pVideoShooter->getDirName();
+    ui->videoDirLabel->setText(dir);
+}
+
+void VWindowMain::m_on_video_period_changed()
 {
  //TODO
 }
@@ -1255,4 +1445,46 @@ void VWindowMain::on_layerCutButton_clicked(bool checked)
 void VWindowMain::on_cubeSideSlider_valueChanged(int value)
 {
     updateCubeSide(value);
+}
+
+
+void VWindowMain::on_actionSlideshow_triggered(bool checked)
+{
+    if(checked)
+        startSlideshow();
+    else
+        stopSlideshow();
+}
+
+void VWindowMain::on_actionVideo_triggered(bool checked)
+{
+
+}
+
+void VWindowMain::on_chooseSlideshowDirButton_clicked()
+{
+    m_pFacade->pauseSimulation();
+    QString lastDir = m_pSlideshowShooter->getDirName();
+    QString dirName = QFileDialog::getExistingDirectory(this, SLIDESHOW_DIR_DIALOG_TITLE, lastDir);
+    QDir parentDir(dirName);
+    if (!dirName.isEmpty() && parentDir.exists())
+    {
+        m_pSlideshowShooter->setDirName(dirName);
+    }
+}
+
+void VWindowMain::on_slideshowPeriodSpinBox_valueChanged(double arg1)
+{
+    ui->resetSlideshowPeriodButton->setEnabled(true);
+}
+
+void VWindowMain::on_resetSlideshowPeriodButton_clicked()
+{
+    showSlideshowPeriod();
+}
+
+void VWindowMain::on_saveSlideshowPeriodButton_clicked()
+{
+    float value = static_cast<float>(ui->slideshowPeriodSpinBox->value());
+    m_pSlideshowShooter->setPeriod(value);
 }

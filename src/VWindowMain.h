@@ -19,6 +19,7 @@ class VSimulationFacade;
 class VWindowLayer;
 class VWindowCloth;
 class VWindowResin;
+class VScreenShooter;
 struct VCloth;
 struct VSimulationInfo;
 
@@ -52,6 +53,13 @@ public:
     static const QColor INVISIBLE_COLOR;
 
     static const float MAX_CUBE_SIDE;
+
+    static const QString SLIDESHOW_DIR_DIALOG_TITLE;
+    static const QString VIDEO_FILE_DIALOG_TITLE;
+    static const Qt::WindowFlags ON_TOP_FLAGS;
+    static const QString BASE_VIDEO_DIR_NAME;
+    static const QString VIDEO_DIR_PATH;
+    static const QString BASE_SLIDESHOW_DIR_NAME;
 
     explicit VWindowMain(QWidget *parent = nullptr);
     ~VWindowMain();
@@ -139,6 +147,25 @@ private:
     void saveSizes();
     void loadSizes();
 
+    void setSlideshowDir(const QString &dir);
+    void setSlideshowPeriod(float period);
+    void setVideoFile(const QString &file);
+    void setVideoPeriod(float period);
+    const QString & getSlideshowDir() const;
+    float getSlideshowPeriod() const;
+    void startSlideshow();
+    void stopSlideshow();
+    const QString & getVideoFile() const;
+    float getVideoPeriod() const;
+    void startVideo();
+    void stopVideo();
+    void saveVideo();
+    void showSlideshowPeriod();
+    void showVideoFrequency();
+    void loadShootersSettings();
+    void saveSootersSettings();
+
+    void enableButtonsShootingWindows(bool enable);
     Ui::VWindowMain *ui;
     std::unique_ptr<VSimulationFacade> m_pFacade;
     VWindowLayer * m_pWindowLayer;
@@ -148,6 +175,10 @@ private:
     QDoubleValidator * const m_pTemperatureValidator;
     QDoubleValidator * const m_pPressureValidator;
     QDoubleValidator * const m_pDiameterValidator;
+
+    std::shared_ptr<VScreenShooter> m_pSlideshowShooter;
+    std::shared_ptr<VScreenShooter> m_pVideoShooter;
+    QString m_videoFile;
 protected:
     virtual void closeEvent(QCloseEvent *);
 private slots:
@@ -189,8 +220,12 @@ private slots:
     void m_on_cube_side_changed(float side);
     void m_on_slideshow_started();
     void m_on_slideshow_stopped();
+    void m_on_slideshow_directory_changed();
+    void m_on_slideshow_period_changed();
     void m_on_video_started();
     void m_on_video_stopped();
+    void m_on_video_directory_changed();
+    void m_on_video_period_changed();
 
     void on_addLayerButton_clicked();
     void on_layersListWidget_itemSelectionChanged();
@@ -230,6 +265,12 @@ private slots:
     void on_timeEdit_timeChanged(const QTime &);
     void on_layerCutButton_clicked(bool checked);
     void on_cubeSideSlider_valueChanged(int value);
+    void on_actionSlideshow_triggered(bool checked);
+    void on_actionVideo_triggered(bool checked);
+    void on_chooseSlideshowDirButton_clicked();
+    void on_slideshowPeriodSpinBox_valueChanged(double arg1);
+    void on_resetSlideshowPeriodButton_clicked();
+    void on_saveSlideshowPeriodButton_clicked();
 };
 
 #endif // _VWINDOWMAIN_H

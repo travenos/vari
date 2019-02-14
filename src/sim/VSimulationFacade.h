@@ -96,6 +96,8 @@ public:
     void setCubeSide(float side);
     float getCubeSide() const;
 
+    const QWidget * getGLWidget() const;
+
 public slots:
     void updateGraphicsPositions();
 
@@ -165,11 +167,6 @@ signals:
     void selectionEnabled(bool);
 
     void configUpdated();
-
-    void slideshowStarted();
-    void slideshowStopped();
-    void videoStarted();
-    void videoStopped();
 };
 
 #endif //_VSIMULATIONFACADE_H

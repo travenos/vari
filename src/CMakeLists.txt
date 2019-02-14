@@ -149,6 +149,7 @@ set(HEADER_FILES
     VDatabaseCloth.h
     VDatabaseResin.h
     VSqlDatabase.h
+    VScreenShooter.h
     )
 
 set(SOURCE_FILES
@@ -162,6 +163,7 @@ set(SOURCE_FILES
     VDatabaseCloth.cpp
     VDatabaseResin.cpp
     VSqlDatabase.cpp
+    VScreenShooter.cpp
     )
 
 #Create executable

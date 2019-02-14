@@ -46,7 +46,6 @@ set(HEADER_FILES
     VSimulationClass.h
     VSimulationFacade.h
     VSimulator.h
-    VScreenShooter.h
     )
 
 set(SOURCE_FILES
@@ -55,7 +54,6 @@ set(SOURCE_FILES
     VSimulationClass.cpp
     VSimulationFacade.cpp
     VSimulator.cpp
-    VScreenShooter.cpp
     )
 
 ADD_MODULE(v_sim

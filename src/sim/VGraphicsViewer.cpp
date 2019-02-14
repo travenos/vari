@@ -28,10 +28,8 @@
 #include <Inventor/events/SoMouseButtonEvent.h>
 #include <Inventor/SoPickedPoint.h>
 #include <Inventor/Qt/widgets/SoQtThumbWheel.h>
-#include <Inventor/SoOffscreenRenderer.h>
 
 #include "VGraphicsViewer.h"
-#include "VScreenShooter.h"
 #include "graphics_elements/VGraphicsNode.h"
 /**
  * VGraphicsViewer implementation
@@ -66,9 +64,7 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_dragCanceled(false),
     m_pSelectedNodesIds(new std::vector<uint>),
     m_pTransformedNodesCoords(new std::vector<std::pair<uint, QVector3D> >),
-    m_cubeSide(VGraphicsNode::DEFAULT_CUBE_SIDE),
-    m_pSlideshowShooter(new VScreenShooter),
-    m_pVideoShooter(new VScreenShooter)
+    m_cubeSide(VGraphicsNode::DEFAULT_CUBE_SIDE)
 {
     m_pRoot->ref();
     m_pFigureRoot->ref();
@@ -99,13 +95,6 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     connect(this, SIGNAL(askForDisplayingInfo()), this, SLOT(displayInfo()));
     m_pRenderWaiterThread.reset(new std::thread(std::bind(&VGraphicsViewer::process, this)));
     m_renderSuccessNotifier.notifyOne();
-
-    m_pSlideshowShooter->setWidget(getGLWidget());
-    m_pVideoShooter->setWidget(getGLWidget());
-    connect(m_pSlideshowShooter.get(), SIGNAL(processStarted()), this, SIGNAL(slideshowStarted()));
-    connect(m_pSlideshowShooter.get(), SIGNAL(processStopped()), this, SIGNAL(slideshowStopped()));
-    connect(m_pVideoShooter.get(), SIGNAL(processStarted()), this, SIGNAL(videoStarted()));
-    connect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(saveVideo()));
 }
 
 void VGraphicsViewer::initSelection()
@@ -128,14 +117,6 @@ void VGraphicsViewer::initSelection()
 
 VGraphicsViewer::~VGraphicsViewer()
 {
-    disconnect(m_pSlideshowShooter.get(), SIGNAL(processStarted()), this, SIGNAL(slideshowStarted()));
-    disconnect(m_pSlideshowShooter.get(), SIGNAL(processStopped()), this, SIGNAL(slideshowStopped()));
-    disconnect(m_pVideoShooter.get(), SIGNAL(processStarted()), this, SIGNAL(videoStarted()));
-    disconnect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(saveVideo()));
-    stopVideo();
-    saveVideo();
-    m_pSlideshowShooter.reset();
-    m_pVideoShooter.reset();
     stopRender();
     m_pRenderWaiterThread->join();
     m_pRenderWaiterThread.reset();
@@ -706,73 +687,6 @@ void VGraphicsViewer::setCameraOrthographic(bool on)
         else
             setCameraType(SoPerspectiveCamera::getClassTypeId());
     }
-}
-
-void VGraphicsViewer::setSlideshowDir(const QString &dir)
-{
-    m_pSlideshowShooter->setDirName(dir);
-}
-
-void VGraphicsViewer::setSlideshowPeriod(float period)
-{
-    m_pSlideshowShooter->setPeriod(period);
-}
-
-void VGraphicsViewer::setVideoFile(const QString &file)
-{
-    m_videoFile = file;
-}
-
-void VGraphicsViewer::setVideoPeriod(float period)
-{
-    m_pVideoShooter->setPeriod(period);
-}
-
-const QString & VGraphicsViewer::getSlideshowDir() const
-{
-    return m_pSlideshowShooter->getDirName();
-}
-
-float VGraphicsViewer::getSlideshowPeriod() const
-{
-    return m_pSlideshowShooter->getPeriod();
-}
-
-void VGraphicsViewer::startSlideshow()
-{
-    m_pSlideshowShooter->start();
-}
-
-void VGraphicsViewer::stopSlideshow()
-{
-    m_pSlideshowShooter->stop();
-}
-
-const QString & VGraphicsViewer::getVideoFile() const
-{
-    return m_videoFile;
-}
-
-float VGraphicsViewer::getVideoPeriod() const
-{
-    return m_pVideoShooter->getPeriod();
-}
-
-void VGraphicsViewer::startVideo()
-{
-    m_pVideoShooter->start();
-}
-
-void VGraphicsViewer::stopVideo()
-{
-    m_pVideoShooter->stop();
-}
-
-void VGraphicsViewer::saveVideo()
-{
-    //TODO
-    //TODO clear temporary folder
-    emit videoStopped();
 }
 
 void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)

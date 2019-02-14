@@ -13,8 +13,6 @@
 #include <chrono>
 
 #include <QObject>
-#include <QTimer>
-#include <QThread> //TODO
 
 class VScreenShooter : public QObject
 {
@@ -28,48 +26,54 @@ public:
     VScreenShooter(VScreenShooter&& temp) = delete;
     VScreenShooter& operator=(VScreenShooter&& temp) = delete;
 
-    void start();
-    void stop();
     bool isWorking() const;
 
     bool takePicture(const QString &fileName) const;
     inline bool areParametersCorrect() const;
-    inline bool createDirIfNecessary() const;
+    inline bool createWorkDir();
 
     void setWidget(const QWidget * widget);
     void setDirName(const QString &dirName);
     void setPeriod(float period);
     const QWidget * getWidget() const;
     const QString& getDirName() const;
+    const QString& getSlidesDirName() const;
     float getPeriod() const;
 private:
     typedef std::chrono::duration<double, std::ratio<1> > second_t;
+    typedef std::chrono::duration<int, std::ratio<1, 1000> > ms_int_t;
     typedef std::chrono::high_resolution_clock clock_t;
     typedef std::chrono::time_point<clock_t> time_point_t;
 
     static const QString BASE_NAME;
-    static const int TIME_PRECISION;
+    static const QString SLIDES_SUFFIX_DIR_NAME;
+    static const int FILENAME_TIME_PRECISION;
 
-    //TODO QThread
     const QWidget * m_pWidget;
-    QString m_dirName;
+    QString m_baseDirName;
+    QString m_workDirName;
     float m_period;
-    int m_msPeriod;
-    QTimer * m_pTimer;
+    std::atomic<int> m_msPeriod;
     std::atomic<bool> m_isWorking;
-    std::atomic<bool> m_stopFlag;
-    mutable std::mutex m_timerLock;
-    mutable std::mutex m_pictureLock;
+    mutable std::mutex m_processLock;
     std::unique_ptr<std::thread> m_takePictureThread;
     time_point_t m_startTime;
 
+    std::shared_ptr< std::atomic<bool> > m_pStopFlag;
+
+    void pictureCycle();
     inline void constructorBody();
-    void takePictureWrapper();
-private slots:
-    void timerSlot();
+    inline void takePictureWrapper(const std::shared_ptr<std::atomic<bool> > &stopFlag);
+public slots:
+    void start();
+    void stop();
 signals:
     void processStarted();
     void processStopped();
+    void shouldBeStopped();
+    void widgetChanged();
+    void directoryChanged();
+    void periodChanged();
 };
 
 #endif //_VSCHREENSHOOTER_H
