@@ -66,13 +66,13 @@ Usage:
     hg clone https://bitbucket.org/Coin3D/soqt
     ```
 6. Build and install it to *COINDIR*. When building, variables *COINDIR* and *QTDIR* should be added to CMAKE\_PREFIX\_PATH.  
-7. Get GMSH sources using Git:
+7. Get GMSH sources using Git:  
     ```
     git clone https://gitlab.onelab.info/gmsh/gmsh.git
     ```  
     Checkout to tag *gmsh_3_0_6*.  
 8. Build and install it. Use flags: *-DENABLE_BUILD_LIB=ON -DENABLE_BLAS_LAPACK=OFF -DENABLE_GMP=OFF* . Set environment variable *GMSH_DIR* pointing to the installation path.  
-9. Get OpenCV sources using Git. On Linux you can use OpenCV installed using your package manager (dev packages should be installed). In this case you can skip steps 9 and 10.
+9. Get OpenCV sources using Git. On Linux you can use OpenCV installed using your package manager (dev packages should be installed). In this case you can skip steps 9 and 10.  
     ```
     git clone https://github.com/opencv/opencv.git
     ```  

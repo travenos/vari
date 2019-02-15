@@ -9,19 +9,6 @@
 
 #include "VScreenShooter.h"
 
-//TODO
-//class VVideoException: public std::exception
-//{
-//    const QString m_msg;
-//public:
-//    VVideoException() = default;
-//    VVideoException(const QString &msg):
-//        m_msg(msg)
-//    {}
-//    const QString &what()
-//    {return m_msg;}
-//};
-
 class VVideoShooter : public VScreenShooter
 {
     Q_OBJECT
