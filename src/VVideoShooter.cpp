@@ -25,7 +25,8 @@ const QString VVideoShooter::BASE_SLIDES_DIR_NAME("_VARI_SLIDES_FOR_VIDEO_");
 const QString VVideoShooter::SLIDES_DIR_PATH = QDir::cleanPath(QDir::tempPath() + QDir::separator() + VVideoShooter::BASE_SLIDES_DIR_NAME);
 
 VVideoShooter::VVideoShooter():
-    VScreenShooter()
+    VScreenShooter(),
+    m_videoDirectory(QDir::homePath())
 {
     VScreenShooter::setDirName(SLIDES_DIR_PATH);
     updateFrequency();

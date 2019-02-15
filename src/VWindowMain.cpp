@@ -160,8 +160,8 @@ void VWindowMain::connectSimulationSignals()
     connect(m_pSlideshowShooter.get(), SIGNAL(periodChanged()), this, SLOT(m_on_slideshow_period_changed()));
     connect(m_pVideoShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_video_started()));
     connect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_video_stopped()));
-    connect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_video_stopped()));
     connect(m_pVideoShooter.get(), SIGNAL(directoryChanged()), this, SLOT(m_on_video_directory_changed()));
+    connect(m_pVideoShooter.get(), SIGNAL(frequencyChanged()), this, SLOT(m_on_video_frequency_changed()));
     connect(m_pVideoShooter.get(), SIGNAL(videoSavingFinished(bool)), this, SLOT(m_on_video_saving_finished(bool)));
 }
 
