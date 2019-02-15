@@ -3,7 +3,7 @@ Software for simulating the VARI process
 
 ## Ubuntu build dependencies
 ```
-sudo apt install make g++ cmake fakeroot qt5-default qt5-qmake mercurial doxygen libc-bin  
+sudo apt install make g++ cmake fakeroot qt5-default qt5-qmake mercurial doxygen libc-bin libopencv-dev  
 ```
 For Ubuntu 18.04 or higher:  
 ```
