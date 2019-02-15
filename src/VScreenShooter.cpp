@@ -11,8 +11,6 @@
 #include <QWidget>
 #include <QDir>
 
-#include <iostream>
-
 #if defined(Q_WS_WIN) || defined (WIN32) || defined(__WIN32__)
 #include "windows.h"
 #define SLEEP(period) Sleep(period)
@@ -29,7 +27,9 @@
  * VScreenShooter implementation
  */
 
-const QString VScreenShooter::BASE_NAME("slide_%1.png");
+const char * const VScreenShooter::PICTURE_FORMAT_C = "png";
+const QString VScreenShooter::PICTURE_FORMAT(VScreenShooter::PICTURE_FORMAT_C);
+const QString VScreenShooter::BASE_NAME = QStringLiteral("slide_%1.") + VScreenShooter::PICTURE_FORMAT;
 const QString VScreenShooter::SLIDES_SUFFIX_DIR_NAME("VARI_slideshow");
 const int VScreenShooter::FILENAME_TIME_PRECISION = 4;
 
@@ -211,7 +211,7 @@ bool VScreenShooter::takePicture(const QString &fileName) const
     if (wx1 < sx1 || wy1 < sy1 || wx2 > sx2 || wy2 > sy2)
         return false;
     QPixmap originalPixmap = screen->grabWindow(m_pWidget->winId());
-    bool ok = originalPixmap.save(fileName, "png");
+    bool ok = originalPixmap.save(fileName, PICTURE_FORMAT_C);
     return ok;
 }
 

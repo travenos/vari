@@ -18,10 +18,12 @@
 #include "VWindowResin.h"
 #include "VWindowLayer.h"
 #include "VScreenShooter.h"
+#include "VVideoShooter.h"
 #include "sim/VSimulationFacade.h"
 #include "sim/structures/VExceptions.h"
 
 const QString VWindowMain::ERROR_TITLE("Ошибка");
+const QString VWindowMain::INFO_TITLE("Информация");
 const QString VWindowMain::IMPORT_FROM_FILE_ERROR("Ошибка загрузки из файла");
 const QString VWindowMain::IMPORT_MANUAL_ERROR("Ошибка создания слоя");
 const QString VWindowMain::EXPORT_TO_FILE_ERROR("Ошибка сохранения в файл");
@@ -59,11 +61,11 @@ const QColor VWindowMain::INVISIBLE_COLOR(127, 127, 127);
 const float VWindowMain::MAX_CUBE_SIDE = 0.0125f;
 
 const QString VWindowMain::SLIDESHOW_DIR_DIALOG_TITLE("Путь сохранения слайдов");
-const QString VWindowMain::VIDEO_FILE_DIALOG_TITLE("Файл, в который будет записано видео");
-const Qt::WindowFlags VWindowMain::ON_TOP_FLAGS = (Qt::CustomizeWindowHint | Qt::X11BypassWindowManagerHint | Qt::WindowStaysOnBottomHint | Qt::WindowStaysOnTopHint | Qt::Dialog | Qt::WindowTitleHint);
-const QString VWindowMain::BASE_VIDEO_DIR_NAME("_VARI_SLIDES_FOR_VIDEO_"); //TODO
-const QString VWindowMain::VIDEO_DIR_PATH = QDir::cleanPath(QDir::tempPath() + QDir::separator() + VWindowMain::BASE_VIDEO_DIR_NAME); //TODO
-const QString VWindowMain::BASE_SLIDESHOW_DIR_NAME("VARI_slideshow"); //TODO
+const QString VWindowMain::VIDEO_DIR_DIALOG_TITLE("Путь сохранения видео");
+const QString VWindowMain::SAVING_VIDEO_ERROR("Ошибка записи видео");
+const QString VWindowMain::SAVING_VIDEO_INFO("Видео сохранено в файл %1");
+const Qt::WindowFlags VWindowMain::ON_TOP_FLAGS = (Qt::WindowStaysOnBottomHint | Qt::WindowStaysOnTopHint | Qt::Dialog | Qt::WindowTitleHint);
+        //(Qt::CustomizeWindowHint | Qt::X11BypassWindowManagerHint | Qt::WindowStaysOnBottomHint | Qt::WindowStaysOnTopHint | Qt::Dialog | Qt::WindowTitleHint);
 
 VWindowMain::VWindowMain(QWidget *parent) :
     QMainWindow(parent),
@@ -75,7 +77,7 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_pPressureValidator(new QDoubleValidator),
     m_pDiameterValidator(new QDoubleValidator),
     m_pSlideshowShooter(new VScreenShooter),
-    m_pVideoShooter(new VScreenShooter)
+    m_pVideoShooter(new VVideoShooter)
 {
     ui->setupUi(this);
     ui->splitter->setStretchFactor(0,1);
@@ -90,7 +92,6 @@ VWindowMain::VWindowMain(QWidget *parent) :
     loadSizes();
     m_pSlideshowShooter->setWidget(m_pFacade->getGLWidget());
     m_pVideoShooter->setWidget(m_pFacade->getGLWidget());
-    m_pVideoShooter->setDirName(VIDEO_DIR_PATH);
 
     loadShootersSettings();
 }
@@ -159,8 +160,9 @@ void VWindowMain::connectSimulationSignals()
     connect(m_pSlideshowShooter.get(), SIGNAL(periodChanged()), this, SLOT(m_on_slideshow_period_changed()));
     connect(m_pVideoShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_video_started()));
     connect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_video_stopped()));
+    connect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_video_stopped()));
     connect(m_pVideoShooter.get(), SIGNAL(directoryChanged()), this, SLOT(m_on_video_directory_changed()));
-    connect(m_pVideoShooter.get(), SIGNAL(periodChanged()), this, SLOT(m_on_video_period_changed()));
+    connect(m_pVideoShooter.get(), SIGNAL(videoSavingFinished(bool)), this, SLOT(m_on_video_saving_finished(bool)));
 }
 
 void VWindowMain::setupValidators()
@@ -185,7 +187,7 @@ VWindowMain::~VWindowMain()
     disconnect(m_pVideoShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_video_started()));
     disconnect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_video_stopped()));
     stopVideo();
-    saveVideo();
+    stopSlideshow();
     saveSootersSettings();
     m_pSlideshowShooter.reset();
     m_pVideoShooter.reset();
@@ -893,14 +895,14 @@ void VWindowMain::setSlideshowPeriod(float period)
     m_pSlideshowShooter->setPeriod(period);
 }
 
-void VWindowMain::setVideoFile(const QString &file)
+void VWindowMain::setVideoDir(const QString &dir)
 {
-    m_videoFile = file;
+    m_pVideoShooter->setDirName(dir);
 }
 
-void VWindowMain::setVideoPeriod(float period)
+void VWindowMain::setVideoFrequency(int frequency)
 {
-    m_pVideoShooter->setPeriod(period);
+    m_pVideoShooter->setFrequency(frequency);
 }
 
 const QString & VWindowMain::getSlideshowDir() const
@@ -925,38 +927,22 @@ void VWindowMain::stopSlideshow()
 
 const QString & VWindowMain::getVideoFile() const
 {
-    //TODO
-    return m_videoFile;
+    return m_pVideoShooter->getVideoFileName();
 }
 
-float VWindowMain::getVideoPeriod() const
+int VWindowMain::getVideoFrequency() const
 {
-    //TODO
-    return m_pVideoShooter->getPeriod();
+    return m_pVideoShooter->getFrequency();
 }
 
 void VWindowMain::startVideo()
 {
-    //TODO
-    QDir videoDir(VIDEO_DIR_PATH);
-    if (videoDir.exists())
-    {
-        bool result = videoDir.removeRecursively();
-        if (!result)
-            return;
-    }
     m_pVideoShooter->start();
 }
 
 void VWindowMain::stopVideo()
 {
     m_pVideoShooter->stop();
-}
-
-void VWindowMain::saveVideo()
-{
-    //TODO
-    //TODO clear temporary folder
 }
 
 void VWindowMain::showSlideshowPeriod()
@@ -968,7 +954,9 @@ void VWindowMain::showSlideshowPeriod()
 
 void VWindowMain::showVideoFrequency()
 {
-
+    int frequency = m_pVideoShooter->getFrequency();
+    ui->videoFrequencySpinBox->setValue(frequency);
+    ui->resetVideoFrequencyButton->setEnabled(false);
 }
 
 void VWindowMain::loadShootersSettings()
@@ -982,11 +970,11 @@ void VWindowMain::loadShootersSettings()
     slideshowPeriod = settings.value(QStringLiteral("slideshow/period"), m_pSlideshowShooter->getPeriod()).toFloat();
 
     videoDir = settings.value(QStringLiteral("video/directory"), m_pVideoShooter->getDirName()).toString();
-    //videoFrequency= settings.value(QStringLiteral("video/frequency"), m_pVideoShooter->getFrequency()).toInt(); //TODO
+    videoFrequency= settings.value(QStringLiteral("video/frequency"), m_pVideoShooter->getFrequency()).toInt();
     m_pSlideshowShooter->setDirName(slideShowDir);
     m_pSlideshowShooter->setPeriod(slideshowPeriod);
     m_pVideoShooter->setDirName(videoDir);
-    //m_pVideoShooter->setFrequency(videoFrequency); //TODO
+    m_pVideoShooter->setFrequency(videoFrequency);
 }
 
 void VWindowMain::saveSootersSettings()
@@ -996,14 +984,14 @@ void VWindowMain::saveSootersSettings()
     settings.setValue(QStringLiteral("slideshow/period"), m_pSlideshowShooter->getPeriod());
 
     settings.setValue(QStringLiteral("video/directory"), m_pVideoShooter->getDirName());
-    //settings.setValue(QStringLiteral("video/frequency"), m_pVideoShooter->getFrequency()); //TODO
+    settings.setValue(QStringLiteral("video/frequency"), m_pVideoShooter->getFrequency());
     settings.sync();
 }
 
 void VWindowMain::enableButtonsShootingWindows(bool enable)
 {
-    ui->chooseSlideshowDirButton->setEnabled(enable);
-    ui->chooseVideoDirButton->setEnabled(enable);
+    ui->simTab->setEnabled(enable);
+    ui->appearanceTab->setEnabled(enable);
     ui->actionOpen->setEnabled(enable);
     ui->actionSave->setEnabled(enable);
 }
@@ -1053,6 +1041,14 @@ void VWindowMain::m_on_layers_cleared()
 {
     reloadLayersList();
     showModelInfo();
+}
+
+void VWindowMain::m_on_video_saving_finished(bool result)
+{
+    if (result)
+        QMessageBox::information(this, INFO_TITLE, SAVING_VIDEO_INFO.arg(m_pVideoShooter->getVideoFileName()));
+    else
+        QMessageBox::warning(this, ERROR_TITLE, SAVING_VIDEO_ERROR);
 }
 
 void VWindowMain::on_addLayerButton_clicked()
@@ -1228,7 +1224,6 @@ void VWindowMain::m_on_cube_side_changed(float)
 
 void VWindowMain::m_on_slideshow_started()
 {
-    enableButtonsShootingWindows(false);
     ui->actionSlideshow->setChecked(true);
     setWindowFlags(windowFlags() | ON_TOP_FLAGS);
     show();
@@ -1236,7 +1231,6 @@ void VWindowMain::m_on_slideshow_started()
 
 void VWindowMain::m_on_slideshow_stopped()
 {
-    enableButtonsShootingWindows(true);
     ui->actionSlideshow->setChecked(false);
     setWindowFlags(windowFlags() ^ ON_TOP_FLAGS);
     show();
@@ -1255,7 +1249,6 @@ void VWindowMain::m_on_slideshow_period_changed()
 
 void VWindowMain::m_on_video_started()
 {
-    enableButtonsShootingWindows(false);
     ui->actionVideo->setChecked(true);
     setWindowFlags(windowFlags() | ON_TOP_FLAGS);
     show();
@@ -1263,11 +1256,9 @@ void VWindowMain::m_on_video_started()
 
 void VWindowMain::m_on_video_stopped()
 {
-    enableButtonsShootingWindows(true);
     ui->actionVideo->setChecked(false);
     setWindowFlags(windowFlags() ^ ON_TOP_FLAGS);
     show();
-    saveVideo();
 }
 
 void VWindowMain::m_on_video_directory_changed()
@@ -1276,9 +1267,9 @@ void VWindowMain::m_on_video_directory_changed()
     ui->videoDirLabel->setText(dir);
 }
 
-void VWindowMain::m_on_video_period_changed()
+void VWindowMain::m_on_video_frequency_changed()
 {
- //TODO
+    showVideoFrequency();
 }
 
 void VWindowMain::on_injectionPlaceButton_clicked(bool checked)
@@ -1458,7 +1449,10 @@ void VWindowMain::on_actionSlideshow_triggered(bool checked)
 
 void VWindowMain::on_actionVideo_triggered(bool checked)
 {
-
+    if(checked)
+        startVideo();
+    else
+        stopVideo();
 }
 
 void VWindowMain::on_chooseSlideshowDirButton_clicked()
@@ -1469,11 +1463,11 @@ void VWindowMain::on_chooseSlideshowDirButton_clicked()
     QDir parentDir(dirName);
     if (!dirName.isEmpty() && parentDir.exists())
     {
-        m_pSlideshowShooter->setDirName(dirName);
+        setSlideshowDir(dirName);
     }
 }
 
-void VWindowMain::on_slideshowPeriodSpinBox_valueChanged(double arg1)
+void VWindowMain::on_slideshowPeriodSpinBox_valueChanged(double)
 {
     ui->resetSlideshowPeriodButton->setEnabled(true);
 }
@@ -1486,5 +1480,33 @@ void VWindowMain::on_resetSlideshowPeriodButton_clicked()
 void VWindowMain::on_saveSlideshowPeriodButton_clicked()
 {
     float value = static_cast<float>(ui->slideshowPeriodSpinBox->value());
-    m_pSlideshowShooter->setPeriod(value);
+    setSlideshowPeriod(value);
+}
+
+void VWindowMain::on_chooseVideoDirButton_clicked()
+{
+    m_pFacade->pauseSimulation();
+    QString lastDir = m_pVideoShooter->getDirName();
+    QString dirName = QFileDialog::getExistingDirectory(this, VIDEO_DIR_DIALOG_TITLE, lastDir);
+    QDir parentDir(dirName);
+    if (!dirName.isEmpty() && parentDir.exists())
+    {
+        setVideoDir(dirName);
+    }
+}
+
+void VWindowMain::on_resetVideoFrequencyButton_clicked()
+{
+    showVideoFrequency();
+}
+
+void VWindowMain::on_saveVideoFrequencyButton_clicked()
+{
+    int value = ui->videoFrequencySpinBox->value();
+    setVideoFrequency(value);
+}
+
+void VWindowMain::on_videoFrequencySpinBox_valueChanged(int)
+{
+    ui->resetVideoFrequencyButton->setEnabled(true);
 }

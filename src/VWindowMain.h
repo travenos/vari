@@ -20,6 +20,7 @@ class VWindowLayer;
 class VWindowCloth;
 class VWindowResin;
 class VScreenShooter;
+class VVideoShooter;
 struct VCloth;
 struct VSimulationInfo;
 
@@ -29,6 +30,7 @@ class VWindowMain : public QMainWindow
 
 public:
     static const QString ERROR_TITLE;
+    static const QString INFO_TITLE;
     static const QString REMOVE_TITLE;
     static const QString CUT_TITLE;
     static const QString TRANSFORM_TITLE;
@@ -55,11 +57,10 @@ public:
     static const float MAX_CUBE_SIDE;
 
     static const QString SLIDESHOW_DIR_DIALOG_TITLE;
-    static const QString VIDEO_FILE_DIALOG_TITLE;
+    static const QString VIDEO_DIR_DIALOG_TITLE;
+    static const QString SAVING_VIDEO_ERROR;
+    static const QString SAVING_VIDEO_INFO;
     static const Qt::WindowFlags ON_TOP_FLAGS;
-    static const QString BASE_VIDEO_DIR_NAME;
-    static const QString VIDEO_DIR_PATH;
-    static const QString BASE_SLIDESHOW_DIR_NAME;
 
     explicit VWindowMain(QWidget *parent = nullptr);
     ~VWindowMain();
@@ -147,23 +148,22 @@ private:
     void saveSizes();
     void loadSizes();
 
-    void setSlideshowDir(const QString &dir);
-    void setSlideshowPeriod(float period);
-    void setVideoFile(const QString &file);
-    void setVideoPeriod(float period);
-    const QString & getSlideshowDir() const;
-    float getSlideshowPeriod() const;
-    void startSlideshow();
-    void stopSlideshow();
-    const QString & getVideoFile() const;
-    float getVideoPeriod() const;
-    void startVideo();
-    void stopVideo();
-    void saveVideo();
-    void showSlideshowPeriod();
-    void showVideoFrequency();
-    void loadShootersSettings();
-    void saveSootersSettings();
+    inline void setSlideshowDir(const QString &dir);
+    inline void setSlideshowPeriod(float period);
+    inline void setVideoDir(const QString &dir);
+    inline void setVideoFrequency(int frequency);
+    inline const QString & getSlideshowDir() const;
+    inline float getSlideshowPeriod() const;
+    inline void startSlideshow();
+    inline void stopSlideshow();
+    inline const QString & getVideoFile() const;
+    inline int getVideoFrequency() const;
+    inline void startVideo();
+    inline void stopVideo();
+    inline void showSlideshowPeriod();
+    inline void showVideoFrequency();
+    inline void loadShootersSettings();
+    inline void saveSootersSettings();
 
     void enableButtonsShootingWindows(bool enable);
     Ui::VWindowMain *ui;
@@ -177,8 +177,7 @@ private:
     QDoubleValidator * const m_pDiameterValidator;
 
     std::shared_ptr<VScreenShooter> m_pSlideshowShooter;
-    std::shared_ptr<VScreenShooter> m_pVideoShooter;
-    QString m_videoFile;
+    std::shared_ptr<VVideoShooter> m_pVideoShooter;
 protected:
     virtual void closeEvent(QCloseEvent *);
 private slots:
@@ -225,7 +224,8 @@ private slots:
     void m_on_video_started();
     void m_on_video_stopped();
     void m_on_video_directory_changed();
-    void m_on_video_period_changed();
+    void m_on_video_frequency_changed();
+    void m_on_video_saving_finished(bool result);
 
     void on_addLayerButton_clicked();
     void on_layersListWidget_itemSelectionChanged();
@@ -268,9 +268,13 @@ private slots:
     void on_actionSlideshow_triggered(bool checked);
     void on_actionVideo_triggered(bool checked);
     void on_chooseSlideshowDirButton_clicked();
-    void on_slideshowPeriodSpinBox_valueChanged(double arg1);
+    void on_slideshowPeriodSpinBox_valueChanged(double);
     void on_resetSlideshowPeriodButton_clicked();
     void on_saveSlideshowPeriodButton_clicked();
+    void on_chooseVideoDirButton_clicked();
+    void on_resetVideoFrequencyButton_clicked();
+    void on_saveVideoFrequencyButton_clicked();
+    void on_videoFrequencySpinBox_valueChanged(int);
 };
 
 #endif // _VWINDOWMAIN_H

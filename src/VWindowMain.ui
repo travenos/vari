@@ -60,7 +60,7 @@
       </widget>
       <widget class="QTabWidget" name="tabWidget">
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="simTab">
         <attribute name="title">
@@ -944,7 +944,7 @@
                      <number>5</number>
                     </property>
                     <property name="maximum">
-                     <number>30</number>
+                     <number>25</number>
                     </property>
                     <property name="value">
                      <number>10</number>

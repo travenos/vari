@@ -7,6 +7,12 @@ find_package(GMSH 3.0.6 REQUIRED)
 find_package(Qt5Core    REQUIRED)
 find_package(Qt5Gui    REQUIRED)
 
+if (${GMSH_FOUND})
+    message(STATUS "\nFound GMSH ${GMSH_VERSION}")
+    message(STATUS "GMSH Libraries: ${GMSH_LIBRARIES}")
+    message(STATUS "GMSH Include directories: ${GMSH_INCLUDE_DIRS}\n")
+endif()
+
 include_directories(${GMSH_INCLUDE_DIR})
 include_directories(${Qt5Core_INCLUDE_DIRS})
 include_directories(${Qt5Gui_INCLUDE_DIRS})

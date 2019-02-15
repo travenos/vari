@@ -2,7 +2,11 @@
 Software for simulating the VARI process
 
 ## BUILD dependencies
-sudo apt install make g++ cmake fakeroot qt5-default qt5-qmake mercurial doxygen libc-bin
+sudo apt install make g++ cmake fakeroot qt5-default qt5-qmake mercurial doxygen libc-bin  
+For Ubuntu 18.04 or heigher:  
+sudo apt install libopencv-videoio-dev  
+For Ubuntu with lower version:  
+sudo apt install libopencv-highgui-dev  
 
 ## Building a DEB package
 For building a **DEB** package, run script **make_deb.sh**.  

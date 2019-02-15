@@ -77,6 +77,7 @@ endif()
 
 #Find packages
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{QTDIR})
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{OPENCV_DIR})
 
 find_package(Qt5Core    REQUIRED)
 find_package(Qt5Gui     REQUIRED)
@@ -86,24 +87,36 @@ find_package(Qt5Sql     REQUIRED)
 if (${Qt5Core_FOUND})
     message(STATUS "Found Qt 5 Core ${Qt5Core_VERSION}")
     message(STATUS "Qt 5 Core Directory: ${Qt5Core_DIR}")
+    message(STATUS "Qt 5 Core Include directories: ${Qt5Core_INCLUDE_DIRS}\n")
 endif()
 if (${Qt5Gui_FOUND})
     message(STATUS "Found Qt 5 Gui ${Qt5Gui_VERSION}")
     message(STATUS "Qt 5 Gui Directory: ${Qt5Gui_DIR}")
+    message(STATUS "Qt 5 Gui Include directories: ${Qt5Gui_INCLUDE_DIRS}\n")
 endif()
 if (${Qt5Widgets_FOUND})
     message(STATUS "Found Qt 5 Widgets ${Qt5Widgets_VERSION}")
     message(STATUS "Qt 5 Widgets Directory: ${Qt5Widgets_DIR}")
+    message(STATUS "Qt 5 Widgets Include directories: ${Qt5Widgets_INCLUDE_DIRS}\n")
 endif()
 if (${Qt5Sql_FOUND})
     message(STATUS "Found Qt Sql 5 ${Qt5Sql_VERSION}")
     message(STATUS "Qt 5 Sql Directory: ${Qt5Sql_DIR}\n")
+    message(STATUS "Qt 5 Sql Include directories: ${Qt5Sql_INCLUDE_DIRS}\n")
+endif()
+
+find_package( OpenCV REQUIRED )
+if (${OpenCV_FOUND})
+    message(STATUS "Found OpenCV ${OpenCV_VERSION}")
+    message(STATUS "OpenCV Directory: ${OpenCV_DIR}")
+    message(STATUS "OpenCV Include directories: ${OpenCV_INCLUDE_DIRS}\n")
 endif()
 
 include_directories(${Qt5Core_INCLUDE_DIRS})
 include_directories(${Qt5Gui_INCLUDE_DIRS})
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 include_directories(${Qt5Sql_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 #Add simulator module
 set(SIMULATOR_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/sim")
@@ -150,6 +163,7 @@ set(HEADER_FILES
     VDatabaseResin.h
     VSqlDatabase.h
     VScreenShooter.h
+    VVideoShooter.h
     )
 
 set(SOURCE_FILES
@@ -164,6 +178,7 @@ set(SOURCE_FILES
     VDatabaseResin.cpp
     VSqlDatabase.cpp
     VScreenShooter.cpp
+    VVideoShooter.cpp
     )
 
 #Create executable
@@ -181,6 +196,7 @@ target_link_libraries(${EXE_NAME} Qt5::Core)
 target_link_libraries(${EXE_NAME} Qt5::Gui)
 target_link_libraries(${EXE_NAME} Qt5::Widgets)
 target_link_libraries(${EXE_NAME} Qt5::Sql)
+target_link_libraries(${EXE_NAME} ${OpenCV_LIBS})
 add_dependencies(${EXE_NAME} v_sim)
 target_link_libraries(${EXE_NAME} v_sim)
 add_dependencies(${EXE_NAME} v_third_party)

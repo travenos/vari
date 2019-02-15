@@ -34,7 +34,15 @@ LIBSTDCXX_VER=${LIBSTDCXX_VER:9}
 QT_VER=$(dpkg -s qt5-default | grep '^Version: ')
 QT_VER=${QT_VER%-*}
 QT_VER=${QT_VER:9}
-DEPENDENCIES="libc6 (>= ${LIBC_VER}), libgcc1 (>= ${LIBGCC1_VER}), libgl1-mesa-glx | libgl1, libstdc++6 (>= ${LIBSTDCXX_VER}), libx11-6, libxi6, qt5-default (>= ${QT_VER}), libqt5core5a (>= ${QT_VER}), libqt5gui5 (>= ${QT_VER}), libqt5sql5 (>= ${QT_VER}), libqt5widgets5 (>= ${QT_VER}), libqt5xml5 (>= ${QT_VER}), libqt5sql5-psql (>= ${QT_VER}), libqt5printsupport5 (>= ${QT_VER}), postgresql"
+LIBOPENCV_NAME=
+if dpkg -s libopencv-highgui2.4v5 > /dev/null 2>&1; then LIBOPENCV_NAME=libopencv-highgui2.4v5; fi
+if dpkg -s libopencv-videoio3.2 > /dev/null 2>&1; then LIBOPENCV_NAME=libopencv-videoio3.2; fi
+if [[ -z ${LIBOPENCV_NAME} ]
+then
+    >&2 echo "Error. No OpenCV module for video writing found in the system"
+    exit 2
+fi
+DEPENDENCIES="libc6 (>= ${LIBC_VER}), libgcc1 (>= ${LIBGCC1_VER}), libgl1-mesa-glx | libgl1, libstdc++6 (>= ${LIBSTDCXX_VER}), libx11-6, libxi6, qt5-default (>= ${QT_VER}), libqt5core5a (>= ${QT_VER}), libqt5gui5 (>= ${QT_VER}), libqt5sql5 (>= ${QT_VER}), libqt5widgets5 (>= ${QT_VER}), libqt5xml5 (>= ${QT_VER}), libqt5sql5-psql (>= ${QT_VER}), libqt5printsupport5 (>= ${QT_VER}), postgresql, ${LIBOPENCV_NAME}"
 CONFLICTS="libsoqt3-20, libsoqt4-20, libcoin80v5, libcoin80-runtime"
 PROVIDES="libcoin80v5"
 
