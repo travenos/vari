@@ -13,13 +13,38 @@
 #include <QDir>
 
 #if defined(Q_WS_WIN) || defined (WIN32) || defined(__WIN32__)
-#include "windows.h"
+#include <windows.h>
+#include <QtWin>
 #define SLEEP(period) Sleep(period)
 #elif defined(linux) || defined(__linux__) || defined(Q_WS_MAC)
 #include <unistd.h>
 #define SLEEP(period) usleep(period * 1000)
 #else
 #define SLEEP(period) std::this_thread::sleep_for(std::chrono::milliseconds(period))
+#endif
+
+#if defined(Q_WS_WIN) || defined (WIN32) || defined(__WIN32__)
+inline void getWinAPIscreen(int wx1, int wy1, int wx2, int wy2, QPixmap &pixmap)
+{
+	POINT a, b;
+	a.x = wx1;
+	a.y = wy1;
+	b.x = wx2;
+	b.y = wy2;
+	HDC     hScreen = GetDC(NULL);
+	HDC     hDC = CreateCompatibleDC(hScreen);
+	HBITMAP hBitmap = CreateCompatibleBitmap(hScreen, abs(b.x - a.x), abs(b.y - a.y));
+	HGDIOBJ old_obj = SelectObject(hDC, hBitmap);
+	BOOL    bRet = BitBlt(hDC, 0, 0, abs(b.x - a.x), abs(b.y - a.y), hScreen, a.x, a.y, SRCCOPY);
+
+	pixmap = QtWin::fromHBITMAP(hBitmap);
+
+	// clean up
+	SelectObject(hDC, old_obj);
+	DeleteDC(hDC);
+	ReleaseDC(NULL, hScreen);
+	DeleteObject(hBitmap);
+}
 #endif
 
 #include "VScreenShooter.h"
@@ -211,7 +236,12 @@ bool VScreenShooter::takePicture(const QString &fileName) const
     screenRect.getCoords(&sx1, &sy1, &sx2, &sy2);
     if (wx1 < sx1 || wy1 < sy1 || wx2 > sx2 || wy2 > sy2)
         return false;
-    QPixmap originalPixmap = screen->grabWindow(m_pWidget->winId());
+	QPixmap originalPixmap;
+	#if defined(Q_WS_WIN) || defined (WIN32) || defined(__WIN32__)
+	getWinAPIscreen(wx1, wy1, wx2, wy2, originalPixmap);
+	#else
+	originalPixmap = screen->grabWindow(m_pWidget->winId());
+	#endif
     bool ok = originalPixmap.save(fileName, PICTURE_FORMAT_C);
     return ok;
 }
