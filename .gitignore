@@ -2,6 +2,7 @@
 build*
 coin3d
 gmsh
+opencv
 pkg-vari
 *.user*
 .directory

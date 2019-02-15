@@ -4,9 +4,11 @@ $BUILD_TYPE="Release"
 $COIN_REPO_URL="https://bitbucket.org/Coin3D/coin"
 $SOQT_REPO_URL="https://bitbucket.org/Coin3D/soqt"
 $GMSH_REPO_URL="https://gitlab.onelab.info/gmsh/gmsh.git"
+$OPENCV_REPO_URL="https://github.com/opencv/opencv.git"
 $COIN_CHANGESET_HASH="11932:acee8063042f"
 $SOQT_CHANGESET_HASH="2021:fd7ae3be0e28"
 $GMSH_TAG="gmsh_3_0_6"
+$OPENCV_TAG="3.2.0"
 
 $env:COINDIR="C:\coin3d"
 $env:GMSH_DIR="C:\gmsh"
@@ -97,6 +99,30 @@ $CMAKE_BUILD_ARG="CMAKE_BUILD_TYPE=$BUILD_TYPE"
 cmake "-D$CMAKE_INST_PREFIX_ARG" "-D$CMAKE_BUILD_ARG" -DENABLE_BLAS_LAPACK=OFF -DENABLE_GMP=OFF -DENABLE_BUILD_LIB=ON -G $GENERATOR_NAME ..
 check_exit_code($LASTEXITCODE)
 $SLN_NAME="gmsh.sln"
+devenv $SLN_NAME /Build $BUILD_TYPE /Project INSTALL
+check_exit_code($LASTEXITCODE)
+
+#BUILD OPENCV
+cd ../..
+$OPENCV_REPO_PATH="opencv"
+if (!(test-path "$OPENCV_REPO_PATH"))
+{
+	git clone $OPENCV_REPO_URL
+	cd "$OPENCV_REPO_PATH"
+	check_exit_code($LASTEXITCODE)
+}
+else
+{
+	cd "$OPENCV_REPO_PATH"
+	git pull
+}
+git checkout $OPENCV_TAG
+if (!(test-path build)) {mkdir build}
+cd build
+$CMAKE_INST_PREFIX_ARG="CMAKE_INSTALL_PREFIX=$env:OPENCV_DIR"
+cmake "-D$CMAKE_INST_PREFIX_ARG" -G $GENERATOR_NAME ..
+check_exit_code($LASTEXITCODE)
+$SLN_NAME="OpenCV.sln"
 devenv $SLN_NAME /Build $BUILD_TYPE /Project INSTALL
 check_exit_code($LASTEXITCODE)
 

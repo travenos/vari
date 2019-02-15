@@ -133,6 +133,7 @@ set(CMAKE_AUTORCC ON)
 
 set(RESOURCES_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/resources)
 if(MSVC)
+	add_definitions(-DNOMINMAX)
     set(WIN_APP_RC_SOURCE "${PROJECT_SOURCE_DIR}/cmake/app.rc.cmake")
     set(WIN_APP_RC_DEST "${CMAKE_CURRENT_BINARY_DIR}/app.rc")
     configure_file("${WIN_APP_RC_SOURCE}" "${WIN_APP_RC_DEST}")

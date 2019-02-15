@@ -4,6 +4,7 @@
  */
 
 #include <functional>
+#include <algorithm>
 
 #include <QScreen>
 #include <QWindow>
@@ -18,7 +19,7 @@
 #include <unistd.h>
 #define SLEEP(period) usleep(period * 1000)
 #else
-#define SLEEP(period) std::this_thread::sleep_for(std::chrono::milliseconds(period));
+#define SLEEP(period) std::this_thread::sleep_for(std::chrono::milliseconds(period))
 #endif
 
 #include "VScreenShooter.h"
@@ -74,7 +75,7 @@ void VScreenShooter::start()
             if (m_takePictureThread && m_takePictureThread->joinable())
                 stop();
             m_isWorking.store(true);
-            m_pStopFlag.reset(new std::atomic_bool(false));
+            m_pStopFlag.reset(new std::atomic<bool>(false));
             m_startTime = clock_t::now();
             m_takePictureThread.reset(new std::thread(std::bind(&VScreenShooter::pictureCycle, this)));
             emit processStarted();
