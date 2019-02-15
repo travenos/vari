@@ -26,24 +26,24 @@
 #if defined(Q_WS_WIN) || defined (WIN32) || defined(__WIN32__)
 inline void getWinAPIscreen(int wx1, int wy1, int wx2, int wy2, QPixmap &pixmap)
 {
-	POINT a, b;
-	a.x = wx1;
-	a.y = wy1;
-	b.x = wx2;
-	b.y = wy2;
-	HDC     hScreen = GetDC(NULL);
-	HDC     hDC = CreateCompatibleDC(hScreen);
-	HBITMAP hBitmap = CreateCompatibleBitmap(hScreen, abs(b.x - a.x), abs(b.y - a.y));
-	HGDIOBJ old_obj = SelectObject(hDC, hBitmap);
-	BOOL    bRet = BitBlt(hDC, 0, 0, abs(b.x - a.x), abs(b.y - a.y), hScreen, a.x, a.y, SRCCOPY);
+    POINT a, b;
+    a.x = wx1;
+    a.y = wy1;
+    b.x = wx2;
+    b.y = wy2;
+    HDC     hScreen = GetDC(NULL);
+    HDC     hDC = CreateCompatibleDC(hScreen);
+    HBITMAP hBitmap = CreateCompatibleBitmap(hScreen, abs(b.x - a.x), abs(b.y - a.y));
+    HGDIOBJ old_obj = SelectObject(hDC, hBitmap);
+    BOOL    bRet = BitBlt(hDC, 0, 0, abs(b.x - a.x), abs(b.y - a.y), hScreen, a.x, a.y, SRCCOPY);
 
-	pixmap = QtWin::fromHBITMAP(hBitmap);
+    pixmap = QtWin::fromHBITMAP(hBitmap);
 
-	// clean up
-	SelectObject(hDC, old_obj);
-	DeleteDC(hDC);
-	ReleaseDC(NULL, hScreen);
-	DeleteObject(hBitmap);
+    // clean up
+    SelectObject(hDC, old_obj);
+    DeleteDC(hDC);
+    ReleaseDC(NULL, hScreen);
+    DeleteObject(hBitmap);
 }
 #endif
 
