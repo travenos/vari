@@ -37,7 +37,7 @@ QT_VER=${QT_VER:9}
 LIBOPENCV_NAME=
 if dpkg -s libopencv-highgui2.4v5 > /dev/null 2>&1; then LIBOPENCV_NAME=libopencv-highgui2.4v5; fi
 if dpkg -s libopencv-videoio3.2 > /dev/null 2>&1; then LIBOPENCV_NAME=libopencv-videoio3.2; fi
-if [[ -z ${LIBOPENCV_NAME} ]
+if [[ -z ${LIBOPENCV_NAME} ]]
 then
     >&2 echo "Error. No OpenCV module for video writing found in the system"
     exit 2
