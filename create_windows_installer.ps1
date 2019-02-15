@@ -12,6 +12,7 @@ $OPENCV_TAG="3.2.0"
 
 $env:COINDIR="C:\coin3d"
 $env:GMSH_DIR="C:\gmsh"
+$env:OPENCV_DIR="C:\opencv"
 
 function check_exit_code([int]$value) {
      if($value -ne 0) {
