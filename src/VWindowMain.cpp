@@ -64,7 +64,7 @@ const QString VWindowMain::SLIDESHOW_DIR_DIALOG_TITLE("Путь сохранен
 const QString VWindowMain::VIDEO_DIR_DIALOG_TITLE("Путь сохранения видео");
 const QString VWindowMain::SAVING_VIDEO_ERROR("Ошибка записи видео");
 const QString VWindowMain::SAVING_VIDEO_INFO("Видео сохранено в файл %1");
-const Qt::WindowFlags VWindowMain::ON_TOP_FLAGS = (Qt::WindowStaysOnBottomHint | Qt::WindowStaysOnTopHint | Qt::Dialog | Qt::WindowTitleHint);
+const Qt::WindowFlags VWindowMain::ON_TOP_FLAGS = (Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint | Qt::Dialog | Qt::WindowTitleHint);
 
 VWindowMain::VWindowMain(QWidget *parent) :
     QMainWindow(parent),

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1565</width>
-    <height>960</height>
+    <width>1632</width>
+    <height>902</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -101,8 +101,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>1193</width>
-              <height>848</height>
+              <width>1231</width>
+              <height>810</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout">
@@ -682,8 +682,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>1193</width>
-              <height>848</height>
+              <width>1245</width>
+              <height>790</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_13">
@@ -941,7 +941,7 @@
                      <string> Гц</string>
                     </property>
                     <property name="minimum">
-                     <number>5</number>
+                     <number>1</number>
                     </property>
                     <property name="maximum">
                      <number>25</number>
@@ -1054,7 +1054,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1565</width>
+     <width>1632</width>
      <height>22</height>
     </rect>
    </property>
