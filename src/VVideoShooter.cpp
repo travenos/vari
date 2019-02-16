@@ -122,7 +122,7 @@ void VVideoShooter::saveVideoProcess()
         try
         {
             cv::Size firstSize(firstFrame.width(),firstFrame.height());
-            cv::VideoWriter video(m_videoFileName.toLocal8Bit().data(), CV_FOURCC('M','J','P','G'), m_frequency,
+            cv::VideoWriter video(m_videoFileName.toLocal8Bit().data(), CV_FOURCC('I', 'Y', 'U', 'V'), m_frequency,
                                   firstSize, true);
             foreach(const QString &filename, images)
             {
