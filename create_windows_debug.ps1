@@ -119,8 +119,9 @@ else
 git checkout $OPENCV_TAG
 if (!(test-path build)) {mkdir build}
 cd build
+$CMAKE_BUILD_ARG="CMAKE_BUILD_TYPE=$BUILD_TYPE"
 $CMAKE_INST_PREFIX_ARG="CMAKE_INSTALL_PREFIX=$env:OPENCV_DIR"
-cmake "-D$CMAKE_INST_PREFIX_ARG" -G $GENERATOR_NAME ..
+cmake "-D$CMAKE_INST_PREFIX_ARG" "-D$CMAKE_BUILD_ARG" -DBUILD_SHARED_LIBS=OFF -DBUILD_WITH_STATIC_CRT=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_DOCS=OFF -G $GENERATOR_NAME ..
 check_exit_code($LASTEXITCODE)
 $SLN_NAME="OpenCV.sln"
 devenv $SLN_NAME /Build $BUILD_TYPE /Project INSTALL
@@ -142,7 +143,3 @@ check_exit_code($LASTEXITCODE)
 cd Debug
 cp $env:COINDIR/bin/Coin4d.dll .
 cp $env:COINDIR/bin/SoQt1d.dll .
-cp $env:OPENCV_DIR/x64/vc12/bin/opencv_videoio320d.dll .
-cp $env:OPENCV_DIR/x64/vc12/bin/opencv_imgcodecs320d.dll .
-cp $env:OPENCV_DIR/x64/vc12/bin/opencv_imgproc320d.dll .
-cp $env:OPENCV_DIR/x64/vc12/bin/opencv_core320d.dll .
