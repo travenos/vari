@@ -41,6 +41,7 @@ private:
     void waitForSaving();
 protected:
     static const char * const VIDEO_FORMAT_C;
+    static const int VIDEO_CODEC;
     static const QString VIDEO_FORMAT;
     static const QString BASE_VIDEO_FILE_NAME;
     static const QString BASE_SLIDES_DIR_NAME;

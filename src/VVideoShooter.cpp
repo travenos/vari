@@ -20,7 +20,8 @@
  * VVideoShooter implementation
  */
 
-const char * const VVideoShooter::VIDEO_FORMAT_C = "wmv";
+const char * const VVideoShooter::VIDEO_FORMAT_C = "avi";
+const int VVideoShooter::VIDEO_CODEC = CV_FOURCC('M', 'J', 'P', 'G');
 const QString VVideoShooter::VIDEO_FORMAT(VVideoShooter::VIDEO_FORMAT_C);
 const QString VVideoShooter::BASE_VIDEO_FILE_NAME = QStringLiteral("VARI_video%1.") + VVideoShooter::VIDEO_FORMAT;
 const QString VVideoShooter::BASE_SLIDES_DIR_NAME("_VARI_SLIDES_FOR_VIDEO_");
@@ -124,7 +125,7 @@ void VVideoShooter::saveVideoProcess()
             if (firstFrame.width() > 0 && firstFrame.height() > 0)
             {
                 cv::Size firstSize(firstFrame.width(),firstFrame.height());
-                cv::VideoWriter video(m_videoFileName.toLocal8Bit().data(), CV_FOURCC('W', 'M', 'V', '1'), m_frequency,
+                cv::VideoWriter video(m_videoFileName.toLocal8Bit().data(), VIDEO_CODEC, m_frequency,
                                       firstSize, true);
                 foreach(const QString &filename, images)
                 {
