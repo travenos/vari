@@ -1233,7 +1233,7 @@ void VWindowMain::m_on_cube_side_changed(float)
 void VWindowMain::m_on_slideshow_started()
 {
     ui->actionSlideshow->setChecked(true);
-    setWindowFlags(windowFlags() | ON_TOP_FLAGS);
+    setWindowFlags((windowFlags() & ~Qt::WindowStaysOnBottomHint) | ON_TOP_FLAGS);
     show();
 }
 
@@ -1242,7 +1242,7 @@ void VWindowMain::m_on_slideshow_stopped()
     ui->actionSlideshow->setChecked(false);
     if (!m_pVideoShooter->isWorking())
     {
-        setWindowFlags(windowFlags() ^ ON_TOP_FLAGS);
+        setWindowFlags((windowFlags() & ~ON_TOP_FLAGS) | Qt::WindowStaysOnBottomHint);
         show();
     }
 }
@@ -1261,7 +1261,7 @@ void VWindowMain::m_on_slideshow_period_changed()
 void VWindowMain::m_on_video_started()
 {
     ui->actionVideo->setChecked(true);
-    setWindowFlags(windowFlags() | ON_TOP_FLAGS);
+    setWindowFlags((windowFlags() & ~Qt::WindowStaysOnBottomHint) | ON_TOP_FLAGS);
     show();
 }
 
@@ -1270,7 +1270,7 @@ void VWindowMain::m_on_video_stopped()
     ui->actionVideo->setChecked(false);
     if (!m_pSlideshowShooter->isWorking())
     {
-        setWindowFlags(windowFlags() ^ ON_TOP_FLAGS);
+        setWindowFlags((windowFlags() & ~ON_TOP_FLAGS) | Qt::WindowStaysOnBottomHint);
         show();
     }
 }
