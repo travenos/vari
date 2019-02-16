@@ -7,6 +7,8 @@
 #include <QDebug>
 #endif
 
+#include <functional>
+
 #include <QDir>
 #include <QPixmap>
 
@@ -43,11 +45,14 @@ VVideoShooter::VVideoShooter(const QWidget * widget, const QString &dirName, int
 
 inline void VVideoShooter::constructorBody()
 {
+    m_isSaving.store(false);
     connect(this, SIGNAL(periodChanged()), this, SLOT(updateFrequency()));
 }
 
 VVideoShooter::~VVideoShooter()
 {
+    stop();
+    waitForSaving();
 }
 
 void VVideoShooter::setFrequency(int frequency)
@@ -86,6 +91,7 @@ const QString& VVideoShooter::getVideoFileName() const
 
 void VVideoShooter::start()
 {
+    waitForSaving();
     m_videoFileName.clear();
     VScreenShooter::start();
 }
@@ -95,49 +101,52 @@ void VVideoShooter::stop()
     if (isWorking())
     {
         VScreenShooter::stop();
-        bool result = saveVideo();
-        emit videoSavingFinished(result);
+        waitForSaving();
+        m_pSavingThread.reset(new std::thread(std::bind(&VVideoShooter::saveVideoProcess, this)));
     }
 }
 
-bool VVideoShooter::saveVideo()
+void VVideoShooter::saveVideoProcess()
 {
+    m_isSaving.store(true);
+    emit videoSavingStarted();
+    bool result = false;
     bool fileNameResult = createFileName();
-    if (!fileNameResult)
-        return false;
     QDir slideShowDir(getSlidesDirName());
     QStringList images = slideShowDir.entryList(QStringList() << (QStringLiteral("*.") + PICTURE_FORMAT),
                                                 QDir::Files, QDir::Time | QDir::Reversed);
-    if (images.size() < 1)
-        return false;
-    QString imagePath = (slideShowDir.absolutePath() + QDir::separator() + QDir::cleanPath(images.first()));
-    QPixmap firstFrame(imagePath, PICTURE_FORMAT_C);
-    try
+    if (images.size() >= 1 && fileNameResult)
     {
-        cv::Size firstSize(firstFrame.width(),firstFrame.height());
-        cv::VideoWriter video(m_videoFileName.toLocal8Bit().data(), CV_FOURCC('M','J','P','G'), m_frequency,
-                              firstSize, true);
-        foreach(const QString &filename, images)
+        QString imagePath = (slideShowDir.absolutePath() + QDir::separator() + QDir::cleanPath(images.first()));
+        QPixmap firstFrame(imagePath, PICTURE_FORMAT_C);
+        try
         {
-            imagePath = (slideShowDir.absolutePath() + QDir::separator() + QDir::cleanPath(filename));
-            cv::Mat frame = cv::imread(imagePath.toLocal8Bit().data());
-            if (frame.cols != firstSize.width || frame.rows != firstSize.height)
+            cv::Size firstSize(firstFrame.width(),firstFrame.height());
+            cv::VideoWriter video(m_videoFileName.toLocal8Bit().data(), CV_FOURCC('M','J','P','G'), m_frequency,
+                                  firstSize, true);
+            foreach(const QString &filename, images)
             {
-                cv::Mat oldFrame = frame;
-                cv::resize(oldFrame, frame, firstSize);
-                oldFrame.release();
+                imagePath = (slideShowDir.absolutePath() + QDir::separator() + QDir::cleanPath(filename));
+                cv::Mat frame = cv::imread(imagePath.toLocal8Bit().data());
+                if (frame.cols != firstSize.width || frame.rows != firstSize.height)
+                {
+                    cv::Mat oldFrame = frame;
+                    cv::resize(oldFrame, frame, firstSize);
+                }
+                video.write(frame);
             }
-            video.write(frame);
-            frame.release();
+            result = true;
+        }
+        catch (...)
+        {
+            result = false;
         }
     }
-    catch (...)
-    {
-        slideShowDir.removeRecursively();
-        return false;
-    }
+    else
+        result = false;
     slideShowDir.removeRecursively();
-    return true;
+    m_isSaving.store(false);
+    emit videoSavingFinished(result);
 }
 
 inline bool VVideoShooter::createFileName()
@@ -158,4 +167,18 @@ inline bool VVideoShooter::createFileName()
     }
     m_videoFileName = videoPath;
     return true;
+}
+
+void VVideoShooter::waitForSaving()
+{
+    if (m_pSavingThread && m_pSavingThread->joinable())
+    {
+        m_pSavingThread->join();
+        m_pSavingThread.reset();
+    }
+}
+
+bool VVideoShooter::isSaving() const
+{
+    return m_isSaving.load();
 }

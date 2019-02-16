@@ -225,6 +225,7 @@ private slots:
     void m_on_video_stopped();
     void m_on_video_directory_changed();
     void m_on_video_frequency_changed();
+    void m_on_video_saving_started();
     void m_on_video_saving_finished(bool result);
 
     void on_addLayerButton_clicked();

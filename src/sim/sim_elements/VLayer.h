@@ -24,10 +24,10 @@ public:
     VLayer(const VSimNode::map_ptr &nodes, const VSimTriangle::list_ptr &triangles,
            const VCloth::ptr &material, bool createVolume=true);
     virtual ~VLayer();
-    VLayer(const VLayer& ) = delete; //TODO implement theese methods
-    VLayer& operator= (const VLayer& ) = delete; //TODO implement theese methods
-    VLayer(VLayer&&) = delete; //TODO implement theese methods
-    VLayer& operator= (VLayer&& ) = delete;//TODO implement theese methods
+    VLayer(const VLayer& ) = delete;
+    VLayer& operator= (const VLayer& ) = delete;
+    VLayer(VLayer&&) = delete;
+    VLayer& operator= (VLayer&& ) = delete;
 
     void resetNodesVolume();
     bool isNodesVolumeValid() const;

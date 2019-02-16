@@ -65,7 +65,6 @@ const QString VWindowMain::VIDEO_DIR_DIALOG_TITLE("Путь сохранения
 const QString VWindowMain::SAVING_VIDEO_ERROR("Ошибка записи видео");
 const QString VWindowMain::SAVING_VIDEO_INFO("Видео сохранено в файл %1");
 const Qt::WindowFlags VWindowMain::ON_TOP_FLAGS = (Qt::WindowStaysOnBottomHint | Qt::WindowStaysOnTopHint | Qt::Dialog | Qt::WindowTitleHint);
-        //(Qt::CustomizeWindowHint | Qt::X11BypassWindowManagerHint | Qt::WindowStaysOnBottomHint | Qt::WindowStaysOnTopHint | Qt::Dialog | Qt::WindowTitleHint);
 
 VWindowMain::VWindowMain(QWidget *parent) :
     QMainWindow(parent),
@@ -162,6 +161,7 @@ void VWindowMain::connectSimulationSignals()
     connect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_video_stopped()));
     connect(m_pVideoShooter.get(), SIGNAL(directoryChanged()), this, SLOT(m_on_video_directory_changed()));
     connect(m_pVideoShooter.get(), SIGNAL(frequencyChanged()), this, SLOT(m_on_video_frequency_changed()));
+    connect(m_pVideoShooter.get(), SIGNAL(videoSavingStarted()), this, SLOT(m_on_video_saving_started()));
     connect(m_pVideoShooter.get(), SIGNAL(videoSavingFinished(bool)), this, SLOT(m_on_video_saving_finished(bool)));
 }
 
@@ -186,6 +186,8 @@ VWindowMain::~VWindowMain()
     disconnect(m_pSlideshowShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_slideshow_stopped()));
     disconnect(m_pVideoShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_video_started()));
     disconnect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_video_stopped()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(videoSavingStarted()), this, SLOT(m_on_video_saving_started()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(videoSavingFinished(bool)), this, SLOT(m_on_video_saving_finished(bool)));
     stopVideo();
     stopSlideshow();
     saveSootersSettings();
@@ -1043,8 +1045,14 @@ void VWindowMain::m_on_layers_cleared()
     showModelInfo();
 }
 
+void VWindowMain::m_on_video_saving_started()
+{
+    ui->actionVideo->setEnabled(false);
+}
+
 void VWindowMain::m_on_video_saving_finished(bool result)
 {
+    ui->actionVideo->setEnabled(true);
     if (result)
         QMessageBox::information(this, INFO_TITLE, SAVING_VIDEO_INFO.arg(m_pVideoShooter->getVideoFileName()));
     else
@@ -1232,8 +1240,11 @@ void VWindowMain::m_on_slideshow_started()
 void VWindowMain::m_on_slideshow_stopped()
 {
     ui->actionSlideshow->setChecked(false);
-    setWindowFlags(windowFlags() ^ ON_TOP_FLAGS);
-    show();
+    if (!m_pVideoShooter->isWorking())
+    {
+        setWindowFlags(windowFlags() ^ ON_TOP_FLAGS);
+        show();
+    }
 }
 
 void VWindowMain::m_on_slideshow_directory_changed()
@@ -1257,8 +1268,11 @@ void VWindowMain::m_on_video_started()
 void VWindowMain::m_on_video_stopped()
 {
     ui->actionVideo->setChecked(false);
-    setWindowFlags(windowFlags() ^ ON_TOP_FLAGS);
-    show();
+    if (!m_pSlideshowShooter->isWorking())
+    {
+        setWindowFlags(windowFlags() ^ ON_TOP_FLAGS);
+        show();
+    }
 }
 
 void VWindowMain::m_on_video_directory_changed()

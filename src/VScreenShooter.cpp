@@ -3,6 +3,10 @@
  * @author Alexey Barashkov
  */
 
+#ifdef DEBUG_MODE
+#include <QDebug>
+#endif
+
 #include <functional>
 #include <algorithm>
 
@@ -14,7 +18,6 @@
 
 #if defined(Q_WS_WIN) || defined (WIN32) || defined(__WIN32__)
 #include <windows.h>
-#include <QtWin>
 #define SLEEP(period) Sleep(period)
 #elif defined(linux) || defined(__linux__) || defined(Q_WS_MAC)
 #include <unistd.h>
@@ -24,6 +27,7 @@
 #endif
 
 #if defined(Q_WS_WIN) || defined (WIN32) || defined(__WIN32__)
+#include <QtWin>
 inline void getWinAPIscreen(int wx1, int wy1, int wx2, int wy2, QPixmap &pixmap)
 {
     POINT a, b;
