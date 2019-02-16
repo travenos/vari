@@ -20,7 +20,7 @@
  * VVideoShooter implementation
  */
 
-const char * const VVideoShooter::VIDEO_FORMAT_C = "avi";
+const char * const VVideoShooter::VIDEO_FORMAT_C = "wmv";
 const QString VVideoShooter::VIDEO_FORMAT(VVideoShooter::VIDEO_FORMAT_C);
 const QString VVideoShooter::BASE_VIDEO_FILE_NAME = QStringLiteral("VARI_video%1.") + VVideoShooter::VIDEO_FORMAT;
 const QString VVideoShooter::BASE_SLIDES_DIR_NAME("_VARI_SLIDES_FOR_VIDEO_");
@@ -121,21 +121,26 @@ void VVideoShooter::saveVideoProcess()
         QPixmap firstFrame(imagePath, PICTURE_FORMAT_C);
         try
         {
-            cv::Size firstSize(firstFrame.width(),firstFrame.height());
-            cv::VideoWriter video(m_videoFileName.toLocal8Bit().data(), CV_FOURCC('I', 'Y', 'U', 'V'), m_frequency,
-                                  firstSize, true);
-            foreach(const QString &filename, images)
+            if (firstFrame.width() > 0 && firstFrame.height() > 0)
             {
-                imagePath = (slideShowDir.absolutePath() + QDir::separator() + QDir::cleanPath(filename));
-                cv::Mat frame = cv::imread(imagePath.toLocal8Bit().data());
-                if (frame.cols != firstSize.width || frame.rows != firstSize.height)
+                cv::Size firstSize(firstFrame.width(),firstFrame.height());
+                cv::VideoWriter video(m_videoFileName.toLocal8Bit().data(), CV_FOURCC('W', 'M', 'V', '1'), m_frequency,
+                                      firstSize, true);
+                foreach(const QString &filename, images)
                 {
-                    cv::Mat oldFrame = frame;
-                    cv::resize(oldFrame, frame, firstSize);
+                    imagePath = (slideShowDir.absolutePath() + QDir::separator() + QDir::cleanPath(filename));
+                    cv::Mat frame = cv::imread(imagePath.toLocal8Bit().data());
+                    if (frame.cols != firstSize.width || frame.rows != firstSize.height)
+                    {
+                        cv::Mat oldFrame = frame;
+                        cv::resize(oldFrame, frame, firstSize);
+                    }
+                    video.write(frame);
                 }
-                video.write(frame);
+                result = true;
             }
-            result = true;
+            else
+                result = false;
         }
         catch (...)
         {
