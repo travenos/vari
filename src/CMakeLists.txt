@@ -242,6 +242,7 @@ endif()
 
 #CONFIGURATING MAC INSTALLER
 if(APPLE)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/Applications")
     set(MACOSX_BUNDLE_INFO_STRING          "com.wicron.vari")
     set(MACOSX_BUNDLE_ICON_FILE            "vari.icns")
     set(MACOSX_BUNDLE_GUI_IDENTIFIER       "com.wicron.vari")

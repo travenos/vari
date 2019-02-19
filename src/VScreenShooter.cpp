@@ -265,7 +265,7 @@ bool VScreenShooter::takePicture(const QString &fileName) const
 #if defined(Q_WS_WIN) || defined (WIN32) || defined(__WIN32__)
     getWinAPIscreen(wx1, wy1, wx2, wy2, originalPixmap);
 #else
-    originalPixmap = screen->grabWindow(m_pWidget->winId());
+    originalPixmap = screen->grabWindow(0, wx1, wy1, wx2-wx1, wy2-wy1);
 #endif
     bool ok = originalPixmap.save(fileName, PICTURE_FORMAT_C);
     return ok;

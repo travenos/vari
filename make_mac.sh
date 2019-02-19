@@ -94,7 +94,7 @@ mkdir -p "$BUILD_DIR" || exit
 cd "$BUILD_DIR" || exit
 
 export SQL_DIR="$BUILD_DIR/sql"
-for filename in "${SQL_CREATE_DIR}/*"
+for filename in "${SQL_SOURCE_DIR}/*"
 do
 	iconv -f CP1251 -t UTF-8 "$SQL_SOURCE_DIR/$filename" > "$SQL_DIR/$filename"
 done
