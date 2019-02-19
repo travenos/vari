@@ -85,6 +85,8 @@ fi
 mkdir -p "$WORK_DIR" || exit
 cd "$WORK_DIR" || exit
 
+FAKEROOT=$(which fakeroot)
+
 # Building Gmsh
 GMSH_REPO_PATH=gmsh
 if [ ! -d "$GMSH_REPO_PATH" ]; then
@@ -101,6 +103,6 @@ mkdir -p my_build
 cd my_build || exit
 cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_BUILD_LIB=ON -DENABLE_BLAS_LAPACK=OFF -DENABLE_GMP=OFF -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} .. || exit
 make -j $THREADS_NUMBER || exit
-fakeroot make install -j $THREADS_NUMBER || exit
+$FAKEROOT make install -j $THREADS_NUMBER || exit
 
 echo "Successfully built Gmsh"

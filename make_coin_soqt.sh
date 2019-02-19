@@ -84,6 +84,8 @@ then
     INSTALL_DIR="$WORKSPACE/$INSTALL_DIR_NAME"
 fi
 
+FAKEROOT=$(which fakeroot)
+
 mkdir -p "$WORK_DIR" || exit
 cd "$WORK_DIR" || exit
 
@@ -104,7 +106,7 @@ mkdir -p my_build
 cd my_build || exit
 cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} .. || exit
 make -j $THREADS_NUMBER || exit
-fakeroot make install -j $THREADS_NUMBER || exit
+$FAKEROOT make install -j $THREADS_NUMBER || exit
 
 # Building SoQt
 cd "$WORK_DIR" || exit
@@ -127,6 +129,6 @@ mkdir -p my_build
 cd my_build || exit
 cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} .. || exit
 make -j $THREADS_NUMBER || exit
-fakeroot make install -j $THREADS_NUMBER || exit
+$FAKEROOT make install -j $THREADS_NUMBER || exit
 
 echo "Successfully built Coin3D and SoQt"
