@@ -129,12 +129,12 @@ INSTALL_DIR="$WORKSPACE/$PREFIX"
 rm -rf "$INSTALL_DIR" || exit
 
 # Build Gmsh
-mkdir -p gmsh
+mkdir -p gmsh/installed
 export GMSH_DIR=$(readlink -f gmsh/installed)
 ./make_gmsh.sh -w gmsh -i "$GMSH_DIR" -j $THREADS_NUMBER || exit
 
 # Build Coin3D
-mkdir -p coin3d
+mkdir -p coin3d/installed
 export COINDIR=$(readlink -f coin3d/installed)
 ./make_coin_soqt.sh -w coin3d -i "$COINDIR" -j $THREADS_NUMBER || exit
 

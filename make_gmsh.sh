@@ -24,7 +24,13 @@ $INSTALL_DIR_ARG INSTALLATION_DIRECTORY
 INSTALL_DIRECTORY- specify directory, where binary files will be installed
 $HELP_ARG - print help text"
 
-SCRIPT=$(readlink -f "${BASH_SOURCE[0]}")
+
+READLINK=$(which greadlink)
+if [[ -z "$READLINK" ]]
+	READLINK=$(which readlink)
+fi
+
+SCRIPT=$(${READLINK} -f "${BASH_SOURCE[0]}")
 WORKSPACE=$(dirname "$SCRIPT")
 
 THREADS_NUMBER=1
@@ -46,20 +52,24 @@ do
     elif [[ ${!i} == "$WORK_DIR_ARG" ]]
     then
         ((i++))
-        WORK_DIR=$(readlink -f "${!i}")
-        if [[ -z "$WORK_DIR" ]]
+	if [[ -z "$WORK_DIR" ]]
         then
-                >&2 echo "Error. Working directory name not specified after ${WORK_DIR_ARG} key"
+                >&2 echo "Error. Build directory name not entered after ${WORK_DIR_ARG} key"
                 exit 2
+	else
+		mkdir -p "${!i}"
+        	WORK_DIR=$(${READLINK} -f "${!i}")
         fi
     elif [[ ${!i} == "$INSTALL_DIR_ARG" ]]
     then
         ((i++))
-        INSTALL_DIR=$(readlink -f "${!i}")
-        if [[ -z "$INSTALL_DIR" ]]
+	if [[ -z "$INSTALL_DIR" ]]
         then
-                >&2 echo "Error. Install directory name not entered after ${INSTALL_DIR_ARG} key"
+                >&2 echo "Error. Build directory name not entered after ${INSTALL_DIR_ARG} key"
                 exit 2
+	else
+		mkdir -p "${!i}"
+        	INSTALL_DIR=$(${READLINK} -f "${!i}")
         fi
     elif [[ ${!i} == "$HELP_ARG" ]]
     then

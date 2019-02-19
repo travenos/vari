@@ -21,7 +21,7 @@ $BUILD_DIR_ARG BUILD_DIRECTORY
 BUILD_DIRECTORY- specify directory, where binary files are being built
 $HELP_ARG - print help text"
 
-SCRIPT=$(readlink -f "${BASH_SOURCE[0]}")
+SCRIPT=$(greadlink -f "${BASH_SOURCE[0]}")
 WORKSPACE=$(dirname "$SCRIPT")
 
 THREADS_NUMBER=1
@@ -42,11 +42,13 @@ do
     elif [[ ${!i} == "$BUILD_DIR_ARG" ]]
     then
         ((i++))
-        BUILD_DIR=$(readlink -f "${!i}")
-        if [[ -z "$BUILD_DIR" ]]
+	if [[ -z "$BUILD_DIR" ]]
         then
                 >&2 echo "Error. Build directory name not entered after ${BUILD_DIR_ARG} key"
                 exit 2
+	else
+		mkdir -p "${!i}"
+        	BUILD_DIR=$(greadlink -f "${!i}")
         fi
     elif [[ ${!i} == "$HELP_ARG" ]]
     then
@@ -65,13 +67,13 @@ then
 fi
 
 # Build Gmsh
-mkdir -p gmsh
-export GMSH_DIR=$(readlink -f gmsh/installed)
+mkdir -p gmsh/installed
+export GMSH_DIR=$(greadlink -f gmsh/installed)
 ./make_gmsh.sh -w gmsh -i "$GMSH_DIR" -j $THREADS_NUMBER || exit
 
 # Build Coin3D
-mkdir -p coin3d
-export COINDIR=$(readlink -f coin3d/installed)
+mkdir -p coin3d/installed
+export COINDIR=$(greadlink -f coin3d/installed)
 ./make_coin_soqt.sh -w coin3d -i "$COINDIR" -j $THREADS_NUMBER || exit
 
 # Add built libraries to default paths
