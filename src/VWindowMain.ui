@@ -962,7 +962,7 @@
                   <item>
                    <widget class="QLabel" name="videoDirNameLabel">
                     <property name="text">
-                     <string>Имя видeофайла:</string>
+                     <string>Имя видeо:</string>
                     </property>
                    </widget>
                   </item>

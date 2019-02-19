@@ -89,7 +89,10 @@ void VVideoShooter::setDirPath(const QString &dirPath)
 
 void VVideoShooter::setSuffixFileName(const QString &name)
 {
-    m_suffixFileName = name;
+    if (!name.isEmpty())
+        m_suffixFileName = name;
+    else
+        m_suffixFileName = DEFAULT_SUFFIX_FILE_NAME;
     emit suffixFileNameChanged();
 }
 

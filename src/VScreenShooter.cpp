@@ -171,7 +171,10 @@ void VScreenShooter::setPeriod(float period)
 
 void VScreenShooter::setSuffixDirName(const QString &name)
 {
-    m_suffixDirName = name;
+    if (!name.isEmpty())
+        m_suffixDirName = name;
+    else
+        m_suffixDirName = DEFAULT_SUFFIX_DIR_NAME;
     emit suffixDirNameChanged();
 }
 
