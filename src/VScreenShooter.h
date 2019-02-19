@@ -20,7 +20,7 @@ class VScreenShooter : public QObject
     Q_OBJECT
 public:
     VScreenShooter();
-    VScreenShooter(const QWidget * widget, const QString &dirName, float period);
+    VScreenShooter(const QWidget * widget, const QString &dirPath, float period);
     virtual ~VScreenShooter();
     VScreenShooter(const VScreenShooter& ) = delete;
     VScreenShooter& operator= (const VScreenShooter& ) = delete;
@@ -34,12 +34,14 @@ public:
     inline bool createWorkDir();
 
     void setWidget(const QWidget * widget);
-    virtual void setDirName(const QString &dirName);
+    virtual void setDirPath(const QString &dirPath);
     void setPeriod(float period);
+    void setSuffixDirName(const QString &name);
     const QWidget * getWidget() const;
-    virtual const QString& getDirName() const;
-    const QString& getSlidesDirName() const;
+    virtual const QString& getDirPath() const;
+    const QString& getSlidesDirPath() const;
     float getPeriod() const;
+    const QString& getSuffixDirName() const;
 private:
     typedef std::chrono::duration<double, std::ratio<1> > second_t;
     typedef std::chrono::duration<int, std::ratio<1, 1000> > ms_int_t;
@@ -47,8 +49,9 @@ private:
     typedef std::chrono::time_point<clock_t> time_point_t;
 
     const QWidget * m_pWidget;
-    QString m_baseDirName;
-    QString m_workDirName;
+    QString m_baseDirPath;
+    QString m_suffixDirName;
+    QString m_workDirPath;
     float m_period;
     std::atomic<int> m_msPeriod;
     std::atomic<bool> m_isWorking;
@@ -68,7 +71,7 @@ protected:
     static const char * const PICTURE_FORMAT_C;
     static const QString PICTURE_FORMAT;
     static const QString BASE_NAME;
-    static const QString SLIDES_SUFFIX_DIR_NAME;
+    static const QString DEFAULT_SUFFIX_DIR_NAME;
     static const int FILENAME_TIME_PRECISION;
 signals:
     void processStarted();
@@ -77,6 +80,7 @@ signals:
     void widgetChanged();
     void directoryChanged();
     void periodChanged();
+    void suffixDirNameChanged();
 };
 
 #endif //_VSCHREENSHOOTER_H

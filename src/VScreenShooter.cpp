@@ -60,20 +60,20 @@ inline void getWinAPIscreen(int wx1, int wy1, int wx2, int wy2, QPixmap &pixmap)
 const char * const VScreenShooter::PICTURE_FORMAT_C = "png";
 const QString VScreenShooter::PICTURE_FORMAT(VScreenShooter::PICTURE_FORMAT_C);
 const QString VScreenShooter::BASE_NAME = QStringLiteral("slide_%1.") + VScreenShooter::PICTURE_FORMAT;
-const QString VScreenShooter::SLIDES_SUFFIX_DIR_NAME("VARI_slideshow");
-const int VScreenShooter::FILENAME_TIME_PRECISION = 4;
+const QString VScreenShooter::DEFAULT_SUFFIX_DIR_NAME("VARI_slideshow");
+const int VScreenShooter::FILENAME_TIME_PRECISION = 3;
 
 VScreenShooter::VScreenShooter():
     m_pWidget(nullptr),
-    m_baseDirName(QDir::homePath()),
+    m_baseDirPath(QDir::homePath()),
     m_period(1.0f)
 {
     constructorBody();
 }
 
-VScreenShooter::VScreenShooter(const QWidget * widget, const QString &dirName, float period):
+VScreenShooter::VScreenShooter(const QWidget * widget, const QString &dirPath, float period):
     m_pWidget(widget),
-    m_baseDirName(dirName),
+    m_baseDirPath(dirPath),
     m_period(period)
 {
     constructorBody();
@@ -81,8 +81,9 @@ VScreenShooter::VScreenShooter(const QWidget * widget, const QString &dirName, f
 
 inline void VScreenShooter::constructorBody()
 {
+    setSuffixDirName(DEFAULT_SUFFIX_DIR_NAME);
     setPeriod(m_period);
-    setDirName(m_baseDirName);
+    setDirPath(m_baseDirPath);
     m_isWorking.store(false);
     connect(this, SIGNAL(shouldBeStopped()), this, SLOT(stop()));
 }
@@ -109,6 +110,8 @@ void VScreenShooter::start()
             m_takePictureThread.reset(new std::thread(std::bind(&VScreenShooter::pictureCycle, this)));
             emit processStarted();
         }
+        else
+            emit processStopped();
     }
 }
 
@@ -146,10 +149,10 @@ void VScreenShooter::setWidget(const QWidget * widget)
     emit widgetChanged();
 }
 
-void VScreenShooter::setDirName(const QString &dirName)
+void VScreenShooter::setDirPath(const QString &dirPath)
 {
     std::lock_guard<std::mutex> locker(m_processLock);
-    m_baseDirName = dirName;
+    m_baseDirPath = dirPath;
     emit directoryChanged();
 }
 
@@ -166,19 +169,25 @@ void VScreenShooter::setPeriod(float period)
     emit periodChanged();
 }
 
+void VScreenShooter::setSuffixDirName(const QString &name)
+{
+    m_suffixDirName = name;
+    emit suffixDirNameChanged();
+}
+
 const QWidget * VScreenShooter::getWidget() const
 {
     return m_pWidget;
 }
 
-const QString& VScreenShooter::getDirName() const
+const QString& VScreenShooter::getDirPath() const
 {
-    return m_baseDirName;
+    return m_baseDirPath;
 }
 
-const QString& VScreenShooter::getSlidesDirName() const
+const QString& VScreenShooter::getSlidesDirPath() const
 {
-    return m_workDirName;
+    return m_workDirPath;
 }
 
 float VScreenShooter::getPeriod() const
@@ -186,16 +195,22 @@ float VScreenShooter::getPeriod() const
     return m_period;
 }
 
+const QString& VScreenShooter::getSuffixDirName() const
+{
+    return m_suffixDirName;
+}
+
 void VScreenShooter::pictureCycle()
 {
     std::shared_ptr< std::atomic<bool> > stopFlag = m_pStopFlag;
+    int OFFSET = 1;
     auto scrStart = clock_t::now();
     takePictureWrapper(stopFlag);
     int lastProcessDuration = std::chrono::duration_cast<ms_int_t>(clock_t::now() - scrStart).count();
     int period;
     while(!stopFlag->load())
     {
-        period = m_msPeriod - lastProcessDuration;
+        period = m_msPeriod - lastProcessDuration - OFFSET;
         period = std::max(period, 0);
         SLEEP(period);
         scrStart = clock_t::now();
@@ -207,19 +222,22 @@ void VScreenShooter::pictureCycle()
 inline void VScreenShooter::takePictureWrapper(const std::shared_ptr< std::atomic<bool> > & stopFlag)
 {
     bool result = true;
-    {
-        std::lock_guard<std::mutex> locker(m_processLock);
+    {        
         if(!stopFlag->load())
         {
-            if (areParametersCorrect())
+            std::lock_guard<std::mutex> locker(m_processLock);
+            if (!stopFlag->load())
             {
-                double seconds = std::chrono::duration_cast<second_t>(clock_t::now() - m_startTime).count();
-                QString secondsStr = QString::number(seconds, 'f', FILENAME_TIME_PRECISION);
-                QString fileName = QDir::cleanPath(m_workDirName + QDir::separator() + BASE_NAME.arg(secondsStr));
-                result = takePicture(fileName);
+                if (areParametersCorrect())
+                {
+                    double seconds = std::chrono::duration_cast<second_t>(clock_t::now() - m_startTime).count();
+                    QString secondsStr = QString::number(seconds, 'f', FILENAME_TIME_PRECISION);
+                    QString fileName = QDir::cleanPath(m_workDirPath + QDir::separator() + BASE_NAME.arg(secondsStr));
+                    result = takePicture(fileName);
+                }
+                else
+                    result = false;
             }
-            else
-                result = false;
         }
     }
     if (!result)
@@ -253,16 +271,16 @@ bool VScreenShooter::takePicture(const QString &fileName) const
 inline bool VScreenShooter::areParametersCorrect() const
 {
     bool widgetNotNull = (m_pWidget != nullptr);
-    bool dirExists = (!m_workDirName.isEmpty() && QDir(m_workDirName).exists());
+    bool dirExists = (!m_workDirPath.isEmpty() && QDir(m_workDirPath).exists());
     bool periodOk = (m_msPeriod > 0);
     return (widgetNotNull && dirExists && periodOk);
 }
 
 inline bool VScreenShooter::createWorkDir()
 {
-    if (m_baseDirName.isEmpty())
+    if (m_baseDirPath.isEmpty() || m_suffixDirName.isEmpty())
         return false;
-    QString originalPath = QDir::cleanPath(m_baseDirName + QDir::separator() + SLIDES_SUFFIX_DIR_NAME);
+    QString originalPath = QDir::cleanPath(m_baseDirPath + QDir::separator() + m_suffixDirName);
     QString slideshowPath = originalPath;
     QDir slideshowDir(slideshowPath);
     int counter = 0;
@@ -273,6 +291,6 @@ inline bool VScreenShooter::createWorkDir()
         slideshowDir.setPath(slideshowPath);
     }
     bool result = slideshowDir.mkpath(slideshowPath);
-    m_workDirName = slideshowPath;
+    m_workDirPath = slideshowPath;
     return result;
 }

@@ -20,6 +20,9 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
+      <property name="childrenCollapsible">
+       <bool>false</bool>
+      </property>
       <widget class="QWidget" name="leftWidget" native="true">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <property name="spacing">
@@ -735,7 +738,7 @@
              <item>
               <widget class="QGroupBox" name="slideshowBox">
                <property name="title">
-                <string>Параметры слайдшоу</string>
+                <string>Параметры серий кадров</string>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_14">
                 <property name="spacing">
@@ -756,7 +759,7 @@
                 <item>
                  <widget class="QLabel" name="slideshowCaption">
                   <property name="text">
-                   <string>Папка для сохранения слайдшоу</string>
+                   <string>Папка, в которой сохраняются серии кадров:</string>
                   </property>
                  </widget>
                 </item>
@@ -786,6 +789,47 @@
                    <widget class="QPushButton" name="chooseSlideshowDirButton">
                     <property name="text">
                      <string>Выбрать папку</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_7">
+                  <item>
+                   <widget class="QLabel" name="slideshowDirNameLabel">
+                    <property name="text">
+                     <string>Имя серии кадров:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_8">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="slideshowDirNameEdit"/>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="resetSlideshowDirNameButton">
+                    <property name="text">
+                     <string>Отменить</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="saveSlideshowDirNameButton">
+                    <property name="text">
+                     <string>Сохранить</string>
                     </property>
                    </widget>
                   </item>
@@ -878,7 +922,7 @@
                 <item>
                  <widget class="QLabel" name="videoCaption">
                   <property name="text">
-                   <string>Папка для сохранения видео</string>
+                   <string>Папка, в которой сохраняются видеофайлы:</string>
                   </property>
                  </widget>
                 </item>
@@ -908,6 +952,47 @@
                    <widget class="QPushButton" name="chooseVideoDirButton">
                     <property name="text">
                      <string>Выбрать папку</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_8">
+                  <item>
+                   <widget class="QLabel" name="videoDirNameLabel">
+                    <property name="text">
+                     <string>Имя видeофайла:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_9">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="videoFileNameEdit"/>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="resetVideoFileNameButton">
+                    <property name="text">
+                     <string>Отменить</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="saveVideoFileNameButton">
+                    <property name="text">
+                     <string>Сохранить</string>
                     </property>
                    </widget>
                   </item>
@@ -1214,10 +1299,16 @@
   <tabstop>scrollArea</tabstop>
   <tabstop>cubeSideSlider</tabstop>
   <tabstop>chooseSlideshowDirButton</tabstop>
+  <tabstop>slideshowDirNameEdit</tabstop>
+  <tabstop>resetSlideshowDirNameButton</tabstop>
+  <tabstop>saveSlideshowDirNameButton</tabstop>
   <tabstop>slideshowPeriodSpinBox</tabstop>
   <tabstop>resetSlideshowPeriodButton</tabstop>
   <tabstop>saveSlideshowPeriodButton</tabstop>
   <tabstop>chooseVideoDirButton</tabstop>
+  <tabstop>videoFileNameEdit</tabstop>
+  <tabstop>resetVideoFileNameButton</tabstop>
+  <tabstop>saveVideoFileNameButton</tabstop>
   <tabstop>videoFrequencySpinBox</tabstop>
   <tabstop>resetVideoFrequencyButton</tabstop>
   <tabstop>saveVideoFrequencyButton</tabstop>
@@ -1229,5 +1320,118 @@
  <resources>
   <include location="resources/resources.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>temperatureEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>saveTemperatureButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1189</x>
+     <y>554</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1542</x>
+     <y>554</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>injectionPressureEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>saveInjectionPressureButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>968</x>
+     <y>672</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1514</x>
+     <y>672</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>injectionDiameterEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>injectionPlaceButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>968</x>
+     <y>701</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1514</x>
+     <y>701</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>vacuumPressureEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>saveVacuumPressureButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>968</x>
+     <y>793</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1514</x>
+     <y>793</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>vacuumDiameterEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>vacuumPlaceButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>968</x>
+     <y>822</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1514</x>
+     <y>822</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>slideshowDirNameEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>saveSlideshowDirNameButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1205</x>
+     <y>251</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1562</x>
+     <y>251</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>videoFileNameEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>saveVideoFileNameButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1203</x>
+     <y>400</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1562</x>
+     <y>400</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

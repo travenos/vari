@@ -221,10 +221,12 @@ private slots:
     void m_on_slideshow_stopped();
     void m_on_slideshow_directory_changed();
     void m_on_slideshow_period_changed();
+    void m_on_slideshow_suffix_dirname_changed();
     void m_on_video_started();
     void m_on_video_stopped();
     void m_on_video_directory_changed();
     void m_on_video_frequency_changed();
+    void m_on_video_suffix_filename_changed();
     void m_on_video_saving_started();
     void m_on_video_saving_finished(bool result);
 
@@ -276,6 +278,12 @@ private slots:
     void on_resetVideoFrequencyButton_clicked();
     void on_saveVideoFrequencyButton_clicked();
     void on_videoFrequencySpinBox_valueChanged(int);
+    void on_slideshowDirNameEdit_textEdited(const QString &arg1);
+    void on_resetSlideshowDirNameButton_clicked();
+    void on_saveSlideshowDirNameButton_clicked();
+    void on_videoFileNameEdit_textEdited(const QString &arg1);
+    void on_resetVideoFileNameButton_clicked();
+    void on_saveVideoFileNameButton_clicked();
 };
 
 #endif // _VWINDOWMAIN_H

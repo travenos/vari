@@ -23,7 +23,8 @@
 const char * const VVideoShooter::VIDEO_FORMAT_C = "avi";
 const int VVideoShooter::VIDEO_CODEC = CV_FOURCC('M', 'J', 'P', 'G');
 const QString VVideoShooter::VIDEO_FORMAT(VVideoShooter::VIDEO_FORMAT_C);
-const QString VVideoShooter::BASE_VIDEO_FILE_NAME = QStringLiteral("VARI_video%1.") + VVideoShooter::VIDEO_FORMAT;
+const QString VVideoShooter::DEFAULT_SUFFIX_FILE_NAME("VARI_video");
+const QString VVideoShooter::BASE_VIDEO_FILE_NAME = QStringLiteral("%1%2.") + VVideoShooter::VIDEO_FORMAT;
 const QString VVideoShooter::BASE_SLIDES_DIR_NAME("_VARI_SLIDES_FOR_VIDEO_");
 const QString VVideoShooter::SLIDES_DIR_PATH = QDir::cleanPath(QDir::tempPath() + QDir::separator() + VVideoShooter::BASE_SLIDES_DIR_NAME);
 
@@ -31,14 +32,14 @@ VVideoShooter::VVideoShooter():
     VScreenShooter(),
     m_videoDirectory(QDir::homePath())
 {
-    VScreenShooter::setDirName(SLIDES_DIR_PATH);
+    VScreenShooter::setDirPath(SLIDES_DIR_PATH);
     updateFrequency();
     constructorBody();
 }
 
-VVideoShooter::VVideoShooter(const QWidget * widget, const QString &dirName, int frequency):
+VVideoShooter::VVideoShooter(const QWidget * widget, const QString &dirPath, int frequency):
     VScreenShooter(widget, SLIDES_DIR_PATH, 1.0f/frequency),
-    m_videoDirectory(dirName),
+    m_videoDirectory(dirPath),
     m_frequency(frequency)
 {
     constructorBody();
@@ -47,6 +48,7 @@ VVideoShooter::VVideoShooter(const QWidget * widget, const QString &dirName, int
 inline void VVideoShooter::constructorBody()
 {
     m_isSaving.store(false);
+    setSuffixFileName(DEFAULT_SUFFIX_FILE_NAME);
     connect(this, SIGNAL(periodChanged()), this, SLOT(updateFrequency()));
 }
 
@@ -74,27 +76,41 @@ int VVideoShooter::getFrequency() const
     return m_frequency;
 }
 
-const QString& VVideoShooter::getDirName() const
+const QString& VVideoShooter::getDirPath() const
 {
     return m_videoDirectory;
 }
 
-void VVideoShooter::setDirName(const QString &dirName)
+void VVideoShooter::setDirPath(const QString &dirPath)
 {
-    m_videoDirectory = dirName;
+    m_videoDirectory = dirPath;
     emit directoryChanged();
 }
 
-const QString& VVideoShooter::getVideoFileName() const
+void VVideoShooter::setSuffixFileName(const QString &name)
 {
-    return m_videoFileName;
+    m_suffixFileName = name;
+    emit suffixFileNameChanged();
+}
+
+const QString& VVideoShooter::getSuffixFileName() const
+{
+    return m_suffixFileName;
+}
+
+const QString& VVideoShooter::getVideoFilePath() const
+{
+    return m_videoFilePath;
 }
 
 void VVideoShooter::start()
 {
     waitForSaving();
-    m_videoFileName.clear();
-    VScreenShooter::start();
+    m_videoFilePath.clear();
+    if (!m_suffixFileName.isEmpty())
+        VScreenShooter::start();
+    else
+        emit processStopped();
 }
 
 void VVideoShooter::stop()
@@ -112,11 +128,11 @@ void VVideoShooter::saveVideoProcess()
     m_isSaving.store(true);
     emit videoSavingStarted();
     bool result = false;
-    bool fileNameResult = createFileName();
-    QDir slideShowDir(getSlidesDirName());
+    bool filePathResult = createFilePath();
+    QDir slideShowDir(getSlidesDirPath());
     QStringList images = slideShowDir.entryList(QStringList() << (QStringLiteral("*.") + PICTURE_FORMAT),
                                                 QDir::Files, QDir::Time | QDir::Reversed);
-    if (images.size() >= 1 && fileNameResult)
+    if (images.size() >= 1 && filePathResult)
     {
         QString imagePath = (slideShowDir.absolutePath() + QDir::separator() + QDir::cleanPath(images.first()));
         QPixmap firstFrame(imagePath, PICTURE_FORMAT_C);
@@ -125,7 +141,7 @@ void VVideoShooter::saveVideoProcess()
             if (firstFrame.width() > 0 && firstFrame.height() > 0)
             {
                 cv::Size firstSize(firstFrame.width(),firstFrame.height());
-                cv::VideoWriter video(m_videoFileName.toLocal8Bit().data(), VIDEO_CODEC, m_frequency,
+                cv::VideoWriter video(m_videoFilePath.toLocal8Bit().data(), VIDEO_CODEC, m_frequency,
                                       firstSize, true);
                 foreach(const QString &filename, images)
                 {
@@ -155,14 +171,15 @@ void VVideoShooter::saveVideoProcess()
     emit videoSavingFinished(result);
 }
 
-inline bool VVideoShooter::createFileName()
+inline bool VVideoShooter::createFilePath()
 {
-    if (m_videoDirectory.isEmpty() || !QDir(m_videoDirectory).exists())
+    if (m_videoDirectory.isEmpty() || !QDir(m_videoDirectory).exists() || m_suffixFileName.isEmpty())
     {
-        m_videoFileName = QStringLiteral("");
+        m_videoFilePath = QStringLiteral("");
         return false;
     }
-    QString originalPath = QDir::cleanPath(m_videoDirectory + QDir::separator() + BASE_VIDEO_FILE_NAME);
+    QString originalPath = QDir::cleanPath(m_videoDirectory + QDir::separator()
+                                           + BASE_VIDEO_FILE_NAME.arg(m_suffixFileName));
     QString videoPath = originalPath.arg(QStringLiteral(""));
     QFile videoFile(videoPath);
     int counter = 0;
@@ -171,7 +188,7 @@ inline bool VVideoShooter::createFileName()
         videoPath = originalPath.arg(++counter);
         videoFile.setFileName(videoPath);
     }
-    m_videoFileName = videoPath;
+    m_videoFilePath = videoPath;
     return true;
 }
 
