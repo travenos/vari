@@ -278,10 +278,10 @@ if(APPLE)
     install(FILES ${QT_PLUGINS_SOURCE_DIR}/sqldrivers/libqsqlpsql.dylib  DESTINATION ${QT_PLUGIN_DESTINAT_DIR}/sqldrivers)
     install(FILES ${QT_PLUGINS_SOURCE_DIR}/printsupport/libcocoaprintersupport.dylib DESTINATION ${QT_PLUGIN_DESTINAT_DIR}/printsupport)
 
-    #INSTALL(CODE "
-    #    FILE(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QT_RESOURCE_DEST_DIR}/qt.conf\" \"\")
-    #    " COMPONENT Runtime
-    #)
+    INSTALL(CODE "
+        FILE(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QT_RESOURCE_DEST_DIR}/qt.conf\" \"\")
+        " COMPONENT Runtime
+    )
 
     install(CODE "
         FILE(GLOB_RECURSE MODULES \"${CMAKE_INSTALL_PREFIX}/${CONTENT_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")

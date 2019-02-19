@@ -91,13 +91,14 @@ export CPLUS_INCLUDE_PATH="${COINDIR}/include":"${GMSH_DIR}/include":"${OPENCV_D
 echo "Starting to build package VARI. Version: $VERSION. Making build in directory $BUILD_DIR. Using $THREADS_NUMBER threads."
 
 mkdir -p "$BUILD_DIR" || exit
-cd "$BUILD_DIR" || exit
 
 export SQL_DIR="$BUILD_DIR/sql"
 for filename in "${SQL_SOURCE_DIR}/*"
 do
 	iconv -f CP1251 -t UTF-8 "$SQL_SOURCE_DIR/$filename" > "$SQL_DIR/$filename"
 done
+
+cd "$BUILD_DIR" || exit
 
 cmake -DCMAKE_BUILD_TYPE=Release "$WORKSPACE/$CODE_SOURCE_DIR" || exit
 make -j $THREADS_NUMBER || exit
