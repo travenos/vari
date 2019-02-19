@@ -27,6 +27,7 @@ $HELP_ARG - print help text"
 
 READLINK=$(which greadlink)
 if [[ -z "$READLINK" ]]
+then
 	READLINK=$(which readlink)
 fi
 
