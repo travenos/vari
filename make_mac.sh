@@ -76,11 +76,16 @@ mkdir -p coin3d/installed
 export COINDIR=$(greadlink -f coin3d/installed)
 ./make_coin_soqt.sh -w coin3d -i "$COINDIR" -j $THREADS_NUMBER || exit
 
+# Build OpenCV
+mkdir -p opencv/installed
+export OPENCV_DIR=$(greadlink -f opencv/installed)
+./make_opencv.sh -w opencv -i "$OPENCV_DIR" -j $THREADS_NUMBER || exit
+
 # Add built libraries to default paths
 export PATH=${PATH}:"${INSTALL_DIR}/usr"
-export CMAKE_PREFIX_PATH="${COINDIR}":"${GMSH_DIR}":${CMAKE_PREFIX_PATH}
-export LD_LIBRARY_PATH="${COINDIR}/lib":"${GMSH_DIR}/lib":${LD_LIBRARY_PATH}
-export CPLUS_INCLUDE_PATH="${COINDIR}/include":"${GMSH_DIR}/include":${CPLUS_INCLUDE_PATH}
+export CMAKE_PREFIX_PATH="${COINDIR}":"${GMSH_DIR}":"${OPENCV_DIR}":${CMAKE_PREFIX_PATH}
+export LD_LIBRARY_PATH="${COINDIR}/lib":"${GMSH_DIR}/lib":"${OPENCV_DIR}/lib":${LD_LIBRARY_PATH}
+export CPLUS_INCLUDE_PATH="${COINDIR}/include":"${GMSH_DIR}/include":"${OPENCV_DIR}/include":${CPLUS_INCLUDE_PATH}
 
 # Building VARI and creating a package
 echo "Starting to build package VARI. Version: $VERSION. Making build in directory $BUILD_DIR. Using $THREADS_NUMBER threads."

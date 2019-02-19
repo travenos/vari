@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 # Copyright (c) 2019 Alexey Barashkov <barasher@yandex.ru>
-
-GMSH_REPO_URL="https://gitlab.onelab.info/gmsh/gmsh.git"
-GMSH_TAG="gmsh_3_0_6"
+OPENCV_REPO_URL="https://github.com/opencv/opencv.git"
+OPENCV_TAG="3.2.0"
 
 THREADS_ARG=-j
 WORK_DIR_ARG=-w
 INSTALL_DIR_ARG=-i
 HELP_ARG=-h
 
-HELP_STRING="A tool for building static Gmsh library for usage with VARI programm.
+HELP_STRING="A tool for building static OpenCV library for usage with VARI programm.
 
 Usage:
 "${BASH_SOURCE[0]}" [$THREADS_ARG THREADS_NUMBER] [$WORK_DIR_ARG WORK_DIRECTORY] [$INSTALL_DIR_ARG INSTALL_DIRECTORY]
@@ -34,7 +33,7 @@ SCRIPT=$(${READLINK} -f "${BASH_SOURCE[0]}")
 WORKSPACE=$(dirname "$SCRIPT")
 
 THREADS_NUMBER=1
-WORK_DIR_NAME=gmsh
+WORK_DIR_NAME=opencv
 INSTALL_DIR_NAME=installed
 
 # Checking arguments
@@ -97,22 +96,22 @@ cd "$WORK_DIR" || exit
 
 FAKEROOT=$(which fakeroot)
 
-# Building Gmsh
-GMSH_REPO_PATH=gmsh
-if [ ! -d "$GMSH_REPO_PATH" ]; then
-	git clone $GMSH_REPO_URL || exit
-	cd $GMSH_REPO_PATH || exit
+# Building OpenCV
+OPENCV_REPO_PATH=opencv
+if [ ! -d "$OPENCV_REPO_PATH" ]; then
+	git clone $OPENCV_REPO_URL || exit
+	cd $OPENCV_REPO_PATH || exit
 else
-	cd "$GMSH_REPO_PATH"
+	cd "$OPENCV_REPO_PATH"
 	git pull
 fi
-git checkout $GMSH_TAG
+git checkout $OPENCV_TAG
 
-echo "Starting to build Gmsh. Making build in directory $WORK_DIR. It will be installed to directory $INSTALL_DIR. Using $THREADS_NUMBER threads."
+echo "Starting to build OpenCV. Making build in directory $WORK_DIR. It will be installed to directory $INSTALL_DIR. Using $THREADS_NUMBER threads."
 mkdir -p my_build
 cd my_build || exit
-cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_BUILD_LIB=ON -DENABLE_BLAS_LAPACK=OFF -DENABLE_GMP=OFF -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} .. || exit
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_DOCS=OFF -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} .. || exit
 make -j $THREADS_NUMBER || exit
 $FAKEROOT make install -j $THREADS_NUMBER || exit
 
-echo "Successfully built Gmsh"
+echo "Successfully built OpenCV"

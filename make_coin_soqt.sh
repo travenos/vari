@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # Copyright (c) 2018 Alexey Barashkov <barasher@yandex.ru>
-PREFIX="pkg-vari"
 
 COIN_REPO_URL="https://bitbucket.org/Coin3D/coin"
 SOQT_REPO_URL="https://bitbucket.org/Coin3D/soqt"
