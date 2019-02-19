@@ -120,8 +120,9 @@ $FAKEROOT make install -j $THREADS_NUMBER || exit
 # Building SoQt
 cd "$WORK_DIR" || exit
 export PATH=${PATH}:${INSTALL_DIR}
-export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:${INSTALL_DIR}
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:"${INSTALL_DIR}/lib"
+export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:${INSTALL_DIR}:${QTDIR}
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:"${QTDIR}/lib":"${INSTALL_DIR}/lib"
+export CPLUS_INCLUDE_PATH=${CPLUS_INCLUDE_PATH}:"${QTDIR}/include"
 SOQT_REPO_PATH=soqt
 if [ ! -d "$SOQT_REPO_PATH" ]; then
 	hg clone $SOQT_REPO_URL || exit

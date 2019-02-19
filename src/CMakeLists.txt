@@ -264,8 +264,8 @@ if(APPLE)
         RUNTIME DESTINATION bin COMPONENT Runtime
     )
 
-    if(EXISTS $ENV{SQLDIR})
-        set(SQL_DIR $ENV{SQLDIR})
+    if(EXISTS $ENV{SQL_DIR})
+        set(SQL_DIR $ENV{SQL_DIR})
     else()
         set(SQL_DIR ${PROJECT_SOURCE_DIR}/../share/vari/sql)
     endif()

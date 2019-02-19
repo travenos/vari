@@ -42,6 +42,7 @@ else (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
         "${GMSH_DIR}"
         "${GMSH_DIR}/lib"
         "${GMSH_DIR}/usr/lib"
+        "${GMSH_DIR}/../MacOS"
         "${GMSH_DIR_LIB}/../../install/lib"
         "${GMSH_INSTALL_DIR}/lib")
 
