@@ -42,7 +42,7 @@ do
     elif [[ ${!i} == "$BUILD_DIR_ARG" ]]
     then
         ((i++))
-	if [[ -z "$BUILD_DIR" ]]
+	if [[ -z "${!i}" ]]
         then
                 >&2 echo "Error. Build directory name not entered after ${BUILD_DIR_ARG} key"
                 exit 2

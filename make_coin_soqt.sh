@@ -54,7 +54,7 @@ do
     elif [[ ${!i} == "$WORK_DIR_ARG" ]]
     then
         ((i++))
-	if [[ -z "$WORK_DIR" ]]
+	if [[ -z "${!i}" ]]
         then
                 >&2 echo "Error. Build directory name not entered after ${WORK_DIR_ARG} key"
                 exit 2
@@ -65,7 +65,7 @@ do
     elif [[ ${!i} == "$INSTALL_DIR_ARG" ]]
     then
         ((i++))
-	if [[ -z "$INSTALL_DIR" ]]
+	if [[ -z "${!i}" ]]
         then
                 >&2 echo "Error. Build directory name not entered after ${INSTALL_DIR_ARG} key"
                 exit 2
