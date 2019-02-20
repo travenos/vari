@@ -7,3 +7,4 @@ pkg-vari
 *.user*
 .directory
 *.bak
+.DS_Store

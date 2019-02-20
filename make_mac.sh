@@ -90,12 +90,14 @@ export CPLUS_INCLUDE_PATH="${COINDIR}/include":"${GMSH_DIR}/include":"${OPENCV_D
 # Building VARI and creating a package
 echo "Starting to build package VARI. Version: $VERSION. Making build in directory $BUILD_DIR. Using $THREADS_NUMBER threads."
 
+cd "$WORKSPACE"
 mkdir -p "$BUILD_DIR" || exit
 
 export SQL_DIR="$BUILD_DIR/sql"
-for filename in "${SQL_SOURCE_DIR}/*"
+mkdir -p "$SQL_DIR"
+for filename in ${SQL_SOURCE_DIR}/*
 do
-	iconv -f CP1251 -t UTF-8 "$SQL_SOURCE_DIR/$filename" > "$SQL_DIR/$filename"
+	iconv -f CP1251 -t UTF-8 "$filename" > "$SQL_DIR/$(basename $filename)"
 done
 
 cd "$BUILD_DIR" || exit

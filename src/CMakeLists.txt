@@ -8,6 +8,10 @@ set(PROJECT_VENDOR_LONG "Wicron")
 set(ORG_WEBSITE "https://wicron.com")
 set(APP_NAME "VARI")
 
+#Get information about the compilation time
+string(TIMESTAMP CURRENT_YEAR "%Y")
+string(TIMESTAMP CURRENT_TIME "%d.%m.%Y %H:%M:%S")
+
 set(PROJECT_COPYRIGHT "Copyright (c) ${CURRENT_YEAR} ${PROJECT_VENDOR_LONG}")
 
 set(EXE_NAME ${PROJECT_NAME})
@@ -40,10 +44,6 @@ SET_PROJECT_VER("${PROJECT_VERSION_LONG}")
 set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}.${PROJECT_VERSION_TWEAK}")
 message(STATUS "${PROJECT_NAME} version: ${PROJECT_VERSION_LONG}")
 message(STATUS "Project version: ${PROJECT_VERSION}\n")
-
-#Get information about the compilation time
-string(TIMESTAMP CURRENT_YEAR "%Y")
-string(TIMESTAMP CURRENT_TIME "%d.%m.%Y %H:%M:%S")
 
 #Configure a file with vendor definitions
 set(VDEFINITIONS_SOURCE "${PROJECT_SOURCE_DIR}/cmake/VDefinitions.h.cmake")
@@ -157,12 +157,14 @@ if(WIN32)
     set(WIN_RESOURCES
         "${WIN_APP_RC_DEST}"
         )
+    set(OPTIONS WIN32)
 endif()
 
 if(APPLE)
     set(MACOSX_BUNDLE_ICON_FILE ${RESOURCES_DIRECTORY}/vari.icns)
     set(OSX_RESOURCES ${RESOURCES_DIRECTORY}/vari.icns)
     set_source_files_properties(${OSX_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    set(OPTIONS MACOSX_BUNDLE)
 endif()
 
 set(QT_RESOURCES
@@ -191,6 +193,7 @@ set(HEADER_FILES
     )
 
 set(SOURCE_FILES
+    main.cpp
     VWindowMain.cpp
     VWindowMaterials.cpp
     VWindowCloth.cpp
@@ -207,8 +210,7 @@ set(SOURCE_FILES
 
 #Create executable
 add_executable(${EXE_NAME}
-    WIN32
-    "main.cpp"
+    ${OPTIONS}
     ${HEADER_FILES}
     ${SOURCE_FILES}
     ${QT_UI_FORMS}
@@ -227,17 +229,20 @@ target_link_libraries(${EXE_NAME} v_third_party)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
 
+if(EXISTS "$ENV{QTDIR}")
+    set(QT_DIR "$ENV{QTDIR}")
+else()
+    set(QT_DIR "${Qt5Core_DIR}/../../..")
+endif()
+if(EXISTS "$ENV{COINDIR}")
+    set(COIN_DIR "$ENV{COINDIR}")
+else()
+    set(COIN_DIR "${Coin_DIR}/../../..")
+endif()
+
 #CONFIGURATING WINDOWS INSTALLER
 if(WIN32 AND CMAKE_BUILD_TYPE MATCHES Release)
-    if(NOT EXISTS $ENV{QTDIR})
-        message(WARNING "QTDIR environment variable is not set correctly. The installer script will not be generated.")
-    endif()
-    if(NOT EXISTS $ENV{COINDIR})
-        message(WARNING "COINDIR environment variable  is not set correctly. The installer script will not be generated.")
-    endif()
-    if (EXISTS $ENV{QTDIR} AND EXISTS $ENV{COINDIR})
-        INCLUDE(win32.vari.install)
-    endif()
+    INCLUDE(win32.vari.install)
 endif()
 
 #CONFIGURATING MAC INSTALLER
@@ -253,22 +258,22 @@ if(APPLE)
     set(MACOSX_BUNDLE_COPYRIGHT            ${PROJECT_COPYRIGHT})
 
     set(APPS "${CMAKE_INSTALL_PREFIX}/${EXE_NAME}.app")
-    set(DIRS ${QT_LIBRARY_DIRS} ${VCORE_LIBRARY_DIRS})
+    set(DIRS "${QT_LIBRARY_DIRS}" "${QT_DIR}/lib" "${COIN_DIR}/lib")
 
-    set(QT_PLUGINS_SOURCE_DIR  $ENV{QTDIR}/plugins)
+    set(QT_PLUGINS_SOURCE_DIR  ${QT_DIR}/plugins)
     set(CONTENT_DIR            ${EXE_NAME}.app/Contents)
     set(QT_PLUGIN_DESTINAT_DIR ${EXE_NAME}.app/Contents/PlugIns)
     set(QT_RESOURCE_DEST_DIR   ${EXE_NAME}.app/Contents/Resources)
 
     install(TARGETS ${EXE_NAME}
-        BUNDLE DESTINATION  .   COMPONENT Runtime
-        RUNTIME DESTINATION bin COMPONENT Runtime
+    BUNDLE DESTINATION  .   COMPONENT Runtime
+    RUNTIME DESTINATION bin COMPONENT Runtime
     )
 
     if(EXISTS $ENV{SQL_DIR})
-        set(SQL_DIR $ENV{SQL_DIR})
+      set(SQL_DIR $ENV{SQL_DIR})
     else()
-        set(SQL_DIR ${PROJECT_SOURCE_DIR}/../share/vari/sql)
+      set(SQL_DIR ${PROJECT_SOURCE_DIR}/../share/vari/sql)
     endif()
     install(FILES ${SQL_DIR}/create.sql DESTINATION ${QT_RESOURCE_DEST_DIR})
     install(FILES ${SQL_DIR}/remove.sql DESTINATION ${QT_RESOURCE_DEST_DIR})
@@ -278,15 +283,15 @@ if(APPLE)
     install(FILES ${QT_PLUGINS_SOURCE_DIR}/sqldrivers/libqsqlpsql.dylib  DESTINATION ${QT_PLUGIN_DESTINAT_DIR}/sqldrivers)
     install(FILES ${QT_PLUGINS_SOURCE_DIR}/printsupport/libcocoaprintersupport.dylib DESTINATION ${QT_PLUGIN_DESTINAT_DIR}/printsupport)
 
-    INSTALL(CODE "
-        FILE(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QT_RESOURCE_DEST_DIR}/qt.conf\" \"\")
-        " COMPONENT Runtime
+    install(CODE "
+      FILE(WRITE \"\${CMAKE_INSTALL_PREFIX}/${QT_RESOURCE_DEST_DIR}/qt.conf\" \"\")
+      " COMPONENT Runtime
     )
 
     install(CODE "
-        FILE(GLOB_RECURSE MODULES \"${CMAKE_INSTALL_PREFIX}/${CONTENT_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
-        INCLUDE(BundleUtilities)
-        FIXUP_BUNDLE(\"${APPS}\" \"\${MODULES}\" \"${DIRS}\")
-        " COMPONENT Runtime
+      FILE(GLOB_RECURSE MODULES \"${CMAKE_INSTALL_PREFIX}/${CONTENT_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+      INCLUDE(BundleUtilities)
+      FIXUP_BUNDLE(\"${APPS}\" \"\${MODULES}\" \"${DIRS}\")
+      " COMPONENT Runtime
     )
 endif()
