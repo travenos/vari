@@ -35,7 +35,7 @@ public:
 
     void setWidget(const QWidget * widget);
     virtual void setDirPath(const QString &dirPath);
-    void setPeriod(float period);
+    virtual void setPeriod(float period);
     void setSuffixDirName(const QString &name);
     const QWidget * getWidget() const;
     virtual const QString& getDirPath() const;

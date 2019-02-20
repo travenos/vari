@@ -16,17 +16,17 @@
 #include <QWidget>
 #include <QDir>
 
-#if defined(Q_WS_WIN) || defined (WIN32) || defined(__WIN32__)
+#if defined(Q_OS_WIN) || defined (WIN32) || defined(__WIN32__)
 #include <windows.h>
 #define SLEEP(period) Sleep(period)
-#elif defined(linux) || defined(__linux__) || defined(Q_WS_MAC)
+#elif defined(linux) || defined(__linux__) || defined(Q_OS_MAC)
 #include <unistd.h>
 #define SLEEP(period) usleep(period * 1000)
 #else
 #define SLEEP(period) std::this_thread::sleep_for(std::chrono::milliseconds(period))
 #endif
 
-#if defined(Q_WS_WIN) || defined (WIN32) || defined(__WIN32__)
+#if defined(Q_OS_WIN) || defined (WIN32) || defined(__WIN32__)
 #include <QtWin>
 inline void getWinAPIscreen(int wx1, int wy1, int wx2, int wy2, QPixmap &pixmap)
 {
@@ -262,10 +262,10 @@ bool VScreenShooter::takePicture(const QString &fileName) const
     if (wx1 < sx1 || wy1 < sy1 || wx2 > sx2 || wy2 > sy2)
         return false;
     QPixmap originalPixmap;
-#if defined(Q_WS_WIN) || defined (WIN32) || defined(__WIN32__)
+#if defined(Q_OS_WIN) || defined (WIN32) || defined(__WIN32__)
     getWinAPIscreen(wx1, wy1, wx2, wy2, originalPixmap);
 #else
-    originalPixmap = screen->grabWindow(0, wx1, wy1, wx2-wx1, wy2-wy1);
+    originalPixmap = screen->grabWindow(0, wx1, wy1, wx2-wx1-1, wy2-wy1-1);
 #endif
     bool ok = originalPixmap.save(fileName, PICTURE_FORMAT_C);
     return ok;

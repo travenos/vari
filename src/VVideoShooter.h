@@ -20,6 +20,7 @@ public:
     int getFrequency() const;
     virtual const QString& getDirPath() const override;
     virtual void setDirPath(const QString &dirPath) override;
+    virtual void setPeriod(float period) override;
     void setSuffixFileName(const QString &name);
     const QString& getSuffixFileName() const;
     const QString& getVideoFilePath() const;
@@ -28,8 +29,7 @@ public:
 public slots:
     virtual void start() override;
     virtual void stop() override;
-private slots:
-    void updateFrequency();
+
 private:
     QString m_videoDirectory;
     QString m_videoFilePath;
@@ -53,9 +53,9 @@ protected:
     static const QString BASE_SLIDES_DIR_NAME;
     static const QString SLIDES_DIR_PATH;
 signals:
-    void frequencyChanged();
     void videoSavingStarted();
     void videoSavingFinished(bool result);
+    void frequencyChanged();
     void suffixFileNameChanged();
 };
 

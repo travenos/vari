@@ -7,6 +7,7 @@
 #include <QDebug>
 #endif
 
+#include <algorithm>
 #include <functional>
 
 #include <QDir>
@@ -33,15 +34,15 @@ VVideoShooter::VVideoShooter():
     m_videoDirectory(QDir::homePath())
 {
     VScreenShooter::setDirPath(SLIDES_DIR_PATH);
-    updateFrequency();
+    setFrequency(10);
     constructorBody();
 }
 
 VVideoShooter::VVideoShooter(const QWidget * widget, const QString &dirPath, int frequency):
     VScreenShooter(widget, SLIDES_DIR_PATH, 1.0f/frequency),
-    m_videoDirectory(dirPath),
-    m_frequency(frequency)
+    m_videoDirectory(dirPath)
 {
+    setFrequency(frequency);
     constructorBody();
 }
 
@@ -49,7 +50,6 @@ inline void VVideoShooter::constructorBody()
 {
     m_isSaving.store(false);
     setSuffixFileName(DEFAULT_SUFFIX_FILE_NAME);
-    connect(this, SIGNAL(periodChanged()), this, SLOT(updateFrequency()));
 }
 
 VVideoShooter::~VVideoShooter()
@@ -60,14 +60,8 @@ VVideoShooter::~VVideoShooter()
 
 void VVideoShooter::setFrequency(int frequency)
 {
-    m_frequency = frequency;
-    setPeriod(1.0f/frequency);
-    emit frequencyChanged();
-}
-
-void VVideoShooter::updateFrequency()
-{
-    m_frequency = static_cast<int>(1 / getPeriod() + 0.5);
+    m_frequency = std::max(frequency, 1);
+    VScreenShooter::setPeriod(1.0f/frequency);
     emit frequencyChanged();
 }
 
@@ -106,6 +100,11 @@ const QString& VVideoShooter::getVideoFilePath() const
     return m_videoFilePath;
 }
 
+void VVideoShooter::setPeriod(float period)
+{
+    setFrequency(1.0f/period);
+}
+
 void VVideoShooter::start()
 {
     waitForSaving();
@@ -136,7 +135,6 @@ void VVideoShooter::saveVideoProcess()
     QVector<QString> images = slideShowDir.entryList(QStringList() << (QStringLiteral("*.") + PICTURE_FORMAT),
                                                 QDir::Files).toVector();
 
-    //auto sortFunc = [this](const QString &str1, const QString &str2) //TODO
     auto sortFunc = [](const QString &str1, const QString &str2)
     {
         return floatFromStr(str1) < floatFromStr(str2);
