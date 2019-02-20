@@ -143,7 +143,7 @@ void VVideoShooter::saveVideoProcess()
 
     if (images.size() >= 1 && filePathResult)
     {
-        QString imagePath = (slideShowDir.absolutePath() + QDir::separator() + QDir::cleanPath(images.first()));
+        QString imagePath = QDir::cleanPath(slideShowDir.absolutePath() + QDir::separator() + images.first());
         QPixmap firstFrame(imagePath, PICTURE_FORMAT_C);
         try
         {
@@ -157,7 +157,7 @@ void VVideoShooter::saveVideoProcess()
                     #ifdef DEBUG_MODE
                     qDebug() << filename;
                     #endif
-                    imagePath = (slideShowDir.absolutePath() + QDir::separator() + QDir::cleanPath(filename));
+                    imagePath = QDir::cleanPath(slideShowDir.absolutePath() + QDir::separator() + filename);
                     cv::Mat frame = cv::imread(imagePath.toLocal8Bit().data());
                     if (frame.cols != firstSize.width || frame.rows != firstSize.height)
                     {
