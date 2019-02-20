@@ -42,7 +42,7 @@ protected:
 
 public:
     VDatabaseInteractor(const QString &tableName);
-    virtual ~VDatabaseInteractor() = default;
+    virtual ~VDatabaseInteractor();
     void getNames(std::deque<QString> &outputDeque, bool sort = true) const ;
     void removeMaterial(int id) ;
     virtual void saveToFile(const QString &fileName) const ;

@@ -26,6 +26,11 @@ VDatabaseInteractor::VDatabaseInteractor(const QString &tableName):
 {
 }
 
+VDatabaseInteractor::~VDatabaseInteractor()
+{
+    VSqlDatabase::deleteInstance();
+}
+
 VSqlDatabase* VDatabaseInteractor::databaseInstance() const 
 {
     return VSqlDatabase::getInstance();
@@ -33,6 +38,7 @@ VSqlDatabase* VDatabaseInteractor::databaseInstance() const
 
 void VDatabaseInteractor::getNames(std::deque<QString> &outputDeque, bool sort) const 
 {
+    outputDeque.clear();
     if (!databaseInstance()->isOpen() && databaseInstance()->open())
     {
         bool hadError;
