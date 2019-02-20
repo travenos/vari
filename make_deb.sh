@@ -68,7 +68,7 @@ $HELP_ARG - print help text"
 SCRIPT=$(readlink -f "${BASH_SOURCE[0]}")
 WORKSPACE=$(dirname "$SCRIPT")
 
-THREADS_NUMBER=1
+THREADS_NUMBER=4
 BUILD_DIR_NAME=build
 
 # Checking arguments

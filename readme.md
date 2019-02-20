@@ -53,6 +53,32 @@ Usage:
 .\create_windows_installer.ps1
 ```
 
+## Building for macOS
+Dependencies:  
+- Xcode Command Line Tools  
+- Qt 5.9.5  
+- cmake  
+- git  
+- mercurial  
+- coreutils  
+- doxygen  
+Some dependencies can be installed with [Homebrew](https://brew.sh/):  
+```
+brew install mercurial coreutils cmake doxygen  
+```
+
+For building a macOS app, run script **make_mac.sh**.  
+Usage:  
+```bash
+./make_mac.sh
+```
+Possible arguments:  
+- **\-j THREADS** \- how many threads should be used by make process.  
+- **\-d BUILD_DIRECTORY** \- specify directory, where binary files are being built.  
+- **\-x OSX_SYSROOT \- specify macOS SDK path.  
+- **\-h** \- print help text.  
+App will be placed to directory Applications in build directory.  
+
 ## Building from scratch:
 1. Install dependencies for your platform.  
 2. Set environment variable *QTDIR* to directory with Qt files.  
@@ -77,7 +103,7 @@ Usage:
     git clone https://github.com/opencv/opencv.git
     ```  
     Checkout to tag *3.2.0*.  
-10. Build and install it. Better use static linking, but it is necessary to use dynamic CRT when building with MSVC. Use flags *-DBUILD_SHARED_LIBS=OFF -DBUILD_WITH_STATIC_CRT=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_DOCS=OFF*. Set environment variable *OPENCV_DIR* pointing to the installation path.  
+10. Build and install it. Better use static linking, but it is necessary to use dynamic CRT when building with MSVC. Use flags *-DBUILD_SHARED_LIBS=OFF -DBUILD_WITH_STATIC_CRT=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_DOCS=OFF -DWITH_FFMPEG=OFF*. Set environment variable *OPENCV_DIR* pointing to the installation path.  
 11. Build VARI. Main *CMakeLists.txt* file is placed in *src* directory.  
 
 ## Installing on Windows

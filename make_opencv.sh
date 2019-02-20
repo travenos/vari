@@ -6,22 +6,24 @@ OPENCV_TAG="3.2.0"
 THREADS_ARG=-j
 WORK_DIR_ARG=-w
 INSTALL_DIR_ARG=-i
+OSX_SYSROOT_ARG=-x
 HELP_ARG=-h
 
 HELP_STRING="A tool for building static OpenCV library for usage with VARI programm.
 
 Usage:
-"${BASH_SOURCE[0]}" [$THREADS_ARG THREADS_NUMBER] [$WORK_DIR_ARG WORK_DIRECTORY] [$INSTALL_DIR_ARG INSTALL_DIRECTORY]
+"${BASH_SOURCE[0]}" [$THREADS_ARG THREADS_NUMBER] [$WORK_DIR_ARG WORK_DIRECTORY] [$INSTALL_DIR_ARG INSTALL_DIRECTORY] [$OSX_SYSROOT_ARG OSX_SYSROOT]
 
 Arguments:
 $THREADS_ARG THREADS_NUMBER
 THREADS_NUMBER - how many threads should be used by make process
 $WORK_DIR_ARG WORK_DIRECTORY
-WORK_DIRECTORY- specify directory, where binary files are being built
+WORK_DIRECTORY - specify directory, where binary files are being built
 $INSTALL_DIR_ARG INSTALLATION_DIRECTORY
-INSTALL_DIRECTORY- specify directory, where binary files will be installed
+INSTALL_DIRECTORY - specify directory, where binary files will be installed
+$OSX_SYSROOT_ARG OSX_SYSROOT
+OSX_SYSROOT - macOS SDK path
 $HELP_ARG - print help text"
-
 
 READLINK=$(which greadlink)
 if [[ -z "$READLINK" ]]
@@ -53,7 +55,7 @@ do
         ((i++))
 	if [[ -z "${!i}" ]]
         then
-                >&2 echo "Error. Build directory name not entered after ${WORK_DIR_ARG} key"
+                >&2 echo "Error. Work directory name not entered after ${WORK_DIR_ARG} key"
                 exit 2
 	else
 		mkdir -p "${!i}"
@@ -69,6 +71,16 @@ do
 	else
 		mkdir -p "${!i}"
         	INSTALL_DIR=$(${READLINK} -f "${!i}")
+        fi
+    elif [[ ${!i} == "$OSX_SYSROOT_ARG" ]]
+    then
+        ((i++))
+	if [[ -z "${!i}" ]]
+        then
+                >&2 echo "Error. macOS SDK directory name not entered after ${OSX_SYSROOT_ARG} key"
+                exit 2
+	else
+        	OSX_SYSROOT="${!i}"
         fi
     elif [[ ${!i} == "$HELP_ARG" ]]
     then
@@ -110,7 +122,7 @@ git checkout $OPENCV_TAG
 echo "Starting to build OpenCV. Making build in directory $WORK_DIR. It will be installed to directory $INSTALL_DIR. Using $THREADS_NUMBER threads."
 mkdir -p my_build
 cd my_build || exit
-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_DOCS=OFF -DWITH_FFMPEG=OFF -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} .. || exit
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_DOCS=OFF -DWITH_FFMPEG=OFF -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" .. || exit
 make -j $THREADS_NUMBER || exit
 $FAKEROOT make install -j $THREADS_NUMBER || exit
 
