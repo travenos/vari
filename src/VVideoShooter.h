@@ -42,6 +42,8 @@ private:
     inline bool createFilePath();
     void saveVideoProcess();
     void waitForSaving();
+
+    static inline float floatFromStr(const QString &str);
 protected:
     static const char * const VIDEO_FORMAT_C;
     static const int VIDEO_CODEC;

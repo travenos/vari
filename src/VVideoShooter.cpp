@@ -133,8 +133,16 @@ void VVideoShooter::saveVideoProcess()
     bool result = false;
     bool filePathResult = createFilePath();
     QDir slideShowDir(getSlidesDirPath());
-    QStringList images = slideShowDir.entryList(QStringList() << (QStringLiteral("*.") + PICTURE_FORMAT),
-                                                QDir::Files, QDir::Time | QDir::Reversed);
+    QVector<QString> images = slideShowDir.entryList(QStringList() << (QStringLiteral("*.") + PICTURE_FORMAT),
+                                                QDir::Files).toVector();
+
+    //auto sortFunc = [this](const QString &str1, const QString &str2) //TODO
+    auto sortFunc = [](const QString &str1, const QString &str2)
+    {
+        return floatFromStr(str1) < floatFromStr(str2);
+    };
+    std::sort(images.begin(), images.end(), sortFunc);
+
     if (images.size() >= 1 && filePathResult)
     {
         QString imagePath = (slideShowDir.absolutePath() + QDir::separator() + QDir::cleanPath(images.first()));
@@ -148,6 +156,9 @@ void VVideoShooter::saveVideoProcess()
                                       firstSize, true);
                 foreach(const QString &filename, images)
                 {
+                    #ifdef DEBUG_MODE
+                    qDebug() << filename;
+                    #endif
                     imagePath = (slideShowDir.absolutePath() + QDir::separator() + QDir::cleanPath(filename));
                     cv::Mat frame = cv::imread(imagePath.toLocal8Bit().data());
                     if (frame.cols != firstSize.width || frame.rows != firstSize.height)
@@ -207,4 +218,12 @@ void VVideoShooter::waitForSaving()
 bool VVideoShooter::isSaving() const
 {
     return m_isSaving.load();
+}
+
+inline float VVideoShooter::floatFromStr(const QString &str)
+{
+    const QRegExp FLOAT_REGEX(QStringLiteral("[0-9]+([.][0-9]*)?|[.][0-9]+"));
+    int start=str.indexOf(FLOAT_REGEX);
+    int finish=str.lastIndexOf(FLOAT_REGEX);
+    return str.midRef(start, finish - start + 1).toFloat();
 }
