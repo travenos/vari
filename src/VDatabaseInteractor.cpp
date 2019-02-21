@@ -13,6 +13,7 @@
 #include <QVariant>
 #include <QDir>
 #include <QCoreApplication>
+#include <QTextCodec>
 
 #include <deque>
 
