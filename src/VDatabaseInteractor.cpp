@@ -247,8 +247,7 @@ void VDatabaseInteractor::executeQueriesFromFile(const QString &filename, QSqlDa
                     #endif
                     #if defined(Q_OS_WIN) || defined (WIN32) || defined(__WIN32__)
                     QTextCodec *codec = QTextCodec::codecForName("Windows-1251");
-                    line = codec->toUnicode(line);
-                    delete codec;
+                    line = codec->toUnicode(line.toLocal8Bit());
                     #endif
                     query.exec(line);
                 }
