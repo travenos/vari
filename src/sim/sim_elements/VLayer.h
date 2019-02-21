@@ -53,6 +53,7 @@ public:
     void cut(const std::shared_ptr<const std::vector<uint> > &nodesIds);
     void transformate(const std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > >
                         &nodesCoords);
+    void incrementVerticalPosition(float dz);
 
     void connectWith(const VLayer::ptr &otherLayer);
     void disconnect();

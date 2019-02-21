@@ -87,10 +87,6 @@ private:
 
     bool m_layersConnected;
 
-    void decreasePositions(uint fromLayer) ;
-
-    void increasePositions(uint fromLayer) ;
-
     void putOnTop(uint layer) ;
 
     void setPoint(const QVector3D &point, double diameter,

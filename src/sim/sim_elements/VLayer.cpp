@@ -211,6 +211,20 @@ void VLayer::transformate(const std::shared_ptr<const std::vector<std::pair<uint
         resetNodesVolume();
 }
 
+void VLayer::incrementVerticalPosition(float dz)
+{
+    if (dz != 0)
+    {
+        for (auto &node_pair : *m_pNodes)
+        {
+            QVector3D position = node_pair.second->getPosition();
+            position[2] += dz;
+            node_pair.second->setPosition(position);
+        }
+        resetNodesVolume();
+    }
+}
+
 void VLayer::connectWith(const VLayer::ptr &otherLayer)
 {
     if (otherLayer && otherLayer.get() != this)

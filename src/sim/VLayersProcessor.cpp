@@ -53,8 +53,8 @@ void VLayersProcessor::addLayer(VLayerAbstractBuilder *builder)
     VLayer::ptr p_newLayer = builder->build();
     m_nodeNextId = builder->getNodeMaxId() + 1;
     m_triangleNextId = builder->getTriangleMaxId() + 1;
-    //TODO put the layer on the highest position
     m_layers.push_back(p_newLayer);
+    putOnTop(m_layers.size() - 1);
     updateActiveElementsVectors();
     m_layersConnected = false;
     emit layerAdded();
@@ -85,7 +85,6 @@ void VLayersProcessor::enableLayer(uint layer, bool enable)
     {
         if (!(m_layers.at(layer)->isActive()))
         {
-            increasePositions(layer + 1);
             m_layersConnected = false;
         }
     }
@@ -93,7 +92,6 @@ void VLayersProcessor::enableLayer(uint layer, bool enable)
     {
         m_layers.at(layer)->disconnect();
         m_layers.at(layer)->reset();
-        decreasePositions(layer + 1);
     }
     m_layers.at(layer)->markActive(enable);
     updateActiveElementsVectors();
@@ -256,16 +254,26 @@ void VLayersProcessor::resetNodesVolumes()
     }
 }
 
-void VLayersProcessor::decreasePositions(uint fromLayer)  {
-    //TODO find nearest ACTIVE layers to layer1 and layer2
-}
-
-void VLayersProcessor::increasePositions(uint fromLayer)  {
-    //TODO find nearest ACTIVE layers to layer1 and layer2
-}
-
-void VLayersProcessor::putOnTop(uint layer)  {
-
+void VLayersProcessor::putOnTop(uint layer)
+{
+    if (m_layers.size() > 1)
+    {
+        QVector3D min, max;
+        uint firstLayer = (layer != 0) ? 0 : 1;
+        m_layers.at(firstLayer)->getConstrains(min, max);
+        float z_max = max.z();
+        for (uint i = 0; i < m_layers.size(); ++i)
+        {
+            if (i != layer)
+            {
+                m_layers.at(i)->getConstrains(min, max);
+                if (max.z() > z_max)
+                    z_max = max.z();
+            }
+        }
+        z_max += static_cast<float>(m_layers.at(layer)->getMaterial()->cavityHeight);
+        m_layers.at(layer)->incrementVerticalPosition(z_max);
+    }
 }
 
 const VSimNode::const_vector_ptr &VLayersProcessor::getActiveNodes() const 
