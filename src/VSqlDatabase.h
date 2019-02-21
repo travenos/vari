@@ -14,6 +14,7 @@ class VSqlDatabase
 {
 private:
     explicit VSqlDatabase();
+    ~VSqlDatabase();
     VSqlDatabase(const VSqlDatabase &other) = delete;
     VSqlDatabase & operator=(const VSqlDatabase &other) = delete;
 
@@ -21,6 +22,7 @@ private:
     static const QString DATABASENAME;
     static const QString USERNAME;
     static const QString PASSWORD;
+    static const QString CONNECTION_NAME;
 
     QSqlDatabase m_database;
     static VSqlDatabase * s_object;
@@ -37,6 +39,8 @@ public:
     void setHostName(const QString &host);
     void setPassword(const QString &password);
     void setUserName(const QString &name);
+    void resetParameters();
+    QSqlDatabase & getDatabase();
 };
 
 #endif // _VSQLDATABASE_H

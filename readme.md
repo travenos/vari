@@ -62,11 +62,12 @@ Dependencies:
 - mercurial  
 - coreutils  
 - doxygen  
+
 Some dependencies can be installed with [Homebrew](https://brew.sh/):  
 ```
 brew install mercurial coreutils cmake doxygen  
 ```
-
+  
 For building a macOS app, run script **make_mac.sh**.  
 Usage:  
 ```bash
@@ -75,7 +76,7 @@ Usage:
 Possible arguments:  
 - **\-j THREADS** \- how many threads should be used by make process.  
 - **\-d BUILD_DIRECTORY** \- specify directory, where binary files are being built.  
-- **\-x OSX_SYSROOT \- specify macOS SDK path.  
+- **\-x OSX_SYSROOT** \- specify macOS SDK path.  
 - **\-h** \- print help text.  
 App will be placed to directory Applications in build directory.  
 

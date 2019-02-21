@@ -25,11 +25,15 @@ public:
     static const QString INVALID_PARAM_ERROR;
     static const QString ASK_FOR_REMOVE;
     static const QString FILE_DIALOG_FORMATS;
+    static const QString POSTGRES_PASSWORD_TITLE;
+    static const QString POSTGRES_PASSWORD_CAPTION;
 
     VWindowMaterials(QWidget *parent = nullptr);
     virtual ~VWindowMaterials();
 
 private slots:
+    void loadDatabaseFromFile();
+
     void on_materialsListWidget_itemSelectionChanged();
 
     void on_refreshButton_clicked();

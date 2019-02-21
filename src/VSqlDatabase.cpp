@@ -10,6 +10,10 @@ const QString VSqlDatabase::HOSTNAME("127.0.0.1");
 const QString VSqlDatabase::DATABASENAME("vari");
 const QString VSqlDatabase::USERNAME("vari");
 const QString VSqlDatabase::PASSWORD("vari-password");
+//const QString VSqlDatabase::DATABASENAME("postgres");
+//const QString VSqlDatabase::USERNAME("postgres");
+//const QString VSqlDatabase::PASSWORD("postgres-password");
+const QString VSqlDatabase::CONNECTION_NAME("qt_sql_default_connection1");
 VSqlDatabase* VSqlDatabase::s_object = nullptr;
 
 VSqlDatabase * VSqlDatabase::getInstance()
@@ -31,6 +35,7 @@ void VSqlDatabase::deleteInstance()
     {
         delete s_object;
         s_object = nullptr;
+        QSqlDatabase::removeDatabase(CONNECTION_NAME);
     }
 }
 
@@ -41,11 +46,13 @@ bool VSqlDatabase::hasInstance()
 
 VSqlDatabase::VSqlDatabase()
 {
-    m_database = QSqlDatabase::addDatabase(QStringLiteral("QPSQL"));
-    m_database.setHostName(HOSTNAME);
-    m_database.setDatabaseName(DATABASENAME);
-    m_database.setUserName(USERNAME);
-    m_database.setPassword(PASSWORD);
+    m_database = QSqlDatabase::addDatabase(QStringLiteral("QPSQL"), CONNECTION_NAME);
+    resetParameters();
+}
+
+VSqlDatabase::~VSqlDatabase()
+{
+    m_database.close();
 }
 
 bool VSqlDatabase::open()
@@ -81,3 +88,15 @@ void VSqlDatabase::setUserName(const QString &name)
     m_database.setPassword(name);
 }
 
+void VSqlDatabase::resetParameters()
+{
+    m_database.setHostName(HOSTNAME);
+    m_database.setDatabaseName(DATABASENAME);
+    m_database.setUserName(USERNAME);
+    m_database.setPassword(PASSWORD);
+}
+
+QSqlDatabase & VSqlDatabase::getDatabase()
+{
+    return m_database;
+}

@@ -31,7 +31,7 @@ void VDatabaseResin::materialInfo(const QString &name, int &id, float &viscosity
         bool hadError;
         QString errorString;
         {
-            QSqlQuery query(GET_INFO_QUERY.arg(TABLE_NAME).arg(name));
+            QSqlQuery query(GET_INFO_QUERY.arg(TABLE_NAME).arg(name), databaseInstance()->getDatabase());
             while (query.next())
             {
                 id = query.value(0).toInt();

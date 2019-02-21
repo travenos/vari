@@ -11,12 +11,15 @@
 #include "VDatabaseInteractor.h"
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <deque>
 
 const QString VWindowMaterials::ERROR_TITLE("Ошибка");
 const QString VWindowMaterials::REMOVE_TITLE("Удалить?");
 const QString VWindowMaterials::IMPORT_TITLE("Импорт базы данных");
 const QString VWindowMaterials::EXPORT_TITLE("Экспорт базы данных");
+const QString VWindowMaterials::POSTGRES_PASSWORD_TITLE("Пароль администратора базы данных");
+const QString VWindowMaterials::POSTGRES_PASSWORD_CAPTION("Пожалуйста, введите пароль администратора базы данных PostgreSQL (пользователя \"postgres\")");
 const QString VWindowMaterials::INVALID_PARAM_ERROR("Введены некорректные параметры");
 const QString VWindowMaterials::ASK_FOR_REMOVE("Вы уверены, что хотите удалить материал?");
 const QString VWindowMaterials::FILE_DIALOG_FORMATS("Табличные данные (*.csv);;Все файлы (*)");
@@ -35,11 +38,12 @@ void VWindowMaterials::loadMaterials( )
     ui->materialsListWidget->setSelectionMode(QAbstractItemView::NoSelection);
     ui->materialsListWidget->clear();
     ui->materialsListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+    connect(databaseInteractor(), SIGNAL(needsToLoadDB()), this, SLOT(loadDatabaseFromFile()));
     try
     {
-        std::deque<QString> materials;
-        databaseInteractor()->getNames(materials);
-        for (auto &materialName : materials)
+        databaseInteractor()->loadNames();
+        const std::deque<QString> & materials = databaseInteractor()->getNames();
+        for (const auto &materialName : materials)
             ui->materialsListWidget->addItem(materialName);
     }
     catch (DatabaseException &e)
@@ -47,8 +51,6 @@ void VWindowMaterials::loadMaterials( )
         QMessageBox::warning(this, ERROR_TITLE, e.what());
     }
 }
-
-
 
 void VWindowMaterials::removeMaterial( )
 {
@@ -211,4 +213,39 @@ void VWindowMaterials::on_buttonBox_accepted()
 void VWindowMaterials::on_materialsListWidget_doubleClicked(const QModelIndex &)
 {
     accept();
+}
+
+void VWindowMaterials::loadDatabaseFromFile()
+{
+    try
+    {
+        databaseInteractor()->createDatabase();
+        databaseInteractor()->loadNames();
+        return;
+    }
+    catch (DatabaseException&)
+    {
+        bool ok = true;
+        while (ok)
+        {
+            QString password = QInputDialog::getText(this, POSTGRES_PASSWORD_TITLE,
+                                                 POSTGRES_PASSWORD_CAPTION, QLineEdit::Password,
+                                                 QStringLiteral(""), &ok);
+            if (ok)
+            {
+                try
+                {
+                    databaseInteractor()->createDatabase(password);
+                    databaseInteractor()->loadNames();
+                    return;
+                }
+                catch(DatabaseException &e)
+                {
+                    QMessageBox::warning(this, ERROR_TITLE, e.what());
+                }
+            }
+            else
+                return;
+        }
+    }
 }
