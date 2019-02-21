@@ -202,7 +202,12 @@ void VDatabaseInteractor::executeQueriesFromFile(const QString &filename, QSqlDa
                 while(!finishedLine && !file.atEnd())
                 {
                     readLine = file.readLine();
-                    cleanedLine=readLine.trimmed();
+                    #if defined(Q_OS_WIN) || defined (WIN32) || defined(__WIN32__)
+                    QTextCodec *codec = QTextCodec::codecForName("windows-1251");
+                    cleanedLine = codec->toUnicode(readLine).trimmed();
+                    #else
+                    cleanedLine = readLine.trimmed();
+                    #endif
                     // remove comments at end of line
                     QStringList strings = cleanedLine.split(QStringLiteral("--"));
                     cleanedLine=strings.at(0);
@@ -244,10 +249,6 @@ void VDatabaseInteractor::executeQueriesFromFile(const QString &filename, QSqlDa
                 {
                     #ifdef DEBUG_MODE
                     qDebug() << line;
-                    #endif
-                    #if defined(Q_OS_WIN) || defined (WIN32) || defined(__WIN32__)
-                    QTextCodec *codec = QTextCodec::codecForName("Windows-1251");
-                    line = codec->toUnicode(line.toLocal8Bit());
                     #endif
                     query.exec(line);
                 }
