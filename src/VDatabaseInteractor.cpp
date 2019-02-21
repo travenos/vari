@@ -162,11 +162,10 @@ void VDatabaseInteractor::createDatabase(const QString &postgresPassword)
         return;
     }
     catch(DatabaseException&)
-    {    }
+    {}
     QSqlDatabase *db = new QSqlDatabase;
     (*db) = QSqlDatabase::addDatabase(QStringLiteral("QPSQL"), CONNECTION_NAME);
     db->setHostName(QStringLiteral("127.0.0.1"));
-    //db->setDatabaseName(QStringLiteral("postgres")); //TODO
     db->setUserName(QStringLiteral("postgres"));
     db->setPassword(postgresPassword);
     try
