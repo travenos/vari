@@ -229,6 +229,34 @@ target_link_libraries(${EXE_NAME} v_third_party)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
 
+# Converting databases encodings
+set(SQL_DIR "${PROJECT_SOURCE_DIR}/../share/vari/sql")
+set(SQL_SOURCE_FILES "${SQL_DIR}/create.sql" "${SQL_DIR}/remove.sql")
+if(NOT WIN32)
+    find_program(ICONV iconv)
+    if(ICONV)
+        message(STATUS "Found Iconv: ${ICONV}")
+        set(SQL_FILES "${CMAKE_CURRENT_BINARY_DIR}/create.sql" "${CMAKE_CURRENT_BINARY_DIR}/remove.sql")
+
+        add_custom_command(OUTPUT ${SQL_FILES}
+          COMMAND ${ICONV} -f CP1251 -t UTF-8 "${SQL_DIR}/create.sql" > "${CMAKE_CURRENT_BINARY_DIR}/create.sql"
+          COMMAND ${ICONV} -f CP1251 -t UTF-8 "${SQL_DIR}/remove.sql" > "${CMAKE_CURRENT_BINARY_DIR}/remove.sql"
+          WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+          DEPENDS ${SQL_SOURCE_FILES}
+          COMMENT "Converting encodings from CP1251 to UTF8"
+          VERBATIM
+        )
+        add_custom_target(
+            convert ALL
+            DEPENDS ${SQL_FILES}
+            )
+    else()
+        message(WARNING "Iconv not found. Encodings of materials names in the database will be not converted.")
+        set(SQL_FILES ${SQL_SOURCE_FILES})
+    endif()
+endif()
+
+#Setting library paths
 if(EXISTS "$ENV{QTDIR}")
     set(QT_DIR "$ENV{QTDIR}")
 else()
@@ -270,13 +298,17 @@ if(APPLE)
     RUNTIME DESTINATION bin COMPONENT Runtime
     )
 
-    if(EXISTS $ENV{SQL_DIR})
-      set(SQL_DIR $ENV{SQL_DIR})
+    if(SQL_FILES)
+        install(FILES ${SQL_FILES} DESTINATION ${QT_RESOURCE_DEST_DIR})
     else()
-      set(SQL_DIR ${PROJECT_SOURCE_DIR}/../share/vari/sql)
+        if(EXISTS $ENV{SQL_DIR})
+          set(SQL_DIR $ENV{SQL_DIR})
+        else()
+          set(SQL_DIR "${PROJECT_SOURCE_DIR}/../share/vari/sql")
+        endif()
+        install(FILES ${SQL_DIR}/create.sql DESTINATION ${QT_RESOURCE_DEST_DIR})
+        install(FILES ${SQL_DIR}/remove.sql DESTINATION ${QT_RESOURCE_DEST_DIR})
     endif()
-    install(FILES ${SQL_DIR}/create.sql DESTINATION ${QT_RESOURCE_DEST_DIR})
-    install(FILES ${SQL_DIR}/remove.sql DESTINATION ${QT_RESOURCE_DEST_DIR})
 
     install(FILES ${QT_PLUGINS_SOURCE_DIR}/platforms/libqcocoa.dylib     DESTINATION ${QT_PLUGIN_DESTINAT_DIR}/platforms)
     install(FILES ${QT_PLUGINS_SOURCE_DIR}/platforms/libqminimal.dylib   DESTINATION ${QT_PLUGIN_DESTINAT_DIR}/platforms)
@@ -294,4 +326,12 @@ if(APPLE)
       FIXUP_BUNDLE(\"${APPS}\" \"\${MODULES}\" \"${DIRS}\")
       " COMPONENT Runtime
     )
+
+#CONFIGURATING GENERIC INSTALL
+else()
+    install(TARGETS ${EXE_NAME}
+    RUNTIME DESTINATION bin COMPONENT Runtime
+    )
+    install(FILES ${SQL_FILES} DESTINATION share/vari/sql)
 endif()
+
