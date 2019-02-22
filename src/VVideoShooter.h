@@ -12,7 +12,15 @@
 class VVideoShooter : public VScreenShooter
 {
     Q_OBJECT
-public:
+public:    
+    static const char * const VIDEO_FORMAT_C;
+    static const int VIDEO_CODEC;
+    static const QString VIDEO_FORMAT;
+    static const QString DEFAULT_SUFFIX_FILE_NAME;
+    static const QString BASE_VIDEO_FILE_NAME;
+    static const QString BASE_SLIDES_DIR_NAME;
+    static const QString SLIDES_DIR_PATH;
+
     VVideoShooter();
     VVideoShooter(const QWidget * widget, const QString &dirPath, int frequency);
     virtual ~VVideoShooter();
@@ -44,14 +52,6 @@ private:
     void waitForSaving();
 
     static inline float floatFromStr(const QString &str);
-protected:
-    static const char * const VIDEO_FORMAT_C;
-    static const int VIDEO_CODEC;
-    static const QString VIDEO_FORMAT;
-    static const QString DEFAULT_SUFFIX_FILE_NAME;
-    static const QString BASE_VIDEO_FILE_NAME;
-    static const QString BASE_SLIDES_DIR_NAME;
-    static const QString SLIDES_DIR_PATH;
 signals:
     void videoSavingStarted();
     void videoSavingFinished(bool result);

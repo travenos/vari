@@ -50,7 +50,6 @@ inline void VVideoShooter::constructorBody()
 {
     m_isSaving.store(false);
     setSuffixFileName(DEFAULT_SUFFIX_FILE_NAME);
-    QDir(SLIDES_DIR_PATH).removeRecursively();
 }
 
 VVideoShooter::~VVideoShooter()

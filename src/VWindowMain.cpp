@@ -92,6 +92,7 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_pSlideshowShooter->setWidget(m_pFacade->getGLWidget());
     m_pVideoShooter->setWidget(m_pFacade->getGLWidget());
 
+    QDir(VVideoShooter::SLIDES_DIR_PATH).removeRecursively();
     loadShootersSettings();
 }
 
