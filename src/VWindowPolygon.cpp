@@ -30,6 +30,8 @@ const QString VWindowPolygon::EXPORT_TO_FILE_ERROR("Ошибка сохране�
 const QString VWindowPolygon::TOO_SMALL_STEP_ERROR("Задан слишком маленький средний шаг сетки для текущих"
                                                    " габаритов слоя. Необходимо увеличить шаг сетки"
                                                    " как минимум в %1 раз");
+const QString VWindowPolygon::INTERSECTION_ERROR("Невозможно использовать заданный контур, так как он"
+                                                 " содержит пересчения");
 
 
 VWindowPolygon::VWindowPolygon(QWidget *parent) :
@@ -80,17 +82,22 @@ VWindowPolygon::~VWindowPolygon()
 
 void VWindowPolygon::accept()
 {
-    double ratio = getStepRatio();
-    if (ratio >= MIN_CHARACTERISTIC_RATIO)
+    if(!lastLineCausesIntersection())
     {
-        hide();
-        QPolygonF polygon;
-        getPolygon(polygon);
-        emit polygonAvailable(polygon, m_characteristicLength);
-        close();
+        double ratio = getStepRatio();
+        if (ratio >= MIN_CHARACTERISTIC_RATIO)
+        {
+            hide();
+            QPolygonF polygon;
+            getPolygon(polygon);
+            emit polygonAvailable(polygon, m_characteristicLength);
+            close();
+        }
+        else
+            showRatioError(ratio);
     }
     else
-        showRatioError(ratio);
+        showIntersectionError();
 }
 
 void VWindowPolygon::reset()
@@ -209,29 +216,34 @@ void VWindowPolygon::exportMeshToFile(const QString &filename) const
 
 void VWindowPolygon::meshExportProcedure()
 {
-    double ratio = getStepRatio();
-    if (ratio >= MIN_CHARACTERISTIC_RATIO)
+    if(!lastLineCausesIntersection())
     {
-        QString filename = QFileDialog::getSaveFileName(this, SAVE_FILE_DIALOG_TITLE, m_lastDir,
-                                                        FILE_DIALOG_FORMATS);
-        if (!filename.isEmpty())
+        double ratio = getStepRatio();
+        if (ratio >= MIN_CHARACTERISTIC_RATIO)
         {
-            m_lastDir = QFileInfo(filename).absolutePath();
-            try
+            QString filename = QFileDialog::getSaveFileName(this, SAVE_FILE_DIALOG_TITLE, m_lastDir,
+                                                            FILE_DIALOG_FORMATS);
+            if (!filename.isEmpty())
             {
-                exportMeshToFile(filename);
+                m_lastDir = QFileInfo(filename).absolutePath();
+                try
+                {
+                    exportMeshToFile(filename);
+                }
+                catch (VExportException)
+                {
+                    QMessageBox::warning(this, ERROR_TITLE, EXPORT_TO_FILE_ERROR);
+                }
+                QSettings settings;
+                settings.setValue(QStringLiteral("import/lastDir"), m_lastDir);
+                settings.sync();
             }
-            catch (VExportException)
-            {
-                QMessageBox::warning(this, ERROR_TITLE, EXPORT_TO_FILE_ERROR);
-            }
-            QSettings settings;
-            settings.setValue(QStringLiteral("import/lastDir"), m_lastDir);
-            settings.sync();
         }
+        else
+            showRatioError(ratio);
     }
     else
-        showRatioError(ratio);
+        showIntersectionError();
 }
 
 void VWindowPolygon::loadSavedParameters()
@@ -280,6 +292,48 @@ void VWindowPolygon::showRatioError(double ratio)
                          TOO_SMALL_STEP_ERROR.arg(QString::number(times, 'g', 4)));
 }
 
+void VWindowPolygon::showIntersectionError()
+{
+    QMessageBox::warning(this, ERROR_TITLE, INTERSECTION_ERROR);
+}
+
+bool VWindowPolygon::pointCausesIntersection(double x, double y) const
+{
+    int polygonSize = getPolygonSize();
+    if (polygonSize <= 2)
+    {
+        return false;
+    }
+    int lastIndex = polygonSize - 1;
+    QLineF lastLine(m_qvX[lastIndex], m_qvY[lastIndex], x, y);
+    for(int i = 1; i < lastIndex; ++i)
+    {
+        QLineF line(m_qvX[i - 1], m_qvY[i - 1], m_qvX[i], m_qvY[i]);
+        if (line.intersect(lastLine, nullptr) == QLineF::BoundedIntersection)
+            return true;
+    }
+    return false;
+}
+
+bool VWindowPolygon::lastLineCausesIntersection() const
+{
+    int polygonSize = getPolygonSize();
+    if (polygonSize <= 3)
+    {
+        return false;
+    }
+    int lastIndex = polygonSize - 1;
+    QLineF lastLine(m_qvX[lastIndex], m_qvY[lastIndex], m_qvX[0], m_qvY[0]);
+    for(int i = 2; i < lastIndex; ++i)
+    {
+        QLineF line(m_qvX[i - 1], m_qvY[i - 1], m_qvX[i], m_qvY[i]);
+        if (line.intersect(lastLine, nullptr) == QLineF::BoundedIntersection)
+            return true;
+    }
+    return false;
+}
+
+
 void VWindowPolygon::on_buttonBox_rejected()
 {
     reject();
@@ -289,6 +343,7 @@ void VWindowPolygon::on_buttonBox_accepted()
 {
     accept();
 }
+
 
 void VWindowPolygon::pl_on_before_report()
 {
@@ -318,7 +373,8 @@ void VWindowPolygon::pl_on_mouse_release(QMouseEvent* event)
         QPoint point = event->pos();
         double coordX = ui->plotWidget->xAxis->pixelToCoord(point.x());
         double coordY = ui->plotWidget->yAxis->pixelToCoord(point.y());
-        addPoint(coordX, coordY);
+        if (!pointCausesIntersection(coordX, coordY))
+            addPoint(coordX, coordY);
     }
     m_mousePressed = false;
     m_plotDragged = false;

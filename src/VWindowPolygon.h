@@ -33,6 +33,7 @@ public:
     static const QString ERROR_TITLE;
     static const QString EXPORT_TO_FILE_ERROR;
     static const QString TOO_SMALL_STEP_ERROR;
+    static const QString INTERSECTION_ERROR;
 
     VWindowPolygon(QWidget *parent = nullptr);
     virtual ~VWindowPolygon();
@@ -76,6 +77,9 @@ private:
     void meshExportProcedure();
     void showCharacteristicLength();
     void showRatioError(double ratio);
+    void showIntersectionError();
+    bool pointCausesIntersection(double x, double y) const;
+    bool lastLineCausesIntersection() const;
 
 private slots:
     void on_buttonBox_rejected();
