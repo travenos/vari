@@ -16,7 +16,7 @@ if (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
     # in cache already
     set(GMSH_FOUND TRUE)
 else (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
-    if(NOT DEFINED GMSH_DIR)
+    if(NOT GMSH_DIR)
         set(GMSH_DIR $ENV{GMSH_DIR})
     endif()
     find_path(GMSH_INCLUDE_DIR NAMES gmsh/Gmsh.h
