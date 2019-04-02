@@ -167,6 +167,8 @@ signals:
     void selectionEnabled(bool);
 
     void configUpdated();
+
+    void filenameChanged(const QString &);
 };
 
 #endif //_VSIMULATIONFACADE_H

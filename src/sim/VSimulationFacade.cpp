@@ -256,6 +256,7 @@ void VSimulationFacade::newModel()
     m_pSimulator->clear();
     m_pLayersProcessor->clear();
     m_pGraphicsViewer->clearAll();
+    emit filenameChanged("");
 }
 
 void VSimulationFacade::loadModel(const QString &filename)
@@ -270,6 +271,7 @@ void VSimulationFacade::loadModel(const QString &filename)
                                           loader.getPaused(), loader.getTimeLimited());
     m_pGraphicsViewer->viewFromAbove();
     emit modelLoaded();
+    emit filenameChanged(filename);
 }
 
 void VSimulationFacade::saveModel(const QString &filename)
@@ -282,6 +284,7 @@ void VSimulationFacade::saveModel(const QString &filename)
     VModelExport saver(info, param, m_pLayersProcessor, paused, timeLimited);
     saver.saveToFile(filename);
     emit modelSaved();
+    emit filenameChanged(filename);
 }
 
 VCloth::const_ptr VSimulationFacade::getMaterial(uint layer) const

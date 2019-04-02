@@ -76,7 +76,8 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_pPressureValidator(new QDoubleValidator),
     m_pDiameterValidator(new QDoubleValidator),
     m_pSlideshowShooter(new VScreenShooter),
-    m_pVideoShooter(new VVideoShooter)
+    m_pVideoShooter(new VVideoShooter),
+    m_isSaved(false)
 {
     ui->setupUi(this);
     ui->splitter->setStretchFactor(0,1);
@@ -93,7 +94,8 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_pVideoShooter->setWidget(m_pFacade->getGLWidget());
 
     QDir(VVideoShooter::SLIDES_DIR_PATH).removeRecursively();
-    loadShootersSettings();
+    loadShootersSettings();    
+    this->setWindowTitle(QCoreApplication::applicationName());
 }
 
 void VWindowMain::connectSimulationSignals()
@@ -143,6 +145,8 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_layers_cleared()));
     connect(m_pFacade.get(), SIGNAL(modelLoaded()),
             this, SLOT(m_on_model_loaded()));
+    connect(m_pFacade.get(), SIGNAL(modelSaved()),
+            this, SLOT(m_on_model_saved()));
     connect(m_pFacade.get(), SIGNAL(selectionMade()),
             this, SLOT(m_on_selection_made()));
     connect(m_pFacade.get(), SIGNAL(gotTransformation()),
@@ -153,6 +157,8 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_selection_enabled(bool)));
     connect(m_pFacade.get(), SIGNAL(cubeSideChanged(float)),
             this, SLOT(m_on_cube_side_changed(float)));
+    connect(m_pFacade.get(), SIGNAL(filenameChanged(const QString &)),
+            this, SLOT(m_on_filename_changed(const QString &)));
 
     connect(m_pSlideshowShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_slideshow_started()));
     connect(m_pSlideshowShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_slideshow_stopped()));
@@ -1009,6 +1015,37 @@ void VWindowMain::enableButtonsShootingWindows(bool enable)
     ui->actionSave->setEnabled(enable);
 }
 
+void VWindowMain::setSavedState(bool saved)
+{
+    m_isSaved = saved;
+    QString title = this->windowTitle();
+    if (m_isSaved || m_pFacade->getNodesNumber() == 0)
+    {
+        title.remove('*');
+    }
+    else if (!title.startsWith('*'))
+    {
+        title.insert(0, '*');
+    }
+    this->setWindowTitle(title);
+}
+
+void VWindowMain::showFilenameInTitle(const QString &filename)
+{
+    bool addStar = this->windowTitle().startsWith('*');
+    QString title;
+    if (addStar)
+        title += '*';
+    if (!filename.isEmpty())
+    {
+        QString baseFileName = QFileInfo(filename).fileName();
+        title += baseFileName;
+        title += QStringLiteral(" - ");
+    }
+    title += QCoreApplication::applicationName();
+    this->setWindowTitle(title);
+}
+
 /**
  * Slots
  */
@@ -1054,6 +1091,7 @@ void VWindowMain::m_on_layers_cleared()
 {
     reloadLayersList();
     showModelInfo();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_video_saving_started()
@@ -1112,38 +1150,45 @@ void VWindowMain::on_selectMaterialResinButton_clicked()
 void VWindowMain::m_on_layer_removed(uint layer)
 {
     removeLayerFromList(layer);
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_material_changed(uint layer)
 {
     updateLayerMaterialInfo(layer);
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_layer_enabled(uint layer, bool enable)
 {
     markLayerAsEnabled(layer, enable);
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_layer_added()
 {
     showNewLayer();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_injection_point_set()
 {
     injectionPointSelectionResult();
     showInjectionPoint();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_vacuum_point_set()
 {
     vacuumPointSelectionResult();
     showVacuumPoint();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_simutation_started()
 {
     simulationStartResult();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_simutation_paused()
@@ -1154,46 +1199,55 @@ void VWindowMain::m_on_simutation_paused()
 void VWindowMain::m_on_simutation_stopped()
 {
     simulationStopResult();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_resin_changed()
 {
     updateResinInfo();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_injection_diameter_set(double)
 {
     showInjectionDiameter();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_vacuum_diameter_set(double)
 {
     showVacuumDiameter();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_temperature_set(double)
 {
     showTemperature();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_vacuum_pressure_set(double)
 {
     showVacuumPressure();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_injection_pressure_set(double)
 {
     showInjectionPressure();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_time_limit_set(double)
 {
     showTimeLimit();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_time_limit_mode_switched(bool on)
 {
     ui->timeLimitCheckBox->setChecked(on);
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_canceled_waiting_for_injection_point()
@@ -1209,11 +1263,18 @@ void VWindowMain::m_on_canceled_waiing_for_vacuum_point()
 void VWindowMain::m_on_layer_visibility_changed(uint layer, bool visible)
 {
     markLayerAsVisible(layer, visible);
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_model_loaded()
 {
     reloadLayersList();
+    setSavedState(true);
+}
+
+void VWindowMain::m_on_model_saved()
+{
+    setSavedState(true);
 }
 
 void VWindowMain::m_on_selection_made()
@@ -1229,6 +1290,7 @@ void VWindowMain::m_on_got_transformation()
 void VWindowMain::m_on_model_config_updated()
 {
     showModelInfo();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_selection_enabled(bool checked)
@@ -1239,6 +1301,11 @@ void VWindowMain::m_on_selection_enabled(bool checked)
 void VWindowMain::m_on_cube_side_changed(float)
 {
     showCubeSide();
+}
+
+void VWindowMain::m_on_filename_changed(const QString & filename)
+{
+    showFilenameInTitle(filename);
 }
 
 void VWindowMain::m_on_slideshow_started()

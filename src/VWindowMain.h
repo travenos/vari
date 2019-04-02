@@ -166,6 +166,10 @@ private:
     inline void saveSootersSettings();
 
     void enableButtonsShootingWindows(bool enable);
+    void setSavedState(bool saved);
+
+    void showFilenameInTitle(const QString &filename);
+
     Ui::VWindowMain *ui;
     std::unique_ptr<VSimulationFacade> m_pFacade;
     VWindowLayer * m_pWindowLayer;
@@ -178,6 +182,8 @@ private:
 
     std::shared_ptr<VScreenShooter> m_pSlideshowShooter;
     std::shared_ptr<VVideoShooter> m_pVideoShooter;
+
+    bool m_isSaved;
 protected:
     virtual void closeEvent(QCloseEvent *);
 private slots:
@@ -212,11 +218,13 @@ private slots:
     void m_on_canceled_waiting_for_injection_point();
     void m_on_canceled_waiing_for_vacuum_point();
     void m_on_model_loaded();
+    void m_on_model_saved();
     void m_on_selection_made();
     void m_on_got_transformation();
     void m_on_model_config_updated();
     void m_on_selection_enabled(bool checked);
     void m_on_cube_side_changed(float side);
+    void m_on_filename_changed(const QString & filename);
     void m_on_slideshow_started();
     void m_on_slideshow_stopped();
     void m_on_slideshow_directory_changed();
