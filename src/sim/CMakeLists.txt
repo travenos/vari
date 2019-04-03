@@ -1,7 +1,7 @@
 # Project VARI
 # @author Alexey Barashkov
 
-set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{COINDIR})
+set(CMAKE_PREFIX_PATH $ENV{COINDIR} ${CMAKE_PREFIX_PATH})
 
 find_package(Coin REQUIRED)
 find_package(SoQt REQUIRED)
