@@ -170,6 +170,8 @@ private:
 
     void showFilenameInTitle(const QString &filename);
 
+    void swapLayersCaptions(uint layer1, uint layer2);
+
     Ui::VWindowMain *ui;
     std::unique_ptr<VSimulationFacade> m_pFacade;
     VWindowLayer * m_pWindowLayer;
@@ -225,6 +227,7 @@ private slots:
     void m_on_selection_enabled(bool checked);
     void m_on_cube_side_changed(float side);
     void m_on_filename_changed(const QString & filename);
+    void m_on_layers_swapped(uint layer1, uint layer2);
     void m_on_slideshow_started();
     void m_on_slideshow_stopped();
     void m_on_slideshow_directory_changed();
@@ -292,6 +295,8 @@ private slots:
     void on_videoFileNameEdit_textEdited(const QString &arg1);
     void on_resetVideoFileNameButton_clicked();
     void on_saveVideoFileNameButton_clicked();
+    void on_layerUpButton_clicked();
+    void on_layerDownButton_clicked();
 };
 
 #endif // _VWINDOWMAIN_H

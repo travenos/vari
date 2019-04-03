@@ -21,7 +21,7 @@ public:
     typedef std::shared_ptr<const VLayer> const_ptr;
 
     VLayer() = delete;
-    VLayer(const VSimNode::map_ptr &nodes, const VSimTriangle::list_ptr &triangles,
+    VLayer(uint id, const VSimNode::map_ptr &nodes, const VSimTriangle::list_ptr &triangles,
            const VCloth::ptr &material, bool createVolume=true);
     virtual ~VLayer();
     VLayer(const VLayer& ) = delete;
@@ -33,6 +33,7 @@ public:
     bool isNodesVolumeValid() const;
     void getSize(QVector3D &size) const;
     void getConstrains(QVector3D &min, QVector3D &max) const;
+    float getMaxZ() const;
     void setVisible(bool visible) ;
     bool isVisible() const ;
     void markActive(bool active) ;
@@ -45,6 +46,7 @@ public:
     void reset() ;
     VCloth::const_ptr getMaterial() const ;
 
+    uint getId() const;
     void setMinMaxIds(uint nodeMinId, uint nodeMaxId, uint tiangleMinId, uint triangleMaxId);
     uint getNodeMinId() const;
     uint getNodeMaxId() const;
@@ -53,7 +55,7 @@ public:
     void cut(const std::shared_ptr<const std::vector<uint> > &nodesIds);
     void transformate(const std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > >
                         &nodesCoords);
-    void incrementVerticalPosition(float dz);
+    void setVerticalPosition(float z);
 
     void connectWith(const VLayer::ptr &otherLayer);
     void disconnect();
@@ -70,6 +72,7 @@ private:
     bool m_wasVisible;
     bool m_active;
 
+    uint m_id;
     uint m_nodeMinId;
     uint m_nodeMaxId;
     uint m_triangleMinId;

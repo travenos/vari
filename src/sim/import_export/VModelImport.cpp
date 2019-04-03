@@ -186,7 +186,7 @@ void VModelImport::loadTimeLimit(QXmlStreamReader &xmlReader)
 void VModelImport::loadLayers(QXmlStreamReader& xmlReader)
 {
     auto &tags = _xLAYERS_TAGS;
-    std::vector<VLayer::ptr> layers;
+    std::deque<VLayer::ptr> layers;
     READ_ELEMENTS
     (
         if (!xmlReader.name().compare(tags._xLAYER_TAGS._NAME))
@@ -195,7 +195,7 @@ void VModelImport::loadLayers(QXmlStreamReader& xmlReader)
     m_pLayersProcessor->setLayers(layers);
 }
 
-void VModelImport::loadLayer(QXmlStreamReader& xmlReader, std::vector<VLayer::ptr>& layers)
+void VModelImport::loadLayer(QXmlStreamReader& xmlReader, std::deque<VLayer::ptr>& layers)
 {
     auto &tags = _xLAYERS_TAGS._xLAYER_TAGS;
     bool isEnabled=true, isVisible=true;
@@ -237,7 +237,7 @@ void VModelImport::loadLayer(QXmlStreamReader& xmlReader, std::vector<VLayer::pt
             loadTrianglesInfos(xmlReader, trianglesInfos);
     );
     createTriangles(trianglesInfos, material, triangles);
-    VLayer::ptr layer(new VLayer(nodes, triangles, material, false));
+    VLayer::ptr layer(new VLayer(layers.size(), nodes, triangles, material, false));
     layer->markActive(isEnabled);
     layer->setVisible(isVisible);
     layer->setMinMaxIds(nodeMinId, nodeMaxId, triangleMinId, triangleMaxId);

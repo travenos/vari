@@ -14,7 +14,7 @@ const float VLayer::SEARCH_ZONE_PART = 0.1f;
  * VLayer implementation
  */
 
-VLayer::VLayer(const VSimNode::map_ptr &nodes,
+VLayer::VLayer(uint id, const VSimNode::map_ptr &nodes,
                const VSimTriangle::list_ptr &triangles,
                const VCloth::ptr &material,
                bool createVolume):
@@ -24,6 +24,7 @@ VLayer::VLayer(const VSimNode::map_ptr &nodes,
     m_visible(true),
     m_wasVisible(true),
     m_active(true),
+    m_id(id),
     m_nodeMinId(0),
     m_nodeMaxId(0),
     m_triangleMinId(0),
@@ -55,6 +56,10 @@ void VLayer::getConstrains(QVector3D &min, QVector3D &max) const
     m_nodesVolume.getConstraints(min, max);
 }
 
+float VLayer::getMaxZ() const
+{
+    return m_nodesVolume.getMaxZ();
+}
 
 bool VLayer::isNodesVolumeValid() const
 {
@@ -147,6 +152,11 @@ void VLayer::setMinMaxIds(uint nodeMinId, uint nodeMaxId, uint tiangleMinId, uin
     m_triangleMaxId = triangleMaxId;
 }
 
+uint VLayer::getId() const
+{
+    return m_id;
+}
+
 uint VLayer::getNodeMinId() const
 {
     return m_nodeMinId;
@@ -211,14 +221,15 @@ void VLayer::transformate(const std::shared_ptr<const std::vector<std::pair<uint
         resetNodesVolume();
 }
 
-void VLayer::incrementVerticalPosition(float dz)
+void VLayer::setVerticalPosition(float z)
 {
-    if (dz != 0)
+    float verticalPosition = m_nodesVolume.getMinZ();
+    if (z != verticalPosition)
     {
         for (auto &node_pair : *m_pNodes)
         {
             QVector3D position = node_pair.second->getPosition();
-            position[2] += dz;
+            position[2] += (z - verticalPosition);
             node_pair.second->setPosition(position);
         }
         resetNodesVolume();

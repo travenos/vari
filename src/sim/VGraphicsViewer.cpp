@@ -317,7 +317,7 @@ void VGraphicsViewer::setGraphicsElements(const std::vector<VLayer::const_ptr> &
     for (uint i = 0; i < layers.size(); ++i)
     {
         if (layers.at(i)->isActive())
-            m_graphicsLayers.push_back(new VGraphicsLayer(layers.at(i), i, m_cubeSide));
+            m_graphicsLayers.push_back(new VGraphicsLayer(layers.at(i), m_cubeSide));
     }
     {
         std::lock_guard<std::recursive_mutex> locker(m_graphMutex);
@@ -346,18 +346,18 @@ void VGraphicsViewer::updateNodeColors()
         layer->updateNodeColors();
 }
 
-void VGraphicsViewer::updateColors(uint layerNumber)
+void VGraphicsViewer::updateColors(uint layerId)
 {
-    updateTriangleColors(layerNumber);
-    updateNodeColors(layerNumber);
+    updateTriangleColors(layerId);
+    updateNodeColors(layerId);
 }
 
-void VGraphicsViewer::updateTriangleColors(uint layerNumber)
+void VGraphicsViewer::updateTriangleColors(uint layerId)
 {
     std::lock_guard<std::mutex> lock(*m_pTrianglesLock);
     for (auto layer : m_graphicsLayers)
     {
-        if (layer->getNumber() == layerNumber)
+        if (layer->getId() == layerId)
         {
             layer->updateTriangleColors();
             break;
@@ -365,12 +365,12 @@ void VGraphicsViewer::updateTriangleColors(uint layerNumber)
     }
 }
 
-void VGraphicsViewer::updateNodeColors(uint layerNumber)
+void VGraphicsViewer::updateNodeColors(uint layerId)
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     for (auto layer : m_graphicsLayers)
     {
-        if (layer->getNumber() == layerNumber)
+        if (layer->getId() == layerId)
         {
             layer->updateNodeColors();
             break;
@@ -384,14 +384,28 @@ void VGraphicsViewer::updateVisibility()
         layer->updateVisibility();
 }
 
-void VGraphicsViewer::updateVisibility(uint layerNumber)
+void VGraphicsViewer::updateVisibility(uint layerId)
 {
-    m_graphicsLayers.at(layerNumber)->updateVisibility();
+    for (auto layer : m_graphicsLayers)
+    {
+        if (layer->getId() == layerId)
+        {
+            layer->updateVisibility();
+            break;
+        }
+    }
 }
 
-void VGraphicsViewer::updatePosition(uint layerNumber)
+void VGraphicsViewer::updatePosition(uint layerId)
 {
-    m_graphicsLayers.at(layerNumber)->updatePosition();
+    for (auto layer : m_graphicsLayers)
+    {
+        if (layer->getId() == layerId)
+        {
+            layer->updatePosition();
+            break;
+        }
+    }
 }
 
 void VGraphicsViewer::updatePositions()
@@ -631,9 +645,9 @@ const VGraphicsViewer::const_pos_vect_ptr &VGraphicsViewer::getTransformedNodesC
     return m_pTransformedNodesCoords;
 }
 
-uint VGraphicsViewer::getTransformedLayerNumber() const
+uint VGraphicsViewer::getTransformedLayerId() const
 {
-    return m_transformedLayerNumber;
+    return m_transformedLayerId;
 }
 
 bool VGraphicsViewer::isPickOn() const
@@ -810,7 +824,7 @@ void VGraphicsViewer::deselection_cb(void * userdata, SoPath * deselectionPath)
                 {
                     viewer->m_pTransformedNodesCoords = pLayer->getNodesCoords(
                                 viewer->getViewportRegion(), path);
-                    viewer->m_transformedLayerNumber = pLayer->getNumber();
+                    viewer->m_transformedLayerId = pLayer->getId();
                     path->unref();
                     emit viewer->gotTransformation();
                     break;

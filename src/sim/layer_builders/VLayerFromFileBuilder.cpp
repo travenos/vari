@@ -43,7 +43,7 @@ const VLayer::ptr &VLayerFromFileBuilder::build()
         throw VImportException();
     }
     m_file.close();
-    m_pLayer.reset(new VLayer(m_pNodes, m_pTriangles, m_pMaterial));
+    m_pLayer.reset(new VLayer(m_layerId, m_pNodes, m_pTriangles, m_pMaterial));
     m_pLayer->setMinMaxIds(m_nodeStartId, m_nodeMaxId, m_triangleStartId, m_triangleMaxId);
     return m_pLayer;
 }

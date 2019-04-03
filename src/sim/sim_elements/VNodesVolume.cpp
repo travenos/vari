@@ -249,6 +249,16 @@ void VNodesVolume::getConstraints(QVector3D &min, QVector3D &max) const
     max = m_max;
 }
 
+float VNodesVolume::getMaxZ() const
+{
+    return m_max.z();
+}
+
+float VNodesVolume::getMinZ() const
+{
+    return m_min.z();
+}
+
 void VNodesVolume::getPointsInSphere(VSimNode::list_t &nodesList,
                                      const QVector3D &point, float radius,
                                      bool strict) const

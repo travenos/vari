@@ -41,7 +41,7 @@ public:
     virtual ~VGraphicsViewer();
     void setGraphicsElements(const std::vector<VLayer::const_ptr> &layers) ;
     void updateVisibility();
-    void updateVisibility(uint layerNumber);
+    void updateVisibility(uint layerId);
     void clearNodes() ;
     void clearTriangles() ;
     void clearAll() ;
@@ -54,11 +54,11 @@ public:
     void updateColors() ;
     void updateNodeColors() ;
     void updateTriangleColors() ;
-    void updateColors(uint layerNumber) ;
-    void updateNodeColors(uint layerNumber) ;
-    void updateTriangleColors(uint layerNumber) ;
+    void updateColors(uint layerId) ;
+    void updateNodeColors(uint layerId) ;
+    void updateTriangleColors(uint layerId) ;
 
-    void updatePosition(uint layerNumber) ;
+    void updatePosition(uint layerId) ;
     void updatePositions() ;
 
     void enableSelection(bool enable);
@@ -66,7 +66,7 @@ public:
 
     const const_uint_vect_ptr &getSelectedNodesIds() const;
     const const_pos_vect_ptr &getTransformedNodesCoords() const;
-    uint getTransformedLayerNumber() const;
+    uint getTransformedLayerId() const;
 
     bool isPickOn() const;
     bool isDragOn() const;
@@ -156,7 +156,7 @@ private:
 
     const_uint_vect_ptr m_pSelectedNodesIds;
     const_pos_vect_ptr m_pTransformedNodesCoords;
-    uint m_transformedLayerNumber;
+    uint m_transformedLayerId;
 
     float m_cubeSide;
 

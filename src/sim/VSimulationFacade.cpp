@@ -186,7 +186,7 @@ void VSimulationFacade::getModelSize(QVector3D &size) const
 void VSimulationFacade::setVisible(uint layer, bool visible)
 {
     m_pLayersProcessor->setVisibleLayer(layer, visible);
-    m_pGraphicsViewer->updateVisibility(layer);
+    m_pGraphicsViewer->updateVisibility(m_pLayersProcessor->getLayerId(layer));
 }
 
 void VSimulationFacade::removeLayer(uint layer)
@@ -201,10 +201,34 @@ void VSimulationFacade::enableLayer(uint layer, bool enable)
     updateConfiguration();
 }
 
+void VSimulationFacade::moveLayerUp(uint layer)
+{
+    if(layer > 0)
+    {
+        m_pLayersProcessor->moveUp(layer);
+        m_pGraphicsViewer->updatePosition(m_pLayersProcessor->getLayerId(layer));
+        m_pGraphicsViewer->updatePosition(m_pLayersProcessor->getLayerId(layer - 1u));
+        emit layersSwapped(layer, layer - 1u);
+        emit configUpdated();
+    }
+}
+
+void VSimulationFacade::moveLayerDown(uint layer)
+{
+    if(static_cast<int>(layer) < static_cast<int>(getLayersNumber()) - 1)
+    {
+        m_pLayersProcessor->moveDown(layer);
+        m_pGraphicsViewer->updatePosition(m_pLayersProcessor->getLayerId(layer));
+        m_pGraphicsViewer->updatePosition(m_pLayersProcessor->getLayerId(layer + 1u));
+        emit layersSwapped(layer, layer + 1u);
+        emit configUpdated();
+    }
+}
+
 void VSimulationFacade::setMaterial(uint layer, const VCloth &material)
 {
     m_pLayersProcessor->setMaterial(layer, material);
-    m_pGraphicsViewer->updateColors(layer);
+    m_pGraphicsViewer->updateColors(m_pLayersProcessor->getLayerId(layer));
 }
 
 void VSimulationFacade::setResin(const VResin& resin)
@@ -448,16 +472,20 @@ uint VSimulationFacade::getCuttedLayer() const
 
 void VSimulationFacade::performTransformation()
 {
-    uint layer = m_pGraphicsViewer->getTransformedLayerNumber();
-    m_pLayersProcessor->transformateLayer(m_pGraphicsViewer->getTransformedNodesCoords(),
-                                 layer);
-    m_pGraphicsViewer->updatePosition(layer);
-    emit translationPerformed();
+    uint layerId = m_pGraphicsViewer->getTransformedLayerId();
+    int layer = m_pLayersProcessor->getLayerNumber(layerId);
+    if (layer >= 0)
+    {
+        m_pLayersProcessor->transformateLayer(m_pGraphicsViewer->getTransformedNodesCoords(),
+                                              static_cast<uint>(layer));
+        m_pGraphicsViewer->updatePosition(layerId);
+        emit translationPerformed();
+    }
 }
 
-uint VSimulationFacade::getTranslatedLayer() const
+uint VSimulationFacade::getTranslatedLayerId() const
 {
-    return m_pGraphicsViewer->getTransformedLayerNumber();
+    return m_pGraphicsViewer->getTransformedLayerId();
 }
 
 void VSimulationFacade::setAllVisible()
@@ -626,6 +654,16 @@ void VSimulationFacade::disableInteraction()
         cancelWaitingForInjectionPointSelection();
         m_pGraphicsViewer->enableDrag(false);
     }
+}
+
+bool VSimulationFacade::isSimulationStopped() const
+{
+    return !(m_pSimulator->isSimulating() || m_pSimulator->isPaused());
+}
+
+bool VSimulationFacade::isSimulationPaused() const
+{
+    return m_pSimulator->isPaused();
 }
 
 void VSimulationFacade::m_on_got_point(const QVector3D &point)

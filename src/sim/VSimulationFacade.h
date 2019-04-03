@@ -41,6 +41,9 @@ public:
     void removeLayer(uint layer) ;
     void enableLayer(uint layer, bool enable) ;
 
+    void moveLayerUp(uint layer);
+    void moveLayerDown(uint layer);
+
     void setMaterial(uint layer, const VCloth& material) ;
     void setResin(const VResin& resin) ;
     void setInjectionPressure(double pressure) ;
@@ -82,7 +85,7 @@ public:
     void performCut();
     uint getCuttedLayer() const;
     void performTransformation();
-    uint getTranslatedLayer() const;
+    uint getTranslatedLayerId() const;
 
     void setAllVisible();
     void setOnlyOneVisible(uint layer);
@@ -97,6 +100,9 @@ public:
     float getCubeSide() const;
 
     const QWidget * getGLWidget() const;
+
+    bool isSimulationStopped() const;
+    bool isSimulationPaused() const;
 
 public slots:
     void updateGraphicsPositions();
@@ -169,6 +175,8 @@ signals:
     void configUpdated();
 
     void filenameChanged(const QString &);
+
+    void layersSwapped(uint, uint);
 };
 
 #endif //_VSIMULATIONFACADE_H

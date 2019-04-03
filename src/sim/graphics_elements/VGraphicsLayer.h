@@ -19,7 +19,7 @@ class SbViewportRegion;
 class VGraphicsLayer : public SoSeparator
 {
 public:
-    VGraphicsLayer(const VLayer::const_ptr &simLayer, uint number, float cubeSide=VGraphicsNode::DEFAULT_CUBE_SIDE);
+    VGraphicsLayer(const VLayer::const_ptr &simLayer, float cubeSide=VGraphicsNode::DEFAULT_CUBE_SIDE);
     virtual ~VGraphicsLayer();
     VGraphicsLayer(const VGraphicsLayer& ) = delete;
     VGraphicsLayer& operator= (const VGraphicsLayer& ) = delete;
@@ -36,7 +36,7 @@ public:
     void updateVisibility();
     void updatePosition();
     void resetTransform();
-    uint getNumber() const;
+    uint getId() const;
     bool isVisible() const;
     const SoTransform * getTransform() const;
     int getTransformId() const;
@@ -46,7 +46,7 @@ public:
     float getFirstCubeSide() const;
     std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > > getNodesCoords(const SbViewportRegion & viewPortRegion, const SoPath * path) const;
 private:
-    uint m_number;
+    uint m_id;
     bool m_visible;
     std::vector<std::pair<int, VGraphicsNode*> > m_graphicsNodes;
     std::vector<std::pair<int, VGraphicsTriangle*> > m_graphicsTriangles;

@@ -159,6 +159,8 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_cube_side_changed(float)));
     connect(m_pFacade.get(), SIGNAL(filenameChanged(const QString &)),
             this, SLOT(m_on_filename_changed(const QString &)));
+    connect(m_pFacade.get(), SIGNAL(layersSwapped(uint, uint)),
+            this, SLOT(m_on_layers_swapped(uint, uint)));
 
     connect(m_pSlideshowShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_slideshow_started()));
     connect(m_pSlideshowShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_slideshow_stopped()));
@@ -317,6 +319,8 @@ void VWindowMain::selectLayer()
         ui->layerInfoLabel->setText(CLOTH_INFO_TEXT.arg(cloth->name).arg(cloth->cavityHeight)
                                              .arg(cloth->permeability).arg(cloth->porosity));
         showColor(cloth->baseColor);
+        ui->layerUpButton->setEnabled(layer > 0 && m_pFacade->isSimulationStopped());
+        ui->layerDownButton->setEnabled(layer < m_pFacade->getLayersNumber() - 1u && m_pFacade->isSimulationStopped());
     }
     else
         ui->layerParamBox->setVisible(false);
@@ -337,8 +341,9 @@ void VWindowMain::enableLayer(bool enable)
 {
     if (ui->layersListWidget->currentIndex().isValid())
     {
-        uint layer = ui->layersListWidget->currentRow();
-        m_pFacade->enableLayer(layer, enable);
+        int layer = ui->layersListWidget->currentRow();
+        if (layer >= 0)
+            m_pFacade->enableLayer(static_cast<uint>(layer), enable);
     }
 }
 
@@ -346,8 +351,9 @@ void VWindowMain::setVisibleLayer(bool visible)
 {
     if (ui->layersListWidget->currentIndex().isValid())
     {
-        uint layer = ui->layersListWidget->currentRow();
-        m_pFacade->setVisible(layer, visible);
+        int layer = ui->layersListWidget->currentRow();
+        if (layer >= 0)
+            m_pFacade->setVisible(static_cast<uint>(layer), visible);
     }
 }
 
@@ -733,6 +739,10 @@ void VWindowMain::activateSimControls(bool enabled)
     ui->vacuumDiameterEdit->setEnabled(enabled);
     ui->vacuumPlaceButton->setEnabled(enabled);
     ui->selectMaterialResinButton->setEnabled(enabled);
+
+    int layer = ui->layersListWidget->currentRow();
+    ui->layerUpButton->setEnabled(enabled && layer > 0);
+    ui->layerDownButton->setEnabled(enabled && layer < static_cast<int>(m_pFacade->getLayersNumber()) - 1);
 }
 
 void VWindowMain::resetAllInputs()
@@ -746,10 +756,9 @@ void VWindowMain::resetAllInputs()
 
 void VWindowMain::showNewLayer()
 {
-    uint lastLayer = static_cast<uint>(m_pFacade->getLayersNumber()) - 1;
-    VCloth::const_ptr cloth = m_pFacade->getMaterial(lastLayer);
-    ui->layersListWidget->addItem(cloth->name);
-    ui->layersListWidget->setCurrentRow(ui->layersListWidget->count() - 1);
+    VCloth::const_ptr cloth = m_pFacade->getMaterial(0);
+    ui->layersListWidget->insertItem(0, cloth->name);
+    ui->layersListWidget->setCurrentRow(0);
 }
 
 void VWindowMain::reloadLayersList()
@@ -1046,6 +1055,17 @@ void VWindowMain::showFilenameInTitle(const QString &filename)
     this->setWindowTitle(title);
 }
 
+void VWindowMain::swapLayersCaptions(uint layer1, uint layer2)
+{
+    QListWidgetItem *item1 = ui->layersListWidget->item(layer1);
+    QListWidgetItem *item2 = ui->layersListWidget->takeItem(layer2);
+    ui->layersListWidget->insertItem(layer1, item2);
+    int layer1Row = ui->layersListWidget->row(item1);
+    item1 = ui->layersListWidget->takeItem(layer1Row);
+    ui->layersListWidget->insertItem(layer2, item1);
+    ui->layersListWidget->setCurrentItem(item1);
+}
+
 /**
  * Slots
  */
@@ -1306,6 +1326,11 @@ void VWindowMain::m_on_cube_side_changed(float)
 void VWindowMain::m_on_filename_changed(const QString & filename)
 {
     showFilenameInTitle(filename);
+}
+
+void VWindowMain::m_on_layers_swapped(uint layer1, uint layer2)
+{
+    swapLayersCaptions(layer1, layer2);
 }
 
 void VWindowMain::m_on_slideshow_started()
@@ -1649,4 +1674,24 @@ void VWindowMain::on_resetVideoFileNameButton_clicked()
 void VWindowMain::on_saveVideoFileNameButton_clicked()
 {
     m_pVideoShooter->setSuffixFileName(ui->videoFileNameEdit->text());
+}
+
+void VWindowMain::on_layerUpButton_clicked()
+{
+    if (ui->layersListWidget->currentIndex().isValid()
+            && ui->layersListWidget->currentRow() < int(m_pFacade->getLayersNumber()))
+    {
+        uint layer = ui->layersListWidget->currentRow();
+        m_pFacade->moveLayerUp(layer);
+    }
+}
+
+void VWindowMain::on_layerDownButton_clicked()
+{
+    if (ui->layersListWidget->currentIndex().isValid()
+            && ui->layersListWidget->currentRow() < int(m_pFacade->getLayersNumber()))
+    {
+        uint layer = ui->layersListWidget->currentRow();
+        m_pFacade->moveLayerDown(layer);
+    }
 }

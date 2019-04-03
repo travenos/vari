@@ -105,7 +105,7 @@
               <x>0</x>
               <y>0</y>
               <width>1231</width>
-              <height>865</height>
+              <height>863</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout">
@@ -161,6 +161,9 @@
                    <string>Выбранный слой</string>
                   </property>
                   <layout class="QVBoxLayout" name="verticalLayout_4">
+                   <property name="spacing">
+                    <number>3</number>
+                   </property>
                    <item>
                     <layout class="QHBoxLayout" name="layerInfoLayout">
                      <item>
@@ -191,24 +194,78 @@
                     </layout>
                    </item>
                    <item>
-                    <widget class="QCheckBox" name="layerEnableCheckBox">
-                     <property name="text">
-                      <string>Учитывать при моделировании</string>
-                     </property>
-                     <property name="checked">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
+                    <layout class="QHBoxLayout" name="horizontalLayout_10">
+                     <item>
+                      <widget class="QCheckBox" name="layerEnableCheckBox">
+                       <property name="text">
+                        <string>Учитывать при моделировании</string>
+                       </property>
+                       <property name="checked">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_10">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="layerUpButton">
+                       <property name="toolTip">
+                        <string>Переместить слой вверх</string>
+                       </property>
+                       <property name="text">
+                        <string>↑</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
                    </item>
                    <item>
-                    <widget class="QCheckBox" name="layerVisibleCheckBox">
-                     <property name="text">
-                      <string>Отображать</string>
-                     </property>
-                     <property name="checked">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
+                    <layout class="QHBoxLayout" name="horizontalLayout_11">
+                     <item>
+                      <widget class="QCheckBox" name="layerVisibleCheckBox">
+                       <property name="text">
+                        <string>Отображать</string>
+                       </property>
+                       <property name="checked">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_11">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="layerDownButton">
+                       <property name="toolTip">
+                        <string>Переместить слой вниз</string>
+                       </property>
+                       <property name="text">
+                        <string>↓</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
                    </item>
                    <item>
                     <layout class="QHBoxLayout" name="layerControlLayout">
@@ -1274,6 +1331,8 @@
   <tabstop>layerColorButton</tabstop>
   <tabstop>layerEnableCheckBox</tabstop>
   <tabstop>layerVisibleCheckBox</tabstop>
+  <tabstop>layerUpButton</tabstop>
+  <tabstop>layerDownButton</tabstop>
   <tabstop>selectMaterialClothButton</tabstop>
   <tabstop>layerRemoveButton</tabstop>
   <tabstop>layerCutButton</tabstop>

@@ -42,7 +42,7 @@ private:
 
     void loadResin(QXmlStreamReader& xmlReader, VSimulationParameters &param);
 
-    void loadLayer(QXmlStreamReader& xmlReader, std::vector<VLayer::ptr>& layers);
+    void loadLayer(QXmlStreamReader& xmlReader, std::deque<VLayer::ptr> &layers);
     void loadCloth(QXmlStreamReader& xmlReader, VCloth::ptr &material);
     void loadNodes(QXmlStreamReader& xmlReader, const VCloth::const_ptr &material,
                    const VSimNode::map_ptr &nodes);

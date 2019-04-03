@@ -32,6 +32,8 @@ public:
     float getStep() const;
     void getSize(QVector3D &size) const;
     void getConstraints(QVector3D &min, QVector3D &max) const;
+    float getMaxZ() const;
+    float getMinZ() const;
 
     void getPointsInSphere(VSimNode::list_t &nodesList, const QVector3D &point, float radius,
                            bool strict=false) const;
