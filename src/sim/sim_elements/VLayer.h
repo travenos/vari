@@ -34,6 +34,7 @@ public:
     void getSize(QVector3D &size) const;
     void getConstrains(QVector3D &min, QVector3D &max) const;
     float getMaxZ() const;
+    float getMinZ() const;
     void setVisible(bool visible) ;
     bool isVisible() const ;
     void markActive(bool active) ;

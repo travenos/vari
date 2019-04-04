@@ -19,6 +19,11 @@ struct VCloth
     double porosity = 0.5;
     QColor baseColor = QColor(255, 172, 172);
     QString name = "";
+
+    float getHeight() const
+    {
+        return static_cast<float>(cavityHeight);
+    }
 };
 
 struct VResin

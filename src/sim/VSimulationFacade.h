@@ -43,6 +43,7 @@ public:
 
     void moveLayerUp(uint layer);
     void moveLayerDown(uint layer);
+    void sortLayers();
 
     void setMaterial(uint layer, const VCloth& material) ;
     void setResin(const VResin& resin) ;

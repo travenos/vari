@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1632</width>
-    <height>896</height>
+    <height>949</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -105,7 +105,7 @@
               <x>0</x>
               <y>0</y>
               <width>1231</width>
-              <height>863</height>
+              <height>865</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout">
@@ -299,11 +299,22 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="addLayerButton">
-                  <property name="text">
-                   <string>Добавить слой</string>
-                  </property>
-                 </widget>
+                 <layout class="QHBoxLayout" name="horizontalLayout_9">
+                  <item>
+                   <widget class="QPushButton" name="addLayerButton">
+                    <property name="text">
+                     <string>Добавить слой</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="sortLayersButton">
+                    <property name="text">
+                     <string>Пересортировать слои</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </item>
                </layout>
               </widget>
@@ -798,7 +809,7 @@
               <x>0</x>
               <y>0</y>
               <width>1245</width>
-              <height>784</height>
+              <height>837</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_13">
@@ -1337,6 +1348,7 @@
   <tabstop>layerRemoveButton</tabstop>
   <tabstop>layerCutButton</tabstop>
   <tabstop>addLayerButton</tabstop>
+  <tabstop>sortLayersButton</tabstop>
   <tabstop>temperatureEdit</tabstop>
   <tabstop>resetTemperatureButton</tabstop>
   <tabstop>saveTemperatureButton</tabstop>
@@ -1358,6 +1370,7 @@
   <tabstop>timeEdit</tabstop>
   <tabstop>resetTimeLimitButton</tabstop>
   <tabstop>saveTimeLimitButton</tabstop>
+  <tabstop>timeLimitCheckBox</tabstop>
   <tabstop>scrollArea</tabstop>
   <tabstop>cubeSideSlider</tabstop>
   <tabstop>chooseSlideshowDirButton</tabstop>
@@ -1374,7 +1387,6 @@
   <tabstop>videoFrequencySpinBox</tabstop>
   <tabstop>resetVideoFrequencyButton</tabstop>
   <tabstop>saveVideoFrequencyButton</tabstop>
-  <tabstop>timeLimitCheckBox</tabstop>
  </tabstops>
  <resources>
   <include location="resources/resources.qrc"/>

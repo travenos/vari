@@ -225,10 +225,20 @@ void VSimulationFacade::moveLayerDown(uint layer)
     }
 }
 
+void VSimulationFacade::sortLayers()
+{
+    m_pLayersProcessor->sort();
+    m_pGraphicsViewer->updatePositions();
+    emit configUpdated();
+}
+
 void VSimulationFacade::setMaterial(uint layer, const VCloth &material)
 {
     m_pLayersProcessor->setMaterial(layer, material);
-    m_pGraphicsViewer->updateColors(m_pLayersProcessor->getLayerId(layer));
+    uint id = m_pLayersProcessor->getLayerId(layer);
+    m_pGraphicsViewer->updatePositions();
+    m_pGraphicsViewer->updateColors(id);
+    emit configUpdated();
 }
 
 void VSimulationFacade::setResin(const VResin& resin)
@@ -473,7 +483,7 @@ uint VSimulationFacade::getCuttedLayer() const
 void VSimulationFacade::performTransformation()
 {
     uint layerId = m_pGraphicsViewer->getTransformedLayerId();
-    int layer = m_pLayersProcessor->getLayerNumber(layerId);
+    int layer = m_pLayersProcessor->getLayerNumberById(layerId);
     if (layer >= 0)
     {
         m_pLayersProcessor->transformateLayer(m_pGraphicsViewer->getTransformedNodesCoords(),

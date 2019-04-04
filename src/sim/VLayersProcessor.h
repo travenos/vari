@@ -37,6 +37,7 @@ public:
 
     void moveUp(uint layer);
     void moveDown(uint layer);
+    void sort();
 
     void reset() ;
     void clear() ;    
@@ -75,7 +76,7 @@ public:
     void transformateLayer(const std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > >
                         &nodesCoords, uint layer);
 
-    int getLayerNumber(uint layerId) const;
+    int getLayerNumberById(uint layerId) const;
     uint getLayerId(uint layer) const;
 
     void createConnections() ;
@@ -97,6 +98,7 @@ private:
     bool m_layersConnected;
 
     void putOnTop(uint layer) ;
+    void sortLayers(uint fromLayer);
 
     void setPoint(const QVector3D &point, double diameter,
                   VSimNode::VNodeRole setRole, VSimNode::VNodeRole anotherRole);

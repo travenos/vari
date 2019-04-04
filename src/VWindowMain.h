@@ -297,6 +297,7 @@ private slots:
     void on_saveVideoFileNameButton_clicked();
     void on_layerUpButton_clicked();
     void on_layerDownButton_clicked();
+    void on_sortLayersButton_clicked();
 };
 
 #endif // _VWINDOWMAIN_H

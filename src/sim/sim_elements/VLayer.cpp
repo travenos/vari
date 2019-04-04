@@ -61,6 +61,11 @@ float VLayer::getMaxZ() const
     return m_nodesVolume.getMaxZ();
 }
 
+float VLayer::getMinZ() const
+{
+    return m_nodesVolume.getMinZ();
+}
+
 bool VLayer::isNodesVolumeValid() const
 {
     return !(m_nodesVolume.isEmpty() && m_pNodes->size() > 0);

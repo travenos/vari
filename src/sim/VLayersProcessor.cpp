@@ -97,6 +97,7 @@ void VLayersProcessor::enableLayer(uint layer, bool enable)
         m_layers.at(layer)->reset();
     }
     m_layers.at(layer)->markActive(enable);
+    sortLayers(layer);
     updateActiveElementsVectors();
     emit layerEnabled(layer, enable);
     emit layerVisibilityChanged(layer, isLayerVisible(layer));
@@ -106,7 +107,12 @@ void VLayersProcessor::setMaterial(uint layer, const VCloth& material)
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     std::lock_guard<std::mutex> lockT(*m_pTrianglesLock);
+    double oldHeight = m_layers.at(layer)->getMaterial()->cavityHeight;
     m_layers.at(layer)->setMateial(material);
+    if (oldHeight != material.cavityHeight)
+    {
+        sortLayers(layer);
+    }
     emit materialChanged(layer);
 }
 
@@ -115,16 +121,29 @@ void VLayersProcessor::moveUp(uint layer)
     if (layer > 0 && layer < getLayersNumber())
     {
         std::lock_guard<std::mutex> lock(*m_pNodesLock);
-        float otherLayerZ{.0f};
-        float layerZ{.0f};
-        if (static_cast<int>(layer) < static_cast<int>(getLayersNumber()) - 1)
+        float otherLayerBaseZ{.0f};
+        if (layer < getLayersNumber() - 1u)
         {
-            otherLayerZ = m_layers.at(layer + 1u)->getMaxZ();
-            otherLayerZ += static_cast<float>(m_layers.at(layer - 1u)->getMaterial()->cavityHeight);
+            float groundLayer = layer + 1u;
+            while (!m_layers.at(groundLayer)->isActive())
+            {
+                ++groundLayer;
+                if (groundLayer >= getLayersNumber() )
+                {
+                    break;
+                }
+            }
+            if (groundLayer < getLayersNumber())
+                otherLayerBaseZ = m_layers.at(groundLayer)->getMaxZ();
         }
+        float otherLayerZ = otherLayerBaseZ + m_layers.at(layer - 1u)->getMaterial()->getHeight();
+        float layerZ;
         m_layers.at(layer - 1u)->setVerticalPosition(otherLayerZ);
-        layerZ = m_layers.at(layer - 1u)->getMaxZ();
-        layerZ += static_cast<float>(m_layers.at(layer)->getMaterial()->cavityHeight);
+        if (m_layers.at(layer - 1u)->isActive())
+            layerZ = m_layers.at(layer - 1u)->getMaxZ();
+        else
+            layerZ = otherLayerBaseZ;
+        layerZ += m_layers.at(layer)->getMaterial()->getHeight();
         m_layers.at(layer)->setVerticalPosition(layerZ);
         std::swap(m_layers.at(layer), m_layers.at(layer - 1u));
         m_layersConnected = false;
@@ -136,19 +155,41 @@ void VLayersProcessor::moveDown(uint layer)
     if (static_cast<int>(layer) < static_cast<int>(getLayersNumber()) - 1)
     {
         std::lock_guard<std::mutex> lock(*m_pNodesLock);
-        float otherLayerZ{.0f};
-        float layerZ{.0f};
+        float layerBaseZ{.0f};
         if (static_cast<int>(layer) < static_cast<int>(getLayersNumber()) - 2)
         {
-            layerZ = m_layers.at(layer + 2u)->getMaxZ();
-            layerZ += static_cast<float>(m_layers.at(layer)->getMaterial()->cavityHeight);
+            float groundLayer = layer + 2u;
+            while (!m_layers.at(groundLayer)->isActive())
+            {
+                ++groundLayer;
+                if (groundLayer >= getLayersNumber() )
+                {
+                    break;
+                }
+            }
+            if (groundLayer < getLayersNumber())
+                layerBaseZ = m_layers.at(groundLayer)->getMaxZ();
         }
+        float layerZ = layerBaseZ + m_layers.at(layer)->getMaterial()->getHeight();
+        float otherLayerZ;
         m_layers.at(layer)->setVerticalPosition(layerZ);
-        otherLayerZ = m_layers.at(layer)->getMaxZ();
-        otherLayerZ += static_cast<float>(m_layers.at(layer + 1u)->getMaterial()->cavityHeight);
+        if (m_layers.at(layer)->isActive())
+            otherLayerZ = m_layers.at(layer)->getMaxZ();
+        else
+            otherLayerZ = layerBaseZ;
+        otherLayerZ += m_layers.at(layer + 1u)->getMaterial()->getHeight();
         m_layers.at(layer + 1u)->setVerticalPosition(otherLayerZ);
         std::swap(m_layers.at(layer), m_layers.at(layer + 1u));
         m_layersConnected = false;
+    }
+}
+
+void VLayersProcessor::sort()
+{
+    if (getLayersNumber() > 0)
+    {
+        std::lock_guard<std::mutex> lock(*m_pNodesLock);
+        sortLayers(getLayersNumber() - 1u);
     }
 }
 
@@ -311,18 +352,73 @@ void VLayersProcessor::putOnTop(uint layer)
     if (m_layers.size() > 1)
     {
         uint firstLayer = (layer != 0) ? 0 : 1;
+        while (!m_layers.at(firstLayer)->isActive())
+        {
+            ++firstLayer;
+            if (firstLayer == layer)
+                ++firstLayer;
+            if (firstLayer >= m_layers.size())
+            {
+                float z_max = m_layers.at(layer)->getMaterial()->getHeight();
+                m_layers.at(layer)->setVerticalPosition(z_max);
+                return;
+            }
+        }
         float z_max = m_layers.at(firstLayer)->getMaxZ();
         for (uint i = 0; i < m_layers.size(); ++i)
         {
-            if (i != layer)
+            if (i != layer && m_layers.at(i)->isActive())
             {
-                float z_max_i = m_layers.at(firstLayer)->getMaxZ();
+                float z_max_i = m_layers.at(i)->getMaxZ();
                 if (z_max_i > z_max)
                     z_max = z_max_i;
             }
         }
-        z_max += static_cast<float>(m_layers.at(layer)->getMaterial()->cavityHeight);
+        z_max += m_layers.at(layer)->getMaterial()->getHeight();
         m_layers.at(layer)->setVerticalPosition(z_max);
+    }
+    else
+    {
+        float z_max = m_layers.at(layer)->getMaterial()->getHeight();
+        m_layers.at(layer)->setVerticalPosition(z_max);
+    }
+}
+
+
+void VLayersProcessor::sortLayers(uint fromLayer)
+{
+    if (fromLayer < getLayersNumber())
+    {
+        float layerZ{.0f};
+        if (fromLayer < getLayersNumber() - 1u)
+        {
+            uint groundLayer = fromLayer + 1u;
+            while (!m_layers.at(groundLayer)->isActive())
+            {
+                ++groundLayer;
+                if (groundLayer >= m_layers.size())
+                {
+                    break;
+                }
+            }
+            if (groundLayer < m_layers.size())
+            {
+                layerZ = m_layers.at(groundLayer)->getMaxZ();
+            }
+        }
+        for (int i = static_cast<int>(fromLayer); i >= 0; --i)
+        {
+            if (m_layers.at(i)->isActive())
+            {
+                layerZ += m_layers.at(i)->getMaterial()->getHeight();
+                m_layers.at(i)->setVerticalPosition(layerZ);
+                if (i > 0)
+                {
+                    layerZ = m_layers.at(i)->getMaxZ();
+                }
+            }
+        }
+        m_layersConnected = false;
     }
 }
 
@@ -377,7 +473,7 @@ void VLayersProcessor::transformateLayer(const std::shared_ptr<const std::vector
     m_layersConnected = false;
 }
 
-int VLayersProcessor::getLayerNumber(uint layerId) const
+int VLayersProcessor::getLayerNumberById(uint layerId) const
 {
     for (uint i = 0; i < m_layers.size(); ++i)
     {

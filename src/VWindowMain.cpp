@@ -730,6 +730,7 @@ void VWindowMain::activateSimControls(bool enabled)
     ui->layerRemoveButton->setEnabled(enabled);
     ui->layerCutButton->setEnabled(enabled);
     ui->addLayerButton->setEnabled(enabled);
+    ui->sortLayersButton->setEnabled(enabled);
     ui->injectionPressureEdit->setEnabled(enabled);
     ui->saveInjectionPressureButton->setEnabled(enabled);
     ui->injectionDiameterEdit->setEnabled(enabled);
@@ -1694,4 +1695,9 @@ void VWindowMain::on_layerDownButton_clicked()
         uint layer = ui->layersListWidget->currentRow();
         m_pFacade->moveLayerDown(layer);
     }
+}
+
+void VWindowMain::on_sortLayersButton_clicked()
+{
+    m_pFacade->sortLayers();
 }
