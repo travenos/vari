@@ -102,6 +102,18 @@ private:
     static const QString FILLED_PERCENT_LABEL_CAPTION;
     static const QString AVERAGE_PRESSURE_LABEL_CAPTION;
 
+    static const QString SELECTION_MODE_TOOLTIP;
+    static const QString VIEW_MOVEMENT_MODE_TOOLTIP;
+    static const QString TO_SAVED_VIEWPOINT_TOOLTIP;
+    static const QString SAVE_VIEWPOINT_TOOLTIP;
+    static const QString FIT_TO_SCREEN_TOOLTIP;
+    static const QString ZOOM_MODE_TOOLTIP;
+    static const QString PROJECTION_TYPE_TOOLTIP;
+    static const QString XY_TOOLTIP;
+    static const QString YZ_TOOLTIP;
+    static const QString DRAG_TOOLTIP;
+    static const QString CUT_SELECTION_TOOLTIP;
+
     static const int ICON_SIZE;
 
     void initSelection();

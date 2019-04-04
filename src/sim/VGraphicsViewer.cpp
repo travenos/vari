@@ -45,6 +45,18 @@ const QString VGraphicsViewer::ITERATION_LABEL_CAPTION("Номер итерац�
 const QString VGraphicsViewer::FILLED_PERCENT_LABEL_CAPTION("Готовность эксперимента (%):");
 const QString VGraphicsViewer::AVERAGE_PRESSURE_LABEL_CAPTION("Среднее давление (Па):");
 
+const QString VGraphicsViewer::SELECTION_MODE_TOOLTIP("Режим взаимодействия с моделью");
+const QString VGraphicsViewer::VIEW_MOVEMENT_MODE_TOOLTIP("Режим перемещения и вращения вида на модель");
+const QString VGraphicsViewer::TO_SAVED_VIEWPOINT_TOOLTIP("Переход к заранее сохранённой точке обзора");
+const QString VGraphicsViewer::SAVE_VIEWPOINT_TOOLTIP("Сохранение текущей точки обзора");
+const QString VGraphicsViewer::FIT_TO_SCREEN_TOOLTIP("Полностью уместить модель на экране");
+const QString VGraphicsViewer::ZOOM_MODE_TOOLTIP("Режим приближения");
+const QString VGraphicsViewer::PROJECTION_TYPE_TOOLTIP("Переключение типа проекции");
+const QString VGraphicsViewer::XY_TOOLTIP("Вид сверху");
+const QString VGraphicsViewer::YZ_TOOLTIP("Вид справа");
+const QString VGraphicsViewer::DRAG_TOOLTIP("Режим перемещения слоёв");
+const QString VGraphicsViewer::CUT_SELECTION_TOOLTIP("Режим задания контура обрезки");
+
 const int VGraphicsViewer::ICON_SIZE = 24;
 
 
@@ -261,11 +273,20 @@ void VGraphicsViewer::createViewerButtons(QWidget * parent, SbPList * buttonlist
 {
     SoQtExaminerViewer::createViewerButtons(parent, buttonlist);
 
+    static_cast<QPushButton*>((*buttonlist)[0])->setToolTip(SELECTION_MODE_TOOLTIP);
+    static_cast<QPushButton*>((*buttonlist)[1])->setToolTip(VIEW_MOVEMENT_MODE_TOOLTIP);
+    static_cast<QPushButton*>((*buttonlist)[2])->setToolTip(TO_SAVED_VIEWPOINT_TOOLTIP);
+    static_cast<QPushButton*>((*buttonlist)[3])->setToolTip(SAVE_VIEWPOINT_TOOLTIP);
+    static_cast<QPushButton*>((*buttonlist)[4])->setToolTip(FIT_TO_SCREEN_TOOLTIP);
+    static_cast<QPushButton*>((*buttonlist)[5])->setToolTip(ZOOM_MODE_TOOLTIP);
+    static_cast<QPushButton*>((*buttonlist)[6])->setToolTip(PROJECTION_TYPE_TOOLTIP);
+
     m_pXYButton = new QPushButton(QIcon(QStringLiteral(":/img/xyplane.png")),
                                    QStringLiteral(""), parent);
     m_pXYButton->setFocusPolicy(Qt::NoFocus);
     m_pXYButton->setIconSize(QSize(ICON_SIZE, ICON_SIZE));
     m_pXYButton->adjustSize();
+    m_pXYButton->setToolTip(XY_TOOLTIP);
     connect(m_pXYButton, SIGNAL(clicked()), this, SLOT(viewFromAbove()));
     buttonlist->append(m_pXYButton);
 
@@ -274,6 +295,7 @@ void VGraphicsViewer::createViewerButtons(QWidget * parent, SbPList * buttonlist
     m_pYZButton->setFocusPolicy(Qt::NoFocus);
     m_pYZButton->setIconSize(QSize(ICON_SIZE, ICON_SIZE));
     m_pYZButton->adjustSize();
+    m_pYZButton->setToolTip(YZ_TOOLTIP);
     connect(m_pYZButton, SIGNAL(clicked()), this, SLOT(viewFromRight()));
     buttonlist->append(m_pYZButton);
 
@@ -285,6 +307,7 @@ void VGraphicsViewer::createViewerButtons(QWidget * parent, SbPList * buttonlist
     m_pDragButton->setCheckable(true);
     m_pDragButton->setChecked(false);
     m_pDragButton->setVisible(true);
+    m_pDragButton->setToolTip(DRAG_TOOLTIP);
     connect(m_pDragButton, SIGNAL(toggled(bool)), this, SLOT(dragModeSwitch(bool)));
     buttonlist->append(m_pDragButton);
 
@@ -296,6 +319,7 @@ void VGraphicsViewer::createViewerButtons(QWidget * parent, SbPList * buttonlist
     m_pSelectionButton->setCheckable(true);
     m_pSelectionButton->setChecked(false);
     m_pSelectionButton->setVisible(false);
+    m_pSelectionButton->setToolTip(CUT_SELECTION_TOOLTIP);
     connect(m_pSelectionButton, SIGNAL(toggled(bool)), this, SLOT(selectionModeSwitch(bool)));
     buttonlist->append(m_pSelectionButton);
 
