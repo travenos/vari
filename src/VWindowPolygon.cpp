@@ -123,6 +123,7 @@ void VWindowPolygon::reset()
     m_qvY.clear();
     ui->verticesListWidget->clear();
     plot();
+    m_pHighlightCurve->data()->clear();
     updateButtonsStates();
     resetView();
 }
@@ -161,6 +162,10 @@ void VWindowPolygon::removeVertex(int index)
         m_qvY.remove(index);
         plotEnclosed();
         updateButtonsStates();
+        if (getPolygonSize() == 0)
+        {
+            m_pHighlightCurve->data()->clear();
+        }
     }
 }
 
