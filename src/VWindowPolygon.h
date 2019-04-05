@@ -35,6 +35,9 @@ public:
     static const QString TOO_SMALL_STEP_ERROR;
     static const QString INTERSECTION_ERROR;
 
+    static const int POINT_SIZE;
+    static const int HIGHLIGHT_POINT_SIZE;
+
     VWindowPolygon(QWidget *parent = nullptr);
     virtual ~VWindowPolygon();
 
@@ -64,6 +67,9 @@ private:
 
     bool m_mousePressed;
     bool m_plotDragged;
+    bool m_vertexSelected;
+
+    int m_selectedIndex;
 
     double m_characteristicLength;
 
@@ -79,7 +85,7 @@ private:
     void showCharacteristicLength();
     void showRatioError(double ratio);
     void showIntersectionError();
-    bool pointCausesIntersection(double x, double y) const;
+    bool newPointCausesIntersection(double x, double y) const;
     bool lastLineCausesIntersection() const;
     QString getVertexString(double x, double y) const;
     void highlight(int index);

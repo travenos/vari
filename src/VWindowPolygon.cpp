@@ -32,12 +32,17 @@ const QString VWindowPolygon::TOO_SMALL_STEP_ERROR("Задан слишком м
                                                    " как минимум в %1 раз");
 const QString VWindowPolygon::INTERSECTION_ERROR("Заданный контур содержит пересчения");
 
+const int VWindowPolygon::POINT_SIZE = 6;
+const int VWindowPolygon::HIGHLIGHT_POINT_SIZE = 10;
+
 
 VWindowPolygon::VWindowPolygon(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::VWindowPolygon),
     m_mousePressed(false),
-    m_plotDragged(false)
+    m_plotDragged(false),
+    m_vertexSelected(false),
+    m_selectedIndex(-1)
 {
     ui->setupUi(this);
 
@@ -63,7 +68,7 @@ VWindowPolygon::VWindowPolygon(QWidget *parent) :
 
     ui->plotWidget->xAxis->setLabel(QStringLiteral("x, m"));
     ui->plotWidget->yAxis->setLabel(QStringLiteral("y, m"));
-    ui->plotWidget->setInteraction(QCP::iRangeDrag, true);
+    //ui->plotWidget->setInteraction(QCP::iRangeDrag, true); //TODO
     ui->plotWidget->setInteraction(QCP::iRangeZoom, true);
     connect(ui->plotWidget, SIGNAL(beforeReplot()), this, SLOT(pl_on_before_report()));
     connect(ui->plotWidget, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(pl_on_mouse_release(QMouseEvent*)));
@@ -71,12 +76,13 @@ VWindowPolygon::VWindowPolygon(QWidget *parent) :
     connect(ui->plotWidget, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(pl_on_mouse_move(QMouseEvent*)));
 
     m_pPlotCurve = new QCPCurve(ui->plotWidget->xAxis, ui->plotWidget->yAxis);
-    m_pPlotCurve->setScatterStyle(QCPScatterStyle::ssPlusCircle);
+    QCPScatterStyle plotScatterStyle(QCPScatterStyle::ssPlusCircle, POINT_SIZE);
+    m_pPlotCurve->setScatterStyle(plotScatterStyle);
     m_pPlotCurve->setPen(QColor(Qt::blue));
     m_pCloseCurve = new QCPCurve(ui->plotWidget->xAxis, ui->plotWidget->yAxis);
     m_pCloseCurve->setPen(QColor(Qt::red));
     m_pHighlightCurve = new QCPCurve(ui->plotWidget->xAxis, ui->plotWidget->yAxis);;
-    QCPScatterStyle highlightStyle(QCPScatterStyle::ssCircle, QColor(Qt::green), QColor(Qt::green), 10);
+    QCPScatterStyle highlightStyle(QCPScatterStyle::ssCircle, QColor(Qt::green), QColor(Qt::green), HIGHLIGHT_POINT_SIZE);
     m_pHighlightCurve->setScatterStyle(highlightStyle);
     m_pHighlightCurve->setPen(QColor(Qt::blue));
 
@@ -337,7 +343,8 @@ void VWindowPolygon::showIntersectionError()
     QMessageBox::warning(this, ERROR_TITLE, INTERSECTION_ERROR);
 }
 
-bool VWindowPolygon::pointCausesIntersection(double x, double y) const
+//TODO: write a function for checking for intersection for every point, not only for the last
+bool VWindowPolygon::newPointCausesIntersection(double x, double y) const
 {
     int polygonSize = getPolygonSize();
     if (polygonSize <= 2)
@@ -501,27 +508,52 @@ void VWindowPolygon::pl_on_before_report()
 
 void VWindowPolygon::pl_on_mouse_release(QMouseEvent* event)
 {
-    if (!m_plotDragged && event->button() == Qt::LeftButton)
+    if (!m_plotDragged && !m_vertexSelected && event->button() == Qt::LeftButton)
     {
         QPoint point = event->pos();
         double coordX = ui->plotWidget->xAxis->pixelToCoord(point.x());
         double coordY = ui->plotWidget->yAxis->pixelToCoord(point.y());
-        if (!pointCausesIntersection(coordX, coordY))
+        if (!newPointCausesIntersection(coordX, coordY))
             addVertex(coordX, coordY);
     }
     m_mousePressed = false;
     m_plotDragged = false;
+    m_vertexSelected = false;
 }
 
 void VWindowPolygon::pl_on_mouse_press(QMouseEvent* event)
 {
     m_mousePressed = true;
+    QPoint pressPoint = event->pos();
+    for (int i = getPolygonSize() - 1; i >= 0; --i)
+    {
+        QPoint vertexPoint;
+        vertexPoint.setX(ui->plotWidget->xAxis->coordToPixel(m_qvX.at(i)));
+        vertexPoint.setY(ui->plotWidget->yAxis->coordToPixel(m_qvY.at(i)));
+        if ((vertexPoint - pressPoint).manhattanLength() <= POINT_SIZE)
+        {
+            ui->verticesListWidget->setCurrentRow(i);
+            m_vertexSelected = true;
+            m_selectedIndex = i;
+            break;
+        }
+    }
 }
 
 void VWindowPolygon::pl_on_mouse_move(QMouseEvent* event)
 {
     if (m_mousePressed)
+    {
         m_plotDragged = true;
+        if (m_selectedIndex >= 0)
+        {
+            QPoint point = event->pos();
+            double x = ui->plotWidget->xAxis->pixelToCoord(point.x());
+            double y = ui->plotWidget->yAxis->pixelToCoord(point.y());
+            if (!newPointCausesIntersection(x, y)) //TODO not only last point
+                changeVertex(m_selectedIndex, x, y);
+        }
+    }
 }
 
 void VWindowPolygon::on_undoButton_clicked()
@@ -568,7 +600,7 @@ void VWindowPolygon::on_changeCoordsButton_clicked()
 
         double x = ui->changeXSpinBox->value();
         double y = ui->changeYSpinBox->value();
-        if (!pointCausesIntersection(x, y))
+        if (!newPointCausesIntersection(x, y)) //TODO not only last point
             changeVertex(index, x, y);
         else
         {
@@ -602,7 +634,7 @@ void VWindowPolygon::on_addVertexButton_clicked()
 {
     double x = ui->addXSpinBox->value();
     double y = ui->addYSpinBox->value();
-    if (!pointCausesIntersection(x, y))
+    if (!newPointCausesIntersection(x, y))
     {
         addVertex(x, y);
     }
