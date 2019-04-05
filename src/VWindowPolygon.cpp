@@ -30,8 +30,7 @@ const QString VWindowPolygon::EXPORT_TO_FILE_ERROR("Ошибка сохране�
 const QString VWindowPolygon::TOO_SMALL_STEP_ERROR("Задан слишком маленький средний шаг сетки для текущих"
                                                    " габаритов слоя. Необходимо увеличить шаг сетки"
                                                    " как минимум в %1 раз");
-const QString VWindowPolygon::INTERSECTION_ERROR("Невозможно использовать заданный контур, так как он"
-                                                 " содержит пересчения");
+const QString VWindowPolygon::INTERSECTION_ERROR("Заданный контур содержит пересчения");
 
 
 VWindowPolygon::VWindowPolygon(QWidget *parent) :
@@ -42,6 +41,11 @@ VWindowPolygon::VWindowPolygon(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->vertexEditFrame->setVisible(false);
+
+    ui->splitter->setStretchFactor(0,1);
+    ui->splitter->setStretchFactor(1,0);
+
     m_pUndoShortcut = new QShortcut(QKeySequence("Ctrl+Z"), this);
     QObject::connect(m_pUndoShortcut, SIGNAL(activated()), this, SLOT(on_undoButton_clicked()));
 
@@ -50,6 +54,12 @@ VWindowPolygon::VWindowPolygon(QWidget *parent) :
 
     ui->stepSpinBox->setMinimum(MIN_CHARACTERISTIC_LENGTH);
     ui->stepSpinBox->setLocale(QLocale::C);
+
+    //TODO set minimums and maximums
+    ui->addXSpinBox->setLocale(QLocale::C);
+    ui->addYSpinBox->setLocale(QLocale::C);
+    ui->changeXSpinBox->setLocale(QLocale::C);
+    ui->changeYSpinBox->setLocale(QLocale::C);
 
     ui->plotWidget->xAxis->setLabel(QStringLiteral("x, m"));
     ui->plotWidget->yAxis->setLabel(QStringLiteral("y, m"));
@@ -62,8 +72,13 @@ VWindowPolygon::VWindowPolygon(QWidget *parent) :
 
     m_pPlotCurve = new QCPCurve(ui->plotWidget->xAxis, ui->plotWidget->yAxis);
     m_pPlotCurve->setScatterStyle(QCPScatterStyle::ssPlusCircle);
+    m_pPlotCurve->setPen(QColor(Qt::blue));
     m_pCloseCurve = new QCPCurve(ui->plotWidget->xAxis, ui->plotWidget->yAxis);
     m_pCloseCurve->setPen(QColor(Qt::red));
+    m_pHighlightCurve = new QCPCurve(ui->plotWidget->xAxis, ui->plotWidget->yAxis);;
+    QCPScatterStyle highlightStyle(QCPScatterStyle::ssCircle, QColor(Qt::green), QColor(Qt::green), 10);
+    m_pHighlightCurve->setScatterStyle(highlightStyle);
+    m_pHighlightCurve->setPen(QColor(Qt::blue));
 
     loadSavedParameters();
 }
@@ -73,6 +88,7 @@ VWindowPolygon::~VWindowPolygon()
     saveParameters();
     m_pPlotCurve->deleteLater();
     m_pCloseCurve->deleteLater();
+    m_pHighlightCurve->deleteLater();
     m_pUndoShortcut->deleteLater();
     delete ui;
     #ifdef DEBUG_MODE
@@ -105,6 +121,7 @@ void VWindowPolygon::reset()
     m_qvT.clear();
     m_qvX.clear();
     m_qvY.clear();
+    ui->verticesListWidget->clear();
     plot();
     updateButtonsStates();
     resetView();
@@ -124,25 +141,43 @@ void VWindowPolygon::reject()
     close();
 }
 
-void VWindowPolygon::addPoint(double x, double y)
+void VWindowPolygon::addVertex(double x, double y)
 {
     m_qvT.append(m_qvT.size());
     m_qvX.append(x);
     m_qvY.append(y);
     plotEnclosed();
+    addVertexToList(getPolygonSize() - 1);
     updateButtonsStates();
+}
+
+void VWindowPolygon::removeVertex(int index)
+{
+    if (index >= 0 && index < getPolygonSize())
+    {
+        removeVertexFromList(index);
+        m_qvT.remove(index);
+        m_qvX.remove(index);
+        m_qvY.remove(index);
+        plotEnclosed();
+        updateButtonsStates();
+    }
 }
 
 void VWindowPolygon::removeLast()
 {
-    if (m_qvT.size() > 0)
-        m_qvT.pop_back();
-    if (m_qvX.size() > 0)
-        m_qvX.pop_back();
-    if (m_qvY.size() > 0)
-        m_qvY.pop_back();
-    plotEnclosed();
-    updateButtonsStates();
+    removeVertex(getPolygonSize() - 1);
+}
+
+void VWindowPolygon::changeVertex(int index, double x, double y)
+{
+    if (index >= 0 && index < getPolygonSize())
+    {
+        m_qvX.replace(index, x);
+        m_qvY.replace(index, y);
+        plotEnclosed();
+        updateVertexRecord(index);
+    }
 }
 
 void VWindowPolygon::plot()
@@ -333,6 +368,99 @@ bool VWindowPolygon::lastLineCausesIntersection() const
     return false;
 }
 
+QString VWindowPolygon::getVertexString(double x, double y) const
+{
+    QString pointStr = QStringLiteral("X")
+            + QString::number(x, 'f', 3)
+            + QStringLiteral(" Y")
+            + QString::number(y, 'f', 3);
+    return pointStr;
+}
+
+void VWindowPolygon::highlight(int index)
+{
+    if (index >= 0 && index < getPolygonSize())
+    {
+        m_pHighlightCurve->data()->clear();
+        QVector<double> t{m_qvT.at(index)};
+        QVector<double> x{m_qvX.at(index)};
+        QVector<double> y{m_qvY.at(index)};
+        m_pHighlightCurve->setData(t, x, y, true);
+        ui->plotWidget->replot();
+        ui->plotWidget->update();
+    }
+}
+
+void VWindowPolygon::selectVertex()
+{
+    int vertexNumber = ui->verticesListWidget->currentRow();
+    if (ui->verticesListWidget->currentIndex().isValid()
+            && vertexNumber < getPolygonSize())
+    {
+        ui->vertexEditFrame->setVisible(true);
+        highlight(vertexNumber);
+        showCoords(vertexNumber);
+    }
+    else
+        ui->vertexEditFrame->setVisible(false);
+}
+
+void VWindowPolygon::showCoords(int index)
+{
+    if (index >= 0 && index < getPolygonSize())
+    {
+        ui->changeXSpinBox->setValue(m_qvX.at(index));
+        ui->changeYSpinBox->setValue(m_qvY.at(index));
+        ui->restoreCoordsButton->setEnabled(false);
+    }
+}
+
+void VWindowPolygon::addVertexToList(int index)
+{
+    if (index >= 0 && index < getPolygonSize())
+    {
+        QString pointStr = getVertexString(m_qvX.at(index), m_qvY.at(index));
+        ui->verticesListWidget->addItem(pointStr);
+        ui->verticesListWidget->setCurrentRow(ui->verticesListWidget->count() - 1);
+    }
+}
+
+void VWindowPolygon::removeVertexFromList(int index)
+{
+    if (index >= 0 && index < ui->verticesListWidget->count())
+    {
+        if (index == ui->verticesListWidget->currentRow())
+        {
+            if(index > 0)
+                ui->verticesListWidget->setCurrentRow(index - 1);
+        }
+        delete ui->verticesListWidget->item(index);
+    }
+}
+
+void VWindowPolygon::updateVertexRecord(int index)
+{
+    if (index >= 0 && index < ui->verticesListWidget->count())
+    {
+        if (index < getPolygonSize())
+        {
+            QString pointStr = getVertexString(m_qvX.at(index), m_qvY.at(index));
+            ui->verticesListWidget->item(index)->setText(pointStr);
+            if (index == ui->verticesListWidget->currentRow())
+            {
+                selectVertex();
+            }
+        }
+        else
+        {
+            delete ui->verticesListWidget->item(index);
+        }
+    }
+}
+
+/**
+ * Slots
+ */
 
 void VWindowPolygon::on_buttonBox_rejected()
 {
@@ -374,7 +502,7 @@ void VWindowPolygon::pl_on_mouse_release(QMouseEvent* event)
         double coordX = ui->plotWidget->xAxis->pixelToCoord(point.x());
         double coordY = ui->plotWidget->yAxis->pixelToCoord(point.y());
         if (!pointCausesIntersection(coordX, coordY))
-            addPoint(coordX, coordY);
+            addVertex(coordX, coordY);
     }
     m_mousePressed = false;
     m_plotDragged = false;
@@ -414,4 +542,67 @@ void VWindowPolygon::on_exportButton_clicked()
 void VWindowPolygon::on_stepSpinBox_valueChanged(double arg1)
 {
     m_characteristicLength = arg1;
+}
+
+void VWindowPolygon::on_verticesListWidget_itemSelectionChanged()
+{
+    selectVertex();
+}
+
+void VWindowPolygon::on_restoreCoordsButton_clicked()
+{
+    selectVertex();
+}
+
+void VWindowPolygon::on_changeCoordsButton_clicked()
+{
+    int index = ui->verticesListWidget->currentRow();
+    if (ui->verticesListWidget->currentIndex().isValid() &&
+            index >= 0 && index < getPolygonSize())
+    {
+
+        double x = ui->changeXSpinBox->value();
+        double y = ui->changeYSpinBox->value();
+        if (!pointCausesIntersection(x, y))
+            changeVertex(index, x, y);
+        else
+        {
+            showIntersectionError();
+            showCoords(index);
+        }
+    }
+}
+
+void VWindowPolygon::on_removeVertexButton_clicked()
+{
+    int index = ui->verticesListWidget->currentRow();
+    if (ui->verticesListWidget->currentIndex().isValid() &&
+            index >= 0 && index < getPolygonSize())
+    {
+        removeVertex(index);
+    }
+}
+
+void VWindowPolygon::on_changeXSpinBox_valueChanged(double arg1)
+{
+    ui->restoreCoordsButton->setEnabled(true);
+}
+
+void VWindowPolygon::on_changeYSpinBox_valueChanged(double arg1)
+{
+    ui->restoreCoordsButton->setEnabled(true);
+}
+
+void VWindowPolygon::on_addVertexButton_clicked()
+{
+    double x = ui->addXSpinBox->value();
+    double y = ui->addYSpinBox->value();
+    if (!pointCausesIntersection(x, y))
+    {
+        addVertex(x, y);
+    }
+    else
+    {
+        showIntersectionError();
+    }
 }
