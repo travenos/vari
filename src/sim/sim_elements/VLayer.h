@@ -58,7 +58,7 @@ public:
                         &nodesCoords);
     void setVerticalPosition(float z);
 
-    void connectWith(const VLayer::ptr &otherLayer);
+    bool connectWith(const VLayer::ptr &otherLayer);
     void disconnect();
 
     static const float SEARCH_ZONE_PART;

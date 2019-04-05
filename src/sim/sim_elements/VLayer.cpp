@@ -241,8 +241,9 @@ void VLayer::setVerticalPosition(float z)
     }
 }
 
-void VLayer::connectWith(const VLayer::ptr &otherLayer)
+bool VLayer::connectWith(const VLayer::ptr &otherLayer)
 {
+    bool result{false};
     if (otherLayer && otherLayer.get() != this)
     {
         if (!otherLayer->isNodesVolumeValid())
@@ -263,10 +264,12 @@ void VLayer::connectWith(const VLayer::ptr &otherLayer)
                 if (distance >= radiusMin && distance <= radiusMax)
                 {
                     nd_ptr->addNeighbourMutually(neighbour, VSimNode::OTHER, distance);
+                    result = true;
                 }
             }
         }
     }
+    return result;
 }
 
 void VLayer::disconnect()

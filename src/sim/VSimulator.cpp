@@ -485,7 +485,7 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
         double highestNeighborPressure = 0;
 
         double den_brace1 = d*phi;
-        if (_K > 0 && den_brace1 > 0 )
+        if (K > 0 && _K > 0 && den_brace1 > 0 )
         {
             const VSimNode::layered_neighbours_t &neighbours = node->getNeighbours();
             for (uint layer = 0; layer < VSimNode::LAYERS_NUMBER; ++layer)
@@ -496,13 +496,15 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
                     if (distance > 0)
                     {
                         const VSimNode* neighbor = it.second;
+                        double K_i = neighbor->getPermeability();
                         double d_i = neighbor->getCavityHeight();
                         double phi_i = neighbor->getPorosity();
                         double brace1 = pow(((d_i*phi_i)/den_brace1),r);
                         double brace2 = pow(_l/distance,s);
                         double p_it = neighbor->getPressure();
                         double brace3 = p_it-p_t;
-                        sum += (brace1*brace2*brace3);
+                        double brace4 = K_i / K;
+                        sum += brace1 * brace2 * brace3 * brace4;
                         if(p_it > highestNeighborPressure)
                             highestNeighborPressure = p_it;
                     }

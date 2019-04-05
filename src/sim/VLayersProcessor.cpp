@@ -317,7 +317,11 @@ void VLayersProcessor::createConnections()
                 for(uint j = i + 1; j < m_layers.size(); ++j)
                 {
                     if (isLayerEnabled(j))
-                        m_layers.at(i)->connectWith(m_layers.at(j));
+                    {
+                        bool addedConnection = m_layers.at(i)->connectWith(m_layers.at(j));
+                        if (addedConnection)
+                            break;
+                    }
                 }
             }
         }
