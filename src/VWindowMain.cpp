@@ -456,10 +456,10 @@ void VWindowMain::removeLayerFromList(int layer)
 
 void VWindowMain::updateLayerMaterialInfo(int layer)
 {
+    VCloth::const_ptr cloth = m_pFacade->getMaterial(layer);
+    ui->layersListWidget->item(layer)->setText(cloth->name);
     if ( layer == ui->layersListWidget->currentRow())
     {
-        VCloth::const_ptr cloth = m_pFacade->getMaterial(layer);
-        ui->layersListWidget->currentItem()->setText(cloth->name);
         ui->layerInfoLabel->setText(CLOTH_INFO_TEXT.arg(cloth->name).arg(cloth->cavityHeight)
                                              .arg(cloth->permeability).arg(cloth->porosity));
         showColor(cloth->baseColor);
