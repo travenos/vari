@@ -18,7 +18,7 @@
  * VGraphicsNode implementation
  */
 
-const float VGraphicsNode::DEFAULT_CUBE_SIDE = 1.5e-3f;
+const float VGraphicsNode::DEFAULT_CUBE_SIDE = 0; //1.5e-3f;
 
 VGraphicsNode::VGraphicsNode(const VSimNode::const_ptr &simNode, float cubeSide):
     VGraphicsElement(std::dynamic_pointer_cast<const VSimElement>(simNode)),
