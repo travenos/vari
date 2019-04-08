@@ -16,6 +16,15 @@ namespace Ui {
 class VWindowPolygon;
 }
 
+struct VMouseInteractionInfo
+{
+    bool mousePressed{false};
+    bool plotDragged{false};
+    bool vertexSelected{false};
+    bool pressedInCorrectPlace{false};
+    int selectedIndex{-1};
+};
+
 class VWindowPolygon : public QMainWindow
 {
     Q_OBJECT
@@ -65,11 +74,7 @@ private:
     QCPCurve * m_pHighlightCurve;
     QShortcut * m_pUndoShortcut;
 
-    bool m_mousePressed;
-    bool m_plotDragged;
-    bool m_vertexSelected;
-
-    int m_selectedIndex;
+    VMouseInteractionInfo m_mouseInfo;
 
     double m_characteristicLength;
 
@@ -85,8 +90,9 @@ private:
     void showCharacteristicLength();
     void showRatioError(double ratio);
     void showIntersectionError();
-    bool newPointCausesIntersection(double x, double y) const;
+    bool newVertexCausesIntersection(double x, double y) const;
     bool lastLineCausesIntersection() const;
+    bool vertexCausesIntersection(int index, double x, double y) const;
     QString getVertexString(double x, double y) const;
     void highlight(int index);
     void selectVertex();

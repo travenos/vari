@@ -38,11 +38,7 @@ const int VWindowPolygon::HIGHLIGHT_POINT_SIZE = 10;
 
 VWindowPolygon::VWindowPolygon(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::VWindowPolygon),
-    m_mousePressed(false),
-    m_plotDragged(false),
-    m_vertexSelected(false),
-    m_selectedIndex(-1)
+    ui(new Ui::VWindowPolygon)
 {
     ui->setupUi(this);
 
@@ -68,7 +64,7 @@ VWindowPolygon::VWindowPolygon(QWidget *parent) :
 
     ui->plotWidget->xAxis->setLabel(QStringLiteral("x, m"));
     ui->plotWidget->yAxis->setLabel(QStringLiteral("y, m"));
-    //ui->plotWidget->setInteraction(QCP::iRangeDrag, true); //TODO
+    ui->plotWidget->setInteraction(QCP::iRangeDrag, true);
     ui->plotWidget->setInteraction(QCP::iRangeZoom, true);
     connect(ui->plotWidget, SIGNAL(beforeReplot()), this, SLOT(pl_on_before_report()));
     connect(ui->plotWidget, SIGNAL(mouseRelease(QMouseEvent*)), this, SLOT(pl_on_mouse_release(QMouseEvent*)));
@@ -343,8 +339,7 @@ void VWindowPolygon::showIntersectionError()
     QMessageBox::warning(this, ERROR_TITLE, INTERSECTION_ERROR);
 }
 
-//TODO: write a function for checking for intersection for every point, not only for the last
-bool VWindowPolygon::newPointCausesIntersection(double x, double y) const
+bool VWindowPolygon::newVertexCausesIntersection(double x, double y) const
 {
     int polygonSize = getPolygonSize();
     if (polygonSize <= 2)
@@ -376,6 +371,44 @@ bool VWindowPolygon::lastLineCausesIntersection() const
         QLineF line(m_qvX[i - 1], m_qvY[i - 1], m_qvX[i], m_qvY[i]);
         if (line.intersect(lastLine, nullptr) == QLineF::BoundedIntersection)
             return true;
+    }
+    return false;
+}
+
+bool VWindowPolygon::vertexCausesIntersection(int index, double x, double y) const
+{
+    int polygonSize = getPolygonSize();
+    if (index > 0)
+    {
+        QLineF checkLine(m_qvX.at(index - 1), m_qvY.at(index - 1), x, y);
+        for(int i = 1; i < index - 1; ++i)
+        {
+            QLineF line(m_qvX.at(i - 1), m_qvY.at(i - 1), m_qvX.at(i), m_qvY.at(i));
+            if (line.intersect(checkLine, nullptr) == QLineF::BoundedIntersection)
+                return true;
+        }
+        for(int i = index + 2; i < polygonSize; ++i)
+        {
+            QLineF line(m_qvX.at(i - 1), m_qvY.at(i - 1), m_qvX.at(i), m_qvY.at(i));
+            if (line.intersect(checkLine, nullptr) == QLineF::BoundedIntersection)
+                return true;
+        }
+    }
+    if (index < polygonSize - 1)
+    {
+        QLineF checkLine(x, y, m_qvX.at(index + 1), m_qvY.at(index + 1));
+        for(int i = 1; i < index; ++i)
+        {
+            QLineF line(m_qvX.at(i - 1), m_qvY.at(i - 1), m_qvX.at(i), m_qvY.at(i));
+            if (line.intersect(checkLine, nullptr) == QLineF::BoundedIntersection)
+                return true;
+        }
+        for(int i = index + 3; i < polygonSize; ++i)
+        {
+            QLineF line(m_qvX.at(i - 1), m_qvY.at(i - 1), m_qvX.at(i), m_qvY.at(i));
+            if (line.intersect(checkLine, nullptr) == QLineF::BoundedIntersection)
+                return true;
+        }
     }
     return false;
 }
@@ -508,22 +541,28 @@ void VWindowPolygon::pl_on_before_report()
 
 void VWindowPolygon::pl_on_mouse_release(QMouseEvent* event)
 {
-    if (!m_plotDragged && !m_vertexSelected && event->button() == Qt::LeftButton)
+    if (m_mouseInfo.pressedInCorrectPlace && !m_mouseInfo.plotDragged
+            && !m_mouseInfo.vertexSelected
+            && event->button() == Qt::LeftButton)
     {
         QPoint point = event->pos();
         double coordX = ui->plotWidget->xAxis->pixelToCoord(point.x());
         double coordY = ui->plotWidget->yAxis->pixelToCoord(point.y());
-        if (!newPointCausesIntersection(coordX, coordY))
+        if (!newVertexCausesIntersection(coordX, coordY))
             addVertex(coordX, coordY);
     }
-    m_mousePressed = false;
-    m_plotDragged = false;
-    m_vertexSelected = false;
+    m_mouseInfo.mousePressed = false;
+    m_mouseInfo.plotDragged = false;
+    m_mouseInfo.vertexSelected = false;
 }
 
 void VWindowPolygon::pl_on_mouse_press(QMouseEvent* event)
 {
-    m_mousePressed = true;
+    if (event->button() != Qt::LeftButton)
+        return;
+    m_mouseInfo.mousePressed = true;
+    m_mouseInfo.vertexSelected = false;
+    m_mouseInfo.pressedInCorrectPlace = false;
     QPoint pressPoint = event->pos();
     for (int i = getPolygonSize() - 1; i >= 0; --i)
     {
@@ -533,25 +572,34 @@ void VWindowPolygon::pl_on_mouse_press(QMouseEvent* event)
         if ((vertexPoint - pressPoint).manhattanLength() <= POINT_SIZE)
         {
             ui->verticesListWidget->setCurrentRow(i);
-            m_vertexSelected = true;
-            m_selectedIndex = i;
+            m_mouseInfo.vertexSelected = true;
+            m_mouseInfo.selectedIndex = i;
             break;
+        }
+    }
+    if (!m_mouseInfo.vertexSelected)
+    {
+        double pressCoordX = ui->plotWidget->xAxis->pixelToCoord(pressPoint.x());
+        double pressCoordY = ui->plotWidget->yAxis->pixelToCoord(pressPoint.y());
+        if (!newVertexCausesIntersection(pressCoordX, pressCoordY))
+        {
+            m_mouseInfo.pressedInCorrectPlace = true;
         }
     }
 }
 
 void VWindowPolygon::pl_on_mouse_move(QMouseEvent* event)
 {
-    if (m_mousePressed)
+    if (m_mouseInfo.mousePressed && m_mouseInfo.vertexSelected)
     {
-        m_plotDragged = true;
-        if (m_selectedIndex >= 0)
+        m_mouseInfo.plotDragged = true;
+        if (m_mouseInfo.selectedIndex >= 0)
         {
             QPoint point = event->pos();
             double x = ui->plotWidget->xAxis->pixelToCoord(point.x());
             double y = ui->plotWidget->yAxis->pixelToCoord(point.y());
-            if (!newPointCausesIntersection(x, y)) //TODO not only last point
-                changeVertex(m_selectedIndex, x, y);
+            if (!vertexCausesIntersection(m_mouseInfo.selectedIndex, x, y))
+                changeVertex(m_mouseInfo.selectedIndex, x, y);
         }
     }
 }
@@ -600,7 +648,7 @@ void VWindowPolygon::on_changeCoordsButton_clicked()
 
         double x = ui->changeXSpinBox->value();
         double y = ui->changeYSpinBox->value();
-        if (!newPointCausesIntersection(x, y)) //TODO not only last point
+        if (!vertexCausesIntersection(index, x, y))
             changeVertex(index, x, y);
         else
         {
@@ -634,7 +682,7 @@ void VWindowPolygon::on_addVertexButton_clicked()
 {
     double x = ui->addXSpinBox->value();
     double y = ui->addYSpinBox->value();
-    if (!newPointCausesIntersection(x, y))
+    if (!newVertexCausesIntersection(x, y))
     {
         addVertex(x, y);
     }
