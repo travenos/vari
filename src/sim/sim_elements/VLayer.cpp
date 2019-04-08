@@ -272,6 +272,45 @@ bool VLayer::connectWith(const VLayer::ptr &otherLayer)
     return result;
 }
 
+bool VLayer::connectWith(const std::list<VLayer::ptr> &layersList)
+{
+    bool result{false};
+    for (auto &node : *m_pNodes)
+    {
+        VSimNode * nd_ptr = node.second.get();
+        for (auto & otherLayer : layersList)
+        {
+            if (otherLayer && otherLayer.get() != this)
+            {
+                if (!otherLayer->isNodesVolumeValid())
+                    otherLayer->resetNodesVolume();
+                float avgRadius = otherLayer->m_nodesVolume.getAverageDistance();
+                float radiusMin = avgRadius * (1 - SEARCH_ZONE_PART);
+                float radiusMax = avgRadius * (1 + SEARCH_ZONE_PART);
+
+                VSimNode::list_t candidatesList;
+                otherLayer->m_nodesVolume.getPointsBetweenSpheres(candidatesList,
+                                                                  nd_ptr->getPosition(),
+                                                                  radiusMax, radiusMin, false);
+                bool madeConnections{false};
+                for (auto &neighbour : candidatesList)
+                {
+                    float distance = neighbour->getDistance(nd_ptr);
+                    if (distance >= radiusMin && distance <= radiusMax)
+                    {
+                        nd_ptr->addNeighbourMutually(neighbour, VSimNode::OTHER, distance);
+                        result = true;
+                        madeConnections = true;
+                    }
+                }
+                if (madeConnections)
+                    break;
+            }
+        }
+    }
+    return result;
+}
+
 void VLayer::disconnect()
 {
     for (auto &node : *m_pNodes)

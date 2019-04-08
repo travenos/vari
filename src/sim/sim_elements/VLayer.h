@@ -59,6 +59,7 @@ public:
     void setVerticalPosition(float z);
 
     bool connectWith(const VLayer::ptr &otherLayer);
+    bool connectWith(const std::list<VLayer::ptr> &layersList);
     void disconnect();
 
     static const float SEARCH_ZONE_PART;
