@@ -314,15 +314,15 @@ void VLayersProcessor::createConnections()
         {
             if (isLayerEnabled(i))
             {
+                std::list<VLayer::ptr> layersToConnect;
                 for(uint j = i + 1; j < m_layers.size(); ++j)
                 {
                     if (isLayerEnabled(j))
                     {
-                        bool addedConnection = m_layers.at(i)->connectWith(m_layers.at(j));
-                        if (addedConnection)
-                            break;
+                        layersToConnect.push_back(m_layers.at(j));
                     }
                 }
+                m_layers.at(i)->connectWith(layersToConnect);
             }
         }
         m_layersConnected = true;
