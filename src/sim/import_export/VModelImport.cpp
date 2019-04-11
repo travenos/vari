@@ -12,6 +12,7 @@
 
 #include "VModelImport.h"
 #include "structures/VExceptions.h"
+#include "structures/VTable.h"
 
 #define READ_ELEMENTS(body) \
     while (!(xmlReader.isEndElement() && !xmlReader.name().compare(tags._NAME)) && !xmlReader.atEnd()) \
@@ -24,25 +25,47 @@
     }
 
 VModelImport::VModelImport():
+    m_pInfo(new VSimulationInfo),
+    m_pParam(new VSimulationParameters),
+    m_pTable(new VTable),
+    m_pInjectionVacuum(new VInjectionVacuum),
     m_pLayersProcessor(new VLayersProcessor),
+    m_useTableParameters(true),
     m_paused(false),
     m_timeLimited(false)
 {
+    m_pInjectionVacuum->injectionDiameter = m_pParam->getInjectionDiameter();
+    m_pInjectionVacuum->vacuumDiameter = m_pParam->getVacuumDiameter();
 }
 
-const VSimulationInfo& VModelImport::getInfo() const
+const std::shared_ptr<VSimulationInfo>& VModelImport::getInfo() const
 {
-    return m_info;
+    return m_pInfo;
 }
 
-const VSimulationParameters &VModelImport::getSimulationParameters() const
+const std::shared_ptr<VSimulationParameters> &VModelImport::getSimulationParameters() const
 {
-    return m_param;
+    return m_pParam;
+}
+
+const std::shared_ptr<VTable>& VModelImport::getTable() const
+{
+    return m_pTable;
+}
+
+const std::shared_ptr<VInjectionVacuum>& VModelImport::getInjectionVacuum() const
+{
+    return m_pInjectionVacuum;
 }
 
 const VLayersProcessor::ptr& VModelImport::getLayersProcessor() const
 {
     return m_pLayersProcessor;
+}
+
+bool VModelImport::getUseTableParameters() const
+{
+    return m_useTableParameters;
 }
 
 bool VModelImport::getPaused() const
@@ -74,6 +97,10 @@ void VModelImport::loadFromFile(const QString &filename)
                 loadInfo(xmlReader);
             else if (!xmlReader.name().compare(_xPARAM_TAGS._NAME))
                 loadParameters(xmlReader);
+            else if (!xmlReader.name().compare(_xTABLE_TAGS._NAME))
+                loadTable(xmlReader);
+            else if (!xmlReader.name().compare(_xUSE_INJECTION_VACUUM_TAGS._NAME))
+                loadUseInjectionVacuum(xmlReader);
             else if (!xmlReader.name().compare(_xPAUSED_TAGS._NAME))
                 loadPaused(xmlReader);
             else if (!xmlReader.name().compare(_xTIMELIMIT_TAGS._NAME))
@@ -102,17 +129,17 @@ void VModelImport::loadInfo(QXmlStreamReader &xmlReader)
     foreach(const QXmlStreamAttribute &attr, xmlReader.attributes())
     {
         if (!attr.name().compare(tags.AVERAGE_PRESSURE))
-            m_info.averagePressure = attr.value().toDouble();
+            m_pInfo->averagePressure = attr.value().toDouble();
         else if (!attr.name().compare(tags.FILLED_PERCENT))
-            m_info.filledPercent = attr.value().toDouble();
+            m_pInfo->filledPercent = attr.value().toDouble();
         else if (!attr.name().compare(tags.REALTIME_FACTOR))
-            m_info.realtimeFactor = attr.value().toDouble();
+            m_pInfo->realtimeFactor = attr.value().toDouble();
         else if (!attr.name().compare(tags.REAL_TIME))
-            m_info.realTime = attr.value().toDouble();
+            m_pInfo->realTime = attr.value().toDouble();
         else if (!attr.name().compare(tags.SIM_TIME))
-            m_info.simTime = attr.value().toDouble();
+            m_pInfo->simTime = attr.value().toDouble();
         else if (!attr.name().compare(tags.ITERATION))
-            m_info.iteration = attr.value().toInt();
+            m_pInfo->iteration = attr.value().toInt();
     }
 }
 
@@ -122,32 +149,32 @@ void VModelImport::loadParameters(QXmlStreamReader& xmlReader)
     foreach(const QXmlStreamAttribute &attr, xmlReader.attributes())
     {
         if (!attr.name().compare(tags.AVERAGE_CELL_DISTANCE))
-            m_param.setAverageCellDistance(attr.value().toDouble());
+            m_pParam->setAverageCellDistance(attr.value().toDouble());
         else if (!attr.name().compare(tags.AVERAGE_PERMEABILITY))
-            m_param.setAveragePermeability(attr.value().toDouble());
+            m_pParam->setAveragePermeability(attr.value().toDouble());
         else if (!attr.name().compare(tags.INJECTION_DIAMETER))
-            m_param.setInjectionDiameter(attr.value().toDouble());
+            m_pParam->setInjectionDiameter(attr.value().toFloat());
         else if (!attr.name().compare(tags.INJECTION_PRESSURE))
-            m_param.setInjectionPressure(attr.value().toDouble());
+            m_pParam->setInjectionPressure(attr.value().toDouble());
         else if (!attr.name().compare(tags.Q))
-            m_param.setQ(attr.value().toDouble());
+            m_pParam->setQ(attr.value().toDouble());
         else if (!attr.name().compare(tags.R))
-            m_param.setR(attr.value().toDouble());
+            m_pParam->setR(attr.value().toDouble());
         else if (!attr.name().compare(tags.S))
-            m_param.setS(attr.value().toDouble());
+            m_pParam->setS(attr.value().toDouble());
         else if (!attr.name().compare(tags.TEMPERATURE))
-            m_param.setTemperature(attr.value().toDouble());
+            m_pParam->setTemperature(attr.value().toDouble());
         else if (!attr.name().compare(tags.VACUUM_DIAMETER))
-            m_param.setVacuumDiameter(attr.value().toDouble());
+            m_pParam->setVacuumDiameter(attr.value().toFloat());
         else if (!attr.name().compare(tags.VACUUM_PRESSURE))
-            m_param.setVacuumPressure(attr.value().toDouble());
+            m_pParam->setVacuumPressure(attr.value().toDouble());
         else if (!attr.name().compare(tags.NUMBER_OF_FULL_NODES))
-            m_param.setNumberOfFullNodes(attr.value().toInt());
+            m_pParam->setNumberOfFullNodes(attr.value().toInt());
     }
     READ_ELEMENTS
     (
         if (!xmlReader.name().compare(tags._xRESIN_TAGS._NAME))
-            loadResin(xmlReader, m_param);
+            loadResin(xmlReader, *m_pParam);
     );
 }
 
@@ -167,6 +194,82 @@ void VModelImport::loadResin(QXmlStreamReader &xmlReader, VSimulationParameters 
     param.setResin(resin);
 }
 
+
+void VModelImport::loadTable(QXmlStreamReader& xmlReader)
+{
+    auto &tags = _xTABLE_TAGS;
+    READ_ELEMENTS
+    (
+        if (!xmlReader.name().compare(tags._xINJECTION_VACUUM_TAGS._NAME))
+        {
+            VInjectionVacuum injectionVacuum;
+            readInjectionVacuum(xmlReader, injectionVacuum);
+            m_pTable->setInjectionVacuum(injectionVacuum);
+        }
+        if (!xmlReader.name().compare(tags.SIZE))
+        {
+            QString tableSizeStr = xmlReader.readElementText();
+            std::vector<float> tableSizeVector;
+            makeVector(tableSizeStr, tableSizeVector);
+            if(tableSizeVector.size() > 1)
+                m_pTable->setSize(tableSizeVector.at(0), tableSizeVector.at(1));
+        }
+    );
+}
+
+void VModelImport::readInjectionVacuum(QXmlStreamReader& xmlReader, VInjectionVacuum &injectionVacuum)
+{
+    auto &tags = _xINJECTION_VACUUM_TAGS;
+    foreach(const QXmlStreamAttribute &attr, xmlReader.attributes())
+    {
+        if (!attr.name().compare(tags.INJECTION_DIAMETER))
+            injectionVacuum.injectionDiameter = xmlReader.readElementText().toFloat();
+        if (!attr.name().compare(tags.VACUUM_DIAMETER))
+            injectionVacuum.vacuumDiameter = xmlReader.readElementText().toFloat();
+    }
+    READ_ELEMENTS
+    (
+        bool isInjection = !xmlReader.name().compare(tags.INJECTION_COORDS);
+        bool isVacuum = !xmlReader.name().compare(tags.VACUUM_COORDS);
+        if (isInjection || isVacuum)
+        {
+            QString coordsStr = xmlReader.readElementText();
+            std::vector<float> coordsVector;
+            makeVector(coordsStr, coordsVector);
+            if(coordsVector.size() > 1)
+            {
+                if (isInjection)
+                {
+                    injectionVacuum.injectionCoords.setX(coordsVector.at(0));
+                    injectionVacuum.injectionCoords.setY(coordsVector.at(1));
+                }
+                else
+                {
+                    injectionVacuum.vacuumCoords.setX(coordsVector.at(0));
+                    injectionVacuum.vacuumCoords.setY(coordsVector.at(1));
+                }
+            }
+        }
+    );
+}
+
+void VModelImport::loadUseInjectionVacuum(QXmlStreamReader& xmlReader)
+{
+    auto &tags = _xUSE_INJECTION_VACUUM_TAGS;
+    foreach(const QXmlStreamAttribute &attr, xmlReader.attributes())
+    {
+        if (!attr.name().compare(tags.USE_TABLE_PARAMETERS))
+            m_useTableParameters = static_cast<bool>(xmlReader.readElementText().toInt());
+    }
+    READ_ELEMENTS
+    (
+        if (!xmlReader.name().compare(tags._xINJECTION_VACUUM_TAGS._NAME))
+        {
+            readInjectionVacuum(xmlReader, *m_pInjectionVacuum);
+        }
+    );
+}
+
 void VModelImport::loadPaused(QXmlStreamReader &xmlReader)
 {
     m_paused = static_cast<bool>(xmlReader.readElementText().toInt());
@@ -178,7 +281,7 @@ void VModelImport::loadTimeLimit(QXmlStreamReader &xmlReader)
     foreach(const QXmlStreamAttribute &attr, xmlReader.attributes())
     {
         if (!attr.name().compare(tags.DURATION))
-            m_param.setTimeLimit(attr.value().toDouble());
+            m_pParam->setTimeLimit(attr.value().toDouble());
     }
     m_timeLimited = static_cast<bool>(xmlReader.readElementText().toInt());
 }
@@ -299,8 +402,8 @@ void VModelImport::loadNode(QXmlStreamReader& xmlReader, const VCloth::const_ptr
         QVector3D pos(positionVect[0], positionVect[1], positionVect[2]);
         VSimNode::ptr nodePtr;
         nodePtr.reset(new VSimNode(id, pos, material,
-                                   m_param.getInjectionPressure(),
-                                   m_param.getVacuumPressure(),
+                                   m_pParam->getInjectionPressure(),
+                                   m_pParam->getVacuumPressure(),
                                    pressure, role));
         if (m_allNodes.insert({id, nodePtr}).second)
             nodes->insert({id, nodePtr});
@@ -437,6 +540,7 @@ void VModelImport::makeVector(const QString &numbersStr, std::vector<T> &numbers
 {
     numbersVect.clear();
     QStringList numberStrings = numbersStr.split(' ');
+    numbersVect.reserve(static_cast<size_t>(numberStrings.size()));
     foreach (const QString &str, numberStrings)
     {
         T number = qvariant_cast<T>(str);

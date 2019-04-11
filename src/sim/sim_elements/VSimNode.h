@@ -73,6 +73,7 @@ public:
     float getDistance(const VSimNode* node) const ;
     float getDistance(const VSimNode::const_ptr &node) const;
     float getDistance(const QVector3D& point) const;
+    float getDistance(const QVector2D &point) const;
     const QVector3D &getPosition() const ;
     void setPosition(const QVector3D& pos);
     void reset() override;

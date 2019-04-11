@@ -16,23 +16,23 @@ const double VSimulationParameters::DEFAULT_TEMPERATURE = 25;
 const double VSimulationParameters::KELVINS_IN_0_CELSIUS = 273.15;
 const double VSimulationParameters::MIN_PRESSURE = 1;
 
-double VSimulationParameters::getInjectionDiameter() const
+float VSimulationParameters::getInjectionDiameter() const
 {
     return m_injectionDiameter;
 }
 
-void VSimulationParameters::setInjectionDiameter(double diameter)
+void VSimulationParameters::setInjectionDiameter(float diameter)
 {
-    m_injectionDiameter = std::max(diameter, 0.0);
+    m_injectionDiameter = std::max(diameter, 0.0f);
 }
 
-double VSimulationParameters::getVacuumDiameter() const
+float VSimulationParameters::getVacuumDiameter() const
 {
     return m_vacuumDiameter;
 }
-void VSimulationParameters::setVacuumDiameter(double diameter)
+void VSimulationParameters::setVacuumDiameter(float diameter)
 {
-    m_vacuumDiameter = std::max(diameter, 0.0);
+    m_vacuumDiameter = std::max(diameter, 0.0f);
 }
 
 double VSimulationParameters::getViscosity() const

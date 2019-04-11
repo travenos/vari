@@ -7,6 +7,8 @@
 #include <QDebug>
 #endif
 
+#include <QVector2D>
+
 #include "VSimNode.h"
 
 /**
@@ -243,6 +245,12 @@ float VSimNode::getDistance(const VSimNode::const_ptr &node) const
 float VSimNode::getDistance(const QVector3D& point) const
 {
     return m_position.distanceToPoint(point);
+}
+
+float VSimNode::getDistance(const QVector2D& point) const
+{
+    QVector2D xyPosition = m_position.toVector2D();
+    return xyPosition.distanceToPoint(point);
 }
 
 const QVector3D& VSimNode::getPosition() const 

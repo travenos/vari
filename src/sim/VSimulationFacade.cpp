@@ -17,6 +17,7 @@
 #include "import_export/VModelExport.h"
 #include "import_export/VModelImport.h"
 #include "structures/VExceptions.h"
+#include "structures/VTable.h"
 
 /**
  * VSimulationFacade implementation
@@ -29,6 +30,9 @@ VSimulationFacade::VSimulationFacade(QWidget *parent):
     m_pLayersProcessor(new VLayersProcessor),
     m_selectInjectionPoint(false),
     m_selectVacuumPoint(false),
+    m_pInjectionVacuum(new VInjectionVacuum),
+    m_pTable(new VTable),
+    m_useTableParameters(true),
     m_pNodesLock(new std::mutex),
     m_pTrianglesLock(new std::mutex)
 {
@@ -76,10 +80,10 @@ void VSimulationFacade::connectMainSignals()
     connect(m_pSimulator.get(), SIGNAL(resinChanged()),
             this, SIGNAL(resinChanged()));
 
-    connect(m_pSimulator.get(), SIGNAL(injectionDiameterSet(double)),
-            this, SIGNAL(injectionDiameterSet(double)));
-    connect(m_pSimulator.get(), SIGNAL(vacuumDiameterSet(double)),
-            this, SIGNAL(vacuumDiameterSet(double)));
+    connect(m_pSimulator.get(), SIGNAL(injectionDiameterSet(float)),
+            this, SIGNAL(injectionDiameterSet(float)));
+    connect(m_pSimulator.get(), SIGNAL(vacuumDiameterSet(float)),
+            this, SIGNAL(vacuumDiameterSet(float)));
     connect(m_pSimulator.get(), SIGNAL(temperatureSet(double)),
             this, SIGNAL(temperatureSet(double)));
     connect(m_pSimulator.get(), SIGNAL(vacuumPressureSet(double)),
@@ -134,6 +138,7 @@ void VSimulationFacade::startSimulation()
 {
     if (!m_pLayersProcessor->areLayersConnected())
         m_pLayersProcessor->createConnections();
+    applyInjectionAndVacuumPoints();
     m_pSimulator->start();
 }
 
@@ -301,8 +306,11 @@ void VSimulationFacade::loadModel(const QString &filename)
     m_pLayersProcessor = loader.getLayersProcessor();
     initLayersProcessor();
     updateConfiguration();
-    m_pSimulator->setSimulationParameters(loader.getInfo(), loader.getSimulationParameters(),
+    m_pSimulator->setSimulationParameters(*(loader.getInfo()), *(loader.getSimulationParameters()),
                                           loader.getPaused(), loader.getTimeLimited());
+    m_pTable = loader.getTable();
+    m_pInjectionVacuum = loader.getInjectionVacuum();
+    m_useTableParameters = loader.getUseTableParameters();
     m_pGraphicsViewer->viewFromAbove();
     emit modelLoaded();
     emit filenameChanged(filename);
@@ -315,7 +323,8 @@ void VSimulationFacade::saveModel(const QString &filename)
     VSimulationParameters param = m_pSimulator->getSimulationParameters();
     bool paused = m_pSimulator->isPaused();
     bool timeLimited = m_pSimulator->isTimeLimitModeOn();
-    VModelExport saver(info, param, m_pLayersProcessor, paused, timeLimited);
+    VModelExport saver(info, param, *m_pTable, *m_pInjectionVacuum,
+                       m_pLayersProcessor, m_useTableParameters, paused, timeLimited);
     saver.saveToFile(filename);
     emit modelSaved();
     emit filenameChanged(filename);
@@ -419,7 +428,7 @@ void VSimulationFacade::updateGraphicsPositions()
     m_pGraphicsViewer->updatePositions();
 }
 
-void VSimulationFacade::waitForInjectionPointSelection(double diameter)
+void VSimulationFacade::waitForInjectionPointSelection(float diameter)
 {
     cancelCuttingLayer();
     cancelDrag();
@@ -427,20 +436,20 @@ void VSimulationFacade::waitForInjectionPointSelection(double diameter)
     m_pGraphicsViewer->enableDrag(false);
     m_selectInjectionPoint = true;
     m_selectVacuumPoint = false;
-    m_injectionDiameter = diameter;
+    m_pInjectionVacuum->injectionDiameter = diameter;
     m_pGraphicsViewer->viewFromAbove();
     m_pGraphicsViewer->setViewing(false);
     emit startedWaitingForInjectionPoint();
 }
 
-void VSimulationFacade::waitForVacuumPointSelection(double diameter)
+void VSimulationFacade::waitForVacuumPointSelection(float diameter)
 {
     cancelCuttingLayer();
     cancelDrag();
     cancelWaitingForInjectionPointSelection();
     m_pGraphicsViewer->enableDrag(false);
     m_selectVacuumPoint = true;
-    m_vacuumDiameter = diameter;
+    m_pInjectionVacuum->vacuumDiameter = diameter;
     m_pGraphicsViewer->viewFromAbove();
     m_pGraphicsViewer->setViewing(false);
     emit startedWaitingForVacuumPoint();
@@ -538,6 +547,7 @@ void VSimulationFacade::showInjectionPoint()
     cancelDrag();
     cancelWaitingForVacuumPointSelection();
     cancelWaitingForInjectionPointSelection();
+    applyInjectionAndVacuumPoints();
     m_pGraphicsViewer->showInjectionPoint();
 }
 
@@ -547,6 +557,7 @@ void VSimulationFacade::showVacuumPoint()
     cancelDrag();
     cancelWaitingForVacuumPointSelection();
     cancelWaitingForInjectionPointSelection();
+    applyInjectionAndVacuumPoints();
     m_pGraphicsViewer->showVacuumPoint();
 }
 
@@ -562,7 +573,8 @@ void VSimulationFacade::loadSavedParameters()
     VResin resin = param.getResin();
 
     VResin newResin;
-    double temperature, injectionDiameter, injectionPressure, vacuumDiameter, vacuumPressure, q, r, s, timeLimit;
+    double temperature, injectionPressure, vacuumPressure, q, r, s, timeLimit;
+    float simInjectionDiameter, simVacuumDiameter;
     bool timeLimitMode;
 
     newResin.name = settings.value(QStringLiteral("sim/resinName"), resin.name).toString();
@@ -570,10 +582,10 @@ void VSimulationFacade::loadSavedParameters()
     newResin.tempcoef = settings.value(QStringLiteral("sim/tempcoef"), resin.tempcoef).toDouble();
 
     temperature = settings.value(QStringLiteral("sim/temperature"), param.getTemperature()).toDouble();
-    injectionDiameter = settings.value(QStringLiteral("sim/injectionDiameter"), param.getInjectionDiameter()).toDouble();
+    simInjectionDiameter = settings.value(QStringLiteral("sim/injectionDiameter"), param.getInjectionDiameter()).toFloat();
     injectionPressure = settings.value(QStringLiteral("sim/injectionPressure"), param.getInjectionPressure()).toDouble();
 
-    vacuumDiameter = settings.value(QStringLiteral("sim/vacuumDiameter"), param.getVacuumDiameter()).toDouble();
+    simVacuumDiameter = settings.value(QStringLiteral("sim/vacuumDiameter"), param.getVacuumDiameter()).toFloat();
     vacuumPressure = settings.value(QStringLiteral("sim/vacuumPressure"), param.getVacuumPressure()).toDouble();
 
     q = settings.value(QStringLiteral("sim/coefQ"), param.getQ()).toDouble();
@@ -585,9 +597,9 @@ void VSimulationFacade::loadSavedParameters()
 
     m_pSimulator->setResin(newResin);
     m_pSimulator->setTemperature(temperature);
-    m_pSimulator->setInjectionDiameter(injectionDiameter);
+    m_pSimulator->setInjectionDiameter(simInjectionDiameter);
     m_pSimulator->setInjectionPressure(injectionPressure);
-    m_pSimulator->setVacuumDiameter(vacuumDiameter);
+    m_pSimulator->setVacuumDiameter(simVacuumDiameter);
     m_pSimulator->setVacuumPressure(vacuumPressure);
     m_pSimulator->setQ(q);
     m_pSimulator->setR(r);
@@ -601,6 +613,34 @@ void VSimulationFacade::loadSavedParameters()
     cubeSide = settings.value(QStringLiteral("graphics/cubeSide"), m_pGraphicsViewer->getCubeSide()).toFloat();
     m_pGraphicsViewer->setCameraOrthographic(isOrthographic);
     m_pGraphicsViewer->setCubeSide(cubeSide);
+
+    bool useTableParam;
+    QVector2D tableSize, tableInjectionCoords, tableVacuumCoords, injectionCoords, vacuumCoords;
+    float tableInjectionDiameter, tableVacuumDiameter, injectionDiameter, vacuumDiameter;
+
+    tableSize = settings.value(QStringLiteral("table/size"), m_pTable->getSize()).value<QVector2D>();
+    tableInjectionDiameter = settings.value(QStringLiteral("table/injectionDiameter"), m_pTable->getInjectionDiameter()).toFloat();
+    tableVacuumDiameter = settings.value(QStringLiteral("table/vacuumDiameter"), m_pTable->getVacuumDiameter()).toFloat();
+    tableInjectionCoords = settings.value(QStringLiteral("table/injectionCoords"), m_pTable->getInjectionCoords()).value<QVector2D>();
+    tableVacuumCoords = settings.value(QStringLiteral("table/vacuumCoords"), m_pTable->getVacuumCoords()).value<QVector2D>();
+
+    useTableParam = settings.value(QStringLiteral("injectionVacuum/useTableParam"), m_useTableParameters).toBool();
+    injectionDiameter = settings.value(QStringLiteral("injectionVacuum/injectionDiameter"), m_pInjectionVacuum->injectionDiameter).toFloat();
+    vacuumDiameter = settings.value(QStringLiteral("injectionVacuum/vacuumDiameter"), m_pInjectionVacuum->vacuumDiameter).toFloat();
+    injectionCoords = settings.value(QStringLiteral("injectionVacuum/injectionCoords"), m_pInjectionVacuum->injectionCoords).value<QVector2D>();
+    vacuumCoords = settings.value(QStringLiteral("injectionVacuum/vacuumCoords"), m_pInjectionVacuum->vacuumCoords).value<QVector2D>();
+
+    setTableSize(tableSize.x(), tableSize.y());
+    setTableInjectionDiameter(tableInjectionDiameter);
+    setTableVacuumDiameter(tableVacuumDiameter);
+    setTableInjectionCoords(tableInjectionCoords.x(), tableInjectionCoords.y());
+    setTableVacuumCoords(tableVacuumCoords.x(), tableVacuumCoords.y());
+
+    useTableParameters(useTableParam);
+    m_pInjectionVacuum->injectionDiameter = injectionDiameter;
+    m_pInjectionVacuum->vacuumDiameter = vacuumDiameter;
+    m_pInjectionVacuum->injectionCoords = injectionCoords;
+    m_pInjectionVacuum->vacuumCoords = vacuumCoords;
 }
 
 void VSimulationFacade::saveParameters() const
@@ -628,6 +668,19 @@ void VSimulationFacade::saveParameters() const
 
     settings.setValue(QStringLiteral("graphics/cameraType"), m_pGraphicsViewer->isCameraOrthographic());
     settings.setValue(QStringLiteral("graphics/cubeSide"), m_pGraphicsViewer->getCubeSide());
+
+    settings.setValue(QStringLiteral("table/size"), m_pTable->getSize());
+    settings.setValue(QStringLiteral("table/injectionDiameter"), m_pTable->getInjectionDiameter());
+    settings.setValue(QStringLiteral("table/vacuumDiameter"), m_pTable->getVacuumDiameter());
+    settings.setValue(QStringLiteral("table/injectionCoords"), m_pTable->getInjectionCoords());
+    settings.setValue(QStringLiteral("table/vacuumCoords"), m_pTable->getVacuumCoords());
+
+    settings.setValue(QStringLiteral("injectionVacuum/useTableParam"), m_useTableParameters);
+    settings.setValue(QStringLiteral("injectionVacuum/injectionDiameter"), m_pInjectionVacuum->injectionDiameter);
+    settings.setValue(QStringLiteral("injectionVacuum/vacuumDiameter"), m_pInjectionVacuum->vacuumDiameter);
+    settings.setValue(QStringLiteral("injectionVacuum/injectionCoords"), m_pInjectionVacuum->injectionCoords);
+    settings.setValue(QStringLiteral("injectionVacuum/vacuumCoords"), m_pInjectionVacuum->vacuumCoords);
+
     settings.sync();
 }
 
@@ -666,6 +719,11 @@ void VSimulationFacade::disableInteraction()
     }
 }
 
+bool VSimulationFacade::isSimulationActive() const
+{
+    return m_pSimulator->isSimulating();
+}
+
 bool VSimulationFacade::isSimulationStopped() const
 {
     return !(m_pSimulator->isSimulating() || m_pSimulator->isPaused());
@@ -676,20 +734,95 @@ bool VSimulationFacade::isSimulationPaused() const
     return m_pSimulator->isPaused();
 }
 
+std::shared_ptr<const VTable> VSimulationFacade::getTable() const
+{
+    return m_pTable;
+}
+
+void VSimulationFacade::setTableSize(float width, float height)
+{
+    m_pTable->setSize(width, height);
+    const QVector2D &size = m_pTable->getSize();
+    emit tableSizeSet(size.x(), size.y());
+}
+
+void VSimulationFacade::setTableInjectionCoords(float x, float y)
+{
+    m_pTable->setInjectionCoords(x, y);
+    const QVector2D &coords = m_pTable->getInjectionCoords();
+    emit tableInjectionCoordsSet(coords.x(), coords.y());
+}
+
+void VSimulationFacade::setTableVacuumCoords(float x, float y)
+{
+    m_pTable->setVacuumCoords(x, y);
+    const QVector2D &coords = m_pTable->getVacuumCoords();
+    emit tableVacuumCoordsSet(coords.x(), coords.y());
+}
+
+void VSimulationFacade::setTableInjectionDiameter(float diameter)
+{
+    m_pTable->setInjectionDiameter(diameter);
+    emit tableInjectionDiameterSet(m_pTable->getInjectionDiameter());
+}
+
+void VSimulationFacade::setTableVacuumDiameter(float diameter)
+{
+    m_pTable->setVacuumDiameter(diameter);
+    emit tableVacuumDiameterSet(m_pTable->getVacuumDiameter());
+}
+
+void VSimulationFacade::applyInjectionAndVacuumPoints()
+{
+    const VInjectionVacuum * injectionVacuum;
+    if (m_useTableParameters)
+    {
+        injectionVacuum = &(m_pTable->getInjectionVacuum());
+    }
+    else
+    {
+        injectionVacuum = m_pInjectionVacuum.get();
+    }
+    m_pSimulator->setInjectionDiameter(injectionVacuum->injectionDiameter);
+    m_pSimulator->setVacuumDiameter(injectionVacuum->injectionDiameter);
+    m_pLayersProcessor->setInjectionPoint(injectionVacuum->injectionCoords,
+                                          injectionVacuum->injectionDiameter);
+    emit injectionPointSet();
+    m_pLayersProcessor->setVacuumPoint(injectionVacuum->vacuumCoords,
+                                       injectionVacuum->vacuumDiameter);
+    emit vacuumPointSet();
+}
+
+void VSimulationFacade::useTableParameters(bool use)
+{
+    m_useTableParameters = use;
+    emit useTableParametersSet(use);
+}
+
+bool VSimulationFacade::isUsingTableParameters() const
+{
+    return m_useTableParameters;
+}
+
 void VSimulationFacade::m_on_got_point(const QVector3D &point)
 {
+    QVector2D xyProjection = point.toVector2D();
     if(m_selectInjectionPoint)
     {
-        m_pLayersProcessor->setInjectionPoint(point, m_injectionDiameter);
-        m_pSimulator->setInjectionDiameter(m_injectionDiameter);
+        m_pInjectionVacuum->injectionCoords = xyProjection;
+        m_pLayersProcessor->setInjectionPoint(xyProjection, m_pInjectionVacuum->injectionDiameter);
+        m_pSimulator->setInjectionDiameter(m_pInjectionVacuum->injectionDiameter);
         m_selectInjectionPoint = false;
+        m_pGraphicsViewer->showInjectionPoint();
         emit injectionPointSet();
     }
     else if (m_selectVacuumPoint)
     {
-        m_pLayersProcessor->setVacuumPoint(point, m_vacuumDiameter);
-        m_pSimulator->setVacuumDiameter(m_vacuumDiameter);
+        m_pInjectionVacuum->vacuumCoords = xyProjection;
+        m_pLayersProcessor->setVacuumPoint(xyProjection, m_pInjectionVacuum->vacuumDiameter);
+        m_pSimulator->setVacuumDiameter(m_pInjectionVacuum->vacuumDiameter);
         m_selectVacuumPoint = false;
+        m_pGraphicsViewer->showVacuumPoint();
         emit vacuumPointSet();
     }
 }

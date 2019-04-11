@@ -526,13 +526,13 @@ void VLayersProcessor::updateActiveElementsVectors()
     m_pActiveTriangles.reset(activeTriangles);
 }
 
-void VLayersProcessor::setInjectionPoint(const QVector3D &point, double diameter)
+void VLayersProcessor::setInjectionPoint(const QVector2D &point, double diameter)
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     setPoint(point, diameter, VSimNode::INJECTION, VSimNode::VACUUM);
 }
 
-void VLayersProcessor::setVacuumPoint(const QVector3D &point, double diameter)
+void VLayersProcessor::setVacuumPoint(const QVector2D &point, double diameter)
 {
     std::lock_guard<std::mutex> lock(*m_pNodesLock);
     setPoint(point, diameter, VSimNode::VACUUM, VSimNode::INJECTION);
@@ -558,7 +558,7 @@ uint VLayersProcessor::getTriangleMaxId(uint layer) const
     return m_layers.at(layer)->getTriangleMaxId();
 }
 
-void VLayersProcessor::setPoint(const QVector3D &point, double diameter,
+void VLayersProcessor::setPoint(const QVector2D &point, double diameter,
                       VSimNode::VNodeRole setRole, VSimNode::VNodeRole anotherRole)
 {
     if (m_pActiveNodes->size() == 0)
@@ -585,12 +585,9 @@ void VLayersProcessor::setPoint(const QVector3D &point, double diameter,
     }
     if (nearNodes.size() > 0)
     {
-        double height = nearestNode->getCavityHeight() / 2;
         for (auto &node : nearNodes)
         {
-            double z = node->getPosition().z();
-            if (abs(z - point.z()) <= height)
-                node->setRole(setRole);
+            node->setRole(setRole);
         }
     }
     nearestNode->setRole(setRole);

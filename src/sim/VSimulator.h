@@ -117,8 +117,8 @@ public:
                                  bool isPaused=false, bool isTimeLimited=false);
 
     void setResin(const VResin &resin) ;
-    void setInjectionDiameter(double diameter) ;
-    void setVacuumDiameter(double diameter) ;
+    void setInjectionDiameter(float diameter) ;
+    void setVacuumDiameter(float diameter) ;
     void setTemperature(double temperature) ;
     void setVacuumPressure(double pressure) ;
     void setInjectionPressure(double pressure) ;
@@ -261,8 +261,8 @@ signals:
     void simulationStopped();
 
     void resinChanged();
-    void injectionDiameterSet(double diameter) ;
-    void vacuumDiameterSet(double diameter) ;
+    void injectionDiameterSet(float diameter) ;
+    void vacuumDiameterSet(float diameter) ;
     void temperatureSet(double temperature) ;
     void vacuumPressureSet(double pressure) ;
     void injectionPressureSet(double pressure) ;
