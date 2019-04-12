@@ -751,6 +751,10 @@ void VSimulationFacade::setTableInjectionCoords(float x, float y)
     m_pTable->setInjectionCoords(x, y);
     const QVector2D &coords = m_pTable->getInjectionCoords();
     emit tableInjectionCoordsSet(coords.x(), coords.y());
+    if (m_useTableParameters)
+    {
+        m_pInjectionVacuum->injectionCoords = coords;
+    }
 }
 
 void VSimulationFacade::setTableVacuumCoords(float x, float y)
@@ -758,6 +762,10 @@ void VSimulationFacade::setTableVacuumCoords(float x, float y)
     m_pTable->setVacuumCoords(x, y);
     const QVector2D &coords = m_pTable->getVacuumCoords();
     emit tableVacuumCoordsSet(coords.x(), coords.y());
+    if (m_useTableParameters)
+    {
+        m_pInjectionVacuum->vacuumCoords = coords;
+    }
 }
 
 void VSimulationFacade::setTableInjectionDiameter(float diameter)
@@ -766,6 +774,7 @@ void VSimulationFacade::setTableInjectionDiameter(float diameter)
     emit tableInjectionDiameterSet(m_pTable->getInjectionDiameter());
     if (m_useTableParameters)
     {
+        m_pInjectionVacuum->injectionDiameter = m_pTable->getInjectionDiameter();
         m_pSimulator->setInjectionDiameter(m_pTable->getInjectionDiameter());
     }
 }
@@ -776,6 +785,7 @@ void VSimulationFacade::setTableVacuumDiameter(float diameter)
     emit tableVacuumDiameterSet(m_pTable->getVacuumDiameter());
     if (m_useTableParameters)
     {
+        m_pInjectionVacuum->vacuumDiameter = m_pTable->getVacuumDiameter();
         m_pSimulator->setVacuumDiameter(m_pTable->getVacuumDiameter());
     }
 }
@@ -830,6 +840,8 @@ void VSimulationFacade::setTable(const std::shared_ptr<VTable> &p_table)
     {
         m_pSimulator->setInjectionDiameter(m_pTable->getInjectionDiameter());
         m_pSimulator->setVacuumDiameter(m_pTable->getVacuumDiameter());
+        m_pInjectionVacuum->injectionDiameter = m_pTable->getInjectionDiameter();
+        m_pInjectionVacuum->vacuumDiameter = m_pTable->getVacuumDiameter();
     }
 }
 
