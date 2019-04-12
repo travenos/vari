@@ -543,7 +543,7 @@ void VSimulator::setResin(const VResin& resin)
     emit resinChanged();
 }
 
-void VSimulator::setInjectionDiameter(double diameter)
+void VSimulator::setInjectionDiameter(float diameter)
 {
     {
         std::lock_guard<std::mutex> lock(*m_pNodesLock);
@@ -552,7 +552,7 @@ void VSimulator::setInjectionDiameter(double diameter)
     emit injectionDiameterSet(diameter);
 }
 
-void VSimulator::setVacuumDiameter(double diameter)
+void VSimulator::setVacuumDiameter(float diameter)
 {
     {
         std::lock_guard<std::mutex> lock(*m_pNodesLock);

@@ -60,8 +60,8 @@ public:
 
     bool areLayersConnected() const;
 
-    void setInjectionPoint(const QVector3D &point, double diameter);
-    void setVacuumPoint(const QVector3D &point, double diameter);
+    void setInjectionPoint(const QVector2D &point, double diameter);
+    void setVacuumPoint(const QVector2D &point, double diameter);
 
     void getActiveModelSize(QVector3D &size) const;
     size_t getActiveNodesNumber() const;
@@ -100,7 +100,7 @@ private:
     void putOnTop(uint layer) ;
     void sortLayers(uint fromLayer);
 
-    void setPoint(const QVector3D &point, double diameter,
+    void setPoint(const QVector2D &point, double diameter,
                   VSimNode::VNodeRole setRole, VSimNode::VNodeRole anotherRole);
 signals:
     void layerVisibilityChanged(uint, bool);

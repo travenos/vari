@@ -16,11 +16,14 @@ set(HEADER_FILES
     VNotify.h
     VSimulationInfo.h
     VSimulationParameters.h
+    VTable.h
+    VInjectionVacuum.h
     )
 
 set(SOURCE_FILES
     VNotify.cpp
     VSimulationParameters.cpp
+    VTable.cpp
     )
 
 ADD_MODULE(v_structures

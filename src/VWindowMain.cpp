@@ -21,6 +21,7 @@
 #include "VVideoShooter.h"
 #include "sim/VSimulationFacade.h"
 #include "sim/structures/VExceptions.h"
+#include "sim/structures/VTable.h"
 
 const QString VWindowMain::ERROR_TITLE("Ошибка");
 const QString VWindowMain::INFO_TITLE("Информация");
@@ -87,6 +88,7 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_pFacade.reset(new VSimulationFacade(ui->viewerWidget));
     connectSimulationSignals();
     setupValidators();
+    setupSpinboxesLocales();
     m_pFacade->loadSavedParameters();
     showCubeSide();
     loadSizes();
@@ -123,10 +125,10 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_resin_changed()));
     connect(m_pFacade.get(), SIGNAL(layerVisibilityChanged(uint, bool)),
             this, SLOT(m_on_layer_visibility_changed(uint, bool)));
-    connect(m_pFacade.get(), SIGNAL(injectionDiameterSet(double)),
-            this, SLOT(m_on_injection_diameter_set(double)));
-    connect(m_pFacade.get(), SIGNAL(vacuumDiameterSet(double)),
-            this, SLOT(m_on_vacuum_diameter_set(double)));
+    connect(m_pFacade.get(), SIGNAL(injectionDiameterSet(float)),
+            this, SLOT(m_on_injection_diameter_set(float)));
+    connect(m_pFacade.get(), SIGNAL(vacuumDiameterSet(float)),
+            this, SLOT(m_on_vacuum_diameter_set(float)));
     connect(m_pFacade.get(), SIGNAL(temperatureSet(double)),
             this, SLOT(m_on_temperature_set(double)));
     connect(m_pFacade.get(), SIGNAL(vacuumPressureSet(double)),
@@ -162,6 +164,19 @@ void VWindowMain::connectSimulationSignals()
     connect(m_pFacade.get(), SIGNAL(layersSwapped(uint, uint)),
             this, SLOT(m_on_layers_swapped(uint, uint)));
 
+    connect(m_pFacade.get(), SIGNAL(tableSizeSet(float, float)),
+            this, SLOT(m_on_table_size_set(float, float)));
+    connect(m_pFacade.get(), SIGNAL(tableInjectionCoordsSet(float, float)),
+            this, SLOT(m_on_table_injection_coords_set(float, float)));
+    connect(m_pFacade.get(), SIGNAL(tableVacuumCoordsSet(float, float)),
+            this, SLOT(m_on_table_vacuum_coords_set(float, float)));
+    connect(m_pFacade.get(), SIGNAL(tableInjectionDiameterSet(float)),
+            this, SLOT(m_on_table_injection_diameter_set(float)));
+    connect(m_pFacade.get(), SIGNAL(tableVacuumDiameterSet(float)),
+            this, SLOT(m_on_table_vacuum_diameter_set(float)));
+    connect(m_pFacade.get(), SIGNAL(useTableParametersSet(bool)),
+            this, SLOT(m_on_use_table_parameters_set(bool)));
+
     connect(m_pSlideshowShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_slideshow_started()));
     connect(m_pSlideshowShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_slideshow_stopped()));
     connect(m_pSlideshowShooter.get(), SIGNAL(directoryChanged()), this, SLOT(m_on_slideshow_directory_changed()));
@@ -189,6 +204,20 @@ void VWindowMain::setupValidators()
     ui->vacuumPressureEdit->setValidator(m_pPressureValidator);
     ui->injectionDiameterEdit->setValidator(m_pDiameterValidator);
     ui->vacuumDiameterEdit->setValidator(m_pDiameterValidator);
+}
+
+void VWindowMain::setupSpinboxesLocales()
+{
+    ui->tableXSpinBox->setLocale(QLocale::C);
+    ui->tableYSpinBox->setLocale(QLocale::C);
+    ui->tableInjectionXSpinBox->setLocale(QLocale::C);
+    ui->tableInjectionYSpinBox->setLocale(QLocale::C);
+    ui->tableInjectionDiameterSpinBox->setLocale(QLocale::C);
+    ui->tableVacuumXSpinBox->setLocale(QLocale::C);
+    ui->tableVacuumYSpinBox->setLocale(QLocale::C);
+    ui->tableVacuumDiameterSpinBox->setLocale(QLocale::C);
+    ui->slideshowPeriodSpinBox->setLocale(QLocale::C);
+    ui->videoFrequencySpinBox->setLocale(QLocale::C);
 }
 
 VWindowMain::~VWindowMain()
@@ -289,7 +318,7 @@ void VWindowMain::showWindowLayer()
 {
     if (m_pWindowLayer == nullptr)
     {
-        m_pWindowLayer = new VWindowLayer(this);
+        m_pWindowLayer = new VWindowLayer(this, m_pFacade->getTable());
         connect(m_pWindowLayer,
                 SIGNAL(creationFromFileAvailable(const VCloth&,const QString&, VLayerAbstractBuilder::VUnit)),
                 this,
@@ -299,6 +328,10 @@ void VWindowMain::showWindowLayer()
                 this,
                 SLOT(m_on_layer_creation_manual_available(const VCloth&,const QPolygonF&, double)));
         connect(m_pWindowLayer,SIGNAL(windowClosed()), this, SLOT(m_on_layer_window_closed()));
+    }
+    else
+    {
+        m_pWindowLayer->setTable(m_pFacade->getTable());
     }
     m_pWindowLayer->show();
     m_pWindowLayer->activateWindow();
@@ -514,7 +547,7 @@ void VWindowMain::injectionPointSelectionResult()
 
 void VWindowMain::startInjectionPointSelection()
 {
-    double diameter;
+    float diameter;
     bool ok = readNumber(ui->injectionDiameterEdit, diameter);
     if (ok)
         m_pFacade->waitForInjectionPointSelection(diameter);
@@ -532,7 +565,7 @@ void VWindowMain::cancelInjectionPointSelection()
 
 void VWindowMain::startVacuumPointSelection()
 {
-    double diameter;
+    float diameter;
     bool ok = readNumber(ui->vacuumDiameterEdit, diameter);
     if (ok)
         m_pFacade->waitForVacuumPointSelection(diameter);
@@ -627,7 +660,7 @@ void VWindowMain::showInjectionPressure()
 
 void VWindowMain::showInjectionDiameter()
 {
-    double injectionDiameter = m_pFacade->getParameters().getInjectionDiameter();
+    float injectionDiameter = m_pFacade->getParameters().getInjectionDiameter();
     ui->injectionDiameterEdit->setText(QString::number(injectionDiameter));
     ui->resetInjectionDiameterButton->setEnabled(false);
 }
@@ -639,7 +672,7 @@ void VWindowMain::showInjectionPoint()
 
 void VWindowMain::showVacuumPressure()
 {
-    double vacuumPressure = m_pFacade->getParameters().getVacuumPressure();
+    float vacuumPressure = m_pFacade->getParameters().getVacuumPressure();
     ui->vacuumPressureEdit->setText(QString::number(vacuumPressure));
     ui->resetVacuumPressureButton->setEnabled(false);
 }
@@ -698,6 +731,19 @@ bool VWindowMain::readNumber(const QLineEdit * lineEdit, double &output) const
     return ok;
 }
 
+bool VWindowMain::readNumber(const QLineEdit * lineEdit, float &output) const
+{
+    bool ok;
+    QString numberStr = lineEdit->text().replace(',', '.');
+    int pos = 0;
+    QValidator::State state = lineEdit->validator()->validate(numberStr, pos);
+    if (state == QValidator::Acceptable)
+        output = numberStr.toFloat(&ok);
+    else
+        return false;
+    return ok;
+}
+
 void VWindowMain::simulationStartResult()
 {
     ui->actionStart->setEnabled(false);
@@ -724,6 +770,8 @@ void VWindowMain::simulationStopResult()
 
 void VWindowMain::activateSimControls(bool enabled)
 {
+    bool useTableParam = m_pFacade->isUsingTableParameters();
+    ui->useTableParamCheckBox->setEnabled(enabled);
     ui->layerEnableCheckBox->setEnabled(enabled);
     ui->layerColorButton->setEnabled(enabled);
     ui->selectMaterialClothButton->setEnabled(enabled);
@@ -733,12 +781,14 @@ void VWindowMain::activateSimControls(bool enabled)
     ui->sortLayersButton->setEnabled(enabled);
     ui->injectionPressureEdit->setEnabled(enabled);
     ui->saveInjectionPressureButton->setEnabled(enabled);
-    ui->injectionDiameterEdit->setEnabled(enabled);
-    ui->injectionPlaceButton->setEnabled(enabled);
+    ui->injectionDiameterEdit->setEnabled(enabled && !useTableParam);
+    ui->injectionPlaceButton->setEnabled(enabled && !useTableParam);
+    ui->resetInjectionDiameterButton->setEnabled(enabled && !useTableParam);
     ui->vacuumPressureEdit->setEnabled(enabled);
     ui->saveVacuumPressureButton->setEnabled(enabled);
-    ui->vacuumDiameterEdit->setEnabled(enabled);
-    ui->vacuumPlaceButton->setEnabled(enabled);
+    ui->vacuumDiameterEdit->setEnabled(enabled && !useTableParam);
+    ui->vacuumPlaceButton->setEnabled(enabled && !useTableParam);
+    ui->resetVacuumDiameterButton->setEnabled(enabled && !useTableParam);
     ui->selectMaterialResinButton->setEnabled(enabled);
 
     int layer = ui->layersListWidget->currentRow();
@@ -1195,14 +1245,12 @@ void VWindowMain::m_on_layer_added()
 void VWindowMain::m_on_injection_point_set()
 {
     injectionPointSelectionResult();
-    showInjectionPoint();
     setSavedState(false);
 }
 
 void VWindowMain::m_on_vacuum_point_set()
 {
     vacuumPointSelectionResult();
-    showVacuumPoint();
     setSavedState(false);
 }
 
@@ -1229,13 +1277,13 @@ void VWindowMain::m_on_resin_changed()
     setSavedState(false);
 }
 
-void VWindowMain::m_on_injection_diameter_set(double)
+void VWindowMain::m_on_injection_diameter_set(float)
 {
     showInjectionDiameter();
     setSavedState(false);
 }
 
-void VWindowMain::m_on_vacuum_diameter_set(double)
+void VWindowMain::m_on_vacuum_diameter_set(float)
 {
     showVacuumDiameter();
     setSavedState(false);
@@ -1406,6 +1454,59 @@ void VWindowMain::m_on_video_suffix_filename_changed()
     const QString &filename = m_pVideoShooter->getSuffixFileName();
     ui->videoFileNameEdit->setText(filename);
     ui->resetVideoFileNameButton->setEnabled(false);
+}
+
+
+void VWindowMain::m_on_table_size_set(float width, float height)
+{
+    ui->tableXSpinBox->setValue(width);
+    ui->tableYSpinBox->setValue(height);
+    ui->resetTableSizeButton->setEnabled(false);
+    setSavedState(false);
+}
+
+void VWindowMain::m_on_table_injection_coords_set(float x, float y)
+{
+    ui->tableInjectionXSpinBox->setValue(x);
+    ui->tableInjectionYSpinBox->setValue(y);
+    ui->resetTableInjectionCoordsButton->setEnabled(false);
+    setSavedState(false);
+}
+
+void VWindowMain::m_on_table_vacuum_coords_set(float x, float y)
+{
+    ui->tableVacuumXSpinBox->setValue(x);
+    ui->tableVacuumYSpinBox->setValue(y);
+    ui->resetTableVacuumCoordsButton->setEnabled(false);
+    setSavedState(false);
+}
+
+void VWindowMain::m_on_table_injection_diameter_set(float diameter)
+{
+    ui->tableInjectionDiameterSpinBox->setValue(diameter);
+    ui->resetTableInjectionDiameterButton->setEnabled(false);
+    setSavedState(false);
+}
+
+void VWindowMain::m_on_table_vacuum_diameter_set(float diameter)
+{
+    ui->tableVacuumDiameterSpinBox->setValue(diameter);
+    ui->resetTableVacuumDiameterButton->setEnabled(false);
+    setSavedState(false);
+}
+
+void VWindowMain::m_on_use_table_parameters_set(bool use)
+{
+    if (ui->useTableParamCheckBox->isChecked() != use)
+        ui->useTableParamCheckBox->setChecked(use);
+    bool enabled = !(m_pFacade->isSimulationActive());
+    ui->injectionDiameterEdit->setEnabled(enabled && !use);
+    ui->injectionPlaceButton->setEnabled(enabled && !use);
+    ui->resetInjectionDiameterButton->setEnabled(enabled && !use);
+    ui->vacuumDiameterEdit->setEnabled(enabled && !use);
+    ui->vacuumPlaceButton->setEnabled(enabled && !use);
+    ui->resetVacuumDiameterButton->setEnabled(enabled && !use);
+    setSavedState(false);
 }
 
 void VWindowMain::on_injectionPlaceButton_clicked(bool checked)
@@ -1700,4 +1801,135 @@ void VWindowMain::on_layerDownButton_clicked()
 void VWindowMain::on_sortLayersButton_clicked()
 {
     m_pFacade->sortLayers();
+}
+
+void VWindowMain::on_useTableParamCheckBox_clicked(bool checked)
+{
+    m_pFacade->useTableParameters(checked);
+}
+
+void VWindowMain::on_tableXSpinBox_valueChanged(double)
+{
+    const QVector2D & size = m_pFacade->getTable()->getSize();
+    float x = static_cast<float>(ui->tableXSpinBox->value());
+    float y = static_cast<float>(ui->tableYSpinBox->value());
+    bool enable = (x != size.x() || y != size.y());
+    ui->resetTableSizeButton->setEnabled(enable);
+}
+
+void VWindowMain::on_tableYSpinBox_valueChanged(double)
+{
+    const QVector2D & size = m_pFacade->getTable()->getSize();
+    float x = static_cast<float>(ui->tableXSpinBox->value());
+    float y = static_cast<float>(ui->tableYSpinBox->value());
+    bool enable = (x != size.x() || y != size.y());
+    ui->resetTableSizeButton->setEnabled(enable);
+}
+
+void VWindowMain::on_tableInjectionXSpinBox_valueChanged(double)
+{
+    const QVector2D & coords = m_pFacade->getTable()->getInjectionCoords();
+    float x = static_cast<float>(ui->tableInjectionXSpinBox->value());
+    float y = static_cast<float>(ui->tableInjectionYSpinBox->value());
+    bool enable = (x != coords.x() || y != coords.y());
+    ui->resetTableInjectionCoordsButton->setEnabled(enable);
+}
+
+void VWindowMain::on_tableInjectionYSpinBox_valueChanged(double)
+{
+    const QVector2D & coords = m_pFacade->getTable()->getInjectionCoords();
+    float x = static_cast<float>(ui->tableInjectionXSpinBox->value());
+    float y = static_cast<float>(ui->tableInjectionYSpinBox->value());
+    bool enable = (x != coords.x() || y != coords.y());
+    ui->resetTableInjectionCoordsButton->setEnabled(enable);
+}
+
+void VWindowMain::on_tableInjectionDiameterSpinBox_valueChanged(double arg1)
+{
+    bool enable = (static_cast<float>(arg1) != m_pFacade->getTable()->getInjectionDiameter());
+    ui->resetTableInjectionDiameterButton->setEnabled(enable);
+}
+
+void VWindowMain::on_tableVacuumXSpinBox_valueChanged(double)
+{
+    const QVector2D & coords = m_pFacade->getTable()->getVacuumCoords();
+    float x = static_cast<float>(ui->tableVacuumXSpinBox->value());
+    float y = static_cast<float>(ui->tableVacuumYSpinBox->value());
+    bool enable = (x != coords.x() || y != coords.y());
+    ui->resetTableVacuumCoordsButton->setEnabled(enable);
+}
+
+void VWindowMain::on_tableVacuumYSpinBox_valueChanged(double)
+{
+    const QVector2D & coords = m_pFacade->getTable()->getVacuumCoords();
+    float x = static_cast<float>(ui->tableVacuumXSpinBox->value());
+    float y = static_cast<float>(ui->tableVacuumYSpinBox->value());
+    bool enable = (x != coords.x() || y != coords.y());
+    ui->resetTableVacuumCoordsButton->setEnabled(enable);
+}
+
+void VWindowMain::on_tableVacuumDiameterSpinBox_valueChanged(double arg1)
+{
+    bool enable = (static_cast<float>(arg1) != m_pFacade->getTable()->getVacuumDiameter());
+    ui->resetTableVacuumDiameterButton->setEnabled(enable);
+}
+
+void VWindowMain::on_resetTableSizeButton_clicked()
+{
+    const QVector2D & coords = m_pFacade->getTable()->getSize();
+    ui->tableXSpinBox->setValue(coords.x());
+    ui->tableYSpinBox->setValue(coords.y());
+}
+
+void VWindowMain::on_saveTableSizeButton_clicked()
+{
+    m_pFacade->setTableSize(ui->tableXSpinBox->value(), ui->tableYSpinBox->value());
+}
+
+void VWindowMain::on_resetTableInjectionCoordsButton_clicked()
+{
+    const QVector2D & coords = m_pFacade->getTable()->getInjectionCoords();
+    ui->tableInjectionXSpinBox->setValue(coords.x());
+    ui->tableInjectionYSpinBox->setValue(coords.y());
+}
+
+void VWindowMain::on_saveTableInjectionCoordsButton_clicked()
+{
+    m_pFacade->setTableInjectionCoords(ui->tableInjectionXSpinBox->value(),
+                                       ui->tableInjectionYSpinBox->value());
+}
+
+void VWindowMain::on_resetTableInjectionDiameterButton_clicked()
+{
+    float diameter = m_pFacade->getTable()->getInjectionDiameter();
+    ui->tableInjectionDiameterSpinBox->setValue(diameter);
+}
+
+void VWindowMain::on_saveTableInjectionDiameterButton_clicked()
+{
+    m_pFacade->setTableInjectionDiameter(ui->tableInjectionDiameterSpinBox->value());
+}
+
+void VWindowMain::on_resetTableVacuumCoordsButton_clicked()
+{
+    const QVector2D & coords = m_pFacade->getTable()->getVacuumCoords();
+    ui->tableVacuumXSpinBox->setValue(coords.x());
+    ui->tableVacuumYSpinBox->setValue(coords.y());
+}
+
+void VWindowMain::on_saveTableVacuumCoordsButton_clicked()
+{
+    m_pFacade->setTableVacuumCoords(ui->tableVacuumXSpinBox->value(),
+                                    ui->tableVacuumYSpinBox->value());
+}
+
+void VWindowMain::on_resetTableVacuumDiameterButton_clicked()
+{
+    float diameter = m_pFacade->getTable()->getVacuumDiameter();
+    ui->tableVacuumDiameterSpinBox->setValue(diameter);
+}
+
+void VWindowMain::on_saveTableVacuumDiameterButton_clicked()
+{
+    m_pFacade->setTableVacuumDiameter(ui->tableVacuumDiameterSpinBox->value());
 }

@@ -26,11 +26,11 @@ public:
     VSimulationParameters(const VSimulationParameters &other) = default;
     VSimulationParameters& operator= (const VSimulationParameters& other) = default;
 
-    double getInjectionDiameter() const ;
-    void setInjectionDiameter(double diameter) ;
+    float getInjectionDiameter() const ;
+    void setInjectionDiameter(float diameter) ;
 
-    double getVacuumDiameter() const ;
-    void setVacuumDiameter(double diameter) ;
+    float getVacuumDiameter() const ;
+    void setVacuumDiameter(float diameter) ;
 
     void setResin(const VResin &resin);
     VResin getResin() const;
@@ -77,8 +77,8 @@ private:
     double m_viscosity{0.1};
     double m_temperature{25};
 
-    double m_injectionDiameter{0.1};
-    double m_vacuumDiameter{0.1};
+    float m_injectionDiameter{0.02f};
+    float m_vacuumDiameter{0.02f};
 
     double m_injectionPressure{1e5};
     double m_vacuumPressure{100};

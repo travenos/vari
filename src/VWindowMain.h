@@ -68,6 +68,7 @@ public:
 private:
     void connectSimulationSignals();
     void setupValidators();
+    void setupSpinboxesLocales();
 
     void showWindowLayer();
     void deleteWindowLayer();
@@ -141,6 +142,7 @@ private:
     void askForTransform();
 
     bool readNumber(const QLineEdit * lineEdit, double &output) const;
+    bool readNumber(const QLineEdit * lineEdit, float &output) const;
 
     void updateCubeSide(int value);
     void showCubeSide();
@@ -210,8 +212,8 @@ private slots:
     void m_on_simutation_paused();
     void m_on_simutation_stopped();
     void m_on_resin_changed();
-    void m_on_injection_diameter_set(double);
-    void m_on_vacuum_diameter_set(double);
+    void m_on_injection_diameter_set(float);
+    void m_on_vacuum_diameter_set(float);
     void m_on_temperature_set(double);
     void m_on_vacuum_pressure_set(double);
     void m_on_injection_pressure_set(double);
@@ -240,6 +242,13 @@ private slots:
     void m_on_video_suffix_filename_changed();
     void m_on_video_saving_started();
     void m_on_video_saving_finished(bool result);
+
+    void m_on_table_size_set(float width, float height);
+    void m_on_table_injection_coords_set(float x, float y);
+    void m_on_table_vacuum_coords_set(float x, float y);
+    void m_on_table_injection_diameter_set(float diameter);
+    void m_on_table_vacuum_diameter_set(float diameter);
+    void m_on_use_table_parameters_set(bool use);
 
     void on_addLayerButton_clicked();
     void on_layersListWidget_itemSelectionChanged();
@@ -298,6 +307,25 @@ private slots:
     void on_layerUpButton_clicked();
     void on_layerDownButton_clicked();
     void on_sortLayersButton_clicked();
+    void on_useTableParamCheckBox_clicked(bool checked);
+    void on_tableXSpinBox_valueChanged(double);
+    void on_tableYSpinBox_valueChanged(double);
+    void on_tableInjectionXSpinBox_valueChanged(double);
+    void on_tableInjectionYSpinBox_valueChanged(double);
+    void on_tableInjectionDiameterSpinBox_valueChanged(double arg1);
+    void on_tableVacuumXSpinBox_valueChanged(double);
+    void on_tableVacuumYSpinBox_valueChanged(double);
+    void on_tableVacuumDiameterSpinBox_valueChanged(double arg1);
+    void on_resetTableSizeButton_clicked();
+    void on_saveTableSizeButton_clicked();
+    void on_resetTableInjectionCoordsButton_clicked();
+    void on_saveTableInjectionCoordsButton_clicked();
+    void on_resetTableInjectionDiameterButton_clicked();
+    void on_saveTableInjectionDiameterButton_clicked();
+    void on_resetTableVacuumCoordsButton_clicked();
+    void on_saveTableVacuumCoordsButton_clicked();
+    void on_resetTableVacuumDiameterButton_clicked();
+    void on_saveTableVacuumDiameterButton_clicked();
 };
 
 #endif // _VWINDOWMAIN_H

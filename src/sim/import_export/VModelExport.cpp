@@ -15,11 +15,18 @@
 
 VModelExport::VModelExport(const VSimulationInfo &info,
                            const VSimulationParameters &param,
+                           const VTable &table,
+                           const VInjectionVacuum &injectionVacuum,
                            const VLayersProcessor::const_ptr &layersProcessor,
-                           bool paused, bool timeLimited):
+                           bool useTableParameters,
+                           bool paused,
+                           bool timeLimited):
     m_info(info),
     m_param(param),
+    m_table(table),
+    m_injectionVacuum(injectionVacuum),
     m_pLayersProcessor(layersProcessor),
+    m_useTableParameters(useTableParameters),
     m_paused(paused),
     m_timeLimited(timeLimited)
 {}
@@ -60,6 +67,8 @@ void VModelExport::saveToFile(const QString &filename)
     xmlWriter.writeStartElement(HEAD_TAG_NAME);
     saveInfo(xmlWriter);
     saveParameters(xmlWriter);
+    saveTable(xmlWriter);
+    saveUseInjectionVacuum(xmlWriter);
     savePaused(xmlWriter);
     saveTimeLimit(xmlWriter);
     saveLayers(xmlWriter);
@@ -108,6 +117,47 @@ void VModelExport::saveResin(QXmlStreamWriter &xmlWriter, const VResin &resin)
     xmlWriter.writeAttribute(tags.TEMP_COEF, QString::number(resin.tempcoef));
     xmlWriter.writeAttribute(tags.DEFAULT_VISCOSITY, QString::number(resin.defaultViscosity));
     xmlWriter.writeAttribute(tags.MATERIAL_NAME, resin.name);
+    xmlWriter.writeEndElement();
+}
+
+void VModelExport::saveTable(QXmlStreamWriter& xmlWriter)
+{
+    auto &tags = _xTABLE_TAGS;
+    xmlWriter.writeStartElement(tags._NAME);
+
+    xmlWriter.writeStartElement(tags.SIZE);
+    xmlWriter.writeCharacters(createString(m_table.getSize()));
+    xmlWriter.writeEndElement();
+
+    writeInjectionVacuum(xmlWriter, m_table.getInjectionVacuum());
+    xmlWriter.writeEndElement();
+}
+
+void VModelExport::writeInjectionVacuum(QXmlStreamWriter& xmlWriter,
+                                        const VInjectionVacuum &injectionVacuum)
+{
+    auto &tags = _xINJECTION_VACUUM_TAGS;
+    xmlWriter.writeStartElement(tags._NAME);
+    xmlWriter.writeAttribute(tags.INJECTION_DIAMETER, QString::number(injectionVacuum.injectionDiameter));
+    xmlWriter.writeAttribute(tags.VACUUM_DIAMETER, QString::number(injectionVacuum.vacuumDiameter));
+
+    xmlWriter.writeStartElement(tags.INJECTION_COORDS);
+    xmlWriter.writeCharacters(createString(injectionVacuum.injectionCoords));
+    xmlWriter.writeEndElement();
+
+    xmlWriter.writeStartElement(tags.VACUUM_COORDS);
+    xmlWriter.writeCharacters(createString(injectionVacuum.vacuumCoords));
+    xmlWriter.writeEndElement();
+
+    xmlWriter.writeEndElement();
+}
+
+void VModelExport::saveUseInjectionVacuum(QXmlStreamWriter& xmlWriter)
+{
+    auto &tags = _xUSE_INJECTION_VACUUM_TAGS;
+    xmlWriter.writeStartElement(tags._NAME);
+    xmlWriter.writeAttribute(tags.USE_TABLE_PARAMETERS, QString::number(m_useTableParameters));
+    writeInjectionVacuum(xmlWriter, m_injectionVacuum);
     xmlWriter.writeEndElement();
 }
 
@@ -255,23 +305,27 @@ void VModelExport::saveConnectionCurrentLayer(QXmlStreamWriter &xmlWriter,
     }
 }
 
+QString VModelExport::createString(const QVector2D &vect) const
+{
+    return _createString(vect, 2u);
+}
+
 QString VModelExport::createString(const QVector3D &vect) const
 {
-    QString str;
-    for (int i=0; i < 3 ; ++i)
-    {
-        if (i > 0)
-            str.append(" ");
-        str.append(QString::number(vect[i]));
-    }
-    return str;
+    return _createString(vect, 3u);
 }
 
 template <typename T>
 QString VModelExport::createString(const std::vector<T> &vect) const
 {
+    return _createString(vect, vect.size());
+}
+
+template <typename T>
+QString VModelExport::_createString(const T &vect, size_t size) const
+{
     QString str;
-    for (size_t i = 0; i < vect.size(); ++i)
+    for (size_t i = 0; i < size; ++i)
     {
         if (i > 0)
             str.append(" ");
