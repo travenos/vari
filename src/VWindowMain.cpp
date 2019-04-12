@@ -80,7 +80,6 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_pVideoShooter(new VVideoShooter),
     m_isSaved(false)
 {
-    //TODO Set locale C for all spin boxes
     ui->setupUi(this);
     ui->splitter->setStretchFactor(0,1);
     ui->splitter->setStretchFactor(1,0);
@@ -89,6 +88,7 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_pFacade.reset(new VSimulationFacade(ui->viewerWidget));
     connectSimulationSignals();
     setupValidators();
+    setupSpinboxesLocales();
     m_pFacade->loadSavedParameters();
     showCubeSide();
     loadSizes();
@@ -206,6 +206,20 @@ void VWindowMain::setupValidators()
     ui->vacuumDiameterEdit->setValidator(m_pDiameterValidator);
 }
 
+void VWindowMain::setupSpinboxesLocales()
+{
+    ui->tableXSpinBox->setLocale(QLocale::C);
+    ui->tableYSpinBox->setLocale(QLocale::C);
+    ui->tableInjectionXSpinBox->setLocale(QLocale::C);
+    ui->tableInjectionYSpinBox->setLocale(QLocale::C);
+    ui->tableInjectionDiameterSpinBox->setLocale(QLocale::C);
+    ui->tableVacuumXSpinBox->setLocale(QLocale::C);
+    ui->tableVacuumYSpinBox->setLocale(QLocale::C);
+    ui->tableVacuumDiameterSpinBox->setLocale(QLocale::C);
+    ui->slideshowPeriodSpinBox->setLocale(QLocale::C);
+    ui->videoFrequencySpinBox->setLocale(QLocale::C);
+}
+
 VWindowMain::~VWindowMain()
 {
     disconnect(m_pSlideshowShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_slideshow_started()));
@@ -304,7 +318,7 @@ void VWindowMain::showWindowLayer()
 {
     if (m_pWindowLayer == nullptr)
     {
-        m_pWindowLayer = new VWindowLayer(this);
+        m_pWindowLayer = new VWindowLayer(this, m_pFacade->getTable());
         connect(m_pWindowLayer,
                 SIGNAL(creationFromFileAvailable(const VCloth&,const QString&, VLayerAbstractBuilder::VUnit)),
                 this,
@@ -314,6 +328,10 @@ void VWindowMain::showWindowLayer()
                 this,
                 SLOT(m_on_layer_creation_manual_available(const VCloth&,const QPolygonF&, double)));
         connect(m_pWindowLayer,SIGNAL(windowClosed()), this, SLOT(m_on_layer_window_closed()));
+    }
+    else
+    {
+        m_pWindowLayer->setTable(m_pFacade->getTable());
     }
     m_pWindowLayer->show();
     m_pWindowLayer->activateWindow();

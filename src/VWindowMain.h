@@ -68,6 +68,7 @@ public:
 private:
     void connectSimulationSignals();
     void setupValidators();
+    void setupSpinboxesLocales();
 
     void showWindowLayer();
     void deleteWindowLayer();

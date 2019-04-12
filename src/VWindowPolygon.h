@@ -6,11 +6,16 @@
 #ifndef _VWINDOWPOLYGON_H
 #define _VWINDOWPOLYGON_H
 
+#include <memory>
+
 #include <QMainWindow>
 
 class QCPCurve;
+class QCPItemEllipse;
 class QCPRange;
 class QShortcut;
+
+class VTable;
 
 namespace Ui {
 class VWindowPolygon;
@@ -43,11 +48,13 @@ public:
     static const QString EXPORT_TO_FILE_ERROR;
     static const QString TOO_SMALL_STEP_ERROR;
     static const QString INTERSECTION_ERROR;
+    static const QString TABLE_ERROR;
 
     static const int POINT_SIZE;
     static const int HIGHLIGHT_POINT_SIZE;
 
-    VWindowPolygon(QWidget *parent = nullptr);
+    VWindowPolygon(QWidget *parent = nullptr,
+                   std::shared_ptr<const VTable> p_table=nullptr);
     virtual ~VWindowPolygon();
 
     void reset();
@@ -67,11 +74,17 @@ public:
 
     double getStepRatio() const;
 
+    void setTable(const std::shared_ptr<const VTable> & p_table);
+    void setUseTable(bool use);
+
 private:
     Ui::VWindowPolygon *ui;
     QCPCurve * m_pPlotCurve;
     QCPCurve * m_pCloseCurve;
     QCPCurve * m_pHighlightCurve;
+    QCPCurve * m_pTableCurve;
+    QCPItemEllipse *m_pInjectionEllipse;
+    QCPItemEllipse *m_pVacuumEllipse;
     QShortcut * m_pUndoShortcut;
 
     VMouseInteractionInfo m_mouseInfo;
@@ -84,15 +97,21 @@ private:
 
     QString m_lastDir;
 
+    std::shared_ptr<const VTable> m_pTable;
+    bool m_useTable;
+
     void reject();
     void accept();
     void meshExportProcedure();
     void showCharacteristicLength();
     void showRatioError(double ratio);
     void showIntersectionError();
+    void showTableError();
     bool newVertexCausesIntersection(double x, double y) const;
+    bool removingVertexCausesIntersection(int index) const;
     bool lastLineCausesIntersection() const;
     bool vertexCausesIntersection(int index, double x, double y) const;
+    bool vertexIsOkForTable(double x, double y) const;
     QString getVertexString(double x, double y) const;
     void highlight(int index);
     void selectVertex();
@@ -135,6 +154,8 @@ private slots:
     void on_changeYSpinBox_valueChanged(double arg1);
 
     void on_addVertexButton_clicked();
+
+    void on_useTableCheckBox_clicked(bool checked);
 
 protected:
 

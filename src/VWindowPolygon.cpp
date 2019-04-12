@@ -13,6 +13,7 @@
 #include "ui_VWindowPolygon.h"
 
 #include "sim/structures/VExceptions.h"
+#include "sim/structures/VTable.h"
 #include "sim/layer_builders/VLayerManualBuilder.h"
 
 const QCPRange VWindowPolygon::X_RANGE(-1, 1);
@@ -31,12 +32,14 @@ const QString VWindowPolygon::TOO_SMALL_STEP_ERROR("Задан слишком м
                                                    " габаритов слоя. Необходимо увеличить шаг сетки"
                                                    " как минимум в %1 раз");
 const QString VWindowPolygon::INTERSECTION_ERROR("Заданный контур содержит пересчения");
+const QString VWindowPolygon::TABLE_ERROR("Вершина лежит за пределами рабочего поля стенда");
 
 const int VWindowPolygon::POINT_SIZE = 6;
 const int VWindowPolygon::HIGHLIGHT_POINT_SIZE = 10;
 
 
-VWindowPolygon::VWindowPolygon(QWidget *parent) :
+VWindowPolygon::VWindowPolygon(QWidget *parent,
+                               std::shared_ptr<const VTable> p_table) :
     QMainWindow(parent),
     ui(new Ui::VWindowPolygon)
 {
@@ -51,12 +54,10 @@ VWindowPolygon::VWindowPolygon(QWidget *parent) :
     QObject::connect(m_pUndoShortcut, SIGNAL(activated()), this, SLOT(on_undoButton_clicked()));
 
     updateButtonsStates();
-    resetView();
 
     ui->stepSpinBox->setMinimum(MIN_CHARACTERISTIC_LENGTH);
     ui->stepSpinBox->setLocale(QLocale::C);
 
-    //TODO set minimums and maximums
     ui->addXSpinBox->setLocale(QLocale::C);
     ui->addYSpinBox->setLocale(QLocale::C);
     ui->changeXSpinBox->setLocale(QLocale::C);
@@ -74,7 +75,7 @@ VWindowPolygon::VWindowPolygon(QWidget *parent) :
     m_pPlotCurve = new QCPCurve(ui->plotWidget->xAxis, ui->plotWidget->yAxis);
     QCPScatterStyle plotScatterStyle(QCPScatterStyle::ssPlusCircle, POINT_SIZE);
     m_pPlotCurve->setScatterStyle(plotScatterStyle);
-    m_pPlotCurve->setPen(QColor(Qt::blue));
+    m_pPlotCurve->setPen(QColor(0,128,0));
     m_pCloseCurve = new QCPCurve(ui->plotWidget->xAxis, ui->plotWidget->yAxis);
     m_pCloseCurve->setPen(QColor(Qt::red));
     m_pHighlightCurve = new QCPCurve(ui->plotWidget->xAxis, ui->plotWidget->yAxis);;
@@ -82,7 +83,16 @@ VWindowPolygon::VWindowPolygon(QWidget *parent) :
     m_pHighlightCurve->setScatterStyle(highlightStyle);
     m_pHighlightCurve->setPen(QColor(Qt::blue));
 
+    m_pTableCurve = new QCPCurve(ui->plotWidget->xAxis, ui->plotWidget->yAxis);
+    m_pTableCurve->setPen(QColor(Qt::black));
+    m_pInjectionEllipse = new QCPItemEllipse(ui->plotWidget);
+    m_pInjectionEllipse->setPen(QColor(Qt::blue));
+    m_pVacuumEllipse = new QCPItemEllipse(ui->plotWidget);
+    m_pVacuumEllipse->setPen(QColor(0,255,255));
+
     loadSavedParameters();
+    setTable(p_table);
+    resetView();
 }
 
 VWindowPolygon::~VWindowPolygon()
@@ -92,6 +102,9 @@ VWindowPolygon::~VWindowPolygon()
     m_pCloseCurve->deleteLater();
     m_pHighlightCurve->deleteLater();
     m_pUndoShortcut->deleteLater();
+    m_pTableCurve->deleteLater();
+    m_pInjectionEllipse->deleteLater();
+    m_pVacuumEllipse->deleteLater();
     delete ui;
     #ifdef DEBUG_MODE
         qInfo() << "VWindowPolygon destroyed";
@@ -102,12 +115,24 @@ void VWindowPolygon::accept()
 {
     if(!lastLineCausesIntersection())
     {
+        if (m_useTable)
+        {
+            int polySize = getPolygonSize();
+            for (int i = 0; i < polySize; ++i)
+            {
+                if (!vertexIsOkForTable(m_qvX[i], m_qvY[i]))
+                {
+                    showTableError();
+                    return;
+                }
+            }
+        }
         double ratio = getStepRatio();
         if (ratio >= MIN_CHARACTERISTIC_RATIO)
         {
             hide();
             QPolygonF polygon;
-            getPolygon(polygon);
+            getPolygon(polygon);            
             emit polygonAvailable(polygon, m_characteristicLength);
             close();
         }
@@ -132,8 +157,22 @@ void VWindowPolygon::reset()
 
 void VWindowPolygon::resetView()
 {
-    ui->plotWidget->xAxis->setRange(X_RANGE);
-    ui->plotWidget->yAxis->setRange(Y_RANGE);
+    if (m_useTable && m_pTable)
+    {
+        float halfSizeX{m_pTable->getSize().x() / 2};
+        float halfSizeY{m_pTable->getSize().y() / 2};
+
+        QCPRange xRange(-halfSizeX, halfSizeX);
+        QCPRange yRange(-halfSizeY, halfSizeY);
+
+        ui->plotWidget->xAxis->setRange(xRange);
+        ui->plotWidget->yAxis->setRange(yRange);
+    }
+    else
+    {
+        ui->plotWidget->xAxis->setRange(X_RANGE);
+        ui->plotWidget->yAxis->setRange(Y_RANGE);
+    }
     ui->plotWidget->replot();
 }
 
@@ -146,7 +185,8 @@ void VWindowPolygon::reject()
 
 void VWindowPolygon::addVertex(double x, double y)
 {
-    m_qvT.append(m_qvT.size());
+    double t{(!m_qvT.empty()) ? m_qvT.last() + 1 : 0};
+    m_qvT.append(t);
     m_qvX.append(x);
     m_qvY.append(y);
     plotEnclosed();
@@ -296,6 +336,9 @@ void VWindowPolygon::loadSavedParameters()
     m_characteristicLength = settings.value(QStringLiteral("mesh/meshStep"), DEFAULT_CHARACTERISTIC_LENGTH).toDouble(&ok);
     if (!ok || m_characteristicLength < MIN_CHARACTERISTIC_LENGTH)
         m_characteristicLength = DEFAULT_CHARACTERISTIC_LENGTH;
+    bool useTable;
+    useTable = settings.value(QStringLiteral("mesh/useTable"), true).toBool();
+    setUseTable(useTable);
     showCharacteristicLength();
 }
 
@@ -304,6 +347,7 @@ void VWindowPolygon::saveParameters() const
     QSettings settings;
     settings.setValue(QStringLiteral("import/lastDir"), m_lastDir);
     settings.setValue(QStringLiteral("mesh/meshStep"), m_characteristicLength);
+    settings.setValue(QStringLiteral("mesh/useTable"), m_useTable);
     settings.sync();
 }
 
@@ -339,6 +383,11 @@ void VWindowPolygon::showIntersectionError()
     QMessageBox::warning(this, ERROR_TITLE, INTERSECTION_ERROR);
 }
 
+void VWindowPolygon::showTableError()
+{
+    QMessageBox::warning(this, ERROR_TITLE, TABLE_ERROR);
+}
+
 bool VWindowPolygon::newVertexCausesIntersection(double x, double y) const
 {
     int polygonSize = getPolygonSize();
@@ -353,6 +402,28 @@ bool VWindowPolygon::newVertexCausesIntersection(double x, double y) const
         QLineF line(m_qvX[i - 1], m_qvY[i - 1], m_qvX[i], m_qvY[i]);
         if (line.intersect(lastLine, nullptr) == QLineF::BoundedIntersection)
             return true;
+    }
+    return false;
+}
+
+bool VWindowPolygon::removingVertexCausesIntersection(int index) const
+{
+    int polySize = getPolygonSize();
+    if (index > 0 && index < polySize - 1)
+    {
+        QLineF resultLine(m_qvX[index - 1], m_qvY[index - 1], m_qvX[index + 1], m_qvY[index + 1]);
+        for(int i = 1; i < index - 1; ++i)
+        {
+            QLineF line(m_qvX[i - 1], m_qvY[i - 1], m_qvX[i], m_qvY[i]);
+            if (line.intersect(resultLine, nullptr) == QLineF::BoundedIntersection)
+                return true;
+        }
+        for(int i = index + 3; i < polySize; ++i)
+        {
+            QLineF line(m_qvX[i - 1], m_qvY[i - 1], m_qvX[i], m_qvY[i]);
+            if (line.intersect(resultLine, nullptr) == QLineF::BoundedIntersection)
+                return true;
+        }
     }
     return false;
 }
@@ -411,6 +482,20 @@ bool VWindowPolygon::vertexCausesIntersection(int index, double x, double y) con
         }
     }
     return false;
+}
+
+bool VWindowPolygon::vertexIsOkForTable(double x, double y) const
+{
+    if (m_useTable && m_pTable)
+    {
+        float halfSizeX{m_pTable->getSize().x() / 2};
+        if (x < -halfSizeX || x > halfSizeX)
+            return false;
+        float halfSizeY{m_pTable->getSize().y() / 2};
+        if (y < -halfSizeY || y > halfSizeY)
+            return false;
+    }
+    return true;
 }
 
 QString VWindowPolygon::getVertexString(double x, double y) const
@@ -503,6 +588,59 @@ void VWindowPolygon::updateVertexRecord(int index)
     }
 }
 
+void VWindowPolygon::setTable(const std::shared_ptr<const VTable> & p_table)
+{
+    m_pTable = p_table;
+    if (m_pTable)
+    {
+        m_pTableCurve->data()->clear();
+
+        float halfSizeX{m_pTable->getSize().x() / 2};
+        float halfSizeY{m_pTable->getSize().y() / 2};
+        QVector<double> qvT{0, 1, 2, 3, 4};
+        QVector<double> qvX{-halfSizeX, halfSizeX, halfSizeX, -halfSizeX, -halfSizeX};
+        QVector<double> qvY{halfSizeY, halfSizeY, -halfSizeY, -halfSizeY, halfSizeY};
+        m_pTableCurve->setData(qvT, qvX, qvY, true);
+
+        float injectionRadius = m_pTable->getInjectionDiameter() / 2;
+        float injectionX = m_pTable->getInjectionCoords().x();
+        float injectionY = m_pTable->getInjectionCoords().y();
+        m_pInjectionEllipse->topLeft->setCoords(injectionX - injectionRadius, injectionY - injectionRadius);
+        m_pInjectionEllipse->bottomRight->setCoords(injectionX + injectionRadius, injectionY + injectionRadius);
+
+        float vacuumRadius = m_pTable->getVacuumDiameter() / 2;
+        float vacuumX = m_pTable->getVacuumCoords().x();
+        float vacuumY = m_pTable->getVacuumCoords().y();
+        m_pVacuumEllipse->topLeft->setCoords(vacuumX - vacuumRadius, vacuumY - vacuumRadius);
+        m_pVacuumEllipse->bottomRight->setCoords(vacuumX + vacuumRadius, vacuumY + vacuumRadius);
+
+        m_pInjectionEllipse->setVisible(true);
+        m_pVacuumEllipse->setVisible(true);
+
+        ui->plotWidget->replot();
+        ui->plotWidget->update();
+    }
+    else
+    {
+        setUseTable(false);
+        m_pTableCurve->data()->clear();
+        m_pInjectionEllipse->setVisible(false);
+        m_pVacuumEllipse->setVisible(false);
+
+        ui->plotWidget->replot();
+        ui->plotWidget->update();
+    }
+}
+
+void VWindowPolygon::setUseTable(bool use)
+{
+    m_useTable = use;
+    if (use != ui->useTableCheckBox->isChecked())
+    {
+        ui->useTableCheckBox->setChecked(use);
+    }
+}
+
 /**
  * Slots
  */
@@ -523,18 +661,24 @@ void VWindowPolygon::pl_on_before_report()
     int width, height;
     width = ui->plotWidget->width();
     height = ui->plotWidget->height();
-    if (height < width)
+    if (height > width)
     {
         double axSize = ui->plotWidget->yAxis->range().size();
-        double axLower = ui->plotWidget->xAxis->range().lower;
-        double axUpper = axLower + axSize * (static_cast<double>(width) / height);
+        double halfRange = axSize * (static_cast<double>(width) / height) / 2;
+        double middle = (ui->plotWidget->xAxis->range().lower
+                         + ui->plotWidget->xAxis->range().upper) / 2;
+        double axLower = middle - halfRange;
+        double axUpper = middle + halfRange;
         ui->plotWidget->xAxis->setRange(axLower, axUpper);
     }
     else
     {
         double axSize = ui->plotWidget->xAxis->range().size();
-        double axLower = ui->plotWidget->yAxis->range().lower;
-        double axUpper = axLower + axSize * (static_cast<double>(height) / width);
+        double halfRange = axSize * (static_cast<double>(height) / width) /2;
+        double middle = (ui->plotWidget->yAxis->range().lower
+                         + ui->plotWidget->yAxis->range().upper) / 2;
+        double axLower = middle - halfRange;
+        double axUpper = middle + halfRange;
         ui->plotWidget->yAxis->setRange(axLower, axUpper);
     }
 }
@@ -548,7 +692,7 @@ void VWindowPolygon::pl_on_mouse_release(QMouseEvent* event)
         QPoint point = event->pos();
         double coordX = ui->plotWidget->xAxis->pixelToCoord(point.x());
         double coordY = ui->plotWidget->yAxis->pixelToCoord(point.y());
-        if (!newVertexCausesIntersection(coordX, coordY))
+        if (!newVertexCausesIntersection(coordX, coordY) && vertexIsOkForTable(coordX, coordY))
             addVertex(coordX, coordY);
     }
     m_mouseInfo.mousePressed = false;
@@ -581,7 +725,7 @@ void VWindowPolygon::pl_on_mouse_press(QMouseEvent* event)
     {
         double pressCoordX = ui->plotWidget->xAxis->pixelToCoord(pressPoint.x());
         double pressCoordY = ui->plotWidget->yAxis->pixelToCoord(pressPoint.y());
-        if (!newVertexCausesIntersection(pressCoordX, pressCoordY))
+        if (!newVertexCausesIntersection(pressCoordX, pressCoordY) && vertexIsOkForTable(pressCoordX, pressCoordY))
         {
             m_mouseInfo.pressedInCorrectPlace = true;
         }
@@ -598,7 +742,8 @@ void VWindowPolygon::pl_on_mouse_move(QMouseEvent* event)
             QPoint point = event->pos();
             double x = ui->plotWidget->xAxis->pixelToCoord(point.x());
             double y = ui->plotWidget->yAxis->pixelToCoord(point.y());
-            if (!vertexCausesIntersection(m_mouseInfo.selectedIndex, x, y))
+            if (!vertexCausesIntersection(m_mouseInfo.selectedIndex, x, y)
+                    && vertexIsOkForTable(x, y))
                 changeVertex(m_mouseInfo.selectedIndex, x, y);
         }
     }
@@ -648,11 +793,16 @@ void VWindowPolygon::on_changeCoordsButton_clicked()
 
         double x = ui->changeXSpinBox->value();
         double y = ui->changeYSpinBox->value();
-        if (!vertexCausesIntersection(index, x, y))
+        bool noIntersections = !vertexCausesIntersection(index, x, y);
+        bool okForTable = vertexIsOkForTable(x, y);
+        if (noIntersections && okForTable)
             changeVertex(index, x, y);
         else
         {
-            showIntersectionError();
+            if (!noIntersections)
+                showIntersectionError();
+            if (!okForTable)
+                showTableError();
             showCoords(index);
         }
     }
@@ -664,7 +814,10 @@ void VWindowPolygon::on_removeVertexButton_clicked()
     if (ui->verticesListWidget->currentIndex().isValid() &&
             index >= 0 && index < getPolygonSize())
     {
-        removeVertex(index);
+        if (!removingVertexCausesIntersection(index))
+            removeVertex(index);
+        else
+            showIntersectionError();
     }
 }
 
@@ -682,12 +835,22 @@ void VWindowPolygon::on_addVertexButton_clicked()
 {
     double x = ui->addXSpinBox->value();
     double y = ui->addYSpinBox->value();
-    if (!newVertexCausesIntersection(x, y))
+    bool noIntersections = !newVertexCausesIntersection(x, y);
+    bool okForTable = vertexIsOkForTable(x, y);
+    if ( noIntersections && okForTable )
     {
         addVertex(x, y);
     }
     else
     {
-        showIntersectionError();
+        if (!noIntersections)
+            showIntersectionError();
+        if (!okForTable)
+            showTableError();
     }
+}
+
+void VWindowPolygon::on_useTableCheckBox_clicked(bool checked)
+{
+    setUseTable(checked);
 }

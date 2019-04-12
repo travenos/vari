@@ -11,10 +11,10 @@
 
 struct VInjectionVacuum
 {
-    float injectionDiameter{0.02f};
-    float vacuumDiameter{0.02f};
-    QVector2D injectionCoords{-0.98f, 0.48f};
-    QVector2D vacuumCoords{0.98f, -0.48f};
+    float injectionDiameter{0.04f};
+    float vacuumDiameter{0.04f};
+    QVector2D injectionCoords{-0.96f, 0.46f};
+    QVector2D vacuumCoords{0.96f, -0.46f};
 };
 
 #endif //_VINJECTIONVACUUM_H

@@ -309,8 +309,8 @@ void VSimulationFacade::loadModel(const QString &filename)
     m_pSimulator->setSimulationParameters(*(loader.getInfo()), *(loader.getSimulationParameters()),
                                           loader.getPaused(), loader.getTimeLimited());
     m_pInjectionVacuum = loader.getInjectionVacuum();
-    setTable(loader.getTable()); //TODO
     useTableParameters(loader.getUseTableParameters());
+    setTable(loader.getTable());
     m_pGraphicsViewer->viewFromAbove();
     emit modelLoaded();
     emit filenameChanged(filename);
@@ -764,12 +764,20 @@ void VSimulationFacade::setTableInjectionDiameter(float diameter)
 {
     m_pTable->setInjectionDiameter(diameter);
     emit tableInjectionDiameterSet(m_pTable->getInjectionDiameter());
+    if (m_useTableParameters)
+    {
+        m_pSimulator->setInjectionDiameter(m_pTable->getInjectionDiameter());
+    }
 }
 
 void VSimulationFacade::setTableVacuumDiameter(float diameter)
 {
     m_pTable->setVacuumDiameter(diameter);
     emit tableVacuumDiameterSet(m_pTable->getVacuumDiameter());
+    if (m_useTableParameters)
+    {
+        m_pSimulator->setVacuumDiameter(m_pTable->getVacuumDiameter());
+    }
 }
 
 void VSimulationFacade::applyInjectionAndVacuumPoints()
@@ -796,6 +804,12 @@ void VSimulationFacade::applyInjectionAndVacuumPoints()
 void VSimulationFacade::useTableParameters(bool use)
 {
     m_useTableParameters = use;
+    if (use)
+    {
+        *m_pInjectionVacuum = m_pTable->getInjectionVacuum();
+        m_pSimulator->setInjectionDiameter(m_pTable->getInjectionDiameter());
+        m_pSimulator->setVacuumDiameter(m_pTable->getVacuumDiameter());
+    }
     emit useTableParametersSet(use);
 }
 
@@ -812,6 +826,11 @@ void VSimulationFacade::setTable(const std::shared_ptr<VTable> &p_table)
     emit tableVacuumCoordsSet(m_pTable->getVacuumCoords().x(), m_pTable->getVacuumCoords().y());
     emit tableInjectionDiameterSet(m_pTable->getInjectionDiameter());
     emit tableVacuumDiameterSet(m_pTable->getVacuumDiameter());
+    if (m_useTableParameters)
+    {
+        m_pSimulator->setInjectionDiameter(m_pTable->getInjectionDiameter());
+        m_pSimulator->setVacuumDiameter(m_pTable->getVacuumDiameter());
+    }
 }
 
 void VSimulationFacade::m_on_got_point(const QVector3D &point)
