@@ -114,10 +114,11 @@ void VModelImport::loadFromFile(const QString &filename)
     }
     if(xmlReader.hasError())
     {
-        throw VImportException();
         #ifdef DEBUG_MODE
             qDebug() << xmlReader.errorString();
         #endif
+        file.close();
+        throw VImportException();
     }
     file.close();
     m_pLayersProcessor->resetNodesVolumes();
@@ -197,24 +198,48 @@ void VModelImport::loadResin(QXmlStreamReader &xmlReader, VSimulationParameters 
 
 void VModelImport::loadTable(QXmlStreamReader& xmlReader)
 {
+//    auto &tags = _xTABLE_TAGS;
+//    READ_ELEMENTS
+//    (
+//        if (!xmlReader.name().compare(tags._xINJECTION_VACUUM_TAGS._NAME))
+//        {
+//            VInjectionVacuum injectionVacuum;
+//            readInjectionVacuum(xmlReader, injectionVacuum);
+//            m_pTable->setInjectionVacuum(injectionVacuum);
+//        }
+//        if (!xmlReader.name().compare(tags.SIZE))
+//        {
+//            QString tableSizeStr = xmlReader.readElementText();
+//            std::vector<float> tableSizeVector;
+//            makeVector(tableSizeStr, tableSizeVector);
+//            if(tableSizeVector.size() > 1)
+//                m_pTable->setSize(tableSizeVector.at(0), tableSizeVector.at(1));
+//        }
+//    );
+
+    //TODO
     auto &tags = _xTABLE_TAGS;
-    READ_ELEMENTS
-    (
-        if (!xmlReader.name().compare(tags._xINJECTION_VACUUM_TAGS._NAME))
+    while (!(xmlReader.isEndElement() && !xmlReader.name().compare(tags._NAME)) && !xmlReader.atEnd()) \
+    {
+        if(xmlReader.isStartElement())
         {
-            VInjectionVacuum injectionVacuum;
-            readInjectionVacuum(xmlReader, injectionVacuum);
-            m_pTable->setInjectionVacuum(injectionVacuum);
+            if (!xmlReader.name().compare(tags._xINJECTION_VACUUM_TAGS._NAME))
+                    {
+                        VInjectionVacuum injectionVacuum;
+                        readInjectionVacuum(xmlReader, injectionVacuum);
+                        m_pTable->setInjectionVacuum(injectionVacuum);
+                    }
+                    if (!xmlReader.name().compare(tags.SIZE))
+                    {
+                        QString tableSizeStr = xmlReader.readElementText();
+                        std::vector<float> tableSizeVector;
+                        makeVector(tableSizeStr, tableSizeVector);
+                        if(tableSizeVector.size() > 1)
+                            m_pTable->setSize(tableSizeVector.at(0), tableSizeVector.at(1));
+                    }
         }
-        if (!xmlReader.name().compare(tags.SIZE))
-        {
-            QString tableSizeStr = xmlReader.readElementText();
-            std::vector<float> tableSizeVector;
-            makeVector(tableSizeStr, tableSizeVector);
-            if(tableSizeVector.size() > 1)
-                m_pTable->setSize(tableSizeVector.at(0), tableSizeVector.at(1));
-        }
-    );
+        xmlReader.readNext();
+    }
 }
 
 void VModelImport::readInjectionVacuum(QXmlStreamReader& xmlReader, VInjectionVacuum &injectionVacuum)
@@ -223,9 +248,9 @@ void VModelImport::readInjectionVacuum(QXmlStreamReader& xmlReader, VInjectionVa
     foreach(const QXmlStreamAttribute &attr, xmlReader.attributes())
     {
         if (!attr.name().compare(tags.INJECTION_DIAMETER))
-            injectionVacuum.injectionDiameter = xmlReader.readElementText().toFloat();
+            injectionVacuum.injectionDiameter = attr.value().toFloat();
         if (!attr.name().compare(tags.VACUUM_DIAMETER))
-            injectionVacuum.vacuumDiameter = xmlReader.readElementText().toFloat();
+            injectionVacuum.vacuumDiameter = attr.value().toFloat();
     }
     READ_ELEMENTS
     (
@@ -259,7 +284,7 @@ void VModelImport::loadUseInjectionVacuum(QXmlStreamReader& xmlReader)
     foreach(const QXmlStreamAttribute &attr, xmlReader.attributes())
     {
         if (!attr.name().compare(tags.USE_TABLE_PARAMETERS))
-            m_useTableParameters = static_cast<bool>(xmlReader.readElementText().toInt());
+            m_useTableParameters = static_cast<bool>(attr.value().toInt());
     }
     READ_ELEMENTS
     (

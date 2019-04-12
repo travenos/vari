@@ -1444,6 +1444,7 @@ void VWindowMain::m_on_table_size_set(float width, float height)
     ui->tableXSpinBox->setValue(width);
     ui->tableYSpinBox->setValue(height);
     ui->resetTableSizeButton->setEnabled(false);
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_table_injection_coords_set(float x, float y)
@@ -1451,6 +1452,7 @@ void VWindowMain::m_on_table_injection_coords_set(float x, float y)
     ui->tableInjectionXSpinBox->setValue(x);
     ui->tableInjectionYSpinBox->setValue(y);
     ui->resetTableInjectionCoordsButton->setEnabled(false);
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_table_vacuum_coords_set(float x, float y)
@@ -1458,31 +1460,35 @@ void VWindowMain::m_on_table_vacuum_coords_set(float x, float y)
     ui->tableVacuumXSpinBox->setValue(x);
     ui->tableVacuumYSpinBox->setValue(y);
     ui->resetTableVacuumCoordsButton->setEnabled(false);
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_table_injection_diameter_set(float diameter)
 {
     ui->tableInjectionDiameterSpinBox->setValue(diameter);
     ui->resetTableInjectionDiameterButton->setEnabled(false);
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_table_vacuum_diameter_set(float diameter)
 {
     ui->tableVacuumDiameterSpinBox->setValue(diameter);
     ui->resetTableVacuumDiameterButton->setEnabled(false);
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_use_table_parameters_set(bool use)
 {
     if (ui->useTableParamCheckBox->isChecked() != use)
         ui->useTableParamCheckBox->setChecked(use);
-    bool enabled = m_pFacade->isSimulationActive();
+    bool enabled = !(m_pFacade->isSimulationActive());
     ui->injectionDiameterEdit->setEnabled(enabled && !use);
     ui->injectionPlaceButton->setEnabled(enabled && !use);
     ui->resetInjectionDiameterButton->setEnabled(enabled && !use);
     ui->vacuumDiameterEdit->setEnabled(enabled && !use);
     ui->vacuumPlaceButton->setEnabled(enabled && !use);
     ui->resetVacuumDiameterButton->setEnabled(enabled && !use);
+    setSavedState(false);
 }
 
 void VWindowMain::on_injectionPlaceButton_clicked(bool checked)
@@ -1778,6 +1784,7 @@ void VWindowMain::on_sortLayersButton_clicked()
 {
     m_pFacade->sortLayers();
 }
+
 void VWindowMain::on_useTableParamCheckBox_clicked(bool checked)
 {
     m_pFacade->useTableParameters(checked);

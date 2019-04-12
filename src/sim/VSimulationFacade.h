@@ -118,6 +118,8 @@ public:
     void useTableParameters(bool use);
     bool isUsingTableParameters() const;
 
+    void setTable(const std::shared_ptr<VTable> &p_table);
+
 public slots:
     void updateGraphicsPositions();
 

@@ -308,9 +308,9 @@ void VSimulationFacade::loadModel(const QString &filename)
     updateConfiguration();
     m_pSimulator->setSimulationParameters(*(loader.getInfo()), *(loader.getSimulationParameters()),
                                           loader.getPaused(), loader.getTimeLimited());
-    m_pTable = loader.getTable();
     m_pInjectionVacuum = loader.getInjectionVacuum();
-    m_useTableParameters = loader.getUseTableParameters();
+    setTable(loader.getTable()); //TODO
+    useTableParameters(loader.getUseTableParameters());
     m_pGraphicsViewer->viewFromAbove();
     emit modelLoaded();
     emit filenameChanged(filename);
@@ -802,6 +802,16 @@ void VSimulationFacade::useTableParameters(bool use)
 bool VSimulationFacade::isUsingTableParameters() const
 {
     return m_useTableParameters;
+}
+
+void VSimulationFacade::setTable(const std::shared_ptr<VTable> &p_table)
+{
+    m_pTable = p_table;
+    emit tableSizeSet(m_pTable->getSize().x(), m_pTable->getSize().y());
+    emit tableInjectionCoordsSet(m_pTable->getInjectionCoords().x(), m_pTable->getInjectionCoords().y());
+    emit tableVacuumCoordsSet(m_pTable->getVacuumCoords().x(), m_pTable->getVacuumCoords().y());
+    emit tableInjectionDiameterSet(m_pTable->getInjectionDiameter());
+    emit tableVacuumDiameterSet(m_pTable->getVacuumDiameter());
 }
 
 void VSimulationFacade::m_on_got_point(const QVector3D &point)
