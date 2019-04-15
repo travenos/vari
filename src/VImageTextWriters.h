@@ -38,7 +38,7 @@ class VSimInfoImageTextWriter : public VAbstractImageTextWriter
 public:
     VSimInfoImageTextWriter(const std::shared_ptr<const VSimulationFacade> p_facade);
 protected:
-    virtual QString createString() const;
+    virtual QString createString() const override;
 private:
     static const QString INFO_STRING;
     static const int PRECISION;

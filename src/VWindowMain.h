@@ -21,6 +21,7 @@ class VWindowCloth;
 class VWindowResin;
 class VScreenShooter;
 class VVideoShooter;
+class VSimInfoImageTextWriter;
 struct VCloth;
 struct VSimulationInfo;
 
@@ -69,6 +70,10 @@ private:
     void connectSimulationSignals();
     void setupValidators();
     void setupSpinboxesLocales();
+
+    void configureVideoShooter();
+    void addNewVideoShooter();
+    void clearFinishedVideoShooters();
 
     void showWindowLayer();
     void deleteWindowLayer();
@@ -176,6 +181,7 @@ private:
 
     Ui::VWindowMain *ui;
     std::shared_ptr<VSimulationFacade> m_pFacade;
+    std::shared_ptr<VSimInfoImageTextWriter> m_pImgTextWriter;
     VWindowLayer * m_pWindowLayer;
     VWindowCloth * m_pWindowCloth;
     VWindowResin * m_pWindowResin;
@@ -186,6 +192,8 @@ private:
 
     std::shared_ptr<VScreenShooter> m_pSlideshowShooter;
     std::shared_ptr<VVideoShooter> m_pVideoShooter;
+
+    std::list< std::shared_ptr<VVideoShooter> > m_oldVideoShootersList;
 
     bool m_isSaved;
 protected:

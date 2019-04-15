@@ -87,7 +87,6 @@ inline void VScreenShooter::constructorBody()
     setPeriod(m_period);
     setDirPath(m_baseDirPath);
     m_isWorking.store(false);
-    connect(this, SIGNAL(shouldBeStopped()), this, SLOT(stop()));
 }
 
 VScreenShooter::~VScreenShooter()
@@ -232,7 +231,7 @@ void VScreenShooter::pictureCycle()
 
 inline void VScreenShooter::takePictureWrapper(const std::shared_ptr< std::atomic<bool> > & stopFlag)
 {
-    bool result = true;
+    bool result{true};
     {        
         if(!stopFlag->load())
         {

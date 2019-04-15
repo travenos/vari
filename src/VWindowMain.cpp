@@ -93,11 +93,10 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_pFacade->loadSavedParameters();
     showCubeSide();
     loadSizes();
+    m_pImgTextWriter.reset(new VSimInfoImageTextWriter(m_pFacade));
     m_pSlideshowShooter->setWidget(m_pFacade->getGLWidget());
-    m_pVideoShooter->setWidget(m_pFacade->getGLWidget());
-    std::shared_ptr<VSimInfoImageTextWriter> imgTextWriter{new VSimInfoImageTextWriter(m_pFacade)};
-    m_pSlideshowShooter->setImageTextWriter(imgTextWriter);
-    m_pVideoShooter->setImageTextWriter(imgTextWriter);
+    m_pSlideshowShooter->setImageTextWriter(m_pImgTextWriter);
+    configureVideoShooter();
     QDir(VVideoShooter::SLIDES_DIR_PATH).removeRecursively();
     loadShootersSettings();    
     this->setWindowTitle(QCoreApplication::applicationName());
@@ -185,13 +184,6 @@ void VWindowMain::connectSimulationSignals()
     connect(m_pSlideshowShooter.get(), SIGNAL(directoryChanged()), this, SLOT(m_on_slideshow_directory_changed()));
     connect(m_pSlideshowShooter.get(), SIGNAL(periodChanged()), this, SLOT(m_on_slideshow_period_changed()));
     connect(m_pSlideshowShooter.get(), SIGNAL(suffixDirNameChanged()), this, SLOT(m_on_slideshow_suffix_dirname_changed()));
-    connect(m_pVideoShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_video_started()));
-    connect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_video_stopped()));
-    connect(m_pVideoShooter.get(), SIGNAL(directoryChanged()), this, SLOT(m_on_video_directory_changed()));
-    connect(m_pVideoShooter.get(), SIGNAL(frequencyChanged()), this, SLOT(m_on_video_frequency_changed()));
-    connect(m_pVideoShooter.get(), SIGNAL(suffixFileNameChanged()), this, SLOT(m_on_video_suffix_filename_changed()));
-    connect(m_pVideoShooter.get(), SIGNAL(videoSavingStarted()), this, SLOT(m_on_video_saving_started()));
-    connect(m_pVideoShooter.get(), SIGNAL(videoSavingFinished(bool)), this, SLOT(m_on_video_saving_finished(bool)));
 }
 
 void VWindowMain::setupValidators()
@@ -221,6 +213,55 @@ void VWindowMain::setupSpinboxesLocales()
     ui->tableVacuumDiameterSpinBox->setLocale(QLocale::C);
     ui->slideshowPeriodSpinBox->setLocale(QLocale::C);
     ui->videoFrequencySpinBox->setLocale(QLocale::C);
+}
+
+void VWindowMain::configureVideoShooter()
+{
+    m_pVideoShooter->setWidget(m_pFacade->getGLWidget());
+    m_pVideoShooter->setImageTextWriter(m_pImgTextWriter);
+
+    connect(m_pVideoShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_video_started()));
+    connect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_video_stopped()));
+    connect(m_pVideoShooter.get(), SIGNAL(directoryChanged()), this, SLOT(m_on_video_directory_changed()));
+    connect(m_pVideoShooter.get(), SIGNAL(frequencyChanged()), this, SLOT(m_on_video_frequency_changed()));
+    connect(m_pVideoShooter.get(), SIGNAL(suffixFileNameChanged()), this, SLOT(m_on_video_suffix_filename_changed()));
+    connect(m_pVideoShooter.get(), SIGNAL(videoSavingStarted()), this, SLOT(m_on_video_saving_started()));
+    connect(m_pVideoShooter.get(), SIGNAL(videoSavingFinished(bool)), this, SLOT(m_on_video_saving_finished(bool)));
+}
+
+void VWindowMain::addNewVideoShooter()
+{
+    std::shared_ptr<VVideoShooter> videoShooter(new VVideoShooter);
+
+    videoShooter->setDirPath(m_pVideoShooter->getDirPath());
+    videoShooter->setFrequency(m_pVideoShooter->getFrequency());
+    videoShooter->setSuffixFileName(m_pVideoShooter->getSuffixFileName());
+    m_oldVideoShootersList.push_back(m_pVideoShooter);
+
+    disconnect(m_pVideoShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_video_started()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_video_stopped()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(directoryChanged()), this, SLOT(m_on_video_directory_changed()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(frequencyChanged()), this, SLOT(m_on_video_frequency_changed()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(suffixFileNameChanged()), this, SLOT(m_on_video_suffix_filename_changed()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(videoSavingStarted()), this, SLOT(m_on_video_saving_started()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(videoSavingFinished(bool)), this, SLOT(m_on_video_saving_finished(bool)));
+
+    m_pVideoShooter = videoShooter;
+    configureVideoShooter();
+}
+
+void VWindowMain::clearFinishedVideoShooters()
+{
+    auto it = m_oldVideoShootersList.begin();
+    while (it != m_oldVideoShootersList.end())
+    {
+        if (!(*it)->isSaving() && !(*it)->isWorking())
+        {
+            m_oldVideoShootersList.erase(it++);
+        }
+        else
+            ++it;
+    }
 }
 
 VWindowMain::~VWindowMain()
@@ -749,6 +790,12 @@ bool VWindowMain::readNumber(const QLineEdit * lineEdit, float &output) const
 
 void VWindowMain::simulationStartResult()
 {
+    if (ui->actionSlideshow->isChecked())
+        startSlideshow();
+    if (ui->actionVideo->isChecked())
+    {
+        startVideo();
+    }
     ui->actionStart->setEnabled(false);
     ui->actionPause->setEnabled(true);
     ui->actionStop->setEnabled(true);
@@ -765,6 +812,8 @@ void VWindowMain::simulationPauseResult()
 
 void VWindowMain::simulationStopResult()
 {
+    m_pSlideshowShooter->stop();
+    m_pVideoShooter->stop();
     ui->actionStart->setEnabled(true);
     ui->actionPause->setEnabled(false);
     ui->actionStop->setEnabled(false);
@@ -1011,6 +1060,8 @@ int VWindowMain::getVideoFrequency() const
 
 void VWindowMain::startVideo()
 {
+    if (m_pVideoShooter->isSaving())
+        addNewVideoShooter();
     m_pVideoShooter->start();
 }
 
@@ -1170,16 +1221,18 @@ void VWindowMain::m_on_layers_cleared()
 
 void VWindowMain::m_on_video_saving_started()
 {
-    ui->actionVideo->setEnabled(false);
 }
 
 void VWindowMain::m_on_video_saving_finished(bool result)
 {
-    ui->actionVideo->setEnabled(true);
-    if (result)
-        QMessageBox::information(this, INFO_TITLE, SAVING_VIDEO_INFO.arg(m_pVideoShooter->getVideoFilePath()));
-    else
-        QMessageBox::warning(this, ERROR_TITLE, SAVING_VIDEO_ERROR);
+    if (!m_pVideoShooter->isWorking() && !m_pSlideshowShooter->isWorking())
+    {
+        if (result)
+            QMessageBox::information(this, INFO_TITLE, SAVING_VIDEO_INFO.arg(m_pVideoShooter->getVideoFilePath()));
+        else
+            QMessageBox::warning(this, ERROR_TITLE, SAVING_VIDEO_ERROR);
+        clearFinishedVideoShooters();
+    }
 }
 
 void VWindowMain::on_addLayerButton_clicked()
@@ -1387,7 +1440,6 @@ void VWindowMain::m_on_layers_swapped(uint layer1, uint layer2)
 
 void VWindowMain::m_on_slideshow_started()
 {
-    ui->actionSlideshow->setChecked(true);
     ui->slideshowBox->setEnabled(false);
     setWindowFlags((windowFlags() & ~Qt::WindowStaysOnBottomHint) | ON_TOP_FLAGS);
     show();
@@ -1395,7 +1447,6 @@ void VWindowMain::m_on_slideshow_started()
 
 void VWindowMain::m_on_slideshow_stopped()
 {
-    ui->actionSlideshow->setChecked(false);
     ui->slideshowBox->setEnabled(true);
     if (!m_pVideoShooter->isWorking())
     {
@@ -1424,7 +1475,6 @@ void VWindowMain::m_on_slideshow_suffix_dirname_changed()
 
 void VWindowMain::m_on_video_started()
 {
-    ui->actionVideo->setChecked(true);
     ui->videoBox->setEnabled(false);
     setWindowFlags((windowFlags() & ~Qt::WindowStaysOnBottomHint) | ON_TOP_FLAGS);
     show();
@@ -1432,7 +1482,6 @@ void VWindowMain::m_on_video_started()
 
 void VWindowMain::m_on_video_stopped()
 {
-    ui->actionVideo->setChecked(false);
     ui->videoBox->setEnabled(true);
     if (!m_pSlideshowShooter->isWorking())
     {
@@ -1681,18 +1730,18 @@ void VWindowMain::on_cubeSideSlider_valueChanged(int value)
 
 void VWindowMain::on_actionSlideshow_triggered(bool checked)
 {
-    if(checked)
-        startSlideshow();
-    else
+    if(!checked)
         stopSlideshow();
+    else if (!m_pFacade->isSimulationStopped())
+        startSlideshow();
 }
 
 void VWindowMain::on_actionVideo_triggered(bool checked)
 {
-    if(checked)
-        startVideo();
-    else
+    if (!checked)
         stopVideo();
+    else if (!m_pFacade->isSimulationStopped())
+        startVideo();
 }
 
 void VWindowMain::on_chooseSlideshowDirButton_clicked()
