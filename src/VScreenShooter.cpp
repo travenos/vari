@@ -109,7 +109,7 @@ void VScreenShooter::start()
             m_isWorking.store(true);
             m_pStopFlag.reset(new std::atomic<bool>(false));
             m_startTime = clock_t::now();
-            m_takePictureThread.reset(new std::thread(std::bind(&VScreenShooter::pictureCycle, this)));
+            m_takePictureThread.reset(new std::thread(&VScreenShooter::pictureCycle, this));
             emit processStarted();
         }
         else

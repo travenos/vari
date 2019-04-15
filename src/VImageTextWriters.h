@@ -40,6 +40,9 @@ public:
 protected:
     virtual QString createString() const;
 private:
+    static const QString INFO_STRING;
+    static const int PRECISION;
+
     std::shared_ptr<const VSimulationFacade> m_pFacade;
 };
 

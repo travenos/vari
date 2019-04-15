@@ -72,6 +72,16 @@ QPoint VAbstractImageTextWriter::getTextPosition(const QPixmap &pixmap) const
  * VSimInfoImageTextWriter implementation
  */
 
+
+const QString VSimInfoImageTextWriter::INFO_STRING{"Время моделирования (с): %1\t"
+                                                   "Время процесса (с): %2\t"
+                                                   "Готовность эксперимента (%): %3\n"
+                                                   "Фактор реального времни: %4\t"
+                                                   "Номер итерации: %5\t"
+                                                   "Среднее давление (Па): %6"};
+
+const int VSimInfoImageTextWriter::PRECISION{6};
+
 VSimInfoImageTextWriter::VSimInfoImageTextWriter(const std::shared_ptr<const VSimulationFacade>
                                                  p_facade):
     m_pFacade{p_facade}
@@ -80,16 +90,9 @@ VSimInfoImageTextWriter::VSimInfoImageTextWriter(const std::shared_ptr<const VSi
 
 QString VSimInfoImageTextWriter::createString() const
 {
-    const int PRECISION{6};
     VSimulationInfo inf{m_pFacade->getSimulationInfo()};
-    QString infoString{QStringLiteral("Время моделирования (с): %1\t"
-                                      "Время процесса (с): %2\t"
-                                      "Готовность эксперимента (%): %3\n"
-                                      "Фактор реального времни: %4\t"
-                                      "Номер итерации: %5\t"
-                                      "Среднее давление (Па): %6")};
 
-    return infoString.arg(QString::number(inf.realTime, 'g', PRECISION),
+    return INFO_STRING.arg(QString::number(inf.realTime, 'g', PRECISION),
                           QString::number(inf.simTime, 'g', PRECISION),
                           QString::number(inf.filledPercent, 'g', PRECISION),
                           QString::number(inf.realtimeFactor, 'g', PRECISION),

@@ -341,7 +341,7 @@ void VModelImport::loadLayer(QXmlStreamReader& xmlReader, std::deque<VLayer::ptr
             loadTrianglesInfos(xmlReader, trianglesInfos);
     );
     createTriangles(trianglesInfos, material, triangles);
-    VLayer::ptr layer(new VLayer(layers.size(), nodes, triangles, material, false));
+    VLayer::ptr layer(new VLayer(static_cast<uint>(layers.size()), nodes, triangles, material, false));
     layer->markActive(isEnabled);
     layer->setVisible(isVisible);
     layer->setMinMaxIds(nodeMinId, nodeMaxId, triangleMinId, triangleMaxId);

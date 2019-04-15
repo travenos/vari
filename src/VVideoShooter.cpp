@@ -121,7 +121,7 @@ void VVideoShooter::stop()
     {
         VScreenShooter::stop();
         waitForSaving();
-        m_pSavingThread.reset(new std::thread(std::bind(&VVideoShooter::saveVideoProcess, this)));
+        m_pSavingThread.reset(new std::thread(&VVideoShooter::saveVideoProcess, this));
     }
 }
 

@@ -15,7 +15,8 @@
 #include "VGraphicsViewer.h"
 
 class VTable;
-class VInjectionVacuum;
+struct VInjectionVacuum;
+
 class QWidget;
 
 class VSimulationFacade : public QObject
