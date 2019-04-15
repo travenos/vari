@@ -19,6 +19,7 @@
 #include "VWindowLayer.h"
 #include "VScreenShooter.h"
 #include "VVideoShooter.h"
+#include "VImageTextWriters.h"
 #include "sim/VSimulationFacade.h"
 #include "sim/structures/VExceptions.h"
 #include "sim/structures/VTable.h"
@@ -94,7 +95,9 @@ VWindowMain::VWindowMain(QWidget *parent) :
     loadSizes();
     m_pSlideshowShooter->setWidget(m_pFacade->getGLWidget());
     m_pVideoShooter->setWidget(m_pFacade->getGLWidget());
-
+    std::shared_ptr<VSimInfoImageTextWriter> imgTextWriter{new VSimInfoImageTextWriter(m_pFacade)};
+    m_pSlideshowShooter->setImageTextWriter(imgTextWriter);
+    m_pVideoShooter->setImageTextWriter(imgTextWriter);
     QDir(VVideoShooter::SLIDES_DIR_PATH).removeRecursively();
     loadShootersSettings();    
     this->setWindowTitle(QCoreApplication::applicationName());

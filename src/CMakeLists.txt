@@ -190,6 +190,7 @@ set(HEADER_FILES
     VSqlDatabase.h
     VScreenShooter.h
     VVideoShooter.h
+    VImageTextWriters.h
     )
 
 set(SOURCE_FILES
@@ -206,6 +207,7 @@ set(SOURCE_FILES
     VSqlDatabase.cpp
     VScreenShooter.cpp
     VVideoShooter.cpp
+    VImageTextWriters.cpp
     )
 
 #Create executable

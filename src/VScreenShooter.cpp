@@ -16,6 +16,8 @@
 #include <QWidget>
 #include <QDir>
 
+#include "VImageTextWriters.h"
+
 #if defined(Q_OS_WIN) || defined (WIN32) || defined(__WIN32__)
 #include <windows.h>
 #define SLEEP(period) Sleep(period)
@@ -203,6 +205,12 @@ const QString& VScreenShooter::getSuffixDirName() const
     return m_suffixDirName;
 }
 
+void VScreenShooter::setImageTextWriter(const std::shared_ptr<const VAbstractImageTextWriter>
+                                        &p_imageTextWriter)
+{
+    m_pImageTextWriter = p_imageTextWriter;
+}
+
 void VScreenShooter::pictureCycle()
 {
     std::shared_ptr< std::atomic<bool> > stopFlag = m_pStopFlag;
@@ -267,6 +275,8 @@ bool VScreenShooter::takePicture(const QString &fileName) const
 #else
     originalPixmap = screen->grabWindow(0, wx1, wy1, wx2-wx1-1, wy2-wy1-1);
 #endif
+    if (m_pImageTextWriter)
+        m_pImageTextWriter->writeText(originalPixmap);
     bool ok = originalPixmap.save(fileName, PICTURE_FORMAT_C);
     return ok;
 }

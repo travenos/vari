@@ -175,7 +175,7 @@ private:
     void swapLayersCaptions(uint layer1, uint layer2);
 
     Ui::VWindowMain *ui;
-    std::unique_ptr<VSimulationFacade> m_pFacade;
+    std::shared_ptr<VSimulationFacade> m_pFacade;
     VWindowLayer * m_pWindowLayer;
     VWindowCloth * m_pWindowCloth;
     VWindowResin * m_pWindowResin;

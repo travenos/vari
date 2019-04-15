@@ -15,6 +15,8 @@
 
 #include <QObject>
 
+class VAbstractImageTextWriter;
+
 class VScreenShooter : public QObject
 {
     Q_OBJECT
@@ -42,6 +44,8 @@ public:
     const QString& getSlidesDirPath() const;
     float getPeriod() const;
     const QString& getSuffixDirName() const;
+
+    void setImageTextWriter(const std::shared_ptr<const VAbstractImageTextWriter> &p_imageTextWriter);
 private:
     typedef std::chrono::duration<double, std::ratio<1> > second_t;
     typedef std::chrono::duration<int, std::ratio<1, 1000> > ms_int_t;
@@ -60,6 +64,8 @@ private:
     time_point_t m_startTime;
 
     std::shared_ptr< std::atomic<bool> > m_pStopFlag;
+
+    std::shared_ptr<const VAbstractImageTextWriter> m_pImageTextWriter;
 
     void pictureCycle();
     inline void constructorBody();
