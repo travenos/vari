@@ -189,7 +189,7 @@ void VLayersProcessor::sort()
     if (getLayersNumber() > 0)
     {
         std::lock_guard<std::mutex> lock(*m_pNodesLock);
-        sortLayers(getLayersNumber() - static_cast<size_t>(1));
+        sortLayers(static_cast<uint>(getLayersNumber() - 1));
     }
 }
 

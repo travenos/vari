@@ -31,7 +31,8 @@ public:
 
     bool isWorking() const;
 
-    bool takePicture(const QString &fileName) const;
+    virtual bool takePicture(double timeMoment) const;
+    inline bool createPixmap(QPixmap &pixmap) const;
     inline bool areParametersCorrect() const;
     inline bool createWorkDir();
 

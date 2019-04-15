@@ -12,7 +12,7 @@
 #include "VLayersProcessor.h"
 
 class VTable;
-class VInjectionVacuum;
+struct VInjectionVacuum;
 
 class QXmlStreamReader;
 
