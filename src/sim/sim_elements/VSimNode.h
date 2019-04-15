@@ -56,6 +56,7 @@ public:
     void commit(bool *madeChanges=nullptr, bool *isFull=nullptr) ;
     double getPressure() const override;
     double getFilledPart() const override;
+    bool isFull() const;
 
     void addNeighbourMutually(VSimNode *node, VLayerSequence layer=CURRENT) ;
     void addNeighbourMutually(const VSimNode::ptr &node, VLayerSequence layer=CURRENT);

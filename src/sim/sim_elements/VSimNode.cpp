@@ -88,6 +88,11 @@ double VSimNode::getFilledPart() const
     return (nom >= den) ? 1 : (nom / den);
 }
 
+bool VSimNode::isFull() const
+{
+    return (m_currentPressure >= m_vacuumPressure);
+}
+
 void VSimNode::addNeighbour(VSimNode* node, VLayerSequence layer)
 {
     double dist = getDistance(node);

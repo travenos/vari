@@ -24,8 +24,9 @@ const uint VSimulator::N_THREADS =
 VSimulator::VSimulator():
     m_nodesThreadPart(1),
     m_trianglesThreadPart(1),
-    m_pActiveNodes(new std::vector<VSimNode::ptr>),
-    m_pTriangles(new std::vector<VSimTriangle::ptr>),
+    m_pActiveNodes(new VSimNode::vector_t),
+    m_pVacuumNodes(new VSimNode::list_t),
+    m_pTriangles(new VSimTriangle::vector_t),
     m_simulatingFlag(false),
     m_pauseFlag(false),
     m_timeLimitFlag(false),
@@ -215,7 +216,15 @@ void VSimulator::simulationCycle()
             m_param.setNumberOfFullNodes(0);
         }
     }
-    bool madeChangesInCycle = false;
+    m_pVacuumNodes->clear();
+    for(auto &node : *m_pActiveNodes)
+    {
+        if (node->isVacuum())
+        {
+            m_pVacuumNodes->push_back(node);
+        }
+    }
+    bool processIsFinished = false;
     while(!(m_stopFlag.load()))
     {
         double filledPercent = getFilledPercent();
@@ -236,11 +245,25 @@ void VSimulator::simulationCycle()
             #endif
         }
         calculatePressure();
-        madeChangesInCycle = moveToNextStep();
+        processIsFinished = !moveToNextStep();
         updateColors();
         m_newDataNotifier.notifyAll();
-        if (!madeChangesInCycle)
+        if (processIsFinished)
             break;
+        if (m_pVacuumNodes->size() > 0)
+        {
+            size_t fullVacuumCounter{0};
+            std::lock_guard<std::mutex> nodesLocker(*m_pNodesLock);
+            for(auto &vacuumNode: *m_pVacuumNodes)
+            {
+                fullVacuumCounter += vacuumNode->isFull();
+            }
+            if (fullVacuumCounter == m_pVacuumNodes->size())
+            {
+                processIsFinished = true;
+                break;
+            }
+        }
         if (m_timeLimitFlag)
         {
             std::lock_guard<std::mutex> infoLocker(m_infoLock);
@@ -253,7 +276,7 @@ void VSimulator::simulationCycle()
         }
     }
     m_simulatingFlag.store(false);
-    if (!madeChangesInCycle)
+    if (processIsFinished)
         m_pauseFlag.store(false);
     if (!m_pauseFlag)
     {

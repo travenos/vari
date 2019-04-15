@@ -150,6 +150,8 @@ private:
      * Vector of pointers to all nodes which can be processed
      */
     VSimNode::const_vector_ptr m_pActiveNodes;
+
+    VSimNode::list_ptr m_pVacuumNodes;
     /**
      * Vector of all triangles which can be processed
      */
