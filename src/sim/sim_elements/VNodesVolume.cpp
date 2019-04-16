@@ -6,13 +6,15 @@
 #include <QDebug>
 #endif
 
+#include <QVector2D>
+
 #include <algorithm>
 #include <cmath>
 
 #include "VNodesVolume.h"
 
-const float VNodesVolume::MIN_STEP = 0.001f;
-const float VNodesVolume::STEP_COEF = static_cast<float>(sqrt(2.0 / 3.0));
+const float VNodesVolume::MIN_STEP{0.001f};
+const float VNodesVolume::STEP_COEF{static_cast<float>(sqrt(2.0 / 3.0))};
 
 VNodesVolume::VNodesVolume()
 {
@@ -30,13 +32,13 @@ VNodesVolume::VNodesVolume(const VSimNode::const_map_ptr &nodes, float step)
 }
 
 VNodesVolume::VNodesVolume(const VNodesVolume& copy):
-    m_step(copy.m_step),
-    m_averageDistance(copy.m_averageDistance),
-    m_min(copy.m_min),
-    m_max(copy.m_max),
-    m_size(copy.m_size),
-    m_arrSizes(copy.m_arrSizes),
-    m_nodes(copy.getNodesArrCopy())
+    m_step{copy.m_step},
+    m_averageDistance{copy.m_averageDistance},
+    m_min{copy.m_min},
+    m_max{copy.m_max},
+    m_size{copy.m_size},
+    m_arrSizes{copy.m_arrSizes},
+    m_nodes{copy.getNodesArrCopy()}
 {
 }
 
@@ -56,13 +58,13 @@ VNodesVolume& VNodesVolume::operator= (const VNodesVolume& copy)
 }
 
 VNodesVolume::VNodesVolume(VNodesVolume&& temp):
-    m_step(temp.m_step),
-    m_averageDistance(temp.m_averageDistance),
-    m_min(temp.m_min),
-    m_max(temp.m_max),
-    m_size(temp.m_size),
-    m_arrSizes(temp.m_arrSizes),
-    m_nodes(temp.m_nodes)
+    m_step{temp.m_step},
+    m_averageDistance{temp.m_averageDistance},
+    m_min{temp.m_min},
+    m_max{temp.m_max},
+    m_size{temp.m_size},
+    m_arrSizes{temp.m_arrSizes},
+    m_nodes{temp.m_nodes}
 {
     temp.m_nodes = nullptr;
     temp.reset();
@@ -124,8 +126,8 @@ VNodesVolume::~VNodesVolume()
 
 inline void VNodesVolume::calculateAverageDistance(const VSimNode::const_map_ptr &nodes)
 {
-    double distance = 0;
-    int counter = 0;
+    double distance{0};
+    int counter{0};
     for(auto &node : *nodes)
     {
         const VSimNode::neighbours_list_t &neighbours = node.second->getNeighbours(VSimNode::CURRENT);
@@ -215,8 +217,8 @@ inline void VNodesVolume::deallocate()
 inline bool VNodesVolume::getIndexes(const QVector3D &pos,
                                      int &i, int &j, int &k) const
 {
-    QVector3D noOffset = pos - m_min;
-    QVector3D backwardOffset = m_max - pos;
+    QVector3D noOffset{pos - m_min};
+    QVector3D backwardOffset{m_max - pos};
     i = static_cast<int>(noOffset.x() / m_step);
     j = static_cast<int>(noOffset.y() / m_step);
     k = static_cast<int>(noOffset.z() / m_step);
@@ -355,7 +357,7 @@ void VNodesVolume::getPointsInCylinder(VSimNode::list_t &nodesList,
                         const QVector3D &nodePos = nodePtr->getPosition();
                         QVector3D diffVector = nodePos - point;
                         if (fabs(diffVector.z()) <= height
-                            && projectionXYLength(diffVector) <= radius)
+                            && diffVector.toVector2D().length() <= radius)
                         {
                             nodesList.push_back(nodePtr);
                         }
@@ -407,11 +409,6 @@ VSimNode::ptr VNodesVolume::getNearestNode(const QVector3D &point) const
 bool VNodesVolume::isEmpty() const
 {
     return (m_arrSizes[0] <= 0);
-}
-
-inline float VNodesVolume::projectionXYLength(const QVector3D &vect)
-{
-    return sqrt(vect.x() * vect.x() + vect.y() * vect.y());
 }
 
 inline VSimNode::list_t *** VNodesVolume::getNodesArrCopy() const

@@ -47,8 +47,6 @@ public:
 
     bool isEmpty() const;
 
-    static inline float projectionXYLength(const QVector3D &vect);
-
     static const float MIN_STEP;
     static const float STEP_COEF;
 
