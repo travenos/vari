@@ -114,8 +114,10 @@ void VModelExport::saveResin(QXmlStreamWriter &xmlWriter, const VResin &resin)
 {
     auto &tags = _xPARAM_TAGS._xRESIN_TAGS;
     xmlWriter.writeStartElement(tags._NAME);
-    xmlWriter.writeAttribute(tags.TEMP_COEF, QString::number(resin.tempcoef));
+    xmlWriter.writeAttribute(tags.VISC_TEMP_COEF, QString::number(resin.viscTempcoef));
     xmlWriter.writeAttribute(tags.DEFAULT_VISCOSITY, QString::number(resin.defaultViscosity));
+    xmlWriter.writeAttribute(tags.LIFETIME_TEMP_COEF, QString::number(resin.lifetimeTempcoef));
+    xmlWriter.writeAttribute(tags.DEFAULT_LIFETIME, QString::number(resin.defaultLifetime));
     xmlWriter.writeAttribute(tags.MATERIAL_NAME, resin.name);
     xmlWriter.writeEndElement();
 }

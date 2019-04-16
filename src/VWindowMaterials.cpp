@@ -137,7 +137,9 @@ void VWindowMaterials::newMaterial( )
     ui->permeabilityEdit->clear();
     ui->porosityEdit->clear();
     ui->viscosityEdit->clear();
-    ui->tempcoefEdit->clear();
+    ui->viscTempcoefEdit->clear();
+    ui->lifetimeEdit->clear();
+    ui->lifetimeTempcoefEdit->clear();
     ui->idLabel->clear();
     m_currentId = -1;
 }

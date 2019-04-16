@@ -31,8 +31,10 @@ protected:
         {
             VXmlResinTags() {}
             const QString _NAME{QStringLiteral("Resin")};
-            const QString TEMP_COEF{QStringLiteral("tempcoef")};
+            const QString VISC_TEMP_COEF{QStringLiteral("viscTempcoef")};
             const QString DEFAULT_VISCOSITY{QStringLiteral("defaultViscosity")};
+            const QString LIFETIME_TEMP_COEF{"lifetimeTempcoef"};
+            const QString DEFAULT_LIFETIME{"lifetime"};
             const QString MATERIAL_NAME{QStringLiteral("name")};
         };
 

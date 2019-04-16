@@ -100,6 +100,8 @@ void VSimulationFacade::connectMainSignals()
             this, SIGNAL(timeLimitSet(double)));
     connect(m_pSimulator.get(), SIGNAL(timeLimitModeSwitched(bool)),
             this, SIGNAL(timeLimitModeSwitched(bool)));
+    connect(m_pSimulator.get(), SIGNAL(lifetimeConsiderationSwitched(bool)),
+            this, SIGNAL(lifetimeConsiderationSwitched(bool)));
 
     connect(m_pSimulator.get(), SIGNAL(simulationStarted()),
             this, SLOT(disableInteraction()));
@@ -288,6 +290,11 @@ void VSimulationFacade::setTimeLimit(double limit)
 void VSimulationFacade::setTimeLimitMode(bool on)
 {
     m_pSimulator->setTimeLimitMode(on);
+}
+
+void VSimulationFacade::considerLifetime(bool on)
+{
+    m_pSimulator->considerLifetime(on);
 }
 
 void VSimulationFacade::newModel() 
@@ -575,11 +582,13 @@ void VSimulationFacade::loadSavedParameters()
     VResin newResin;
     double temperature, injectionPressure, vacuumPressure, q, r, s, timeLimit;
     float simInjectionDiameter, simVacuumDiameter;
-    bool timeLimitMode;
+    bool timeLimitMode, lifetimeConsidered;
 
     newResin.name = settings.value(QStringLiteral("sim/resinName"), resin.name).toString();
     newResin.defaultViscosity = settings.value(QStringLiteral("sim/defaultViscosity"), resin.defaultViscosity).toDouble();
-    newResin.tempcoef = settings.value(QStringLiteral("sim/tempcoef"), resin.tempcoef).toDouble();
+    newResin.viscTempcoef = settings.value(QStringLiteral("sim/viscTempcoef"), resin.viscTempcoef).toDouble();
+    newResin.defaultLifetime = settings.value(QStringLiteral("sim/defaultLifetime"), resin.defaultLifetime).toDouble();
+    newResin.lifetimeTempcoef = settings.value(QStringLiteral("sim/lifetimeTempcoef"), resin.lifetimeTempcoef).toDouble();
 
     temperature = settings.value(QStringLiteral("sim/temperature"), param.getTemperature()).toDouble();
     simInjectionDiameter = settings.value(QStringLiteral("sim/injectionDiameter"), param.getInjectionDiameter()).toFloat();
@@ -595,6 +604,8 @@ void VSimulationFacade::loadSavedParameters()
     timeLimit = settings.value(QStringLiteral("sim/timeLimit"), param.getTimeLimit()).toDouble();
     timeLimitMode = settings.value(QStringLiteral("sim/timeLimitMode"), m_pSimulator->isTimeLimitModeOn()).toBool();
 
+    lifetimeConsidered = settings.value(QStringLiteral("sim/lifetimeConsidered"), m_pSimulator->isLifetimeConsidered()).toBool();
+
     m_pSimulator->setResin(newResin);
     m_pSimulator->setTemperature(temperature);
     m_pSimulator->setInjectionDiameter(simInjectionDiameter);
@@ -606,6 +617,7 @@ void VSimulationFacade::loadSavedParameters()
     m_pSimulator->setS(s);    
     m_pSimulator->setTimeLimit(timeLimit);
     m_pSimulator->setTimeLimitMode(timeLimitMode);
+    m_pSimulator->considerLifetime(lifetimeConsidered);
 
     bool isOrthographic;
     float cubeSide;
@@ -650,7 +662,9 @@ void VSimulationFacade::saveParameters() const
     VResin resin = param.getResin();
     settings.setValue(QStringLiteral("sim/resinName"), resin.name);
     settings.setValue(QStringLiteral("sim/defaultViscosity"), resin.defaultViscosity);
-    settings.setValue(QStringLiteral("sim/tempcoef"), resin.tempcoef);
+    settings.setValue(QStringLiteral("sim/viscTempcoef"), resin.viscTempcoef);
+    settings.setValue(QStringLiteral("sim/defaultLifetime"), resin.defaultLifetime);
+    settings.setValue(QStringLiteral("sim/lifetimeTempcoef"), resin.lifetimeTempcoef);
 
     settings.setValue(QStringLiteral("sim/temperature"), param.getTemperature());
     settings.setValue(QStringLiteral("sim/injectionDiameter"), param.getInjectionDiameter());
@@ -665,6 +679,8 @@ void VSimulationFacade::saveParameters() const
 
     settings.setValue(QStringLiteral("sim/timeLimit"), param.getTimeLimit());
     settings.setValue(QStringLiteral("sim/timeLimitMode"), m_pSimulator->isTimeLimitModeOn());
+
+    settings.setValue(QStringLiteral("sim/lifetimeConsidered"), m_pSimulator->isLifetimeConsidered());
 
     settings.setValue(QStringLiteral("graphics/cameraType"), m_pGraphicsViewer->isCameraOrthographic());
     settings.setValue(QStringLiteral("graphics/cubeSide"), m_pGraphicsViewer->getCubeSide());

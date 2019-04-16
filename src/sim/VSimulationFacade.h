@@ -60,6 +60,7 @@ public:
 
     void setTimeLimit(double limit);
     void setTimeLimitMode(bool on);
+    void considerLifetime(bool on);
 
     void newModel() ;
     void loadModel(const QString &filename) ;
@@ -180,6 +181,7 @@ signals:
     void coefSSet(double s) ;
     void timeLimitSet(double);
     void timeLimitModeSwitched(bool);
+    void lifetimeConsiderationSwitched(bool);
 
     void modelSaved();
     void modelLoaded();

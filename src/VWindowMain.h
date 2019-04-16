@@ -90,7 +90,7 @@ private:
     void showWindowCloth();
     void showWindowResin();
     void setCloth(const QString & name, float cavityheight, float permeability, float porosity);
-    void setResin(const QString & name , float viscosity, float tempcoef);
+    void setResin(const QString & name , float viscosity, float viscTempcoef, float lifetime, float lifetimeTempcoef);
     void selectColor();
 
     void removeLayerFromList(int layer);
@@ -204,7 +204,7 @@ private slots:
     void m_on_resin_window_closed();
     void m_on_layers_cleared();
     void m_on_got_cloth(const QString & name, float cavityheight, float permeability, float porosity);
-    void m_on_got_resin(const QString & name , float viscosity, float tempcoef);
+    void m_on_got_resin(const QString & name , float viscosity, float viscTempcoef, float lifetime, float lifetimeTempcoef);
     void m_on_layer_creation_from_file_available(const VCloth& material, const QString& filename,
                                                  VLayerAbstractBuilder::VUnit units);
     void m_on_layer_creation_manual_available(const VCloth& material, const QPolygonF& polygon,
@@ -227,6 +227,7 @@ private slots:
     void m_on_injection_pressure_set(double);
     void m_on_time_limit_set(double);
     void m_on_time_limit_mode_switched(bool on);
+    void m_on_lifetime_consideration_switched(bool on);
     void m_on_canceled_waiting_for_injection_point();
     void m_on_canceled_waiing_for_vacuum_point();
     void m_on_model_loaded();
@@ -334,6 +335,7 @@ private slots:
     void on_saveTableVacuumCoordsButton_clicked();
     void on_resetTableVacuumDiameterButton_clicked();
     void on_saveTableVacuumDiameterButton_clicked();
+    void on_timeConsiderationCheckbox_clicked(bool checked);
 };
 
 #endif // _VWINDOWMAIN_H

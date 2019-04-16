@@ -22,8 +22,12 @@ VWindowCloth::VWindowCloth(QWidget *parent):
 {
     ui->viscosityEdit->hide();
     ui->viscosityLabel->hide();
-    ui->tempcoefEdit->hide();
-    ui->tempcoefLabel->hide();
+    ui->viscTempcoefEdit->hide();
+    ui->viscTempcoefLabel->hide();
+    ui->lifetimeEdit->hide();
+    ui->lifetimeLabel->hide();
+    ui->lifetimeTempcoefEdit->hide();
+    ui->lifetimeTempcoefLabel->hide();
 
     m_pValidator->setBottom(0);
     m_pValidator->setLocale(QLocale::C);

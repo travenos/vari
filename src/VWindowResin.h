@@ -28,13 +28,13 @@ protected:
 
 private:
     virtual VDatabaseInteractor* databaseInteractor();
-    bool getInputs(QString &name, float &viscosity, float &tempcoef);
+    bool getInputs(QString &name, float &viscosity, float &viscTempcoef, float &lifetime, float &lifetimeTempcoef);
 
     VDatabaseResin* const m_pDatabaseResin;
     QDoubleValidator * const m_pValidator;
 
 signals:
-    void gotMaterial(const QString &name, float viscosity, float tempcoef);
+    void gotMaterial(const QString &name, float viscosity, float viscTempcoef, float lifetime, float lifetimeTempcoef);
 };
 
 #endif // _VWINDOWRESIN_H

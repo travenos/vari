@@ -187,8 +187,12 @@ void VModelImport::loadResin(QXmlStreamReader &xmlReader, VSimulationParameters 
     {
         if (!attr.name().compare(tags.DEFAULT_VISCOSITY))
             resin.defaultViscosity = attr.value().toDouble();
-        else if (!attr.name().compare(tags.TEMP_COEF))
-            resin.defaultViscosity = attr.value().toDouble();
+        else if (!attr.name().compare(tags.VISC_TEMP_COEF))
+            resin.viscTempcoef = attr.value().toDouble();
+        else if (!attr.name().compare(tags.DEFAULT_LIFETIME))
+            resin.defaultLifetime = attr.value().toDouble();
+        else if (!attr.name().compare(tags.LIFETIME_TEMP_COEF))
+            resin.lifetimeTempcoef = attr.value().toDouble();
         else if (!attr.name().compare(tags.MATERIAL_NAME))
             resin.name = attr.value().toString();
     }

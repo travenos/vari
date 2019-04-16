@@ -58,6 +58,9 @@ public:
     * Check if time timit mode is on
     */
     bool isTimeLimitModeOn() const ;
+
+    bool isLifetimeConsidered() const;
+
     /**
      * Stop the simulation and reset all nodes states
      */
@@ -127,6 +130,7 @@ public:
     void setS(double s) ;
     void setTimeLimit(double limit);
     void setTimeLimitMode(bool on);
+    void considerLifetime(bool on);
 
 private:
     typedef void(*nodeFunc)(VSimNode::ptr& node);
@@ -176,6 +180,8 @@ private:
     * Flag used for time limitation mode
     */
     std::atomic<bool> m_timeLimitFlag;
+
+    std::atomic<bool> m_lifetimeLimitFlag;
     /**
      * Vector used for storage of calculation threads
      */
@@ -273,6 +279,7 @@ signals:
     void coefSSet(double s) ;
 
     void timeLimitModeSwitched(bool);
+    void lifetimeConsiderationSwitched(bool);
     void timeLimitSet(double);
 };
 

@@ -20,6 +20,7 @@ public:
 
     static const double DEFAULT_TEMPERATURE;
     static const double KELVINS_IN_0_CELSIUS;
+    static const double UNIVERSAL_GAS_CONSTANT;
     static const double MIN_PRESSURE;
 
     VSimulationParameters() = default;
@@ -39,10 +40,15 @@ public:
 
     double getDefaultViscosity() const ;
 
+    double getLifetime() const;
+
+    double getDefaultLifetime() const ;
+
     double getTemperature() const ;
     void setTemperature(double temperature) ;
 
-    double getTempcoef() const ;
+    double getViscTempcoef() const ;
+    double getLifetimeTempcoef() const;
 
     double getInjectionPressure() const ;
     void setInjectionPressure(double pressure) ;
@@ -75,6 +81,7 @@ private:
     VResin m_resin;
 
     double m_viscosity{0.1};
+    double m_lifetime{10800};
     double m_temperature{25};
 
     float m_injectionDiameter{0.02f};
@@ -95,6 +102,7 @@ private:
     int m_numberOfFullNodes{0};
 
     double calculateViscosity() const ;
+    double calculateLifetime() const;
 };
 
 #endif //_VSIMULATIONPARAMETERS_H

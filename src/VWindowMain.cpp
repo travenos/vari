@@ -38,16 +38,18 @@ const QString VWindowMain::ASK_FOR_CUT("Вы уверены, что хотите
 const QString VWindowMain::TRANSFORM_TITLE("Переместить?");
 const QString VWindowMain::ASK_FOR_TRANSFORM("Вы уверены, что хотите изменть положение слоя?");
 const QString VWindowMain::CLOTH_INFO_TEXT("<html><head/><body>"
-                                               "Материал: &quot;%1&quot;<br>"
-                                               "Толщина: %2 м<br>"
-                                               "Проницаемость: %3 м<span style=\" vertical-align:super;\">2</span><br>"
-                                               "Пористость: %4"
-                                               "</body></html>");
+                                           "Материал: &quot;%1&quot;<br>"
+                                           "Толщина: %2 м<br>"
+                                           "Проницаемость: %3 м<span style=\" vertical-align:super;\">2</span><br>"
+                                           "Пористость: %4"
+                                           "</body></html>");
 const QString VWindowMain::RESIN_INFO_TEXT("<html><head/><body>"
-                                               "Материал: &quot;%1&quot;<br>"
-                                               "Вязкость при 25 °C: %2 Па·с<br>"
-                                               "Температурный коэффициент: %3 Па·с"
-                                               "</body></html>");
+                                           "Материал: &quot;%1&quot;<br>"
+                                           "Вязкость при 25 °C: %2 Па·с<br>"
+                                           "Энергия активации вязкого течения: %3 Дж/моль<br>"
+                                           "Время жизни при 25 °C: %4 с<br>"
+                                           "Энергия активации процесса отвеждения: %5 Дж/моль<br>"
+                                           "</body></html>");
 const QString VWindowMain::MODEL_INFO_TEXT("Габариты: %1м x %2м x %3м;    "
                                            "Число узлов: %4;    "
                                            "Число треугольников: %5.");
@@ -141,6 +143,8 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_time_limit_set(double)));
     connect(m_pFacade.get(), SIGNAL(timeLimitModeSwitched(bool)),
             this, SLOT(m_on_time_limit_mode_switched(bool)));
+    connect(m_pFacade.get(), SIGNAL(lifetimeConsiderationSwitched(bool)),
+            this, SLOT(m_on_lifetime_consideration_switched(bool)));
     connect(m_pFacade.get(), SIGNAL(canceledWaitingForInjectionPoint()),
             this, SLOT(m_on_canceled_waiting_for_injection_point()));
     connect(m_pFacade.get(), SIGNAL(canceledWaitingForVacuumPoint()),
@@ -466,8 +470,8 @@ void VWindowMain::showWindowResin()
     if (m_pWindowResin == nullptr)
     {
         m_pWindowResin = new VWindowResin(this);
-        connect(m_pWindowResin, SIGNAL(gotMaterial(const QString &, float, float)),
-                this, SLOT(m_on_got_resin(const QString &, float, float)));
+        connect(m_pWindowResin, SIGNAL(gotMaterial(const QString &, float, float, float, float)),
+                this, SLOT(m_on_got_resin(const QString &, float, float, float, float)));
         connect(m_pWindowResin,SIGNAL(windowClosed()), this, SLOT(m_on_resin_window_closed()));
     }
     m_pWindowResin->show();
@@ -504,11 +508,14 @@ void VWindowMain::selectColor()
     }
 }
 
-void VWindowMain::setResin(const QString & name , float viscosity, float tempcoef)
+void VWindowMain::setResin(const QString & name , float viscosity, float viscTempcoef,
+                           float lifetime, float lifetimeTempcoef)
 {
     VResin resin;
     resin.defaultViscosity = viscosity;
-    resin.tempcoef = tempcoef;
+    resin.defaultLifetime = lifetime;
+    resin.viscTempcoef = viscTempcoef;
+    resin.lifetimeTempcoef = lifetimeTempcoef;
     resin.name = name;
     m_pFacade->setResin(resin);
 }
@@ -547,7 +554,8 @@ void VWindowMain::updateResinInfo()
 {
     VResin resin = m_pFacade->getParameters().getResin();
     ui->resinInfoLabel->setText(RESIN_INFO_TEXT.arg(resin.name).arg(resin.defaultViscosity)
-                                         .arg(resin.tempcoef));
+                                .arg(resin.viscTempcoef).arg(resin.defaultLifetime)
+                                .arg(resin.lifetimeTempcoef));
 }
 
 void VWindowMain::markLayerAsEnabled(int layer, bool enable)
@@ -1192,9 +1200,10 @@ void VWindowMain::m_on_got_cloth(const QString & name, float cavityheight, float
     setCloth(name, cavityheight, permeability, porosity);
 }
 
-void VWindowMain::m_on_got_resin(const QString & name , float viscosity, float tempcoef)
+void VWindowMain::m_on_got_resin(const QString & name , float viscosity, float viscTempcoef,
+                                 float lifetime, float lifetimeTempcoef)
 {
-    setResin(name, viscosity, tempcoef);
+    setResin(name, viscosity, viscTempcoef, lifetime, lifetimeTempcoef);
 }
 
 void VWindowMain::m_on_layer_window_closed()
@@ -1373,6 +1382,11 @@ void VWindowMain::m_on_time_limit_mode_switched(bool on)
 {
     ui->timeLimitCheckBox->setChecked(on);
     setSavedState(false);
+}
+
+void VWindowMain::m_on_lifetime_consideration_switched(bool on)
+{
+    ui->timeConsiderationCheckbox->setChecked(on);
 }
 
 void VWindowMain::m_on_canceled_waiting_for_injection_point()
@@ -1984,4 +1998,9 @@ void VWindowMain::on_resetTableVacuumDiameterButton_clicked()
 void VWindowMain::on_saveTableVacuumDiameterButton_clicked()
 {
     m_pFacade->setTableVacuumDiameter(ui->tableVacuumDiameterSpinBox->value());
+}
+
+void VWindowMain::on_timeConsiderationCheckbox_clicked(bool checked)
+{
+    m_pFacade->considerLifetime(checked);
 }

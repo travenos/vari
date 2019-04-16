@@ -30,6 +30,7 @@ VSimulator::VSimulator():
     m_simulatingFlag(false),
     m_pauseFlag(false),
     m_timeLimitFlag(false),
+    m_lifetimeLimitFlag(true),
     m_simT_timeBeforePause(0),
     m_destroyed(false)
 {
@@ -51,7 +52,7 @@ void VSimulator::start()
                 m_pSimulationThread->join();
         m_stopFlag.store(false);
         m_simulatingFlag.store(true);
-        m_pSimulationThread.reset(new std::thread(std::bind(&VSimulator::simulationCycle, this)));
+        m_pSimulationThread.reset(new std::thread(&VSimulator::simulationCycle, this));
     }
 }
 
@@ -97,6 +98,11 @@ bool VSimulator::isPaused() const
 bool VSimulator::isTimeLimitModeOn() const
 {
     return m_timeLimitFlag.load();
+}
+
+bool VSimulator::isLifetimeConsidered() const
+{
+    return m_lifetimeLimitFlag.load();
 }
 
 void VSimulator::reset() 
@@ -264,11 +270,16 @@ void VSimulator::simulationCycle()
                 break;
             }
         }
-        if (m_timeLimitFlag)
+        if (m_lifetimeLimitFlag || m_timeLimitFlag)
         {
             std::lock_guard<std::mutex> infoLocker(m_infoLock);
             std::lock_guard<std::mutex> nodesLocker(*m_pNodesLock);
-            if (m_info.simTime >= m_param.getTimeLimit())
+            if (m_lifetimeLimitFlag && m_info.simTime >= m_param.getLifetime())
+            {
+                processIsFinished = true;
+                break;
+            }
+            else if (m_timeLimitFlag && m_info.simTime >= m_param.getTimeLimit())
             {
                 m_pauseFlag.store(true);
                 break;
@@ -557,6 +568,8 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
     }
 }
 
+
+
 void VSimulator::setResin(const VResin& resin)
 {
     {
@@ -651,4 +664,10 @@ void VSimulator::setTimeLimitMode(bool on)
 {
     m_timeLimitFlag.store(on);
     emit timeLimitModeSwitched(on);
+}
+
+void VSimulator::considerLifetime(bool on)
+{
+    m_lifetimeLimitFlag.store(on);
+    emit lifetimeConsiderationSwitched(on);
 }
