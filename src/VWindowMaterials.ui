@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>905</width>
-    <height>659</height>
+    <height>677</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -446,6 +446,38 @@
     <hint type="destinationlabel">
      <x>287</x>
      <y>435</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lifetimeEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>saveButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>279</x>
+     <y>457</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>411</x>
+     <y>543</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lifetimeTempcoefEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>saveButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>279</x>
+     <y>511</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>411</x>
+     <y>543</y>
     </hint>
    </hints>
   </connection>

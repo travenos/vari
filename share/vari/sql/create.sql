@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS resin (
 ALTER TABLE resin ADD COLUMN visctempcoef REAL NOT NULL DEFAULT 90000;
 ALTER TABLE resin ADD COLUMN lifetime REAL NOT NULL DEFAULT 10800;
 ALTER TABLE resin ADD COLUMN lifetimetempcoef REAL NOT NULL DEFAULT 90000;
-ALTER TABLE resin ALTER COLUMN tempcoef DROP NOT NULL;
+ALTER TABLE resin DROP COLUMN tempcoef;
 INSERT INTO resin (name, viscosity, visctempcoef, lifetime, lifetimetempcoef) VALUES ('Пример связующего 1', 0.1, 90000, 10800, 90000);
 INSERT INTO resin (name, viscosity, visctempcoef, lifetime, lifetimetempcoef) VALUES ('Пример связующего 2', 0.1, 90000, 5400, 90000);
 INSERT INTO resin (name, viscosity, visctempcoef, lifetime, lifetimetempcoef) VALUES ('Пример связующего 3', 0.1, 90000, 3600, 90000);

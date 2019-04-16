@@ -17,7 +17,7 @@ const QString VDatabaseResin::GET_INFO_QUERY("SELECT id, viscosity, visctempcoef
 const QString VDatabaseResin::UPDATE_INFO_QUERY("UPDATE %1 SET name='%2', viscosity=%3, visctempcoef=%4, lifetime=%5, lifetimetempcoef=%6 WHERE id=%7;");
 const QString VDatabaseResin::INSERT_INFO_QUERY("INSERT INTO %1 (name, viscosity, visctempcoef, lifetime, lifetimetempcoef) VALUES ('%2', %3, %4, %5, %6);");
 
-const int VDatabaseResin::PARAM_NUMBER = 3;
+const int VDatabaseResin::PARAM_NUMBER = 5;
 
 VDatabaseResin::VDatabaseResin():
     VDatabaseInteractor(TABLE_NAME)
