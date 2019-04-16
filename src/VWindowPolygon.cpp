@@ -18,10 +18,10 @@
 
 const QCPRange VWindowPolygon::X_RANGE(-1, 1);
 const QCPRange VWindowPolygon::Y_RANGE(-0.5, 0.5);
-const int VWindowPolygon::MIN_POLYGON_SIZE = 3;
-const double VWindowPolygon::MIN_CHARACTERISTIC_LENGTH = 0.001;
-const double VWindowPolygon::DEFAULT_CHARACTERISTIC_LENGTH = 0.01;
-const double VWindowPolygon::MIN_CHARACTERISTIC_RATIO = 0.005;
+const int VWindowPolygon::MIN_POLYGON_SIZE{3};
+const double VWindowPolygon::MIN_CHARACTERISTIC_LENGTH{0.001};
+const double VWindowPolygon::DEFAULT_CHARACTERISTIC_LENGTH{0.01};
+const double VWindowPolygon::MIN_CHARACTERISTIC_RATIO{0.005};
 
 const QString VWindowPolygon::SAVE_FILE_DIALOG_TITLE("Создание и сохранение слоя в файл");
 const QString VWindowPolygon::FILE_DIALOG_FORMATS("Файлы gmsh(*.msh);;"
@@ -34,8 +34,8 @@ const QString VWindowPolygon::TOO_SMALL_STEP_ERROR("Задан слишком м
 const QString VWindowPolygon::INTERSECTION_ERROR("Заданный контур содержит пересчения");
 const QString VWindowPolygon::TABLE_ERROR("Вершина лежит за пределами рабочего поля стенда");
 
-const int VWindowPolygon::POINT_SIZE = 6;
-const int VWindowPolygon::HIGHLIGHT_POINT_SIZE = 10;
+const int VWindowPolygon::POINT_SIZE{6};
+const int VWindowPolygon::HIGHLIGHT_POINT_SIZE{10};
 
 
 VWindowPolygon::VWindowPolygon(QWidget *parent,
@@ -202,12 +202,12 @@ void VWindowPolygon::removeVertex(int index)
         m_qvT.remove(index);
         m_qvX.remove(index);
         m_qvY.remove(index);
-        plotEnclosed();
-        updateButtonsStates();
         if (getPolygonSize() == 0)
         {
             m_pHighlightCurve->data()->clear();
         }
+        plotEnclosed();
+        updateButtonsStates();
     }
 }
 
