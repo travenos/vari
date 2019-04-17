@@ -6,6 +6,7 @@
 #ifdef DEBUG_MODE
 #include <QDebug>
 #endif
+#include <QTextStream>
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
@@ -13,7 +14,6 @@
 #include <QVariant>
 #include <QDir>
 #include <QCoreApplication>
-#include <QTextCodec>
 #include <QSqlRecord>
 
 #include <deque>
