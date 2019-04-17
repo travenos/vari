@@ -38,7 +38,7 @@ VNodesVolume::VNodesVolume(const VNodesVolume& copy):
     m_max{copy.m_max},
     m_size{copy.m_size},
     m_arrSizes{copy.m_arrSizes},
-    m_nodes{copy.getNodesArrCopy()}
+    m_nodes(copy.getNodesArrCopy())
 {
 }
 
@@ -64,7 +64,7 @@ VNodesVolume::VNodesVolume(VNodesVolume&& temp):
     m_max{temp.m_max},
     m_size{temp.m_size},
     m_arrSizes{temp.m_arrSizes},
-    m_nodes{temp.m_nodes}
+    m_nodes(temp.getNodesArrCopy())
 {
     temp.m_nodes = nullptr;
     temp.reset();
