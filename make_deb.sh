@@ -42,7 +42,7 @@ then
     >&2 echo "Error. No OpenCV module for video writing found in the system"
     exit 2
 fi
-DEPENDENCIES="libc6 (>= ${LIBC_VER}), libgcc1 (>= ${LIBGCC1_VER}), libgl1-mesa-glx | libgl1, libstdc++6 (>= ${LIBSTDCXX_VER}), libx11-6, libxi6, qt5-default (>= ${QT_VER}), libqt5core5a (>= ${QT_VER}), libqt5gui5 (>= ${QT_VER}), libqt5sql5 (>= ${QT_VER}), libqt5widgets5 (>= ${QT_VER}), libqt5xml5 (>= ${QT_VER}), libqt5sql5-psql (>= ${QT_VER}), libqt5printsupport5 (>= ${QT_VER}), postgresql, ${LIBOPENCV_NAME}"
+DEPENDENCIES="libc6 (>= ${LIBC_VER}), libgcc1 (>= ${LIBGCC1_VER}), libgl1-mesa-glx | libgl1, libstdc++6 (>= ${LIBSTDCXX_VER}), libx11-6, libxi6, qt5-default (>= ${QT_VER}), libqt5core5a (>= ${QT_VER}), libqt5gui5 (>= ${QT_VER}), libqt5sql5 (>= ${QT_VER}), libqt5widgets5 (>= ${QT_VER}), libqt5xml5 (>= ${QT_VER}), libqt5sql5-psql (>= ${QT_VER}), libqt5printsupport5 (>= ${QT_VER}), ${LIBOPENCV_NAME}"
 CONFLICTS="libsoqt3-20, libsoqt4-20, libcoin80v5, libcoin80-runtime"
 PROVIDES="libcoin80v5"
 
@@ -168,8 +168,6 @@ for file in ${COIN3D_LIBS[@]}
 do
 	cp "${COINDIR}/lib/$file" "$LIB_DEST_DIR"
 done
-
-iconv -f CP1251 -t UTF-8 "$CREATE_SQL_SOURCE_FILE" > "$CREATE_DEST_SOURCE_FILE"
 
 #Set package parametres
 sed -i "s/@version@/${VERSION}/g" "$PACKAGE_DEST_DIR/$CONTROL_NAME"

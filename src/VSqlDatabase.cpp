@@ -4,15 +4,15 @@
  */
 
 #include <QString>
+#include <QDir>
+#include <QStandardPaths>
+
 #include "VSqlDatabase.h"
 
 const QString VSqlDatabase::HOSTNAME("127.0.0.1");
-const QString VSqlDatabase::DATABASENAME("vari");
+const QString VSqlDatabase::DATABASENAME("vari_materials");
 const QString VSqlDatabase::USERNAME("vari");
 const QString VSqlDatabase::PASSWORD("vari-password");
-//const QString VSqlDatabase::DATABASENAME("postgres");
-//const QString VSqlDatabase::USERNAME("postgres");
-//const QString VSqlDatabase::PASSWORD("postgres-password");
 const QString VSqlDatabase::CONNECTION_NAME("qt_sql_default_connection1");
 VSqlDatabase* VSqlDatabase::s_object = nullptr;
 
@@ -44,9 +44,10 @@ bool VSqlDatabase::hasInstance()
     return (s_object != nullptr);
 }
 
-VSqlDatabase::VSqlDatabase()
+VSqlDatabase::VSqlDatabase():
+    m_databaseLocation{QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)}
 {
-    m_database = QSqlDatabase::addDatabase(QStringLiteral("QPSQL"), CONNECTION_NAME);
+    m_database = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), CONNECTION_NAME);
     resetParameters();
 }
 
@@ -90,8 +91,10 @@ void VSqlDatabase::setUserName(const QString &name)
 
 void VSqlDatabase::resetParameters()
 {
+    createDirIfNecessary();
+    QString databaseName{QDir::cleanPath(m_databaseLocation + QDir::separator() + DATABASENAME)};
+    m_database.setDatabaseName(databaseName);
     m_database.setHostName(HOSTNAME);
-    m_database.setDatabaseName(DATABASENAME);
     m_database.setUserName(USERNAME);
     m_database.setPassword(PASSWORD);
 }
@@ -99,4 +102,12 @@ void VSqlDatabase::resetParameters()
 QSqlDatabase & VSqlDatabase::getDatabase()
 {
     return m_database;
+}
+
+bool VSqlDatabase::createDirIfNecessary()
+{
+    QDir dir(m_databaseLocation);
+    if (!dir.exists())
+        return dir.mkpath(QStringLiteral("."));
+    return true;
 }

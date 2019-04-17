@@ -18,15 +18,16 @@ private:
     VSqlDatabase(const VSqlDatabase &other) = delete;
     VSqlDatabase & operator=(const VSqlDatabase &other) = delete;
 
+    QSqlDatabase m_database;
+    QString m_databaseLocation;
+    static VSqlDatabase * s_object;
+public:
     static const QString HOSTNAME;
     static const QString DATABASENAME;
     static const QString USERNAME;
     static const QString PASSWORD;
     static const QString CONNECTION_NAME;
 
-    QSqlDatabase m_database;
-    static VSqlDatabase * s_object;
-public:
     static VSqlDatabase * getInstance();
     static void deleteInstance();
     static bool hasInstance();
@@ -41,6 +42,8 @@ public:
     void setUserName(const QString &name);
     void resetParameters();
     QSqlDatabase & getDatabase();
+
+    bool createDirIfNecessary();
 };
 
 #endif // _VSQLDATABASE_H

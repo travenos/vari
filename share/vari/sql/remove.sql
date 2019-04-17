@@ -1,3 +1,2 @@
-DROP DATABASE vari;
-DROP OWNED BY vari;
-DROP ROLE vari;
+DROP TABLE cloth;
+DROP TABLE resin;
