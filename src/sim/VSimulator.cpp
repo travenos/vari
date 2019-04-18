@@ -550,8 +550,6 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
         if (m > 0)
         {
             double newPressure = p_t+(brace0/m)*sum;
-            if(newPressure < p_t)
-                newPressure = p_t;
             if(newPressure > m_param.getInjectionPressure())
                 newPressure = m_param.getInjectionPressure();
 
@@ -559,6 +557,8 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
                     newPressure = highestNeighborPressure;
             if(node->isVacuum() && newPressure > m_param.getVacuumPressure())
                     newPressure = m_param.getVacuumPressure();
+            if(newPressure < p_t)
+                newPressure = p_t;
             node->setNewPressure(newPressure);
         }
     }
