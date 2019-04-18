@@ -21,7 +21,9 @@ class VSimTriangle;
 class VSimNode: public VSimElement
 {
 public: 
-    static const uint LAYERS_NUMBER = 2;
+    static const uint LAYERS_NUMBER{2};
+
+    static const double CONSIDERED_FULL;
 
     typedef std::shared_ptr<VSimNode> ptr;
     typedef std::shared_ptr<const VSimNode> const_ptr;
@@ -53,7 +55,7 @@ public:
     void setRole(VNodeRole role) ;
     VNodeRole getRole() const ;
     void setNewPressure(double newPressure) ;
-    void commit(bool *madeChanges=nullptr, bool *isFull=nullptr) ;
+    void commit(bool *p_madeChanges=nullptr, bool *p_isFull=nullptr) ;
     double getPressure() const override;
     double getFilledPart() const override;
     bool isFull() const;

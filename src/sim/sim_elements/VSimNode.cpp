@@ -15,6 +15,7 @@
  * VSimNode implementation
  */
 
+const double VSimNode::CONSIDERED_FULL{0.98};
 
 VSimNode::VSimNode(uint id, const QVector3D& pos,
                    const VCloth::const_ptr &p_material,
@@ -59,20 +60,20 @@ void VSimNode::setNewPressure(double newPressure)
     m_newPressure = newPressure;
 }
 
-void VSimNode::commit(bool *madeChanges, bool *isFull)
+void VSimNode::commit(bool *p_madeChanges, bool *p_isFull)
 {
-    if (isFull != nullptr)
-        (*isFull) = (m_newPressure >= m_vacuumPressure);
+    if (p_isFull != nullptr)
+        (*p_isFull) = isFull();
     if(m_newPressure != m_currentPressure)
     {
-        if (madeChanges != nullptr)
-            (*madeChanges) = (m_currentPressure < m_vacuumPressure);
+        if (p_madeChanges != nullptr)
+            (*p_madeChanges) = (m_currentPressure < m_vacuumPressure);
         m_currentPressure = m_newPressure;
     }
     else
     {
-        if (madeChanges != nullptr)
-            (*madeChanges) = false;
+        if (p_madeChanges != nullptr)
+            (*p_madeChanges) = false;
     }
 }
 
@@ -90,7 +91,7 @@ double VSimNode::getFilledPart() const
 
 bool VSimNode::isFull() const
 {
-    return (m_currentPressure >= m_vacuumPressure);
+    return (getFilledPart() >= CONSIDERED_FULL);
 }
 
 void VSimNode::addNeighbour(VSimNode* node, VLayerSequence layer)
