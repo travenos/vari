@@ -15,10 +15,10 @@ CREATE TABLE IF NOT EXISTS resin (
     "id"	INTEGER PRIMARY KEY AUTOINCREMENT,
     "name"	TEXT UNIQUE NOT NULL,
     "viscosity"	REAL NOT NULL,
-    "visctempcoef"	REAL NOT NULL DEFAULT 90000,
-    "lifetime"	REAL NOT NULL DEFAULT 10800,
-    "lifetimetempcoef"	REAL NOT NULL DEFAULT 90000
+    "visctempcoef"	REAL NOT NULL,
+    "lifetime"	REAL NOT NULL,
+    "lifetimetempcoef"	REAL NOT NULL
     );
-INSERT INTO resin (name, viscosity, visctempcoef, lifetime, lifetimetempcoef) VALUES ('Пример связующего 1', 0.1, 90000, 10800, 90000);
-INSERT INTO resin (name, viscosity, visctempcoef, lifetime, lifetimetempcoef) VALUES ('Пример связующего 2', 0.1, 90000, 5400, 90000);
-INSERT INTO resin (name, viscosity, visctempcoef, lifetime, lifetimetempcoef) VALUES ('Пример связующего 3', 0.1, 90000, 3600, 90000);
+INSERT INTO resin (name, viscosity, visctempcoef, lifetime, lifetimetempcoef) VALUES ('Пример связующего 1', 0.1, 9000, 10800, 6000);
+INSERT INTO resin (name, viscosity, visctempcoef, lifetime, lifetimetempcoef) VALUES ('Пример связующего 2', 0.1, 9000, 5400, 7000);
+INSERT INTO resin (name, viscosity, visctempcoef, lifetime, lifetimetempcoef) VALUES ('Пример связующего 3', 0.1, 9000, 3600, 8000);
