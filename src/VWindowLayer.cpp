@@ -218,7 +218,7 @@ void VWindowLayer::m_on_got_polygon(const QPolygonF &polygon, double characteris
 {
     m_polygon = polygon;
     m_characteristicLength = characteristicLength;
-    if (polygon.size() >= VWindowPolygon::MIN_POLYGON_SIZE)
+    if (polygon.size() >= VWindowPolygon::MIN_2D_POLYGON_SIZE)
     {
         ui->geometryStatusLabel->setText(GEOMETRY_MANUAL_TEXT);
         ui->geometryStatusLabel->setStyleSheet(QStringLiteral("QLabel { color : black; }"));

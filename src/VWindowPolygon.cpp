@@ -18,7 +18,8 @@
 
 const QCPRange VWindowPolygon::X_RANGE(-1, 1);
 const QCPRange VWindowPolygon::Y_RANGE(-0.5, 0.5);
-const int VWindowPolygon::MIN_POLYGON_SIZE{3};
+const int VWindowPolygon::MIN_1D_POLYGON_SIZE{2};
+const int VWindowPolygon::MIN_2D_POLYGON_SIZE{3};
 const double VWindowPolygon::MIN_CHARACTERISTIC_LENGTH{0.001};
 const double VWindowPolygon::DEFAULT_CHARACTERISTIC_LENGTH{0.01};
 const double VWindowPolygon::MIN_CHARACTERISTIC_RATIO{0.005};
@@ -41,7 +42,9 @@ const int VWindowPolygon::HIGHLIGHT_POINT_SIZE{10};
 VWindowPolygon::VWindowPolygon(QWidget *parent,
                                std::shared_ptr<const VTable> p_table) :
     QMainWindow(parent),
-    ui(new Ui::VWindowPolygon)
+    ui(new Ui::VWindowPolygon),
+    m_useTable(true),
+    m_mode1D(false)
 {
     ui->setupUi(this);
 
@@ -113,6 +116,14 @@ VWindowPolygon::~VWindowPolygon()
 
 void VWindowPolygon::accept()
 {
+    if (!m_mode1D)
+        accept2DProcedure();
+    else
+        accept1DProcedure();
+}
+
+void VWindowPolygon::accept2DProcedure()
+{
     if(!lastLineCausesIntersection())
     {
         if (m_useTable)
@@ -132,7 +143,7 @@ void VWindowPolygon::accept()
         {
             hide();
             QPolygonF polygon;
-            getPolygon(polygon);            
+            getPolygon(polygon);
             emit polygonAvailable(polygon, m_characteristicLength);
             close();
         }
@@ -141,6 +152,47 @@ void VWindowPolygon::accept()
     }
     else
         showIntersectionError();
+}
+
+void VWindowPolygon::accept1DProcedure()
+{
+    QPolygonF polygon;
+    getPolygonFrom1D(polygon);
+    VPolygonQuality quality;
+    if (!correctFor1D(polygon, &quality))
+    {
+        if (quality == INTERSECTION)
+            showIntersectionError();
+        else if (quality == OUT_OF_TABLE)
+            showTableError();
+        return;
+    }
+    hide();;
+    emit polygonAvailable(polygon, m_characteristicLength);
+    close();
+}
+
+bool VWindowPolygon::correctFor1D(const QPolygonF &polygon, VPolygonQuality * quality)
+{
+    for(int i{0}; i < polygon.size(); ++i)
+    {
+        const QPointF &point{polygon.at(i)};
+        if (m_useTable && !vertexIsOkForTable(point.x(), point.y()))
+        {
+            if (quality != nullptr)
+                (*quality) = OUT_OF_TABLE;
+            return false;
+        }
+        if (vertexCausesIntersection(i, point.x(), point.y(), polygon))
+        {
+            if (quality != nullptr)
+                (*quality) = INTERSECTION;
+            return false;
+        }
+    }
+    if (quality != nullptr)
+        (*quality) = GOOD;
+    return true;
 }
 
 void VWindowPolygon::reset()
@@ -189,7 +241,10 @@ void VWindowPolygon::addVertex(double x, double y)
     m_qvT.append(t);
     m_qvX.append(x);
     m_qvY.append(y);
-    plotEnclosed();
+    if (m_mode1D)
+        plot();
+    else
+        plotEnclosed();
     addVertexToList(getPolygonSize() - 1);
     updateButtonsStates();
 }
@@ -206,7 +261,10 @@ void VWindowPolygon::removeVertex(int index)
         {
             m_pHighlightCurve->data()->clear();
         }
-        plotEnclosed();
+        if (m_mode1D)
+            plot();
+        else
+            plotEnclosed();
         updateButtonsStates();
     }
 }
@@ -222,7 +280,10 @@ void VWindowPolygon::changeVertex(int index, double x, double y)
     {
         m_qvX.replace(index, x);
         m_qvY.replace(index, y);
-        plotEnclosed();
+        if (m_mode1D)
+            plot();
+        else
+            plotEnclosed();
         updateVertexRecord(index);
     }
 }
@@ -238,17 +299,17 @@ void VWindowPolygon::plot()
 void VWindowPolygon::plotEnclosed()
 {
     QVector<double> coordX, coordY, coordT;
-    if (m_qvT.size() >= MIN_POLYGON_SIZE)
+    if (m_qvT.size() >= MIN_2D_POLYGON_SIZE)
     {
         coordT.push_back(0);
         coordT.push_back(1);
     }
-    if (m_qvX.size() >= MIN_POLYGON_SIZE)
+    if (m_qvX.size() >= MIN_2D_POLYGON_SIZE)
     {
         coordX.push_back(m_qvX.last());
         coordX.push_back(m_qvX.first());
     }
-    if (m_qvY.size() >= MIN_POLYGON_SIZE)
+    if (m_qvY.size() >= MIN_2D_POLYGON_SIZE)
     {
         coordY.push_back(m_qvY.last());
         coordY.push_back(m_qvY.first());
@@ -261,10 +322,12 @@ void VWindowPolygon::plotEnclosed()
 
 void VWindowPolygon::updateButtonsStates()
 {
-    bool hasValidPolygon = (getPolygonSize() >= MIN_POLYGON_SIZE);
+    int polySize{getPolygonSize()};
+    bool hasValidPolygon{(!m_mode1D && polySize >= MIN_2D_POLYGON_SIZE)
+                         || (m_mode1D && polySize >= MIN_1D_POLYGON_SIZE)};
     ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok)->setEnabled(hasValidPolygon);
     ui->exportButton->setEnabled(hasValidPolygon);
-    bool hasPoints = (getPolygonSize() > 0);
+    bool hasPoints{polySize > 0};
     ui->undoButton->setEnabled(hasPoints);
     ui->clearButton->setEnabled(hasPoints);
 }
@@ -279,6 +342,90 @@ void VWindowPolygon::getPolygon(QPolygonF &polygon) const
     }
 }
 
+void VWindowPolygon::getPolygonFrom1D(QPolygonF &polygon) const
+{
+    polygon.clear();
+    float halfWidth{static_cast<float>(ui->tubeWidthSpinBox->value() / 2)};
+    QPolygonF centralPolygon;
+    getPolygon(centralPolygon);
+    int polySize{centralPolygon.size()};
+    if (polySize > 1)
+    {
+        QPointF point1, point2;
+        QPolygonF otherSide;
+        getPerpendicular(centralPolygon.at(0), centralPolygon.at(1), halfWidth, point1, point2);
+        polygon.append(point1);
+        otherSide.append(point2);
+        for(int i{1}; i < polySize; ++i)
+        {
+            if (i < polySize - 1)
+            {
+                getBisectrix(centralPolygon.at(i-1),
+                             centralPolygon.at(i),
+                             centralPolygon.at(i+1),
+                             halfWidth, point1, point2);
+            }
+            else
+            {
+                getPerpendicular(centralPolygon.at(i),
+                                 centralPolygon.at(i-1),
+                                 halfWidth, point1, point2);
+            }
+            QLineF section1(polygon.last(), point1);
+            QLineF sectionCentral(centralPolygon.at(i-1), centralPolygon.at(i));
+            if (section1.intersect(sectionCentral, nullptr) == QLineF::BoundedIntersection)
+                std::swap(point1, point2);
+            polygon.append(point1);
+            otherSide.append(point2);
+        }
+        std::reverse(otherSide.begin(), otherSide.end());
+        polygon.append(otherSide);
+    }
+    else if (polySize == 1)
+    {
+        polygon.append(QPointF(m_qvX.at(0), m_qvY.at(1) + halfWidth));
+        polygon.append(QPointF(m_qvX.at(0), m_qvY.at(1) - halfWidth));
+    }
+}
+
+void VWindowPolygon::getPerpendicular(const QPointF &inPoint1, const QPointF &inPoint2,
+                                      float length,
+                                      QPointF &outPoint1, QPointF &outPoint2)
+{
+    QVector2D inVector(inPoint2 - inPoint1);
+    QVector2D outVector(-inVector.y(), inVector.x());
+    outVector.normalize();
+    outVector *= length;
+    outPoint1 = inPoint1 + outVector.toPointF();
+    outPoint2 = inPoint1 - outVector.toPointF();
+}
+
+void VWindowPolygon::getBisectrix(const QPointF &inPoint0, const QPointF &inPoint1,
+                                  const QPointF &inPoint2, float length,
+                                  QPointF &outPoint1, QPointF &outPoint2)
+{
+    QVector2D inVector1(inPoint0 - inPoint1);
+    QVector2D inVector2(inPoint2 - inPoint1);
+    QVector2D bisVector{inVector1.normalized() + inVector2.normalized()};
+    if (!bisVector.isNull())
+    {
+        float angleCos{QVector2D::dotProduct(inVector1, bisVector)
+                    / (inVector1.length() * bisVector.length())};
+        float angleSin{static_cast<float>(sqrt(1 - angleCos * angleCos))};
+        bisVector.normalize();
+        if (angleSin != 0)
+            bisVector *= length / angleSin;
+        else
+            bisVector *= length;
+        outPoint1 = inPoint1 + bisVector.toPointF();
+        outPoint2 = inPoint1 - bisVector.toPointF();
+    }
+    else
+    {
+        getPerpendicular(inPoint1, inPoint2, length, outPoint1, outPoint2);
+    }
+}
+
 int VWindowPolygon::getPolygonSize() const
 {
     return std::min(m_qvX.size(), m_qvY.size());
@@ -289,43 +436,59 @@ void VWindowPolygon::closeEvent(QCloseEvent *)
     emit windowClosed();
 }
 
-void VWindowPolygon::exportMeshToFile(const QString &filename) const
+void VWindowPolygon::exportMeshToFile(const QString &filename, const QPolygonF &polygon) const
 {
-    QPolygonF polygon;
-    getPolygon(polygon);
     VLayerManualBuilder::exportToFile(polygon, filename, m_characteristicLength);
 }
 
 void VWindowPolygon::meshExportProcedure()
 {
-    if(!lastLineCausesIntersection())
+    QPolygonF polygon;
+    if (!m_mode1D)
     {
-        double ratio = getStepRatio();
-        if (ratio >= MIN_CHARACTERISTIC_RATIO)
+        getPolygon(polygon);
+        if (lastLineCausesIntersection())
         {
-            QString filename = QFileDialog::getSaveFileName(this, SAVE_FILE_DIALOG_TITLE, m_lastDir,
-                                                            FILE_DIALOG_FORMATS);
-            if (!filename.isEmpty())
-            {
-                m_lastDir = QFileInfo(filename).absolutePath();
-                try
-                {
-                    exportMeshToFile(filename);
-                }
-                catch (VExportException)
-                {
-                    QMessageBox::warning(this, ERROR_TITLE, EXPORT_TO_FILE_ERROR);
-                }
-                QSettings settings;
-                settings.setValue(QStringLiteral("import/lastDir"), m_lastDir);
-                settings.sync();
-            }
+            showIntersectionError();
+            return;
         }
-        else
+        double ratio = getStepRatio();
+        if (ratio < MIN_CHARACTERISTIC_RATIO)
+        {
             showRatioError(ratio);
+            return;
+        }
     }
     else
-        showIntersectionError();
+    {
+        getPolygonFrom1D(polygon);
+        VPolygonQuality quality;
+        if (!correctFor1D(polygon, &quality))
+        {
+            if (quality == INTERSECTION)
+            {
+                showIntersectionError();
+                return;
+            }
+        }
+    }
+    QString filename = QFileDialog::getSaveFileName(this, SAVE_FILE_DIALOG_TITLE, m_lastDir,
+                                                    FILE_DIALOG_FORMATS);
+    if (!filename.isEmpty())
+    {
+        m_lastDir = QFileInfo(filename).absolutePath();
+        try
+        {
+            exportMeshToFile(filename, polygon);
+        }
+        catch (VExportException)
+        {
+            QMessageBox::warning(this, ERROR_TITLE, EXPORT_TO_FILE_ERROR);
+        }
+        QSettings settings;
+        settings.setValue(QStringLiteral("import/lastDir"), m_lastDir);
+        settings.sync();
+    }
 }
 
 void VWindowPolygon::loadSavedParameters()
@@ -336,9 +499,14 @@ void VWindowPolygon::loadSavedParameters()
     m_characteristicLength = settings.value(QStringLiteral("mesh/meshStep"), DEFAULT_CHARACTERISTIC_LENGTH).toDouble(&ok);
     if (!ok || m_characteristicLength < MIN_CHARACTERISTIC_LENGTH)
         m_characteristicLength = DEFAULT_CHARACTERISTIC_LENGTH;
-    bool useTable;
-    useTable = settings.value(QStringLiteral("mesh/useTable"), true).toBool();
+    bool useTable, mode1D;
+    double tubeWidth;
+    useTable = settings.value(QStringLiteral("mesh/useTable"), m_mode1D).toBool();
+    mode1D = settings.value(QStringLiteral("mesh/mode1D"), m_mode1D).toBool();
+    tubeWidth = settings.value(QStringLiteral("mesh/tubeWidth"), ui->tubeWidthSpinBox->value()).toDouble();
     setUseTable(useTable);
+    set1DMode(mode1D);
+    ui->tubeWidthSpinBox->setValue(tubeWidth);
     showCharacteristicLength();
 }
 
@@ -348,6 +516,8 @@ void VWindowPolygon::saveParameters() const
     settings.setValue(QStringLiteral("import/lastDir"), m_lastDir);
     settings.setValue(QStringLiteral("mesh/meshStep"), m_characteristicLength);
     settings.setValue(QStringLiteral("mesh/useTable"), m_useTable);
+    settings.setValue(QStringLiteral("mesh/mode1D"), m_mode1D);
+    settings.setValue(QStringLiteral("mesh/tubeWidth"), ui->tubeWidthSpinBox->value());
     settings.sync();
 }
 
@@ -358,7 +528,7 @@ void VWindowPolygon::showCharacteristicLength()
 
 double VWindowPolygon::getStepRatio() const
 {
-    if (m_qvX.size() >= MIN_POLYGON_SIZE && m_qvY.size() >= MIN_POLYGON_SIZE)
+    if (m_qvX.size() >= MIN_2D_POLYGON_SIZE && m_qvY.size() >= MIN_2D_POLYGON_SIZE)
     {
         auto xMinMax = std::minmax_element(m_qvX.begin(), m_qvX.end());
         auto yMinMax = std::minmax_element(m_qvY.begin(), m_qvY.end());
@@ -448,35 +618,43 @@ bool VWindowPolygon::lastLineCausesIntersection() const
 
 bool VWindowPolygon::vertexCausesIntersection(int index, double x, double y) const
 {
-    int polygonSize = getPolygonSize();
+    QPolygonF polygon;
+    getPolygon(polygon);
+    return vertexCausesIntersection(index, x, y, polygon);
+}
+
+bool VWindowPolygon::vertexCausesIntersection(int index, double x, double y,
+                                              const QPolygonF &polygon)
+{
+    int polygonSize = polygon.size();
     if (index > 0)
     {
-        QLineF checkLine(m_qvX.at(index - 1), m_qvY.at(index - 1), x, y);
+        QLineF checkLine(polygon.at(index - 1), QPointF(x, y));
         for(int i = 1; i < index - 1; ++i)
         {
-            QLineF line(m_qvX.at(i - 1), m_qvY.at(i - 1), m_qvX.at(i), m_qvY.at(i));
+            QLineF line(polygon.at(i - 1), polygon.at(i));
             if (line.intersect(checkLine, nullptr) == QLineF::BoundedIntersection)
                 return true;
         }
         for(int i = index + 2; i < polygonSize; ++i)
         {
-            QLineF line(m_qvX.at(i - 1), m_qvY.at(i - 1), m_qvX.at(i), m_qvY.at(i));
+            QLineF line(polygon.at(i - 1), polygon.at(i));
             if (line.intersect(checkLine, nullptr) == QLineF::BoundedIntersection)
                 return true;
         }
     }
     if (index < polygonSize - 1)
     {
-        QLineF checkLine(x, y, m_qvX.at(index + 1), m_qvY.at(index + 1));
+        QLineF checkLine(QPointF(x, y), polygon.at(index + 1));
         for(int i = 1; i < index; ++i)
         {
-            QLineF line(m_qvX.at(i - 1), m_qvY.at(i - 1), m_qvX.at(i), m_qvY.at(i));
+            QLineF line(polygon.at(i - 1), polygon.at(i));
             if (line.intersect(checkLine, nullptr) == QLineF::BoundedIntersection)
                 return true;
         }
         for(int i = index + 3; i < polygonSize; ++i)
         {
-            QLineF line(m_qvX.at(i - 1), m_qvY.at(i - 1), m_qvX.at(i), m_qvY.at(i));
+            QLineF line(polygon.at(i - 1), polygon.at(i));
             if (line.intersect(checkLine, nullptr) == QLineF::BoundedIntersection)
                 return true;
         }
@@ -639,6 +817,19 @@ void VWindowPolygon::setUseTable(bool use)
     {
         ui->useTableCheckBox->setChecked(use);
     }
+}
+
+void VWindowPolygon::set1DMode(bool set)
+{
+    ui->mode1DRadioButton->setChecked(set);
+    ui->mode2DRadioButton->setChecked(!set);
+    ui->tubeWidthSpinBox->setEnabled(set);
+    m_mode1D = set;
+    if (set)
+        plot();
+    else
+        plotEnclosed();
+    updateButtonsStates();
 }
 
 /**
@@ -853,4 +1044,9 @@ void VWindowPolygon::on_addVertexButton_clicked()
 void VWindowPolygon::on_useTableCheckBox_clicked(bool checked)
 {
     setUseTable(checked);
+}
+
+void VWindowPolygon::on_mode1DRadioButton_toggled(bool checked)
+{
+    set1DMode(checked);
 }

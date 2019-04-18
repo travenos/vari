@@ -35,9 +35,11 @@ class VWindowPolygon : public QMainWindow
     Q_OBJECT
 
 public:
+    enum VPolygonQuality {GOOD, INTERSECTION, OUT_OF_TABLE};
     static const QCPRange X_RANGE;
     static const QCPRange Y_RANGE;
-    static const int MIN_POLYGON_SIZE;
+    static const int MIN_1D_POLYGON_SIZE;
+    static const int MIN_2D_POLYGON_SIZE;
     static const double MIN_CHARACTERISTIC_LENGTH;
     static const double DEFAULT_CHARACTERISTIC_LENGTH;
     static const double MIN_CHARACTERISTIC_RATIO;
@@ -66,8 +68,20 @@ public:
     void plotEnclosed();
     void updateButtonsStates();
     void getPolygon(QPolygonF &polygon) const;
+
+    void getPolygonFrom1D(QPolygonF &polygon) const;
+    static void getPerpendicular(const QPointF &inPoint1, const QPointF &inPoint2,
+                                 float length,
+                                 QPointF &outPoint1, QPointF &outPoint2);
+    static void getBisectrix(const QPointF &inPoint0, const QPointF &inPoint1,
+                             const QPointF &inPoint2, float length,
+                             QPointF &outPoint1, QPointF &outPoint2);
+
+    static bool vertexCausesIntersection(int index, double x, double y,
+                                         const QPolygonF &polygon);
+
     int getPolygonSize() const;
-    void exportMeshToFile(const QString &filename) const;
+    void exportMeshToFile(const QString &filename, const QPolygonF &polygon) const;
 
     void loadSavedParameters();
     void saveParameters() const;
@@ -99,9 +113,15 @@ private:
 
     std::shared_ptr<const VTable> m_pTable;
     bool m_useTable;
+    bool m_mode1D;
 
     void reject();
     void accept();
+    void accept1DProcedure();
+    void accept2DProcedure();
+
+    bool correctFor1D(const QPolygonF &polygon, VPolygonQuality * quality);
+
     void meshExportProcedure();
     void showCharacteristicLength();
     void showRatioError(double ratio);
@@ -121,6 +141,8 @@ private:
     void addVertexToList(int index);
     void removeVertexFromList(int index);
     void updateVertexRecord(int index);
+
+    void set1DMode(bool set);
 
 private slots:
     void on_buttonBox_rejected();
@@ -156,6 +178,8 @@ private slots:
     void on_addVertexButton_clicked();
 
     void on_useTableCheckBox_clicked(bool checked);
+
+    void on_mode1DRadioButton_toggled(bool checked);
 
 protected:
 
