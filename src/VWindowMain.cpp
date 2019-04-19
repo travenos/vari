@@ -366,7 +366,7 @@ void VWindowMain::showWindowLayer()
 {
     if (m_pWindowLayer == nullptr)
     {
-        m_pWindowLayer = new VWindowLayer(this, m_pFacade->getTable());
+        m_pWindowLayer = new VWindowLayer(this, m_pFacade->getAllActivePolygons(), m_pFacade->getTable());
         connect(m_pWindowLayer,
                 SIGNAL(creationFromFileAvailable(const VCloth&,const QString&, VLayerAbstractBuilder::VUnit)),
                 this,

@@ -2,6 +2,7 @@
  * Project VARI
  * @author Alexey Barashkov
  */
+
 #ifdef DEBUG_MODE
 #include <QDebug>
 #endif
@@ -12,6 +13,10 @@
 #include <cmath>
 
 #include "VNodesVolume.h"
+
+/**
+ * VNodesVolume implementation
+ */
 
 const float VNodesVolume::MIN_STEP{0.001f};
 const float VNodesVolume::STEP_COEF{static_cast<float>(sqrt(2.0 / 3.0))};
@@ -167,7 +172,7 @@ inline void VNodesVolume::calcSizes(const VSimNode::const_map_ptr &nodes)
         }
         m_size = m_max - m_min;
     }
-    for (int i = 0; i < 3; ++i)
+    for (size_t i{0}; i < m_arrSizes.size(); ++i)
     {
         m_arrSizes[i] = static_cast<int>(m_size[i] / m_step + 1);
     }
@@ -240,9 +245,19 @@ float VNodesVolume::getStep() const
     return m_step;
 }
 
-void VNodesVolume::getSize(QVector3D &size) const
+const QVector3D &VNodesVolume::getSize() const
 {
-    size = m_size;
+    return m_size;
+}
+
+const QVector3D &VNodesVolume::getMin() const
+{
+    return m_min;
+}
+
+const QVector3D &VNodesVolume::getMax() const
+{
+    return m_max;
 }
 
 void VNodesVolume::getConstraints(QVector3D &min, QVector3D &max) const

@@ -34,7 +34,8 @@ public:
 
     static const QColor DEFAULT_COLOR;
 
-    VWindowLayer(QWidget *parent = nullptr,
+    VWindowLayer(QWidget *parent,
+                 const std::vector<std::vector<QPolygonF> > &polygons,
                  std::shared_ptr<const VTable> p_table = nullptr);
     virtual ~VWindowLayer();
     void saveParameters() const;
@@ -85,6 +86,7 @@ private:
     QPolygonF m_polygon;
     double m_characteristicLength;
     std::shared_ptr<const VTable> m_pTable;
+    std::vector<std::vector<QPolygonF> > m_otherLayersPolygons;
 
 signals:
     void creationFromFileAvailable(const VCloth &material, const QString &fileName,

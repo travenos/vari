@@ -304,6 +304,24 @@ size_t VLayersProcessor::getActiveTrianglesNumber() const
     return m_pActiveTriangles->size();
 }
 
+std::vector<std::vector<QPolygonF> > VLayersProcessor::getAllActivePolygons() const
+{
+    std::vector<std::vector<QPolygonF> > polygonsVector;
+    polygonsVector.reserve(getActiveLayersNumber());
+    for (auto & layer : m_layers)
+    {
+        if (layer->isActive())
+        {
+            polygonsVector.push_back(layer->getPolygons());
+        }
+    }
+    return polygonsVector;
+}
+
+const std::vector<QPolygonF> & VLayersProcessor::getPolygons(uint layer)
+{
+    return m_layers.at(layer)->getPolygons();
+}
 
 void VLayersProcessor::createConnections()
 {

@@ -21,7 +21,7 @@ const QCPRange VWindowPolygon::Y_RANGE(-0.5, 0.5);
 const int VWindowPolygon::MIN_1D_POLYGON_SIZE{2};
 const int VWindowPolygon::MIN_2D_POLYGON_SIZE{3};
 const double VWindowPolygon::MIN_CHARACTERISTIC_LENGTH{0.001};
-const double VWindowPolygon::DEFAULT_CHARACTERISTIC_LENGTH{0.01};
+const double VWindowPolygon::DEFAULT_CHARACTERISTIC_LENGTH{0.03};
 const double VWindowPolygon::MIN_CHARACTERISTIC_RATIO{0.005};
 
 const QString VWindowPolygon::SAVE_FILE_DIALOG_TITLE("Создание и сохранение слоя в файл");
@@ -40,11 +40,13 @@ const int VWindowPolygon::HIGHLIGHT_POINT_SIZE{10};
 
 
 VWindowPolygon::VWindowPolygon(QWidget *parent,
+                               const std::vector<std::vector<QPolygonF> > &polygons,
                                std::shared_ptr<const VTable> p_table) :
     QMainWindow(parent),
     ui(new Ui::VWindowPolygon),
     m_useTable(true),
-    m_mode1D(false)
+    m_mode1D(false),
+    m_otherLayersPolygons(polygons)
 {
     ui->setupUi(this);
 
@@ -93,6 +95,8 @@ VWindowPolygon::VWindowPolygon(QWidget *parent,
     m_pVacuumEllipse = new QCPItemEllipse(ui->plotWidget);
     m_pVacuumEllipse->setPen(QColor(0,255,255));
 
+    drawOtherPolygons();
+
     loadSavedParameters();
     setTable(p_table);
     resetView();
@@ -108,6 +112,10 @@ VWindowPolygon::~VWindowPolygon()
     m_pTableCurve->deleteLater();
     m_pInjectionEllipse->deleteLater();
     m_pVacuumEllipse->deleteLater();
+    for (auto &otherCurve: m_otherLayersCurves)
+    {
+        otherCurve->deleteLater();
+    }
     delete ui;
     #ifdef DEBUG_MODE
         qInfo() << "VWindowPolygon destroyed";
@@ -817,6 +825,44 @@ void VWindowPolygon::setUseTable(bool use)
     {
         ui->useTableCheckBox->setChecked(use);
     }
+}
+
+void VWindowPolygon::drawOtherPolygons()
+{
+    for (auto &otherCurve: m_otherLayersCurves)
+    {
+        otherCurve->data()->clear();
+        otherCurve->deleteLater();
+    }
+    m_otherLayersCurves.clear();
+    for(auto & layerPolygons : m_otherLayersPolygons)
+    {
+        for (auto & polygon : layerPolygons)
+        {
+            QCPCurve * polyCurve = new QCPCurve(ui->plotWidget->xAxis, ui->plotWidget->yAxis);
+            polyCurve->setPen(QColor(Qt::gray));
+            QVector<double> qvT, qvX, qvY;
+            qvT.reserve(polygon.size() + 1);
+            qvX.reserve(polygon.size() + 1);
+            qvY.reserve(polygon.size() + 1);
+            for (int i{0}; i < polygon.size(); ++i)
+            {
+                qvT.append(i);
+                qvX.append(polygon.at(i).x());
+                qvY.append(polygon.at(i).y());
+            }
+            if (polygon.size() > 0)
+            {
+                qvT.append(qvT.size());
+                qvX.append(polygon.at(0).x());
+                qvY.append(polygon.at(0).y());
+            }
+            polyCurve->setData(qvT, qvX, qvY);
+            m_otherLayersCurves.push_back(polyCurve);
+        }
+    }
+    ui->plotWidget->replot();
+    ui->plotWidget->update();
 }
 
 void VWindowPolygon::set1DMode(bool set)

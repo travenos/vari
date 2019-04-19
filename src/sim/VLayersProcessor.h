@@ -67,6 +67,9 @@ public:
     size_t getActiveNodesNumber() const;
     size_t getActiveTrianglesNumber() const;
 
+    std::vector<std::vector<QPolygonF> > getAllActivePolygons() const;
+    const std::vector<QPolygonF> & getPolygons(uint layer);
+
     uint getNodeMinId(uint layer) const;
     uint getNodeMaxId(uint layer) const;
     uint getTriangleMinId(uint layer) const;

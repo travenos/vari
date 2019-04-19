@@ -10,9 +10,8 @@
 #include <memory>
 #include <QColor>
 
-#include "VSimNode.h"
-#include "VSimTriangle.h"
 #include "VNodesVolume.h"
+#include "VLayerPolygon.h"
 
 class VLayer
 {
@@ -31,7 +30,7 @@ public:
 
     void resetNodesVolume();
     bool isNodesVolumeValid() const;
-    void getSize(QVector3D &size) const;
+    const QVector3D &getSize() const;
     void getConstrains(QVector3D &min, QVector3D &max) const;
     float getMaxZ() const;
     float getMinZ() const;
@@ -53,16 +52,20 @@ public:
     uint getNodeMaxId() const;
     uint getTriangleMinId() const;
     uint getTriangleMaxId() const;
+    const std::vector<QPolygonF> & getPolygons() const;
     void cut(const std::shared_ptr<const std::vector<uint> > &nodesIds);
     void transformate(const std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > >
                         &nodesCoords);
     void setVerticalPosition(float z);
+
+    bool pointIsInside(const QPointF &point) const;
 
     bool connectWith(const VLayer::ptr &otherLayer);
     bool connectWith(const std::list<VLayer::ptr> &layersList);
     void disconnect();
 
     static const float SEARCH_ZONE_PART;
+    static const float IMG_STEP_COEF;
 
 private: 
     void p_setVisible(bool visible) ;
@@ -81,6 +84,7 @@ private:
     uint m_triangleMaxId;
 
     VNodesVolume m_nodesVolume;
+    VLayerPolygon m_layerPolygon;
 };
 
 #endif //_VLAYER_H

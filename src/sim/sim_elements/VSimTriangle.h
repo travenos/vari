@@ -28,7 +28,7 @@ public:
     typedef std::shared_ptr<list_t> list_ptr;
     typedef std::shared_ptr<const list_t> const_list_ptr;
 
-    static const uint VERTICES_NUMBER = 3;
+    static const uint VERTICES_NUMBER{3};
 
     VSimTriangle(uint id, const VCloth::const_ptr &p_material,
                  const VSimNode::const_ptr &p_node0,

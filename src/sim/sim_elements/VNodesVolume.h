@@ -30,7 +30,9 @@ public:
 
     float getAverageDistance() const;
     float getStep() const;
-    void getSize(QVector3D &size) const;
+    const QVector3D & getSize() const;
+    const QVector3D & getMin() const;
+    const QVector3D & getMax() const;
     void getConstraints(QVector3D &min, QVector3D &max) const;
     float getMaxZ() const;
     float getMinZ() const;

@@ -114,8 +114,18 @@ bool VSimTriangle::isNormal() const
 
 bool VSimTriangle::isRole(VSimNode::VNodeRole role) const
 {
-    for (auto &node: m_pNodes)
-        if (node->getRole() != role)
-            return false;
-    return true;
+    if (role == VSimNode::NORMAL)
+    {
+        for (auto &node: m_pNodes)
+            if (node->getRole() != role)
+                return false;
+        return true;
+    }
+    else
+    {
+        for (auto &node: m_pNodes)
+            if (node->getRole() == role)
+                return true;
+        return false;
+    }
 }

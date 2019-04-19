@@ -36,13 +36,16 @@ const QString VWindowLayer::MATERIAL_INFO_TEXT("<html><head/><body>"
 
 const QColor VWindowLayer::DEFAULT_COLOR = QColor(255, 172, 172);
 
-VWindowLayer::VWindowLayer(QWidget *parent, std::shared_ptr<const VTable> p_table) :
+VWindowLayer::VWindowLayer(QWidget *parent,
+                           const std::vector<std::vector<QPolygonF> > &polygons,
+                           std::shared_ptr<const VTable> p_table) :
     QMainWindow(parent),
     ui(new Ui::VWindowLayer),
     m_selectedMaterial(false),
     m_selectedFile(false),
     m_createdGeometry(false),
-    m_pTable(p_table)
+    m_pTable(p_table),
+    m_otherLayersPolygons(polygons)
 {
     ui->setupUi(this);
     reset();
@@ -151,7 +154,7 @@ void VWindowLayer::showWindowPolygon()
 {
     if(!m_pWindowPolygon)
     {
-        m_pWindowPolygon.reset(new VWindowPolygon(this, m_pTable));
+        m_pWindowPolygon.reset(new VWindowPolygon(this, m_otherLayersPolygons, m_pTable));
         connect(m_pWindowPolygon.get(), SIGNAL(polygonAvailable(const QPolygonF &, double)),
                 this, SLOT(m_on_got_polygon(const QPolygonF &, double)));
     }

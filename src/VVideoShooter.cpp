@@ -13,7 +13,10 @@
 #include <QDir>
 #include <QPixmap>
 
-#include <opencv2/opencv.hpp>
+#include <opencv2/videoio.hpp>
+#include <opencv2/videoio/videoio_c.h>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
 
 #include "VVideoShooter.h"
 

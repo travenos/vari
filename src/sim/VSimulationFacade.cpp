@@ -861,6 +861,11 @@ void VSimulationFacade::setTable(const std::shared_ptr<VTable> &p_table)
     }
 }
 
+std::vector<std::vector<QPolygonF> > VSimulationFacade::getAllActivePolygons() const
+{
+    return m_pLayersProcessor->getAllActivePolygons();
+}
+
 void VSimulationFacade::m_on_got_point(const QVector3D &point)
 {
     QVector2D xyProjection = point.toVector2D();

@@ -8,7 +8,8 @@
 
 #include "VLayer.h"
 
-const float VLayer::SEARCH_ZONE_PART = 0.1f;
+const float VLayer::SEARCH_ZONE_PART{0.1f};
+const float VLayer::IMG_STEP_COEF{0.1f};
 
 /**
  * VLayer implementation
@@ -44,11 +45,15 @@ VLayer::~VLayer()
 void VLayer::resetNodesVolume()
 {
     m_nodesVolume.reset(m_pNodes);
+    m_layerPolygon.reset(m_pTriangles,
+                         m_nodesVolume.getMin().toVector2D(),
+                         m_nodesVolume.getMax().toVector2D(),
+                         m_nodesVolume.getStep() * IMG_STEP_COEF);
 }
 
-void VLayer::getSize(QVector3D &size) const
+const QVector3D & VLayer::getSize() const
 {
-    m_nodesVolume.getSize(size);
+    return m_nodesVolume.getSize();
 }
 
 void VLayer::getConstrains(QVector3D &min, QVector3D &max) const
@@ -182,6 +187,11 @@ uint VLayer::getTriangleMaxId() const
     return m_triangleMaxId;
 }
 
+const std::vector<QPolygonF> & VLayer::getPolygons() const
+{
+    return m_layerPolygon.getPolygons();
+}
+
 void VLayer::cut(const std::shared_ptr<const std::vector<uint> > &nodesIds)
 {
     VSimNode::map_ptr p_remainingNodesMap(new VSimNode::map_t);
@@ -272,6 +282,11 @@ bool VLayer::connectWith(const VLayer::ptr &otherLayer)
     return result;
 }
 
+bool VLayer::pointIsInside(const QPointF & point) const
+{
+    return m_layerPolygon.pointIsInside(point);
+}
+
 bool VLayer::connectWith(const std::list<VLayer::ptr> &layersList)
 {
     bool result{false};
@@ -280,7 +295,8 @@ bool VLayer::connectWith(const std::list<VLayer::ptr> &layersList)
         VSimNode * nd_ptr = node.second.get();
         for (auto & otherLayer : layersList)
         {
-            if (otherLayer && otherLayer.get() != this)
+            if (otherLayer && otherLayer.get() != this
+                && otherLayer->pointIsInside(nd_ptr->getPosition().toPointF()))
             {
                 if (!otherLayer->isNodesVolumeValid())
                     otherLayer->resetNodesVolume();
@@ -292,7 +308,6 @@ bool VLayer::connectWith(const std::list<VLayer::ptr> &layersList)
                 otherLayer->m_nodesVolume.getPointsBetweenSpheres(candidatesList,
                                                                   nd_ptr->getPosition(),
                                                                   radiusMax, radiusMin, false);
-                bool madeConnections{false};
                 for (auto &neighbour : candidatesList)
                 {
                     float distance = neighbour->getDistance(nd_ptr);
@@ -300,11 +315,9 @@ bool VLayer::connectWith(const std::list<VLayer::ptr> &layersList)
                     {
                         nd_ptr->addNeighbourMutually(neighbour, VSimNode::OTHER, distance);
                         result = true;
-                        madeConnections = true;
                     }
                 }
-                if (madeConnections)
-                    break;
+                break;
             }
         }
     }

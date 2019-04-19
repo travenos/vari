@@ -55,7 +55,8 @@ public:
     static const int POINT_SIZE;
     static const int HIGHLIGHT_POINT_SIZE;
 
-    VWindowPolygon(QWidget *parent = nullptr,
+    VWindowPolygon(QWidget *parent,
+                   const std::vector<std::vector<QPolygonF> > &polygons,
                    std::shared_ptr<const VTable> p_table=nullptr);
     virtual ~VWindowPolygon();
 
@@ -91,12 +92,15 @@ public:
     void setTable(const std::shared_ptr<const VTable> & p_table);
     void setUseTable(bool use);
 
+    void drawOtherPolygons();
+
 private:
     Ui::VWindowPolygon *ui;
     QCPCurve * m_pPlotCurve;
     QCPCurve * m_pCloseCurve;
     QCPCurve * m_pHighlightCurve;
     QCPCurve * m_pTableCurve;
+    std::list<QCPCurve *> m_otherLayersCurves;
     QCPItemEllipse *m_pInjectionEllipse;
     QCPItemEllipse *m_pVacuumEllipse;
     QShortcut * m_pUndoShortcut;
@@ -114,6 +118,8 @@ private:
     std::shared_ptr<const VTable> m_pTable;
     bool m_useTable;
     bool m_mode1D;
+
+    std::vector<std::vector<QPolygonF> > m_otherLayersPolygons;
 
     void reject();
     void accept();

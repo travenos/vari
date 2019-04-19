@@ -122,6 +122,8 @@ public:
 
     void setTable(const std::shared_ptr<VTable> &p_table);
 
+    std::vector<std::vector<QPolygonF> > getAllActivePolygons() const;
+
 public slots:
     void updateGraphicsPositions();
 
