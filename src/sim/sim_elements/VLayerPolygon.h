@@ -7,6 +7,7 @@
 #define _VLAYER_POLYGON_H
 
 #include <vector>
+#include <array>
 
 #include <QVector2D>
 #include <QPolygonF>
@@ -16,9 +17,9 @@
 class VLayerPolygon
 {
 public:
+    VLayerPolygon();
     VLayerPolygon(const VSimTriangle::const_list_ptr &triangles,
                   const QVector2D &min, const QVector2D &max, float step);
-    VLayerPolygon() = default;
     virtual ~VLayerPolygon();
 
     void reset();
@@ -45,7 +46,7 @@ private:
     float m_step{MIN_STEP};
     QVector2D m_min;
     QVector2D m_max;
-    std::array<int, 2> m_arrSizes{{0, 0}};
+    std::array<int, 2> m_arrSizes;
     std::vector<QPolygonF> m_polygons;
     std::vector<std::array<int, 4>> m_hierarchy;
 };

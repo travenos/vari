@@ -22,6 +22,11 @@
 
 const float VLayerPolygon::MIN_STEP{0.001f};
 
+VLayerPolygon::VLayerPolygon()
+{
+    m_arrSizes.fill(0);
+}
+
 VLayerPolygon::VLayerPolygon(const VSimTriangle::const_list_ptr &triangles,
                              const QVector2D &min, const QVector2D &max, float step)
 {
@@ -52,7 +57,7 @@ void VLayerPolygon::reset(const VSimTriangle::const_list_ptr &triangles,
     QVector2D size = m_max - m_min;
     for (size_t i{0}; i < m_arrSizes.size(); ++i)
     {
-        m_arrSizes[i] = static_cast<int>(size[i] / m_step + 1);
+        m_arrSizes[i] = static_cast<int>(size[static_cast<int>(i)] / m_step + 1);
     }
     createPolygons(triangles);
 }
@@ -161,7 +166,7 @@ void VLayerPolygon::createPolygons(const VSimTriangle::const_list_ptr &triangles
     {
         const std::vector<cv::Point> &currentContour = contours.at(i);
         m_polygons.push_back(QPolygonF());
-        m_polygons.back().reserve(contours.size());
+        m_polygons.back().reserve(static_cast<int>(contours.size()));
         for (size_t j{0}, contourSize{currentContour.size()}; j < contourSize; ++j)
         {
             QPointF point{getPoint(currentContour.at(j).x, currentContour.at(j).y)};
