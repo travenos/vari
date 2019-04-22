@@ -107,6 +107,4 @@ App will be placed to directory Applications in build directory.
 10. Build and install it. Better use static linking, but it is necessary to use dynamic CRT when building with MSVC. Use flags *-DBUILD_SHARED_LIBS=OFF -DBUILD_WITH_STATIC_CRT=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_DOCS=OFF -DWITH_FFMPEG=OFF*. Set environment variable *OPENCV_DIR* pointing to the installation path.  
 11. Build VARI. Main *CMakeLists.txt* file is placed in *src* directory.  
 
-## Installing on Windows
-Before installation of VARI, install [PostgresSQL](https://www.openscg.com/bigsql/postgresql/installers.jsp/) . Make sure that it is added to *PATH*.
 
