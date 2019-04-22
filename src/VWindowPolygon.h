@@ -15,7 +15,7 @@ class QCPItemEllipse;
 class QCPRange;
 class QShortcut;
 
-class VTable;
+class VSimulationFacade;
 
 namespace Ui {
 class VWindowPolygon;
@@ -55,9 +55,8 @@ public:
     static const int POINT_SIZE;
     static const int HIGHLIGHT_POINT_SIZE;
 
-    VWindowPolygon(QWidget *parent,
-                   const std::vector<std::vector<QPolygonF> > &polygons,
-                   std::shared_ptr<const VTable> p_table=nullptr);
+    VWindowPolygon(QWidget *parent=nullptr,
+                   std::shared_ptr<const VSimulationFacade> p_facade=nullptr);
     virtual ~VWindowPolygon();
 
     void reset();
@@ -89,7 +88,7 @@ public:
 
     double getStepRatio() const;
 
-    void setTable(const std::shared_ptr<const VTable> & p_table);
+    void updateTable();
     void setUseTable(bool use);
 
     void drawOtherPolygons();
@@ -115,11 +114,9 @@ private:
 
     QString m_lastDir;
 
-    std::shared_ptr<const VTable> m_pTable;
+    std::shared_ptr<const VSimulationFacade> m_pFacade;
     bool m_useTable;
     bool m_mode1D;
-
-    std::vector<std::vector<QPolygonF> > m_otherLayersPolygons;
 
     void reject();
     void accept();

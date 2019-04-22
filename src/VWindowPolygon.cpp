@@ -12,6 +12,7 @@
 #include "VWindowPolygon.h"
 #include "ui_VWindowPolygon.h"
 
+#include "sim/VSimulationFacade.h"
 #include "sim/structures/VExceptions.h"
 #include "sim/structures/VTable.h"
 #include "sim/layer_builders/VLayerManualBuilder.h"
@@ -40,13 +41,12 @@ const int VWindowPolygon::HIGHLIGHT_POINT_SIZE{10};
 
 
 VWindowPolygon::VWindowPolygon(QWidget *parent,
-                               const std::vector<std::vector<QPolygonF> > &polygons,
-                               std::shared_ptr<const VTable> p_table) :
+                               std::shared_ptr<const VSimulationFacade> p_facade) :
     QMainWindow(parent),
     ui(new Ui::VWindowPolygon),
+    m_pFacade(p_facade),
     m_useTable(true),
-    m_mode1D(false),
-    m_otherLayersPolygons(polygons)
+    m_mode1D(false)
 {
     ui->setupUi(this);
 
@@ -98,7 +98,7 @@ VWindowPolygon::VWindowPolygon(QWidget *parent,
     drawOtherPolygons();
 
     loadSavedParameters();
-    setTable(p_table);
+    updateTable();
     resetView();
 }
 
@@ -217,10 +217,11 @@ void VWindowPolygon::reset()
 
 void VWindowPolygon::resetView()
 {
-    if (m_useTable && m_pTable)
+    if (m_useTable && m_pFacade)
     {
-        float halfSizeX{m_pTable->getSize().x() / 2};
-        float halfSizeY{m_pTable->getSize().y() / 2};
+        std::shared_ptr<const VTable> p_table{m_pFacade->getTable()};
+        float halfSizeX{p_table->getSize().x() / 2};
+        float halfSizeY{p_table->getSize().y() / 2};
 
         QCPRange xRange(-halfSizeX, halfSizeX);
         QCPRange yRange(-halfSizeY, halfSizeY);
@@ -672,12 +673,13 @@ bool VWindowPolygon::vertexCausesIntersection(int index, double x, double y,
 
 bool VWindowPolygon::vertexIsOkForTable(double x, double y) const
 {
-    if (m_useTable && m_pTable)
+    if (m_useTable && m_pFacade)
     {
-        float halfSizeX{m_pTable->getSize().x() / 2};
+        std::shared_ptr<const VTable> p_table{m_pFacade->getTable()};
+        float halfSizeX{p_table->getSize().x() / 2};
         if (x < -halfSizeX || x > halfSizeX)
             return false;
-        float halfSizeY{m_pTable->getSize().y() / 2};
+        float halfSizeY{p_table->getSize().y() / 2};
         if (y < -halfSizeY || y > halfSizeY)
             return false;
     }
@@ -774,29 +776,29 @@ void VWindowPolygon::updateVertexRecord(int index)
     }
 }
 
-void VWindowPolygon::setTable(const std::shared_ptr<const VTable> & p_table)
+void VWindowPolygon::updateTable()
 {
-    m_pTable = p_table;
-    if (m_pTable)
+    if (m_pFacade)
     {
+        std::shared_ptr<const VTable> p_table{m_pFacade->getTable()};
         m_pTableCurve->data()->clear();
 
-        float halfSizeX{m_pTable->getSize().x() / 2};
-        float halfSizeY{m_pTable->getSize().y() / 2};
+        float halfSizeX{p_table->getSize().x() / 2};
+        float halfSizeY{p_table->getSize().y() / 2};
         QVector<double> qvT{0, 1, 2, 3, 4};
         QVector<double> qvX{-halfSizeX, halfSizeX, halfSizeX, -halfSizeX, -halfSizeX};
         QVector<double> qvY{halfSizeY, halfSizeY, -halfSizeY, -halfSizeY, halfSizeY};
         m_pTableCurve->setData(qvT, qvX, qvY, true);
 
-        float injectionRadius = m_pTable->getInjectionDiameter() / 2;
-        float injectionX = m_pTable->getInjectionCoords().x();
-        float injectionY = m_pTable->getInjectionCoords().y();
+        float injectionRadius = p_table->getInjectionDiameter() / 2;
+        float injectionX = p_table->getInjectionCoords().x();
+        float injectionY = p_table->getInjectionCoords().y();
         m_pInjectionEllipse->topLeft->setCoords(injectionX - injectionRadius, injectionY - injectionRadius);
         m_pInjectionEllipse->bottomRight->setCoords(injectionX + injectionRadius, injectionY + injectionRadius);
 
-        float vacuumRadius = m_pTable->getVacuumDiameter() / 2;
-        float vacuumX = m_pTable->getVacuumCoords().x();
-        float vacuumY = m_pTable->getVacuumCoords().y();
+        float vacuumRadius = p_table->getVacuumDiameter() / 2;
+        float vacuumX = p_table->getVacuumCoords().x();
+        float vacuumY = p_table->getVacuumCoords().y();
         m_pVacuumEllipse->topLeft->setCoords(vacuumX - vacuumRadius, vacuumY - vacuumRadius);
         m_pVacuumEllipse->bottomRight->setCoords(vacuumX + vacuumRadius, vacuumY + vacuumRadius);
 
@@ -835,30 +837,34 @@ void VWindowPolygon::drawOtherPolygons()
         otherCurve->deleteLater();
     }
     m_otherLayersCurves.clear();
-    for(auto & layerPolygons : m_otherLayersPolygons)
+    if (m_pFacade)
     {
-        for (auto & polygon : layerPolygons)
+        std::vector<std::vector<QPolygonF> > otherLayersPolygons{m_pFacade->getAllActivePolygons()};
+        for(auto & layerPolygons : otherLayersPolygons)
         {
-            QCPCurve * polyCurve = new QCPCurve(ui->plotWidget->xAxis, ui->plotWidget->yAxis);
-            polyCurve->setPen(QColor(Qt::gray));
-            QVector<double> qvT, qvX, qvY;
-            qvT.reserve(polygon.size() + 1);
-            qvX.reserve(polygon.size() + 1);
-            qvY.reserve(polygon.size() + 1);
-            for (int i{0}; i < polygon.size(); ++i)
+            for (auto & polygon : layerPolygons)
             {
-                qvT.append(i);
-                qvX.append(polygon.at(i).x());
-                qvY.append(polygon.at(i).y());
+                QCPCurve * polyCurve = new QCPCurve(ui->plotWidget->xAxis, ui->plotWidget->yAxis);
+                polyCurve->setPen(QColor(Qt::gray));
+                QVector<double> qvT, qvX, qvY;
+                qvT.reserve(polygon.size() + 1);
+                qvX.reserve(polygon.size() + 1);
+                qvY.reserve(polygon.size() + 1);
+                for (int i{0}; i < polygon.size(); ++i)
+                {
+                    qvT.append(i);
+                    qvX.append(polygon.at(i).x());
+                    qvY.append(polygon.at(i).y());
+                }
+                if (polygon.size() > 0)
+                {
+                    qvT.append(qvT.size());
+                    qvX.append(polygon.at(0).x());
+                    qvY.append(polygon.at(0).y());
+                }
+                polyCurve->setData(qvT, qvX, qvY);
+                m_otherLayersCurves.push_back(polyCurve);
             }
-            if (polygon.size() > 0)
-            {
-                qvT.append(qvT.size());
-                qvX.append(polygon.at(0).x());
-                qvY.append(polygon.at(0).y());
-            }
-            polyCurve->setData(qvT, qvX, qvY);
-            m_otherLayersCurves.push_back(polyCurve);
         }
     }
     ui->plotWidget->replot();

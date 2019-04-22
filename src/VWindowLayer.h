@@ -15,7 +15,7 @@ class VWindowLayer;
 }
 class VWindowCloth;
 class VWindowPolygon;
-class VTable;
+class VSimulationFacade;
 
 class VWindowLayer : public QMainWindow
 {
@@ -34,14 +34,11 @@ public:
 
     static const QColor DEFAULT_COLOR;
 
-    VWindowLayer(QWidget *parent,
-                 const std::vector<std::vector<QPolygonF> > &polygons,
-                 std::shared_ptr<const VTable> p_table = nullptr);
+    VWindowLayer(QWidget *parent = nullptr,
+                 std::shared_ptr<const VSimulationFacade> p_facade = nullptr);
     virtual ~VWindowLayer();
     void saveParameters() const;
     void loadSavedParameters();
-
-    void setTable(const std::shared_ptr<const VTable> & p_table);
 
 public slots:
 
@@ -85,8 +82,7 @@ private:
     VCloth m_material;
     QPolygonF m_polygon;
     double m_characteristicLength;
-    std::shared_ptr<const VTable> m_pTable;
-    std::vector<std::vector<QPolygonF> > m_otherLayersPolygons;
+    std::shared_ptr<const VSimulationFacade> m_pFacade;
 
 signals:
     void creationFromFileAvailable(const VCloth &material, const QString &fileName,

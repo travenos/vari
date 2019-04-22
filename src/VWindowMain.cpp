@@ -366,7 +366,7 @@ void VWindowMain::showWindowLayer()
 {
     if (m_pWindowLayer == nullptr)
     {
-        m_pWindowLayer = new VWindowLayer(this, m_pFacade->getAllActivePolygons(), m_pFacade->getTable());
+        m_pWindowLayer = new VWindowLayer(this, m_pFacade);
         connect(m_pWindowLayer,
                 SIGNAL(creationFromFileAvailable(const VCloth&,const QString&, VLayerAbstractBuilder::VUnit)),
                 this,
@@ -376,10 +376,6 @@ void VWindowMain::showWindowLayer()
                 this,
                 SLOT(m_on_layer_creation_manual_available(const VCloth&,const QPolygonF&, double)));
         connect(m_pWindowLayer,SIGNAL(windowClosed()), this, SLOT(m_on_layer_window_closed()));
-    }
-    else
-    {
-        m_pWindowLayer->setTable(m_pFacade->getTable());
     }
     m_pWindowLayer->show();
     m_pWindowLayer->activateWindow();

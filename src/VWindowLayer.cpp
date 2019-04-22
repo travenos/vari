@@ -37,15 +37,13 @@ const QString VWindowLayer::MATERIAL_INFO_TEXT("<html><head/><body>"
 const QColor VWindowLayer::DEFAULT_COLOR = QColor(255, 172, 172);
 
 VWindowLayer::VWindowLayer(QWidget *parent,
-                           const std::vector<std::vector<QPolygonF> > &polygons,
-                           std::shared_ptr<const VTable> p_table) :
+                           std::shared_ptr<const VSimulationFacade> p_facade) :
     QMainWindow(parent),
     ui(new Ui::VWindowLayer),
     m_selectedMaterial(false),
     m_selectedFile(false),
     m_createdGeometry(false),
-    m_pTable(p_table),
-    m_otherLayersPolygons(polygons)
+    m_pFacade(p_facade)
 {
     ui->setupUi(this);
     reset();
@@ -86,11 +84,6 @@ void VWindowLayer::loadSavedParameters()
     ui->mmCheckBox->setChecked(mm_selected);
     QVariant color = settings.value(QStringLiteral("import/color"), DEFAULT_COLOR);
     m_material.baseColor = color.value<QColor>();
-}
-
-void VWindowLayer::setTable(const std::shared_ptr<const VTable> & p_table)
-{
-    m_pTable = p_table;
 }
 
 void VWindowLayer::saveParameters() const
@@ -154,13 +147,9 @@ void VWindowLayer::showWindowPolygon()
 {
     if(!m_pWindowPolygon)
     {
-        m_pWindowPolygon.reset(new VWindowPolygon(this, m_otherLayersPolygons, m_pTable));
+        m_pWindowPolygon.reset(new VWindowPolygon(this, m_pFacade));
         connect(m_pWindowPolygon.get(), SIGNAL(polygonAvailable(const QPolygonF &, double)),
                 this, SLOT(m_on_got_polygon(const QPolygonF &, double)));
-    }
-    else
-    {
-        m_pWindowPolygon->setTable(m_pTable);
     }
     m_pWindowPolygon->show();
     m_pWindowPolygon->activateWindow();
