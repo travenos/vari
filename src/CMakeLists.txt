@@ -127,7 +127,7 @@ if(WIN32)
     endif()
 endif()
 
-find_package( OpenCV REQUIRED )
+find_package( OpenCV 3.2.0 REQUIRED )
 if (${OpenCV_FOUND})
     message(STATUS "Found OpenCV ${OpenCV_VERSION}")
     message(STATUS "OpenCV Directory: ${OpenCV_DIR}")

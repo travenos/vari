@@ -3,7 +3,7 @@
 
 find_package(Qt5Core    REQUIRED)
 find_package(Qt5Gui    REQUIRED)
-find_package(OpenCV REQUIRED)
+find_package(OpenCV 3.2.0 REQUIRED)
 
 include_directories(${Qt5Core_INCLUDE_DIRS})
 include_directories(${Qt5Gui_INCLUDE_DIRS})

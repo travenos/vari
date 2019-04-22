@@ -34,21 +34,14 @@ LIBSTDCXX_VER=${LIBSTDCXX_VER:9}
 QT_VER=$(dpkg -s qt5-default | grep '^Version: ')
 QT_VER=${QT_VER%-*}
 QT_VER=${QT_VER:9}
-LIBOPENCV_NAME=
-if dpkg -s libopencv-highgui2.4v5 > /dev/null 2>&1; then LIBOPENCV_NAME=libopencv-highgui2.4v5; fi
-if dpkg -s libopencv-videoio3.2 > /dev/null 2>&1; then LIBOPENCV_NAME=libopencv-videoio3.2; fi
-if [[ -z ${LIBOPENCV_NAME} ]]
-then
-    >&2 echo "Error. No OpenCV module for video writing found in the system"
-    exit 2
-fi
-DEPENDENCIES="libc6 (>= ${LIBC_VER}), libgcc1 (>= ${LIBGCC1_VER}), libgl1-mesa-glx | libgl1, libstdc++6 (>= ${LIBSTDCXX_VER}), libx11-6, libxi6, qt5-default (>= ${QT_VER}), libqt5core5a (>= ${QT_VER}), libqt5gui5 (>= ${QT_VER}), libqt5sql5 (>= ${QT_VER}), libqt5widgets5 (>= ${QT_VER}), libqt5xml5 (>= ${QT_VER}), libqt5sql5-psql (>= ${QT_VER}), libqt5printsupport5 (>= ${QT_VER}), ${LIBOPENCV_NAME}"
+DEPENDENCIES="libc6 (>= ${LIBC_VER}), libgcc1 (>= ${LIBGCC1_VER}), libgl1-mesa-glx | libgl1, libstdc++6 (>= ${LIBSTDCXX_VER}), libx11-6, libxi6, qt5-default (>= ${QT_VER}), libqt5core5a (>= ${QT_VER}), libqt5gui5 (>= ${QT_VER}), libqt5sql5 (>= ${QT_VER}), libqt5widgets5 (>= ${QT_VER}), libqt5xml5 (>= ${QT_VER}), libqt5sql5-sqlite (>= ${QT_VER}), libqt5printsupport5 (>= ${QT_VER})"
 CONFLICTS="libsoqt3-20, libsoqt4-20, libcoin80v5, libcoin80-runtime"
 PROVIDES="libcoin80v5"
 
 VERSION_ARG=-v
 THREADS_ARG=-j
 BUILD_DIR_ARG=-d
+EXTERNAL_OPENCV_ARG=--system_opencv
 HELP_ARG=-h
 
 HELP_STRING="Tool for making DEB package from source.
@@ -63,6 +56,7 @@ $THREADS_ARG THREADS_NUMBER
 THREADS_NUMBER - how many threads should be used by make process
 $BUILD_DIR_ARG BUILD_DIRECTORY
 BUILD_DIRECTORY- specify directory, where binary files are being built
+$EXTERNAL_OPENCV_ARG - do not build OpenCV, enable dynamic linking with OpenCV installed to system using package manager
 $HELP_ARG - print help text"
 
 SCRIPT=$(readlink -f "${BASH_SOURCE[0]}")
@@ -70,6 +64,8 @@ WORKSPACE=$(dirname "$SCRIPT")
 
 THREADS_NUMBER=4
 BUILD_DIR_NAME=build
+
+BUILD_OPENCV=1
 
 # Checking arguments
 for (( i=1; i<=$#; i++ ))
@@ -98,6 +94,11 @@ do
 		mkdir -p "${!i}"
         	BUILD_DIR=$(readlink -f "${!i}")
         fi
+    elif [[ ${!i} == "$EXTERNAL_OPENCV_ARG" ]]
+    then
+        LIBOPENCV_PACKAGES="libopencv-videoio3.2, libopencv-imgproc3.2"        
+        DEPENDENCIES="$DEPENDENCIES, $LIBOPENCV_PACKAGES"
+        BUILD_OPENCV=0
     elif [[ ${!i} == "$HELP_ARG" ]]
     then
         echo -e "$HELP_STRING"
@@ -139,6 +140,14 @@ export GMSH_DIR=$(readlink -f gmsh/installed)
 mkdir -p coin3d/installed
 export COINDIR=$(readlink -f coin3d/installed)
 ./make_coin_soqt.sh -w coin3d -i "$COINDIR" -j $THREADS_NUMBER || exit
+
+# Build OpenCV
+if [[ "$BUILD_OPENCV" == 1 ]]
+then
+    mkdir -p opencv/installed
+    export OPENCV_DIR=$(readlink -f opencv/installed)
+    ./make_opencv.sh -w opencv -i "$OPENCV_DIR" -j $THREADS_NUMBER || exit
+fi
 
 # Add built libraries to default paths
 export PATH=${PATH}:"${INSTALL_DIR}/usr"
