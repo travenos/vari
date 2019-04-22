@@ -133,25 +133,21 @@ void VLayerPolygon::createPolygons(const VSimTriangle::const_list_ptr &triangles
 {
     cv::Scalar FILL_COLOR(255);
     const uint VERTICES_NUMBER{VSimTriangle::VERTICES_NUMBER};
-    int ncontours{static_cast<int>(triangles->size())};
     cv::Mat img(std::vector<int>({m_arrSizes.at(1), m_arrSizes.at(0)}), CV_8U, cv::Scalar(0));
-    std::vector<std::vector<cv::Point> > pts;
-    pts.resize(triangles->size());
-    auto p_triange = triangles->begin();
-    for (int triangleIndex{0}; triangleIndex < ncontours; ++triangleIndex)
+    for (auto & p_triange : *triangles)
     {
+        std::vector<std::vector<cv::Point> > pts(1);
+        pts.at(0).resize(VERTICES_NUMBER);
         QVector3D vertices[VERTICES_NUMBER];
-        (*p_triange)->getVertices(vertices);
-        pts.at(triangleIndex).resize(VERTICES_NUMBER);
+        p_triange->getVertices(vertices);
         for (uint vertexIndex{0}; vertexIndex < VERTICES_NUMBER; ++vertexIndex)
         {
             int x, y;
             getIndexes(vertices[vertexIndex].toVector2D(), x, y);
-            pts.at(triangleIndex).at(vertexIndex).x = x;
-            pts.at(triangleIndex).at(vertexIndex).y = y;
+            pts.at(0).at(vertexIndex).x = x;
+            pts.at(0).at(vertexIndex).y = y;
         }
-        cv::drawContours(img, pts, triangleIndex, FILL_COLOR, -1, cv::LINE_4);
-        p_triange++;
+        cv::drawContours(img, pts, 0, FILL_COLOR, -1, cv::LINE_4);
     }
 
     std::vector<std::vector<cv::Point> > contours;
