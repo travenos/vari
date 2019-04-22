@@ -11,6 +11,7 @@
 #include <QColorDialog>
 #include <QSettings>
 #include <QTimeZone>
+#include <QCloseEvent>
 
 #include "VWindowMain.h"
 #include "ui_VWindowMain.h"
@@ -37,6 +38,8 @@ const QString VWindowMain::CUT_TITLE("Обрезать?");
 const QString VWindowMain::ASK_FOR_CUT("Вы уверены, что хотите выполнить обрезку слоя?");
 const QString VWindowMain::TRANSFORM_TITLE("Переместить?");
 const QString VWindowMain::ASK_FOR_TRANSFORM("Вы уверены, что хотите изменть положение слоя?");
+const QString VWindowMain::EXIT_TITLE("Выйти?");
+const QString VWindowMain::ASK_FOR_EXIT_TEXT("Имеются несохранённые параметры. Вы уверены, что хотите выйти?");
 const QString VWindowMain::CLOTH_INFO_TEXT("<html><head/><body>"
                                            "Материал: &quot;%1&quot;<br>"
                                            "Толщина: %2 м<br>"
@@ -88,6 +91,7 @@ VWindowMain::VWindowMain(QWidget *parent) :
     ui->splitter->setStretchFactor(1,0);
     ui->layerParamBox->setVisible(false);
     ui->modelInfoLabel->setVisible(false);
+    setContextMenuPolicy(Qt::NoContextMenu);
     m_pFacade.reset(new VSimulationFacade(ui->viewerWidget));
     connectSimulationSignals();
     setupValidators();
@@ -296,9 +300,17 @@ VWindowMain::~VWindowMain()
     #endif
 }
 
-void VWindowMain::closeEvent(QCloseEvent *)
+void VWindowMain::closeEvent(QCloseEvent * event)
 {
-    saveSizes();
+    if (!m_isSaved && QMessageBox::question(this, EXIT_TITLE,
+                      ASK_FOR_EXIT_TEXT, QMessageBox::Yes|QMessageBox::No )!=QMessageBox::Yes)
+    {
+        event->ignore();
+    }
+    else
+    {
+        saveSizes();
+    }
 }
 
 void VWindowMain::deleteWindowLayer()
@@ -1136,8 +1148,9 @@ void VWindowMain::enableButtonsShootingWindows(bool enable)
 void VWindowMain::setSavedState(bool saved)
 {
     m_isSaved = saved;
+    m_isSaved |= (m_pFacade->getNodesNumber() == 0);
     QString title = this->windowTitle();
-    if (m_isSaved || m_pFacade->getNodesNumber() == 0)
+    if (m_isSaved)
     {
         title.remove('*');
     }

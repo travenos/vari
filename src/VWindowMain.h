@@ -45,6 +45,8 @@ public:
     static const QString ASK_FOR_REMOVE;
     static const QString ASK_FOR_CUT;
     static const QString ASK_FOR_TRANSFORM;
+    static const QString EXIT_TITLE;
+    static const QString ASK_FOR_EXIT_TEXT;
     static const QString MODEL_INFO_TEXT;
 
     static const QString OPEN_FILE_DIALOG_TITLE;
