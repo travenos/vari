@@ -22,7 +22,7 @@ const QCPRange VWindowPolygon::Y_RANGE(-0.5, 0.5);
 const int VWindowPolygon::MIN_1D_POLYGON_SIZE{2};
 const int VWindowPolygon::MIN_2D_POLYGON_SIZE{3};
 const double VWindowPolygon::MIN_CHARACTERISTIC_LENGTH{0.001};
-const double VWindowPolygon::DEFAULT_CHARACTERISTIC_LENGTH{0.03};
+const double VWindowPolygon::DEFAULT_CHARACTERISTIC_LENGTH{0.02};
 const double VWindowPolygon::MIN_CHARACTERISTIC_RATIO{0.005};
 
 const QString VWindowPolygon::SAVE_FILE_DIALOG_TITLE("Создание и сохранение слоя в файл");

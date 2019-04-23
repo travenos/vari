@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>928</width>
-    <height>569</height>
+    <width>1135</width>
+    <height>668</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -484,6 +484,20 @@
   <tabstop>clearButton</tabstop>
   <tabstop>resetViewButton</tabstop>
   <tabstop>exportButton</tabstop>
+  <tabstop>mode2DRadioButton</tabstop>
+  <tabstop>mode1DRadioButton</tabstop>
+  <tabstop>tubeWidthSpinBox</tabstop>
+  <tabstop>useTableCheckBox</tabstop>
+  <tabstop>addXSpinBox</tabstop>
+  <tabstop>addYSpinBox</tabstop>
+  <tabstop>addVertexButton</tabstop>
+  <tabstop>verticesListWidget</tabstop>
+  <tabstop>changeXSpinBox</tabstop>
+  <tabstop>changeYSpinBox</tabstop>
+  <tabstop>restoreCoordsButton</tabstop>
+  <tabstop>changeCoordsButton</tabstop>
+  <tabstop>removeVertexButton</tabstop>
+  <tabstop>stepSpinBox</tabstop>
  </tabstops>
  <resources/>
  <connections/>
