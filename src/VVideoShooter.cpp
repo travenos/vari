@@ -31,13 +31,14 @@ const QString VVideoShooter::DEFAULT_SUFFIX_FILE_NAME("VARI_video");
 const QString VVideoShooter::BASE_VIDEO_FILE_NAME = QStringLiteral("%1%2.") + VVideoShooter::VIDEO_FORMAT;
 const QString VVideoShooter::BASE_SLIDES_DIR_NAME("_VARI_SLIDES_FOR_VIDEO_");
 const QString VVideoShooter::SLIDES_DIR_PATH = QDir::cleanPath(QDir::tempPath() + QDir::separator() + VVideoShooter::BASE_SLIDES_DIR_NAME);
+const int VVideoShooter::DEFAULT_FREQUENCY{25};
 
 VVideoShooter::VVideoShooter():
     VScreenShooter(),
     m_videoDirectory(QDir::homePath())
 {
     VScreenShooter::setDirPath(SLIDES_DIR_PATH);
-    setFrequency(10);
+    setFrequency(DEFAULT_FREQUENCY);
     constructorBody();
 }
 

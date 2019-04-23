@@ -217,14 +217,14 @@ void VWindowPolygon::reset()
 
 void VWindowPolygon::resetView()
 {
-    if (m_useTable && m_pFacade)
+    if (m_pFacade)
     {
         std::shared_ptr<const VTable> p_table{m_pFacade->getTable()};
-        float halfSizeX{p_table->getSize().x() / 2};
-        float halfSizeY{p_table->getSize().y() / 2};
+        float sizeX{p_table->getSize().x()};
+        float sizeY{p_table->getSize().y()};
 
-        QCPRange xRange(-halfSizeX, halfSizeX);
-        QCPRange yRange(-halfSizeY, halfSizeY);
+        QCPRange xRange(0, sizeX);
+        QCPRange yRange(0, sizeY);
 
         ui->plotWidget->xAxis->setRange(xRange);
         ui->plotWidget->yAxis->setRange(yRange);
@@ -676,11 +676,11 @@ bool VWindowPolygon::vertexIsOkForTable(double x, double y) const
     if (m_useTable && m_pFacade)
     {
         std::shared_ptr<const VTable> p_table{m_pFacade->getTable()};
-        float halfSizeX{p_table->getSize().x() / 2};
-        if (x < -halfSizeX || x > halfSizeX)
+        float sizeX{p_table->getSize().x()};
+        if (x < 0 || x > sizeX)
             return false;
-        float halfSizeY{p_table->getSize().y() / 2};
-        if (y < -halfSizeY || y > halfSizeY)
+        float sizeY{p_table->getSize().y()};
+        if (y < 0 || y > sizeY)
             return false;
     }
     return true;
@@ -783,11 +783,11 @@ void VWindowPolygon::updateTable()
         std::shared_ptr<const VTable> p_table{m_pFacade->getTable()};
         m_pTableCurve->data()->clear();
 
-        float halfSizeX{p_table->getSize().x() / 2};
-        float halfSizeY{p_table->getSize().y() / 2};
+        float sizeX{p_table->getSize().x()};
+        float sizeY{p_table->getSize().y()};
         QVector<double> qvT{0, 1, 2, 3, 4};
-        QVector<double> qvX{-halfSizeX, halfSizeX, halfSizeX, -halfSizeX, -halfSizeX};
-        QVector<double> qvY{halfSizeY, halfSizeY, -halfSizeY, -halfSizeY, halfSizeY};
+        QVector<double> qvX{0, sizeX, sizeX, 0, 0};
+        QVector<double> qvY{sizeY, sizeY, 0, 0, sizeY};
         m_pTableCurve->setData(qvT, qvX, qvY, true);
 
         float injectionRadius = p_table->getInjectionDiameter() / 2;

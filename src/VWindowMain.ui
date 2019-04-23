@@ -103,7 +103,7 @@
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-82</y>
+              <y>0</y>
               <width>1231</width>
               <height>919</height>
              </rect>
@@ -967,16 +967,16 @@
                         <number>3</number>
                        </property>
                        <property name="minimum">
-                        <double>-20.000000000000000</double>
+                        <double>0.040000000000000</double>
                        </property>
                        <property name="maximum">
-                        <double>20.000000000000000</double>
+                        <double>40.000000000000000</double>
                        </property>
                        <property name="singleStep">
                         <double>0.010000000000000</double>
                        </property>
                        <property name="value">
-                        <double>-0.980000000000000</double>
+                        <double>0.040000000000000</double>
                        </property>
                       </widget>
                      </item>
@@ -986,16 +986,16 @@
                         <number>3</number>
                        </property>
                        <property name="minimum">
-                        <double>-20.000000000000000</double>
+                        <double>0.000000000000000</double>
                        </property>
                        <property name="maximum">
-                        <double>20.000000000000000</double>
+                        <double>40.000000000000000</double>
                        </property>
                        <property name="singleStep">
                         <double>0.010000000000000</double>
                        </property>
                        <property name="value">
-                        <double>0.480000000000000</double>
+                        <double>0.960000000000000</double>
                        </property>
                       </widget>
                      </item>
@@ -1049,7 +1049,7 @@
                         <double>0.010000000000000</double>
                        </property>
                        <property name="value">
-                        <double>0.020000000000000</double>
+                        <double>0.040000000000000</double>
                        </property>
                       </widget>
                      </item>
@@ -1127,16 +1127,16 @@
                         <number>3</number>
                        </property>
                        <property name="minimum">
-                        <double>-20.000000000000000</double>
+                        <double>0.000000000000000</double>
                        </property>
                        <property name="maximum">
-                        <double>20.000000000000000</double>
+                        <double>40.000000000000000</double>
                        </property>
                        <property name="singleStep">
                         <double>0.010000000000000</double>
                        </property>
                        <property name="value">
-                        <double>0.980000000000000</double>
+                        <double>1.960000000000000</double>
                        </property>
                       </widget>
                      </item>
@@ -1146,16 +1146,16 @@
                         <number>3</number>
                        </property>
                        <property name="minimum">
-                        <double>-20.000000000000000</double>
+                        <double>0.000000000000000</double>
                        </property>
                        <property name="maximum">
-                        <double>30.000000000000000</double>
+                        <double>40.000000000000000</double>
                        </property>
                        <property name="singleStep">
                         <double>0.010000000000000</double>
                        </property>
                        <property name="value">
-                        <double>-0.480000000000000</double>
+                        <double>0.040000000000000</double>
                        </property>
                       </widget>
                      </item>
@@ -1209,7 +1209,7 @@
                         <double>0.010000000000000</double>
                        </property>
                        <property name="value">
-                        <double>0.020000000000000</double>
+                        <double>0.040000000000000</double>
                        </property>
                       </widget>
                      </item>
@@ -1577,7 +1577,7 @@
                      <number>25</number>
                     </property>
                     <property name="value">
-                     <number>10</number>
+                     <number>25</number>
                     </property>
                    </widget>
                   </item>
@@ -1796,6 +1796,24 @@
   <tabstop>saveTimeLimitButton</tabstop>
   <tabstop>timeLimitCheckBox</tabstop>
   <tabstop>scrollArea</tabstop>
+  <tabstop>tableXSpinBox</tabstop>
+  <tabstop>tableYSpinBox</tabstop>
+  <tabstop>resetTableSizeButton</tabstop>
+  <tabstop>saveTableSizeButton</tabstop>
+  <tabstop>tableInjectionXSpinBox</tabstop>
+  <tabstop>tableInjectionYSpinBox</tabstop>
+  <tabstop>resetTableInjectionCoordsButton</tabstop>
+  <tabstop>saveTableInjectionCoordsButton</tabstop>
+  <tabstop>tableInjectionDiameterSpinBox</tabstop>
+  <tabstop>resetTableInjectionDiameterButton</tabstop>
+  <tabstop>saveTableInjectionDiameterButton</tabstop>
+  <tabstop>tableVacuumXSpinBox</tabstop>
+  <tabstop>tableVacuumYSpinBox</tabstop>
+  <tabstop>resetTableVacuumCoordsButton</tabstop>
+  <tabstop>saveTableVacuumCoordsButton</tabstop>
+  <tabstop>tableVacuumDiameterSpinBox</tabstop>
+  <tabstop>resetTableVacuumDiameterButton</tabstop>
+  <tabstop>saveTableVacuumDiameterButton</tabstop>
   <tabstop>cubeSideSlider</tabstop>
   <tabstop>chooseSlideshowDirButton</tabstop>
   <tabstop>slideshowDirNameEdit</tabstop>
@@ -1811,24 +1829,6 @@
   <tabstop>videoFrequencySpinBox</tabstop>
   <tabstop>resetVideoFrequencyButton</tabstop>
   <tabstop>saveVideoFrequencyButton</tabstop>
-  <tabstop>tableYSpinBox</tabstop>
-  <tabstop>tableXSpinBox</tabstop>
-  <tabstop>saveTableSizeButton</tabstop>
-  <tabstop>resetTableSizeButton</tabstop>
-  <tabstop>resetTableInjectionDiameterButton</tabstop>
-  <tabstop>saveTableInjectionDiameterButton</tabstop>
-  <tabstop>tableInjectionDiameterSpinBox</tabstop>
-  <tabstop>saveTableInjectionCoordsButton</tabstop>
-  <tabstop>resetTableInjectionCoordsButton</tabstop>
-  <tabstop>tableInjectionXSpinBox</tabstop>
-  <tabstop>tableInjectionYSpinBox</tabstop>
-  <tabstop>tableVacuumDiameterSpinBox</tabstop>
-  <tabstop>resetTableVacuumDiameterButton</tabstop>
-  <tabstop>saveTableVacuumDiameterButton</tabstop>
-  <tabstop>tableVacuumXSpinBox</tabstop>
-  <tabstop>tableVacuumYSpinBox</tabstop>
-  <tabstop>resetTableVacuumCoordsButton</tabstop>
-  <tabstop>saveTableVacuumCoordsButton</tabstop>
  </tabstops>
  <resources>
   <include location="resources/resources.qrc"/>
