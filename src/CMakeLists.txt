@@ -291,7 +291,7 @@ if(APPLE)
 
     install(FILES ${QT_PLUGINS_SOURCE_DIR}/platforms/libqcocoa.dylib     DESTINATION ${QT_PLUGIN_DESTINAT_DIR}/platforms)
     install(FILES ${QT_PLUGINS_SOURCE_DIR}/platforms/libqminimal.dylib   DESTINATION ${QT_PLUGIN_DESTINAT_DIR}/platforms)
-    install(FILES ${QT_PLUGINS_SOURCE_DIR}/sqldrivers/libqsqlpsql.dylib  DESTINATION ${QT_PLUGIN_DESTINAT_DIR}/sqldrivers)
+    install(FILES ${QT_PLUGINS_SOURCE_DIR}/sqldrivers/libqsqlite.dylib  DESTINATION ${QT_PLUGIN_DESTINAT_DIR}/sqldrivers)
     install(FILES ${QT_PLUGINS_SOURCE_DIR}/printsupport/libcocoaprintersupport.dylib DESTINATION ${QT_PLUGIN_DESTINAT_DIR}/printsupport)
 
     install(CODE "
