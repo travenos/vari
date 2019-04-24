@@ -152,7 +152,7 @@ void VLayerPolygon::createPolygons(const VSimTriangle::const_list_ptr &triangles
 
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
-    cv::findContours(img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_TC89_L1);
+    cv::findContours(img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_TC89_KCOS);
 
     m_polygons.clear();
     m_hierarchy.clear();
