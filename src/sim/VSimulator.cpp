@@ -212,6 +212,7 @@ void VSimulator::simulationCycle()
     if (!(m_pauseFlag.load()))
     {
         m_pauseFlag.store(false);
+        m_simT_timeBeforePause = 0;
         resetState();
         double avgPerm = getAveragePermeability();
         double avgDist = getAverageCellDistance();
