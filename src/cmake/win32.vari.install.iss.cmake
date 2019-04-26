@@ -2,6 +2,7 @@
 
 #define AppName      "${APP_NAME}"
 #define AppVersion   "${PROJECT_VERSION_LONG}"
+#define AppProjectVersion   "${PROJECT_VERSION}"
 #define AppPublisher "${PROJECT_VENDOR_LONG}"
 #define AppURL       "${ORG_WEBSITE}"
 #define AppGUID      "931BBE66-77AA-471C-B785-7FAD395E634E"
@@ -19,6 +20,7 @@ AppPublisher = {#AppPublisher}
 AppCopyright = {#AppPublisher}
 AppPublisherURL = {#AppURL}
 VersionInfoCompany = {#AppPublisher}
+VersionInfoVersion = {#AppProjectVersion}
 DefaultDirName = {pf}\{#AppName}
 DefaultGroupName = {#AppName}
 UninstallDisplayIcon = {app}\{#AppVARIExeName}
