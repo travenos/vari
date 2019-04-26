@@ -538,7 +538,7 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
                         double brace2 = pow(_l/distance,s);
                         double p_it = neighbor->getPressure();
                         double brace3 = p_it-p_t;
-                        double brace4 = K_i / K;
+                        double brace4 = std::min(K_i / K, 1.0);
                         sum += brace1 * brace2 * brace3 * brace4;
                         if(p_it > highestNeighborPressure)
                             highestNeighborPressure = p_it;
