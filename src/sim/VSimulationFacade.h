@@ -14,6 +14,9 @@
 #include "VLayersProcessor.h"
 #include "VGraphicsViewer.h"
 
+class VTable;
+struct VInjectionVacuum;
+
 class QWidget;
 
 class VSimulationFacade : public QObject
@@ -41,6 +44,10 @@ public:
     void removeLayer(uint layer) ;
     void enableLayer(uint layer, bool enable) ;
 
+    void moveLayerUp(uint layer);
+    void moveLayerDown(uint layer);
+    void sortLayers();
+
     void setMaterial(uint layer, const VCloth& material) ;
     void setResin(const VResin& resin) ;
     void setInjectionPressure(double pressure) ;
@@ -53,6 +60,7 @@ public:
 
     void setTimeLimit(double limit);
     void setTimeLimitMode(bool on);
+    void considerLifetime(bool on);
 
     void newModel() ;
     void loadModel(const QString &filename) ;
@@ -62,8 +70,8 @@ public:
     bool isLayerVisible(uint layer) const ;
     bool isLayerEnabled(uint layer) const ;
 
-    void waitForInjectionPointSelection(double diameter);
-    void waitForVacuumPointSelection(double diameter);
+    void waitForInjectionPointSelection(float diameter);
+    void waitForVacuumPointSelection(float diameter);
 
     void cancelWaitingForInjectionPointSelection();
     void cancelWaitingForVacuumPointSelection();
@@ -82,7 +90,7 @@ public:
     void performCut();
     uint getCuttedLayer() const;
     void performTransformation();
-    uint getTranslatedLayer() const;
+    uint getTranslatedLayerId() const;
 
     void setAllVisible();
     void setOnlyOneVisible(uint layer);
@@ -98,6 +106,24 @@ public:
 
     const QWidget * getGLWidget() const;
 
+    bool isSimulationActive() const;
+    bool isSimulationStopped() const;
+    bool isSimulationPaused() const;
+
+    std::shared_ptr<const VTable> getTable() const;
+    void setTableSize(float width, float height);
+    void setTableInjectionCoords(float x, float y);
+    void setTableVacuumCoords(float x, float y);
+    void setTableInjectionDiameter(float diameter) ;
+    void setTableVacuumDiameter(float diameter) ;
+
+    void useTableParameters(bool use);
+    bool isUsingTableParameters() const;
+
+    void setTable(const std::shared_ptr<VTable> &p_table);
+
+    std::vector<std::vector<QPolygonF> > getAllActivePolygons() const;
+
 public slots:
     void updateGraphicsPositions();
 
@@ -105,6 +131,7 @@ private:
     void connectMainSignals() ;
     void initLayersProcessor() ;
     void updateConfiguration() ;
+    void applyInjectionAndVacuumPoints();
 
     QWidget * m_parentWidget;
 
@@ -113,8 +140,9 @@ private:
     VLayersProcessor::ptr m_pLayersProcessor;
     bool m_selectInjectionPoint;
     bool m_selectVacuumPoint;
-    double m_injectionDiameter;
-    double m_vacuumDiameter;
+    std::shared_ptr<VInjectionVacuum> m_pInjectionVacuum;
+    std::shared_ptr<VTable> m_pTable;
+    bool m_useTableParameters;
     uint m_cuttedLayer;
 
     std::shared_ptr<std::mutex> m_pNodesLock;
@@ -145,8 +173,8 @@ signals:
     void gotNewInfo();
 
     void resinChanged();
-    void injectionDiameterSet(double diameter) ;
-    void vacuumDiameterSet(double diameter) ;
+    void injectionDiameterSet(float diameter) ;
+    void vacuumDiameterSet(float diameter) ;
     void temperatureSet(double temperature) ;
     void vacuumPressureSet(double pressure) ;
     void injectionPressureSet(double pressure) ;
@@ -155,6 +183,7 @@ signals:
     void coefSSet(double s) ;
     void timeLimitSet(double);
     void timeLimitModeSwitched(bool);
+    void lifetimeConsiderationSwitched(bool);
 
     void modelSaved();
     void modelLoaded();
@@ -167,6 +196,18 @@ signals:
     void selectionEnabled(bool);
 
     void configUpdated();
+
+    void filenameChanged(const QString &);
+
+    void layersSwapped(uint, uint);
+
+    void tableSizeSet(float, float);
+    void tableInjectionCoordsSet(float, float);
+    void tableVacuumCoordsSet(float, float);
+    void tableInjectionDiameterSet(float);
+    void tableVacuumDiameterSet(float);
+
+    void useTableParametersSet(bool);
 };
 
 #endif //_VSIMULATIONFACADE_H

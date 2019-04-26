@@ -31,8 +31,10 @@ protected:
         {
             VXmlResinTags() {}
             const QString _NAME{QStringLiteral("Resin")};
-            const QString TEMP_COEF{QStringLiteral("tempcoef")};
+            const QString VISC_TEMP_COEF{QStringLiteral("viscTempcoef")};
             const QString DEFAULT_VISCOSITY{QStringLiteral("defaultViscosity")};
+            const QString LIFETIME_TEMP_COEF{"lifetimeTempcoef"};
+            const QString DEFAULT_LIFETIME{"lifetime"};
             const QString MATERIAL_NAME{QStringLiteral("name")};
         };
 
@@ -50,6 +52,31 @@ protected:
         const QString NUMBER_OF_FULL_NODES{QStringLiteral("numberOfFullNodes")};
 
         const VXmlResinTags _xRESIN_TAGS;
+    };  
+    struct VXmlInjectionVacuumTags
+    {
+        VXmlInjectionVacuumTags() {}
+        const QString _NAME{QStringLiteral("InjectionVacuum")};
+        const QString INJECTION_COORDS{QStringLiteral("injectionCoords")};
+        const QString VACUUM_COORDS{QStringLiteral("vacuumCoords")};
+        const QString INJECTION_DIAMETER{QStringLiteral("injectionDiameter")};
+        const QString VACUUM_DIAMETER{QStringLiteral("vacuumDiameter")};
+    };
+    struct VXmlTableTags
+    {
+        VXmlTableTags() {}
+        const QString _NAME{QStringLiteral("Table")};
+        const QString SIZE{QStringLiteral("size")};
+
+        const VXmlInjectionVacuumTags _xINJECTION_VACUUM_TAGS;
+    };
+    struct VXmlUseInjectionVacuumTags
+    {
+        VXmlUseInjectionVacuumTags() {}
+        const QString _NAME{QStringLiteral("UseInjectionVacuum")};
+        const QString USE_TABLE_PARAMETERS{QStringLiteral("useTable")};
+
+        const VXmlInjectionVacuumTags _xINJECTION_VACUUM_TAGS;
     };
     struct VXmlPausedTags
     {
@@ -154,6 +181,9 @@ protected:
 
     const VXmlInfoTags _xINFO_TAGS;
     const VXmlParamTags _xPARAM_TAGS;
+    const VXmlInjectionVacuumTags _xINJECTION_VACUUM_TAGS;
+    const VXmlTableTags _xTABLE_TAGS;
+    const VXmlUseInjectionVacuumTags _xUSE_INJECTION_VACUUM_TAGS;
     const VXmlPausedTags _xPAUSED_TAGS;
     const VXmlTimeLimitTags _xTIMELIMIT_TAGS;
     const VXmlLayersTags _xLAYERS_TAGS;

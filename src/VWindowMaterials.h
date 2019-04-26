@@ -32,8 +32,6 @@ public:
     virtual ~VWindowMaterials();
 
 private slots:
-    void loadDatabaseFromFile();
-
     void on_materialsListWidget_itemSelectionChanged();
 
     void on_refreshButton_clicked();

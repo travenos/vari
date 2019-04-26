@@ -7,12 +7,15 @@
 #include <QDebug>
 #endif
 
+#include <QVector2D>
+
 #include "VSimNode.h"
 
 /**
  * VSimNode implementation
  */
 
+const double VSimNode::CONSIDERED_FULL{0.98};
 
 VSimNode::VSimNode(uint id, const QVector3D& pos,
                    const VCloth::const_ptr &p_material,
@@ -57,20 +60,20 @@ void VSimNode::setNewPressure(double newPressure)
     m_newPressure = newPressure;
 }
 
-void VSimNode::commit(bool *madeChanges, bool *isFull)
+void VSimNode::commit(bool *p_madeChanges, bool *p_isFull)
 {
-    if (isFull != nullptr)
-        (*isFull) = (m_newPressure >= m_vacuumPressure);
+    if (p_isFull != nullptr)
+        (*p_isFull) = isFull();
     if(m_newPressure != m_currentPressure)
     {
-        if (madeChanges != nullptr)
-            (*madeChanges) = (m_currentPressure < m_vacuumPressure);
+        if (p_madeChanges != nullptr)
+            (*p_madeChanges) = (m_currentPressure < m_vacuumPressure);
         m_currentPressure = m_newPressure;
     }
     else
     {
-        if (madeChanges != nullptr)
-            (*madeChanges) = false;
+        if (p_madeChanges != nullptr)
+            (*p_madeChanges) = false;
     }
 }
 
@@ -84,6 +87,11 @@ double VSimNode::getFilledPart() const
     double nom = m_currentPressure;
     double den = m_vacuumPressure;
     return (nom >= den) ? 1 : (nom / den);
+}
+
+bool VSimNode::isFull() const
+{
+    return (getFilledPart() >= CONSIDERED_FULL);
 }
 
 void VSimNode::addNeighbour(VSimNode* node, VLayerSequence layer)
@@ -243,6 +251,12 @@ float VSimNode::getDistance(const VSimNode::const_ptr &node) const
 float VSimNode::getDistance(const QVector3D& point) const
 {
     return m_position.distanceToPoint(point);
+}
+
+float VSimNode::getDistance(const QVector2D& point) const
+{
+    QVector2D xyPosition = m_position.toVector2D();
+    return xyPosition.distanceToPoint(point);
 }
 
 const QVector3D& VSimNode::getPosition() const 

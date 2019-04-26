@@ -2,6 +2,7 @@
 
 #define AppName      "${APP_NAME}"
 #define AppVersion   "${PROJECT_VERSION_LONG}"
+#define AppProjectVersion   "${PROJECT_VERSION}"
 #define AppPublisher "${PROJECT_VENDOR_LONG}"
 #define AppURL       "${ORG_WEBSITE}"
 #define AppGUID      "931BBE66-77AA-471C-B785-7FAD395E634E"
@@ -19,6 +20,7 @@ AppPublisher = {#AppPublisher}
 AppCopyright = {#AppPublisher}
 AppPublisherURL = {#AppURL}
 VersionInfoCompany = {#AppPublisher}
+VersionInfoVersion = {#AppProjectVersion}
 DefaultDirName = {pf}\{#AppName}
 DefaultGroupName = {#AppName}
 UninstallDisplayIcon = {app}\{#AppVARIExeName}
@@ -43,7 +45,7 @@ Source: "${QT_DIR}/bin/Qt5OpenGL.dll";  DestDir: "{app}"
 Source: "${QT_DIR}/bin/Qt5PrintSupport.dll";  DestDir: "{app}"
 Source: "${QT_DIR}/bin/Qt5WinExtras.dll";  DestDir: "{app}"
 Source: "${QT_DIR}/plugins/platforms/qwindows.dll";  DestDir: "{app}/platforms"
-Source: "${QT_DIR}/plugins/sqldrivers/qsqlpsql.dll";  DestDir: "{app}/sqldrivers"
+Source: "${QT_DIR}/plugins/sqldrivers/qsqlite.dll";  DestDir: "{app}/sqldrivers"
 
 Source: "${COIN_DIR}/bin/SoQt1.dll";    DestDir: "{app}"
 Source: "${COIN_DIR}/bin/Coin4.dll";    DestDir: "{app}"
@@ -54,13 +56,8 @@ Source: "msvcp120.dll"; DestDir: "{app}"
 Source: "sql/create.sql"; DestDir: "{app}/sql"
 Source: "sql/remove.sql"; DestDir: "{app}/sql"
 
-[Run]
-Filename: "psql.exe"; Parameters: "-h 127.0.0.1 -U postgres -f ""{app}\sql\create.sql"""; StatusMsg: "Initializing the database"; Flags: runhidden;
-
 [Icons]
 Name: "{group}\{#AppName}";           Filename: "{app}\{#AppVARIExeName}"; WorkingDir: "{app}"
 Name: "{group}\Uninstall {#AppName}"; Filename: "{uninstallexe}"
 Name: "{commondesktop}\{#AppName}";   Filename: "{app}\{#AppVARIExeName}"; Tasks: desktopicon
 
-[UninstallRun]
-Filename: "psql.exe"; Parameters: "-h 127.0.0.1 -U postgres -f ""{app}\sql\remove.sql"""; StatusMsg: "Dropping the database"; Flags: runhidden;

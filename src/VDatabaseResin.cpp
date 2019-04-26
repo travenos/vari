@@ -13,18 +13,18 @@
 
 const QString VDatabaseResin::TABLE_NAME("resin");
 
-const QString VDatabaseResin::GET_INFO_QUERY("SELECT id, viscosity, tempcoef FROM %1 WHERE name='%2';");
-const QString VDatabaseResin::UPDATE_INFO_QUERY("UPDATE %1 SET name='%2', viscosity=%3, tempcoef=%4 WHERE id=%5;");
-const QString VDatabaseResin::INSERT_INFO_QUERY("INSERT INTO %1 (name, viscosity, tempcoef) VALUES ('%2', %3, %4);");
+const QString VDatabaseResin::GET_INFO_QUERY("SELECT id, viscosity, visctempcoef, lifetime, lifetimetempcoef FROM %1 WHERE name='%2';");
+const QString VDatabaseResin::UPDATE_INFO_QUERY("UPDATE %1 SET name='%2', viscosity=%3, visctempcoef=%4, lifetime=%5, lifetimetempcoef=%6 WHERE id=%7;");
+const QString VDatabaseResin::INSERT_INFO_QUERY("INSERT INTO %1 (name, viscosity, visctempcoef, lifetime, lifetimetempcoef) VALUES ('%2', %3, %4, %5, %6);");
 
-const int VDatabaseResin::PARAM_NUMBER = 3;
+const int VDatabaseResin::PARAM_NUMBER = 5;
 
 VDatabaseResin::VDatabaseResin():
     VDatabaseInteractor(TABLE_NAME)
 {
 }
 
-void VDatabaseResin::materialInfo(const QString &name, int &id, float &viscosity, float &tempcoef) const 
+void VDatabaseResin::materialInfo(const QString &name, int &id, float &viscosity, float &viscTempcoef, float &lifetime, float &lifetimeTempcoef) const
 {
     if (!databaseInstance()->isOpen() && databaseInstance()->open())
     {
@@ -36,7 +36,9 @@ void VDatabaseResin::materialInfo(const QString &name, int &id, float &viscosity
             {
                 id = query.value(0).toInt();
                 viscosity = query.value(1).toFloat();
-                tempcoef = query.value(2).toFloat();
+                viscTempcoef = query.value(2).toFloat();
+                lifetime = query.value(3).toFloat();
+                lifetimeTempcoef = query.value(4).toFloat();
             }
             hadError = query.lastError().isValid();
             if (hadError)
@@ -50,17 +52,17 @@ void VDatabaseResin::materialInfo(const QString &name, int &id, float &viscosity
         throw DatabaseException(OPEN_ERROR_STRING);
 }
 
-void VDatabaseResin::saveMaterial(const QString &name, int id, float viscosity, float tempcoef) 
+void VDatabaseResin::saveMaterial(const QString &name, int id, float viscosity, float viscTempcoef, float lifetime, float lifetimeTempcoef)
 {
     if (!name.contains(','))
     {
         QString execString;
         if (id >= 0)
-            execString = UPDATE_INFO_QUERY.arg(TABLE_NAME).arg(name).arg(viscosity).arg(tempcoef).arg(id);
+            execString = UPDATE_INFO_QUERY.arg(TABLE_NAME).arg(name).arg(viscosity).arg(viscTempcoef).arg(lifetime).arg(lifetimeTempcoef).arg(id);
         else
-            execString = INSERT_INFO_QUERY.arg(TABLE_NAME).arg(name).arg(viscosity).arg(tempcoef);
+            execString = INSERT_INFO_QUERY.arg(TABLE_NAME).arg(name).arg(viscosity).arg(viscTempcoef).arg(lifetime).arg(lifetimeTempcoef);
         basicOperation(execString);
-        }
+    }
     else
         throw DatabaseException(OPEN_ERROR_STRING);
 }
@@ -75,7 +77,7 @@ void VDatabaseResin::loadFromFile(const QString &fileName)
         while (!in.atEnd())
         {
             QString name;
-            float viscosity=0, tempcoef=0;
+            float viscosity{0}, viscTempcoef{0}, lifetime{0}, lifetimeTempCoef{0};
             QString line = in.readLine();
             QStringList paramList = line.split(",");
             if (paramList.length() != PARAM_NUMBER + 1)
@@ -95,7 +97,13 @@ void VDatabaseResin::loadFromFile(const QString &fileName)
                     viscosity = paramList[2].toFloat(&ok);
                     break;
                 case 3:
-                    tempcoef = paramList[3].toFloat(&ok);
+                    viscTempcoef = paramList[3].toFloat(&ok);
+                    break;
+                case 4:
+                    lifetime = paramList[4].toFloat(&ok);
+                    break;
+                case 5:
+                    lifetimeTempCoef = paramList[5].toFloat(&ok);
                     break;
                 }
                 if (!ok)
@@ -103,7 +111,7 @@ void VDatabaseResin::loadFromFile(const QString &fileName)
             }
             try
             {
-                saveMaterial(name, -1, viscosity, tempcoef);
+                saveMaterial(name, -1, viscosity, viscTempcoef, lifetime, lifetimeTempCoef);
             }
             catch (DatabaseException &)
             {}

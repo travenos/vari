@@ -8,13 +8,14 @@
 
 #include "VLayer.h"
 
-const float VLayer::SEARCH_ZONE_PART = 0.1f;
+const float VLayer::SEARCH_ZONE_PART{0.1f};
+const float VLayer::IMG_STEP_COEF{0.1f};
 
 /**
  * VLayer implementation
  */
 
-VLayer::VLayer(const VSimNode::map_ptr &nodes,
+VLayer::VLayer(uint id, const VSimNode::map_ptr &nodes,
                const VSimTriangle::list_ptr &triangles,
                const VCloth::ptr &material,
                bool createVolume):
@@ -24,6 +25,7 @@ VLayer::VLayer(const VSimNode::map_ptr &nodes,
     m_visible(true),
     m_wasVisible(true),
     m_active(true),
+    m_id(id),
     m_nodeMinId(0),
     m_nodeMaxId(0),
     m_triangleMinId(0),
@@ -43,11 +45,15 @@ VLayer::~VLayer()
 void VLayer::resetNodesVolume()
 {
     m_nodesVolume.reset(m_pNodes);
+    m_layerPolygon.reset(m_pTriangles,
+                         m_nodesVolume.getMin().toVector2D(),
+                         m_nodesVolume.getMax().toVector2D(),
+                         m_nodesVolume.getStep() * IMG_STEP_COEF);
 }
 
-void VLayer::getSize(QVector3D &size) const
+const QVector3D & VLayer::getSize() const
 {
-    m_nodesVolume.getSize(size);
+    return m_nodesVolume.getSize();
 }
 
 void VLayer::getConstrains(QVector3D &min, QVector3D &max) const
@@ -55,6 +61,15 @@ void VLayer::getConstrains(QVector3D &min, QVector3D &max) const
     m_nodesVolume.getConstraints(min, max);
 }
 
+float VLayer::getMaxZ() const
+{
+    return m_nodesVolume.getMaxZ();
+}
+
+float VLayer::getMinZ() const
+{
+    return m_nodesVolume.getMinZ();
+}
 
 bool VLayer::isNodesVolumeValid() const
 {
@@ -147,6 +162,11 @@ void VLayer::setMinMaxIds(uint nodeMinId, uint nodeMaxId, uint tiangleMinId, uin
     m_triangleMaxId = triangleMaxId;
 }
 
+uint VLayer::getId() const
+{
+    return m_id;
+}
+
 uint VLayer::getNodeMinId() const
 {
     return m_nodeMinId;
@@ -165,6 +185,11 @@ uint VLayer::getTriangleMinId() const
 uint VLayer::getTriangleMaxId() const
 {
     return m_triangleMaxId;
+}
+
+const std::vector<QPolygonF> & VLayer::getPolygons() const
+{
+    return m_layerPolygon.getPolygons();
 }
 
 void VLayer::cut(const std::shared_ptr<const std::vector<uint> > &nodesIds)
@@ -211,22 +236,24 @@ void VLayer::transformate(const std::shared_ptr<const std::vector<std::pair<uint
         resetNodesVolume();
 }
 
-void VLayer::incrementVerticalPosition(float dz)
+void VLayer::setVerticalPosition(float z)
 {
-    if (dz != 0)
+    float verticalPosition = m_nodesVolume.getMinZ();
+    if (z != verticalPosition)
     {
         for (auto &node_pair : *m_pNodes)
         {
             QVector3D position = node_pair.second->getPosition();
-            position[2] += dz;
+            position[2] += (z - verticalPosition);
             node_pair.second->setPosition(position);
         }
         resetNodesVolume();
     }
 }
 
-void VLayer::connectWith(const VLayer::ptr &otherLayer)
+bool VLayer::connectWith(const VLayer::ptr &otherLayer)
 {
+    bool result{false};
     if (otherLayer && otherLayer.get() != this)
     {
         if (!otherLayer->isNodesVolumeValid())
@@ -247,10 +274,54 @@ void VLayer::connectWith(const VLayer::ptr &otherLayer)
                 if (distance >= radiusMin && distance <= radiusMax)
                 {
                     nd_ptr->addNeighbourMutually(neighbour, VSimNode::OTHER, distance);
+                    result = true;
                 }
             }
         }
     }
+    return result;
+}
+
+bool VLayer::pointIsInside(const QPointF & point) const
+{
+    return m_layerPolygon.pointIsInside(point);
+}
+
+bool VLayer::connectWith(const std::list<VLayer::ptr> &layersList)
+{
+    bool result{false};
+    for (auto &node : *m_pNodes)
+    {
+        VSimNode * nd_ptr = node.second.get();
+        for (auto & otherLayer : layersList)
+        {
+            if (otherLayer && otherLayer.get() != this
+                && otherLayer->pointIsInside(nd_ptr->getPosition().toPointF()))
+            {
+                if (!otherLayer->isNodesVolumeValid())
+                    otherLayer->resetNodesVolume();
+                float avgRadius = otherLayer->m_nodesVolume.getAverageDistance();
+                float radiusMin = avgRadius * (1 - SEARCH_ZONE_PART);
+                float radiusMax = avgRadius * (1 + SEARCH_ZONE_PART);
+
+                VSimNode::list_t candidatesList;
+                otherLayer->m_nodesVolume.getPointsBetweenSpheres(candidatesList,
+                                                                  nd_ptr->getPosition(),
+                                                                  radiusMax, radiusMin, false);
+                for (auto &neighbour : candidatesList)
+                {
+                    float distance = neighbour->getDistance(nd_ptr);
+                    if (distance >= radiusMin && distance <= radiusMax)
+                    {
+                        nd_ptr->addNeighbourMutually(neighbour, VSimNode::OTHER, distance);
+                        result = true;
+                    }
+                }
+                break;
+            }
+        }
+    }
+    return result;
 }
 
 void VLayer::disconnect()

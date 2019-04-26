@@ -12,27 +12,28 @@
  * VSimulationParameters implementation
  */
 
-const double VSimulationParameters::DEFAULT_TEMPERATURE = 25;
-const double VSimulationParameters::KELVINS_IN_0_CELSIUS = 273.15;
-const double VSimulationParameters::MIN_PRESSURE = 1;
+const double VSimulationParameters::DEFAULT_TEMPERATURE{25};
+const double VSimulationParameters::KELVINS_IN_0_CELSIUS{273.15};
+const double VSimulationParameters::UNIVERSAL_GAS_CONSTANT{8.314};
+const double VSimulationParameters::MIN_PRESSURE{1};
 
-double VSimulationParameters::getInjectionDiameter() const
+float VSimulationParameters::getInjectionDiameter() const
 {
     return m_injectionDiameter;
 }
 
-void VSimulationParameters::setInjectionDiameter(double diameter)
+void VSimulationParameters::setInjectionDiameter(float diameter)
 {
-    m_injectionDiameter = std::max(diameter, 0.0);
+    m_injectionDiameter = std::max(diameter, 0.0f);
 }
 
-double VSimulationParameters::getVacuumDiameter() const
+float VSimulationParameters::getVacuumDiameter() const
 {
     return m_vacuumDiameter;
 }
-void VSimulationParameters::setVacuumDiameter(double diameter)
+void VSimulationParameters::setVacuumDiameter(float diameter)
 {
-    m_vacuumDiameter = std::max(diameter, 0.0);
+    m_vacuumDiameter = std::max(diameter, 0.0f);
 }
 
 double VSimulationParameters::getViscosity() const
@@ -45,6 +46,16 @@ double VSimulationParameters::getDefaultViscosity() const
     return m_resin.defaultViscosity;
 }
 
+double VSimulationParameters::getLifetime() const
+{
+    return m_lifetime;
+}
+
+double VSimulationParameters::getDefaultLifetime() const
+{
+    return m_resin.defaultLifetime;
+}
+
 double VSimulationParameters::getTemperature() const
 {
     return m_temperature;
@@ -55,17 +66,24 @@ void VSimulationParameters::setTemperature(double temperature)
         temperature = - KELVINS_IN_0_CELSIUS + 1;
     m_temperature = temperature;
     m_viscosity = calculateViscosity();
+    m_lifetime = calculateLifetime();
 }
 
-double VSimulationParameters::getTempcoef() const
+double VSimulationParameters::getViscTempcoef() const
 {
-    return m_resin.tempcoef;
+    return m_resin.viscTempcoef;
+}
+
+double VSimulationParameters::getLifetimeTempcoef() const
+{
+    return m_resin.lifetimeTempcoef;
 }
 
 void VSimulationParameters::setResin(const VResin &resin)
 {
     m_resin = resin;
-    calculateViscosity();
+    m_viscosity = calculateViscosity();
+    m_lifetime = calculateLifetime();
 }
 
 VResin VSimulationParameters::getResin() const
@@ -160,15 +178,32 @@ void VSimulationParameters::setTimeLimit(double limit)
 
 double VSimulationParameters::calculateViscosity() const
 {
-    double A = m_resin.tempcoef;
-    double mu0 = m_resin.defaultViscosity;
-    double T = m_temperature - KELVINS_IN_0_CELSIUS;
-    double T0 = DEFAULT_TEMPERATURE - KELVINS_IN_0_CELSIUS;
+    double R{UNIVERSAL_GAS_CONSTANT};
+    double mu0{m_resin.defaultViscosity};
+    double T{m_temperature - KELVINS_IN_0_CELSIUS};
+    double T0{DEFAULT_TEMPERATURE - KELVINS_IN_0_CELSIUS};
+    double Ea{m_resin.viscTempcoef};
     if (T != T0)
     {
-        double mu = pow(A, 1 - T0/T) * pow(mu0, T0/T);
+        double mu{mu0 * exp(Ea / R * (1 / T - 1/ T0))};
         return mu;
     }
     else
         return mu0;
+}
+
+double VSimulationParameters::calculateLifetime() const
+{
+    double R{UNIVERSAL_GAS_CONSTANT};
+    double t0{m_resin.defaultLifetime};
+    double T{m_temperature - KELVINS_IN_0_CELSIUS};
+    double T0{DEFAULT_TEMPERATURE - KELVINS_IN_0_CELSIUS};
+    double Ea{m_resin.lifetimeTempcoef};
+    if (T != T0)
+    {
+        double t{t0 * exp(Ea / R * (1 / T - 1/ T0))};
+        return t;
+    }
+    else
+        return t0;
 }

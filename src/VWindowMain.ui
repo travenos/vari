@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1632</width>
-    <height>896</height>
+    <height>949</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -105,7 +105,7 @@
               <x>0</x>
               <y>0</y>
               <width>1231</width>
-              <height>865</height>
+              <height>919</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout">
@@ -161,6 +161,9 @@
                    <string>Выбранный слой</string>
                   </property>
                   <layout class="QVBoxLayout" name="verticalLayout_4">
+                   <property name="spacing">
+                    <number>3</number>
+                   </property>
                    <item>
                     <layout class="QHBoxLayout" name="layerInfoLayout">
                      <item>
@@ -191,24 +194,78 @@
                     </layout>
                    </item>
                    <item>
-                    <widget class="QCheckBox" name="layerEnableCheckBox">
-                     <property name="text">
-                      <string>Учитывать при моделировании</string>
-                     </property>
-                     <property name="checked">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
+                    <layout class="QHBoxLayout" name="horizontalLayout_10">
+                     <item>
+                      <widget class="QCheckBox" name="layerEnableCheckBox">
+                       <property name="text">
+                        <string>Учитывать при моделировании</string>
+                       </property>
+                       <property name="checked">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_10">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="layerUpButton">
+                       <property name="toolTip">
+                        <string>Переместить слой вверх</string>
+                       </property>
+                       <property name="text">
+                        <string>↑</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
                    </item>
                    <item>
-                    <widget class="QCheckBox" name="layerVisibleCheckBox">
-                     <property name="text">
-                      <string>Отображать</string>
-                     </property>
-                     <property name="checked">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
+                    <layout class="QHBoxLayout" name="horizontalLayout_11">
+                     <item>
+                      <widget class="QCheckBox" name="layerVisibleCheckBox">
+                       <property name="text">
+                        <string>Отображать</string>
+                       </property>
+                       <property name="checked">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_11">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="layerDownButton">
+                       <property name="toolTip">
+                        <string>Переместить слой вниз</string>
+                       </property>
+                       <property name="text">
+                        <string>↓</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
                    </item>
                    <item>
                     <layout class="QHBoxLayout" name="layerControlLayout">
@@ -242,11 +299,22 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="addLayerButton">
-                  <property name="text">
-                   <string>Добавить слой</string>
-                  </property>
-                 </widget>
+                 <layout class="QHBoxLayout" name="horizontalLayout_9">
+                  <item>
+                   <widget class="QPushButton" name="addLayerButton">
+                    <property name="text">
+                     <string>Добавить слой</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="sortLayersButton">
+                    <property name="text">
+                     <string>Пересортировать слои</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </item>
                </layout>
               </widget>
@@ -344,6 +412,16 @@
                       </widget>
                      </item>
                     </layout>
+                   </item>
+                   <item>
+                    <widget class="QCheckBox" name="timeConsiderationCheckbox">
+                     <property name="text">
+                      <string>Ограничить расчет временем жизни связующего</string>
+                     </property>
+                     <property name="checked">
+                      <bool>true</bool>
+                     </property>
+                    </widget>
                    </item>
                    <item>
                     <widget class="QPushButton" name="selectMaterialResinButton">
@@ -606,6 +684,13 @@
                      </layout>
                     </widget>
                    </item>
+                   <item>
+                    <widget class="QCheckBox" name="useTableParamCheckBox">
+                     <property name="text">
+                      <string>Положения источников по умолчанию</string>
+                     </property>
+                    </widget>
+                   </item>
                   </layout>
                  </widget>
                 </item>
@@ -741,10 +826,415 @@
               <x>0</x>
               <y>0</y>
               <width>1245</width>
-              <height>784</height>
+              <height>837</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_13">
+             <item>
+              <widget class="QGroupBox" name="tableBox">
+               <property name="title">
+                <string>Параметры стола</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_18">
+                <item>
+                 <widget class="QLabel" name="tableSizeLabel">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="text">
+                   <string>Размеры стола, м (x, y):</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_12">
+                  <item>
+                   <spacer name="horizontalSpacer_12">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QDoubleSpinBox" name="tableXSpinBox">
+                    <property name="minimum">
+                     <double>0.010000000000000</double>
+                    </property>
+                    <property name="maximum">
+                     <double>40.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.010000000000000</double>
+                    </property>
+                    <property name="value">
+                     <double>2.000000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QDoubleSpinBox" name="tableYSpinBox">
+                    <property name="minimum">
+                     <double>0.010000000000000</double>
+                    </property>
+                    <property name="maximum">
+                     <double>40.000000000000000</double>
+                    </property>
+                    <property name="singleStep">
+                     <double>0.010000000000000</double>
+                    </property>
+                    <property name="value">
+                     <double>1.000000000000000</double>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="resetTableSizeButton">
+                    <property name="text">
+                     <string>Отменить</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="saveTableSizeButton">
+                    <property name="text">
+                     <string>Сохранить</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QGroupBox" name="tableResinInjectionBox">
+                  <property name="title">
+                   <string>Место подвода связующего</string>
+                  </property>
+                  <layout class="QVBoxLayout" name="verticalLayout_16">
+                   <property name="spacing">
+                    <number>4</number>
+                   </property>
+                   <property name="leftMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>3</number>
+                   </property>
+                   <item>
+                    <widget class="QLabel" name="tableInjectionCoordsLabel">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="text">
+                      <string>Координаты точки подачи, м (x, y):</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_15">
+                     <item>
+                      <spacer name="horizontalSpacer_14">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QDoubleSpinBox" name="tableInjectionXSpinBox">
+                       <property name="decimals">
+                        <number>3</number>
+                       </property>
+                       <property name="minimum">
+                        <double>0.040000000000000</double>
+                       </property>
+                       <property name="maximum">
+                        <double>40.000000000000000</double>
+                       </property>
+                       <property name="singleStep">
+                        <double>0.010000000000000</double>
+                       </property>
+                       <property name="value">
+                        <double>0.040000000000000</double>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QDoubleSpinBox" name="tableInjectionYSpinBox">
+                       <property name="decimals">
+                        <number>3</number>
+                       </property>
+                       <property name="minimum">
+                        <double>0.000000000000000</double>
+                       </property>
+                       <property name="maximum">
+                        <double>40.000000000000000</double>
+                       </property>
+                       <property name="singleStep">
+                        <double>0.010000000000000</double>
+                       </property>
+                       <property name="value">
+                        <double>0.960000000000000</double>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="resetTableInjectionCoordsButton">
+                       <property name="text">
+                        <string>Отменить</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="saveTableInjectionCoordsButton">
+                       <property name="text">
+                        <string>Сохранить</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_13">
+                     <item>
+                      <widget class="QLabel" name="tableInjectionDiameterLabel">
+                       <property name="text">
+                        <string>Диаметр источника, м:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_13">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QDoubleSpinBox" name="tableInjectionDiameterSpinBox">
+                       <property name="decimals">
+                        <number>3</number>
+                       </property>
+                       <property name="maximum">
+                        <double>40.000000000000000</double>
+                       </property>
+                       <property name="singleStep">
+                        <double>0.010000000000000</double>
+                       </property>
+                       <property name="value">
+                        <double>0.040000000000000</double>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="resetTableInjectionDiameterButton">
+                       <property name="text">
+                        <string>Отменить</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="saveTableInjectionDiameterButton">
+                       <property name="text">
+                        <string>Сохранить</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QGroupBox" name="tableResinVacuumBox">
+                  <property name="title">
+                   <string>Место съёма связующего</string>
+                  </property>
+                  <layout class="QVBoxLayout" name="verticalLayout_17">
+                   <property name="spacing">
+                    <number>4</number>
+                   </property>
+                   <property name="leftMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>3</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>3</number>
+                   </property>
+                   <item>
+                    <widget class="QLabel" name="tableVacuumCoordsLabel">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="text">
+                      <string>Координаты точки съёма, м (x, y):</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_18">
+                     <item>
+                      <spacer name="horizontalSpacer_16">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QDoubleSpinBox" name="tableVacuumXSpinBox">
+                       <property name="decimals">
+                        <number>3</number>
+                       </property>
+                       <property name="minimum">
+                        <double>0.000000000000000</double>
+                       </property>
+                       <property name="maximum">
+                        <double>40.000000000000000</double>
+                       </property>
+                       <property name="singleStep">
+                        <double>0.010000000000000</double>
+                       </property>
+                       <property name="value">
+                        <double>1.960000000000000</double>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QDoubleSpinBox" name="tableVacuumYSpinBox">
+                       <property name="decimals">
+                        <number>3</number>
+                       </property>
+                       <property name="minimum">
+                        <double>0.000000000000000</double>
+                       </property>
+                       <property name="maximum">
+                        <double>40.000000000000000</double>
+                       </property>
+                       <property name="singleStep">
+                        <double>0.010000000000000</double>
+                       </property>
+                       <property name="value">
+                        <double>0.040000000000000</double>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="resetTableVacuumCoordsButton">
+                       <property name="text">
+                        <string>Отменить</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="saveTableVacuumCoordsButton">
+                       <property name="text">
+                        <string>Сохранить</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_16">
+                     <item>
+                      <widget class="QLabel" name="tableVacuumDiameterLabel">
+                       <property name="text">
+                        <string>Диаметр источника, м:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <spacer name="horizontalSpacer_15">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item>
+                      <widget class="QDoubleSpinBox" name="tableVacuumDiameterSpinBox">
+                       <property name="decimals">
+                        <number>3</number>
+                       </property>
+                       <property name="maximum">
+                        <double>40.000000000000000</double>
+                       </property>
+                       <property name="singleStep">
+                        <double>0.010000000000000</double>
+                       </property>
+                       <property name="value">
+                        <double>0.040000000000000</double>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="resetTableVacuumDiameterButton">
+                       <property name="text">
+                        <string>Отменить</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QPushButton" name="saveTableVacuumDiameterButton">
+                       <property name="text">
+                        <string>Сохранить</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
              <item>
               <layout class="QVBoxLayout" name="cubeSideLayout">
                <item>
@@ -1087,7 +1577,7 @@
                      <number>25</number>
                     </property>
                     <property name="value">
-                     <number>10</number>
+                     <number>25</number>
                     </property>
                    </widget>
                   </item>
@@ -1274,13 +1764,17 @@
   <tabstop>layerColorButton</tabstop>
   <tabstop>layerEnableCheckBox</tabstop>
   <tabstop>layerVisibleCheckBox</tabstop>
+  <tabstop>layerUpButton</tabstop>
+  <tabstop>layerDownButton</tabstop>
   <tabstop>selectMaterialClothButton</tabstop>
   <tabstop>layerRemoveButton</tabstop>
   <tabstop>layerCutButton</tabstop>
   <tabstop>addLayerButton</tabstop>
+  <tabstop>sortLayersButton</tabstop>
   <tabstop>temperatureEdit</tabstop>
   <tabstop>resetTemperatureButton</tabstop>
   <tabstop>saveTemperatureButton</tabstop>
+  <tabstop>timeConsiderationCheckbox</tabstop>
   <tabstop>selectMaterialResinButton</tabstop>
   <tabstop>injectionPressureEdit</tabstop>
   <tabstop>resetInjectionPressureButton</tabstop>
@@ -1296,10 +1790,30 @@
   <tabstop>resetVacuumDiameterButton</tabstop>
   <tabstop>vacuumPlaceButton</tabstop>
   <tabstop>showVacuumPlaceButton</tabstop>
+  <tabstop>useTableParamCheckBox</tabstop>
   <tabstop>timeEdit</tabstop>
   <tabstop>resetTimeLimitButton</tabstop>
   <tabstop>saveTimeLimitButton</tabstop>
+  <tabstop>timeLimitCheckBox</tabstop>
   <tabstop>scrollArea</tabstop>
+  <tabstop>tableXSpinBox</tabstop>
+  <tabstop>tableYSpinBox</tabstop>
+  <tabstop>resetTableSizeButton</tabstop>
+  <tabstop>saveTableSizeButton</tabstop>
+  <tabstop>tableInjectionXSpinBox</tabstop>
+  <tabstop>tableInjectionYSpinBox</tabstop>
+  <tabstop>resetTableInjectionCoordsButton</tabstop>
+  <tabstop>saveTableInjectionCoordsButton</tabstop>
+  <tabstop>tableInjectionDiameterSpinBox</tabstop>
+  <tabstop>resetTableInjectionDiameterButton</tabstop>
+  <tabstop>saveTableInjectionDiameterButton</tabstop>
+  <tabstop>tableVacuumXSpinBox</tabstop>
+  <tabstop>tableVacuumYSpinBox</tabstop>
+  <tabstop>resetTableVacuumCoordsButton</tabstop>
+  <tabstop>saveTableVacuumCoordsButton</tabstop>
+  <tabstop>tableVacuumDiameterSpinBox</tabstop>
+  <tabstop>resetTableVacuumDiameterButton</tabstop>
+  <tabstop>saveTableVacuumDiameterButton</tabstop>
   <tabstop>cubeSideSlider</tabstop>
   <tabstop>chooseSlideshowDirButton</tabstop>
   <tabstop>slideshowDirNameEdit</tabstop>
@@ -1315,7 +1829,6 @@
   <tabstop>videoFrequencySpinBox</tabstop>
   <tabstop>resetVideoFrequencyButton</tabstop>
   <tabstop>saveVideoFrequencyButton</tabstop>
-  <tabstop>timeLimitCheckBox</tabstop>
  </tabstops>
  <resources>
   <include location="resources/resources.qrc"/>

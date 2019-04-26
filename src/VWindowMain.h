@@ -21,6 +21,7 @@ class VWindowCloth;
 class VWindowResin;
 class VScreenShooter;
 class VVideoShooter;
+class VSimInfoImageTextWriter;
 struct VCloth;
 struct VSimulationInfo;
 
@@ -44,6 +45,8 @@ public:
     static const QString ASK_FOR_REMOVE;
     static const QString ASK_FOR_CUT;
     static const QString ASK_FOR_TRANSFORM;
+    static const QString EXIT_TITLE;
+    static const QString ASK_FOR_EXIT_TEXT;
     static const QString MODEL_INFO_TEXT;
 
     static const QString OPEN_FILE_DIALOG_TITLE;
@@ -68,6 +71,11 @@ public:
 private:
     void connectSimulationSignals();
     void setupValidators();
+    void setupSpinboxesLocales();
+
+    void configureVideoShooter();
+    void addNewVideoShooter();
+    void clearFinishedVideoShooters();
 
     void showWindowLayer();
     void deleteWindowLayer();
@@ -84,7 +92,7 @@ private:
     void showWindowCloth();
     void showWindowResin();
     void setCloth(const QString & name, float cavityheight, float permeability, float porosity);
-    void setResin(const QString & name , float viscosity, float tempcoef);
+    void setResin(const QString & name , float viscosity, float viscTempcoef, float lifetime, float lifetimeTempcoef);
     void selectColor();
 
     void removeLayerFromList(int layer);
@@ -141,6 +149,7 @@ private:
     void askForTransform();
 
     bool readNumber(const QLineEdit * lineEdit, double &output) const;
+    bool readNumber(const QLineEdit * lineEdit, float &output) const;
 
     void updateCubeSide(int value);
     void showCubeSide();
@@ -166,8 +175,15 @@ private:
     inline void saveSootersSettings();
 
     void enableButtonsShootingWindows(bool enable);
+    void setSavedState(bool saved);
+
+    void showFilenameInTitle(const QString &filename);
+
+    void swapLayersCaptions(uint layer1, uint layer2);
+
     Ui::VWindowMain *ui;
-    std::unique_ptr<VSimulationFacade> m_pFacade;
+    std::shared_ptr<VSimulationFacade> m_pFacade;
+    std::shared_ptr<VSimInfoImageTextWriter> m_pImgTextWriter;
     VWindowLayer * m_pWindowLayer;
     VWindowCloth * m_pWindowCloth;
     VWindowResin * m_pWindowResin;
@@ -178,6 +194,10 @@ private:
 
     std::shared_ptr<VScreenShooter> m_pSlideshowShooter;
     std::shared_ptr<VVideoShooter> m_pVideoShooter;
+
+    std::list< std::shared_ptr<VVideoShooter> > m_oldVideoShootersList;
+
+    bool m_isSaved;
 protected:
     virtual void closeEvent(QCloseEvent *);
 private slots:
@@ -186,7 +206,7 @@ private slots:
     void m_on_resin_window_closed();
     void m_on_layers_cleared();
     void m_on_got_cloth(const QString & name, float cavityheight, float permeability, float porosity);
-    void m_on_got_resin(const QString & name , float viscosity, float tempcoef);
+    void m_on_got_resin(const QString & name , float viscosity, float viscTempcoef, float lifetime, float lifetimeTempcoef);
     void m_on_layer_creation_from_file_available(const VCloth& material, const QString& filename,
                                                  VLayerAbstractBuilder::VUnit units);
     void m_on_layer_creation_manual_available(const VCloth& material, const QPolygonF& polygon,
@@ -202,21 +222,25 @@ private slots:
     void m_on_simutation_paused();
     void m_on_simutation_stopped();
     void m_on_resin_changed();
-    void m_on_injection_diameter_set(double);
-    void m_on_vacuum_diameter_set(double);
+    void m_on_injection_diameter_set(float);
+    void m_on_vacuum_diameter_set(float);
     void m_on_temperature_set(double);
     void m_on_vacuum_pressure_set(double);
     void m_on_injection_pressure_set(double);
     void m_on_time_limit_set(double);
     void m_on_time_limit_mode_switched(bool on);
+    void m_on_lifetime_consideration_switched(bool on);
     void m_on_canceled_waiting_for_injection_point();
     void m_on_canceled_waiing_for_vacuum_point();
     void m_on_model_loaded();
+    void m_on_model_saved();
     void m_on_selection_made();
     void m_on_got_transformation();
     void m_on_model_config_updated();
     void m_on_selection_enabled(bool checked);
     void m_on_cube_side_changed(float side);
+    void m_on_filename_changed(const QString & filename);
+    void m_on_layers_swapped(uint layer1, uint layer2);
     void m_on_slideshow_started();
     void m_on_slideshow_stopped();
     void m_on_slideshow_directory_changed();
@@ -229,6 +253,13 @@ private slots:
     void m_on_video_suffix_filename_changed();
     void m_on_video_saving_started();
     void m_on_video_saving_finished(bool result);
+
+    void m_on_table_size_set(float width, float height);
+    void m_on_table_injection_coords_set(float x, float y);
+    void m_on_table_vacuum_coords_set(float x, float y);
+    void m_on_table_injection_diameter_set(float diameter);
+    void m_on_table_vacuum_diameter_set(float diameter);
+    void m_on_use_table_parameters_set(bool use);
 
     void on_addLayerButton_clicked();
     void on_layersListWidget_itemSelectionChanged();
@@ -284,6 +315,29 @@ private slots:
     void on_videoFileNameEdit_textEdited(const QString &arg1);
     void on_resetVideoFileNameButton_clicked();
     void on_saveVideoFileNameButton_clicked();
+    void on_layerUpButton_clicked();
+    void on_layerDownButton_clicked();
+    void on_sortLayersButton_clicked();
+    void on_useTableParamCheckBox_clicked(bool checked);
+    void on_tableXSpinBox_valueChanged(double);
+    void on_tableYSpinBox_valueChanged(double);
+    void on_tableInjectionXSpinBox_valueChanged(double);
+    void on_tableInjectionYSpinBox_valueChanged(double);
+    void on_tableInjectionDiameterSpinBox_valueChanged(double arg1);
+    void on_tableVacuumXSpinBox_valueChanged(double);
+    void on_tableVacuumYSpinBox_valueChanged(double);
+    void on_tableVacuumDiameterSpinBox_valueChanged(double arg1);
+    void on_resetTableSizeButton_clicked();
+    void on_saveTableSizeButton_clicked();
+    void on_resetTableInjectionCoordsButton_clicked();
+    void on_saveTableInjectionCoordsButton_clicked();
+    void on_resetTableInjectionDiameterButton_clicked();
+    void on_saveTableInjectionDiameterButton_clicked();
+    void on_resetTableVacuumCoordsButton_clicked();
+    void on_saveTableVacuumCoordsButton_clicked();
+    void on_resetTableVacuumDiameterButton_clicked();
+    void on_saveTableVacuumDiameterButton_clicked();
+    void on_timeConsiderationCheckbox_clicked(bool checked);
 };
 
 #endif // _VWINDOWMAIN_H

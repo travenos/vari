@@ -38,7 +38,6 @@ void VWindowMaterials::loadMaterials( )
     ui->materialsListWidget->setSelectionMode(QAbstractItemView::NoSelection);
     ui->materialsListWidget->clear();
     ui->materialsListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
-    connect(databaseInteractor(), SIGNAL(needsToLoadDB()), this, SLOT(loadDatabaseFromFile()));
     try
     {
         databaseInteractor()->loadNames();
@@ -137,7 +136,9 @@ void VWindowMaterials::newMaterial( )
     ui->permeabilityEdit->clear();
     ui->porosityEdit->clear();
     ui->viscosityEdit->clear();
-    ui->tempcoefEdit->clear();
+    ui->viscTempcoefEdit->clear();
+    ui->lifetimeEdit->clear();
+    ui->lifetimeTempcoefEdit->clear();
     ui->idLabel->clear();
     m_currentId = -1;
 }
@@ -215,37 +216,3 @@ void VWindowMaterials::on_materialsListWidget_doubleClicked(const QModelIndex &)
     accept();
 }
 
-void VWindowMaterials::loadDatabaseFromFile()
-{
-    try
-    {
-        databaseInteractor()->createDatabase();
-        databaseInteractor()->loadNames();
-        return;
-    }
-    catch (DatabaseException&)
-    {
-        bool ok = true;
-        while (ok)
-        {
-            QString password = QInputDialog::getText(this, POSTGRES_PASSWORD_TITLE,
-                                                 POSTGRES_PASSWORD_CAPTION, QLineEdit::Password,
-                                                 QStringLiteral(""), &ok);
-            if (ok)
-            {
-                try
-                {
-                    databaseInteractor()->createDatabase(password);
-                    databaseInteractor()->loadNames();
-                    return;
-                }
-                catch(DatabaseException &e)
-                {
-                    QMessageBox::warning(this, ERROR_TITLE, e.what());
-                }
-            }
-            else
-                return;
-        }
-    }
-}

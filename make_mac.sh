@@ -125,7 +125,7 @@ export SQL_DIR="$BUILD_DIR/sql"
 mkdir -p "$SQL_DIR"
 for filename in ${SQL_SOURCE_DIR}/*
 do
-	iconv -f CP1251 -t UTF-8 "$filename" > "$SQL_DIR/$(basename $filename)"
+	cp "$filename" "$SQL_DIR"
 done
 
 cd "$BUILD_DIR" || exit

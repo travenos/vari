@@ -24,11 +24,13 @@ const uint VSimulator::N_THREADS =
 VSimulator::VSimulator():
     m_nodesThreadPart(1),
     m_trianglesThreadPart(1),
-    m_pActiveNodes(new std::vector<VSimNode::ptr>),
-    m_pTriangles(new std::vector<VSimTriangle::ptr>),
+    m_pActiveNodes(new VSimNode::vector_t),
+    m_pVacuumNodes(new VSimNode::list_t),
+    m_pTriangles(new VSimTriangle::vector_t),
     m_simulatingFlag(false),
     m_pauseFlag(false),
     m_timeLimitFlag(false),
+    m_lifetimeLimitFlag(true),
     m_simT_timeBeforePause(0),
     m_destroyed(false)
 {
@@ -50,7 +52,7 @@ void VSimulator::start()
                 m_pSimulationThread->join();
         m_stopFlag.store(false);
         m_simulatingFlag.store(true);
-        m_pSimulationThread.reset(new std::thread(std::bind(&VSimulator::simulationCycle, this)));
+        m_pSimulationThread.reset(new std::thread(&VSimulator::simulationCycle, this));
     }
 }
 
@@ -96,6 +98,11 @@ bool VSimulator::isPaused() const
 bool VSimulator::isTimeLimitModeOn() const
 {
     return m_timeLimitFlag.load();
+}
+
+bool VSimulator::isLifetimeConsidered() const
+{
+    return m_lifetimeLimitFlag.load();
 }
 
 void VSimulator::reset() 
@@ -205,6 +212,7 @@ void VSimulator::simulationCycle()
     if (!(m_pauseFlag.load()))
     {
         m_pauseFlag.store(false);
+        m_simT_timeBeforePause = 0;
         resetState();
         double avgPerm = getAveragePermeability();
         double avgDist = getAverageCellDistance();
@@ -215,7 +223,15 @@ void VSimulator::simulationCycle()
             m_param.setNumberOfFullNodes(0);
         }
     }
-    bool madeChangesInCycle = false;
+    m_pVacuumNodes->clear();
+    for(auto &node : *m_pActiveNodes)
+    {
+        if (node->isVacuum())
+        {
+            m_pVacuumNodes->push_back(node);
+        }
+    }
+    bool processIsFinished = false;
     while(!(m_stopFlag.load()))
     {
         double filledPercent = getFilledPercent();
@@ -236,16 +252,35 @@ void VSimulator::simulationCycle()
             #endif
         }
         calculatePressure();
-        madeChangesInCycle = moveToNextStep();
+        processIsFinished = !moveToNextStep();
         updateColors();
         m_newDataNotifier.notifyAll();
-        if (!madeChangesInCycle)
+        if (processIsFinished)
             break;
-        if (m_timeLimitFlag)
+        if (m_pVacuumNodes->size() > 0)
+        {
+            size_t fullVacuumCounter{0};
+            std::lock_guard<std::mutex> nodesLocker(*m_pNodesLock);
+            for(auto &vacuumNode: *m_pVacuumNodes)
+            {
+                fullVacuumCounter += vacuumNode->isFull();
+            }
+            if (fullVacuumCounter == m_pVacuumNodes->size())
+            {
+                processIsFinished = true;
+                break;
+            }
+        }
+        if (m_lifetimeLimitFlag || m_timeLimitFlag)
         {
             std::lock_guard<std::mutex> infoLocker(m_infoLock);
             std::lock_guard<std::mutex> nodesLocker(*m_pNodesLock);
-            if (m_info.simTime >= m_param.getTimeLimit())
+            if (m_lifetimeLimitFlag && m_info.simTime >= m_param.getLifetime())
+            {
+                processIsFinished = true;
+                break;
+            }
+            else if (m_timeLimitFlag && m_info.simTime >= m_param.getTimeLimit())
             {
                 m_pauseFlag.store(true);
                 break;
@@ -253,7 +288,7 @@ void VSimulator::simulationCycle()
         }
     }
     m_simulatingFlag.store(false);
-    if (!madeChangesInCycle)
+    if (processIsFinished)
         m_pauseFlag.store(false);
     if (!m_pauseFlag)
     {
@@ -485,7 +520,7 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
         double highestNeighborPressure = 0;
 
         double den_brace1 = d*phi;
-        if (_K > 0 && den_brace1 > 0 )
+        if (K > 0 && _K > 0 && den_brace1 > 0 )
         {
             const VSimNode::layered_neighbours_t &neighbours = node->getNeighbours();
             for (uint layer = 0; layer < VSimNode::LAYERS_NUMBER; ++layer)
@@ -496,13 +531,15 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
                     if (distance > 0)
                     {
                         const VSimNode* neighbor = it.second;
+                        double K_i = neighbor->getPermeability();
                         double d_i = neighbor->getCavityHeight();
                         double phi_i = neighbor->getPorosity();
                         double brace1 = pow(((d_i*phi_i)/den_brace1),r);
                         double brace2 = pow(_l/distance,s);
                         double p_it = neighbor->getPressure();
                         double brace3 = p_it-p_t;
-                        sum += (brace1*brace2*brace3);
+                        double brace4 = std::min(K_i / K, 1.0);
+                        sum += brace1 * brace2 * brace3 * brace4;
                         if(p_it > highestNeighborPressure)
                             highestNeighborPressure = p_it;
                     }
@@ -514,8 +551,6 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
         if (m > 0)
         {
             double newPressure = p_t+(brace0/m)*sum;
-            if(newPressure < p_t)
-                newPressure = p_t;
             if(newPressure > m_param.getInjectionPressure())
                 newPressure = m_param.getInjectionPressure();
 
@@ -523,6 +558,8 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
                     newPressure = highestNeighborPressure;
             if(node->isVacuum() && newPressure > m_param.getVacuumPressure())
                     newPressure = m_param.getVacuumPressure();
+            if(newPressure < p_t)
+                newPressure = p_t;
             node->setNewPressure(newPressure);
         }
     }
@@ -531,6 +568,8 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
         node->setNewPressure(node->getPressure());
     }
 }
+
+
 
 void VSimulator::setResin(const VResin& resin)
 {
@@ -541,7 +580,7 @@ void VSimulator::setResin(const VResin& resin)
     emit resinChanged();
 }
 
-void VSimulator::setInjectionDiameter(double diameter)
+void VSimulator::setInjectionDiameter(float diameter)
 {
     {
         std::lock_guard<std::mutex> lock(*m_pNodesLock);
@@ -550,7 +589,7 @@ void VSimulator::setInjectionDiameter(double diameter)
     emit injectionDiameterSet(diameter);
 }
 
-void VSimulator::setVacuumDiameter(double diameter)
+void VSimulator::setVacuumDiameter(float diameter)
 {
     {
         std::lock_guard<std::mutex> lock(*m_pNodesLock);
@@ -626,4 +665,10 @@ void VSimulator::setTimeLimitMode(bool on)
 {
     m_timeLimitFlag.store(on);
     emit timeLimitModeSwitched(on);
+}
+
+void VSimulator::considerLifetime(bool on)
+{
+    m_lifetimeLimitFlag.store(on);
+    emit lifetimeConsiderationSwitched(on);
 }

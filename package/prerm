@@ -1,9 +1,0 @@
-#!/bin/bash
-DATABASE_REMOVE_PATH="/usr/share/vari/sql/remove.sql"
-set -e
-
-if [ "$1" = "remove" ]; then
-	mkdir -p /tmp/vari
-	cp $DATABASE_REMOVE_PATH /tmp/vari 2>&1
-fi
-exit 0

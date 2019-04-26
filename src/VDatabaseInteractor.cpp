@@ -6,6 +6,7 @@
 #ifdef DEBUG_MODE
 #include <QDebug>
 #endif
+#include <QTextStream>
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
@@ -13,7 +14,7 @@
 #include <QVariant>
 #include <QDir>
 #include <QCoreApplication>
-#include <QTextCodec>
+#include <QSqlRecord>
 
 #include <deque>
 
@@ -25,9 +26,10 @@ const QString VDatabaseInteractor::NAME_ERROR_STRING("Некорректное �
 const QString VDatabaseInteractor::SQLFILE_ERROR_STRING("База данных не загружена, а файл \"create.sql\" не найден");
 
 const QString VDatabaseInteractor::GET_NAME_QUERY("SELECT name FROM %1;");
+const QString VDatabaseInteractor::GET_ALL_QUERY("SELECT * FROM %1;");
 const QString VDatabaseInteractor::DELETE_BY_ID_QUERY("DELETE FROM %1 WHERE id=%2;");
-const QString VDatabaseInteractor::COPY_FROM_FILE_QUERY("COPY %1 FROM '%2' DELIMITER ',' CSV;");
-const QString VDatabaseInteractor::COPY_TO_FILE_QUERY("COPY %1 TO '%2' DELIMITER ',' CSV;");
+
+const QString VDatabaseInteractor::COMMANDS_FILE("create.sql");
 
 VDatabaseInteractor::VDatabaseInteractor(const QString &tableName):
     m_tableName(tableName)
@@ -46,34 +48,33 @@ VSqlDatabase* VDatabaseInteractor::databaseInstance() const
 
 void VDatabaseInteractor::loadNames(bool sort)
 {
-    m_namesDeque.clear();
-    bool result = true;
-    bool hadError = false;
-    if (!databaseInstance()->isOpen() && databaseInstance()->open())
+    for (int i{0}; i < 2; ++i)
     {
+        m_namesDeque.clear();
+        bool result = true;
+        bool hadError = false;
+        if (!databaseInstance()->isOpen() && databaseInstance()->open())
         {
-            QSqlQuery query(GET_NAME_QUERY.arg(m_tableName), databaseInstance()->getDatabase());
-            while (query.next())
-                m_namesDeque.push_back(query.value(0).toString());
-            if (sort)
-                std::sort(m_namesDeque.begin(), m_namesDeque.end());
-            hadError = query.lastError().isValid();
+            {
+                QSqlQuery query(GET_NAME_QUERY.arg(m_tableName), databaseInstance()->getDatabase());
+                while (query.next())
+                    m_namesDeque.push_back(query.value(0).toString());
+                if (sort)
+                    std::sort(m_namesDeque.begin(), m_namesDeque.end());
+                hadError = query.lastError().isValid();
+            }
+            databaseInstance()->close();
+            result = (m_namesDeque.size() > 0 && !hadError);
         }
-        databaseInstance()->close();
-        result = (m_namesDeque.size() > 0 && !hadError);
-    }
-    else
-        result = false;
-    if (!result)
-    {
-        bool sqlFileFound = findSQLfile();
-        if (sqlFileFound)
-        {            
-            emit needsToLoadDB();
+        else
+            result = false;
+        if (result)
+        {
+            break;
         }
         else
         {
-            throw DatabaseException(SQLFILE_ERROR_STRING);
+            createDatabase();
         }
     }
 }
@@ -108,27 +109,43 @@ void VDatabaseInteractor::removeMaterial(int id)
     basicOperation(DELETE_BY_ID_QUERY.arg(m_tableName).arg(id));
 }
 
-void VDatabaseInteractor::loadFromFile(const QString &fileName) 
+void VDatabaseInteractor::saveToFile(const QString &fileName) const
 {
-    basicOperation(COPY_FROM_FILE_QUERY.arg(m_tableName).arg(fileName));
+    if (!databaseInstance()->isOpen() && databaseInstance()->open())
+    {
+        bool hadError;
+        QString errorString;
+        {
+            QFile csvFile (fileName);
+            if (!csvFile.open(QFile::WriteOnly | QFile::Text))
+                throw DatabaseException(FILE_ERROR_STRING);
+            QTextStream outStream(&csvFile);
+            QSqlQuery query(GET_ALL_QUERY.arg(m_tableName), databaseInstance()->getDatabase());
+            while (query.next())
+            {
+                const QSqlRecord record = query.record();
+                for (int i{0}, recCount{record.count()} ; i < recCount ; ++i)
+                {
+                    if (i > 0)
+                        outStream << ',';
+                    outStream << record.value(i).toString();
+                }
+                outStream << '\n';
+            }
+            hadError = query.lastError().isValid();
+            if (hadError)
+                errorString = query.lastError().text();
+        }
+        databaseInstance()->close();
+        if (hadError)
+            throw DatabaseException(errorString);
+    }
+    else
+        throw DatabaseException(OPEN_ERROR_STRING);
 }
 
-void VDatabaseInteractor::saveToFile(const QString &fileName) const 
+bool VDatabaseInteractor::findSQLfile(const QString &name, QString *foundPath) const
 {
-    QString baseName = QFileInfo(fileName).fileName();
-    QString tempFileName = QDir::cleanPath(QDir::tempPath() + QDir::separator() + baseName);
-    basicOperation(COPY_TO_FILE_QUERY.arg(m_tableName).arg(tempFileName));
-    QFile tempFile(tempFileName);
-    QFile(fileName).remove();
-    bool copyOk = tempFile.copy(fileName);
-    tempFile.remove();
-    if (!copyOk)
-        throw DatabaseException(FILE_ERROR_STRING);
-}
-
-bool VDatabaseInteractor::findSQLfile(QString *sqlFile) const
-{
-    const QString sqlCreateFilename(QStringLiteral("create.sql"));
     QString exeDir;
     exeDir = QFileInfo(QCoreApplication::applicationFilePath()).absoluteDir().absolutePath();
     QStringList directories = {
@@ -140,48 +157,25 @@ bool VDatabaseInteractor::findSQLfile(QString *sqlFile) const
     };
     foreach(const QString &dirpath, directories)
     {
-        QString filePath = QDir::cleanPath(dirpath + QDir::separator() + sqlCreateFilename);
+        QString filePath = QDir::cleanPath(dirpath + QDir::separator() + name);
         if (QFile::exists(filePath))
         {
-            if (sqlFile != nullptr)
-                (*sqlFile) = filePath;
+            if (foundPath != nullptr)
+                (*foundPath) = filePath;
             return true;
         }
     }
     return false;
 }
 
-void VDatabaseInteractor::createDatabase(const QString &postgresPassword)
+void VDatabaseInteractor::createDatabase()
 {
-    const QString CONNECTION_NAME(QStringLiteral("psql_connect"));
     QString sqlFile;
-    if (!findSQLfile(&sqlFile))
+    if (!databaseInstance()->createDirIfNecessary())
         throw DatabaseException(OPEN_ERROR_STRING);
-    try
-    {
-        executeQueriesFromFile(sqlFile, databaseInstance()->getDatabase());
-        return;
-    }
-    catch(DatabaseException&)
-    {}
-    QSqlDatabase *db = new QSqlDatabase;
-    (*db) = QSqlDatabase::addDatabase(QStringLiteral("QPSQL"), CONNECTION_NAME);
-    db->setHostName(QStringLiteral("127.0.0.1"));
-    db->setUserName(QStringLiteral("postgres"));
-    db->setPassword(postgresPassword);
-    try
-    {
-        executeQueriesFromFile(sqlFile, *db);
-        executeQueriesFromFile(sqlFile, databaseInstance()->getDatabase());
-    }
-    catch(DatabaseException &e)
-    {
-        delete db;
-        QSqlDatabase::removeDatabase(CONNECTION_NAME);
-        throw e;
-    }
-    delete db;
-    QSqlDatabase::removeDatabase(CONNECTION_NAME);
+    if (!findSQLfile(COMMANDS_FILE, &sqlFile))
+        throw DatabaseException(SQLFILE_ERROR_STRING);
+    executeQueriesFromFile(sqlFile, databaseInstance()->getDatabase());
 }
 
 void VDatabaseInteractor::executeQueriesFromFile(const QString &filename, QSqlDatabase &db)
@@ -202,35 +196,16 @@ void VDatabaseInteractor::executeQueriesFromFile(const QString &filename, QSqlDa
                 while(!finishedLine && !file.atEnd())
                 {
                     readLine = file.readLine();
-                    #if defined(Q_OS_WIN) || defined (WIN32) || defined(__WIN32__)
-                    QTextCodec *codec = QTextCodec::codecForName("windows-1251");
-                    cleanedLine = codec->toUnicode(readLine).trimmed();
-                    #else
                     cleanedLine = readLine.trimmed();
-                    #endif
                     // remove comments at end of line
                     QStringList strings = cleanedLine.split(QStringLiteral("--"));
                     cleanedLine=strings.at(0);
-
-                    if(cleanedLine.startsWith(QStringLiteral("\\c")))
-                    {
-                        QStringList str = cleanedLine.split(' ');
-                        if (str.size() > 1)
-                        {
-                            if (db.databaseName() != str.at(1))
-                            {
-                                finishedFile = true;
-                                break;
-                            }
-                        }
-                    }
                     if(cleanedLine.startsWith(QStringLiteral("\\")))
                     {
                         break;
                     }
-                    // remove lines with only comment, and DROP lines
+                    // remove lines with only comment
                     if(!cleanedLine.startsWith(QStringLiteral("--"))
-                            && !cleanedLine.startsWith(QStringLiteral("DROP"))
                             && !cleanedLine.isEmpty())
                     {
                         line += cleanedLine;

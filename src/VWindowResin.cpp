@@ -29,7 +29,9 @@ VWindowResin::VWindowResin(QWidget *parent):
     m_pValidator->setBottom(0);
     m_pValidator->setLocale(QLocale::C);
     ui->viscosityEdit->setValidator( m_pValidator );
-    ui->tempcoefEdit->setValidator( m_pValidator );
+    ui->viscTempcoefEdit->setValidator( m_pValidator );
+    ui->lifetimeEdit->setValidator( m_pValidator );
+    ui->lifetimeTempcoefEdit->setValidator( m_pValidator );
 
     setWindowTitle(TITLE);
     loadMaterials();
@@ -41,15 +43,16 @@ void VWindowResin::selectMaterial( )
             ui->materialsListWidget->currentIndex().isValid())
     {
         const QString &name = ui->materialsListWidget->currentItem()->text();
-        float viscosity;
-        float tempcoef;
+        float viscosity, viscTempcoef, lifetime, lifetimeTempcoef;
         try
         {
-            m_pDatabaseResin->materialInfo(name, m_currentId, viscosity, tempcoef);
+            m_pDatabaseResin->materialInfo(name, m_currentId, viscosity, viscTempcoef, lifetime, lifetimeTempcoef);
             ui->nameEdit->setText(name);
             ui->idLabel->setText(QString("ID: %1").arg(m_currentId));
             ui->viscosityEdit->setText(QString::number(viscosity));
-            ui->tempcoefEdit->setText(QString::number(tempcoef));
+            ui->viscTempcoefEdit->setText(QString::number(viscTempcoef));
+            ui->lifetimeEdit->setText(QString::number(lifetime));
+            ui->lifetimeTempcoefEdit->setText(QString::number(lifetimeTempcoef));
         }
         catch (DatabaseException &e)
         {
@@ -61,8 +64,8 @@ void VWindowResin::selectMaterial( )
 void VWindowResin::saveMaterial( )
 {
     QString name;
-    float viscosity, tempcoef;
-    bool result = getInputs(name, viscosity, tempcoef);
+    float viscosity, viscTempcoef, lifetime, lifetimeTempcoef;
+    bool result = getInputs(name, viscosity, viscTempcoef, lifetime, lifetimeTempcoef);
     if (!result)
     {
         QMessageBox::warning(this, ERROR_TITLE, INVALID_PARAM_ERROR);
@@ -70,7 +73,7 @@ void VWindowResin::saveMaterial( )
     }
     try
     {
-        m_pDatabaseResin->saveMaterial(name, m_currentId, viscosity, tempcoef);
+        m_pDatabaseResin->saveMaterial(name, m_currentId, viscosity, viscTempcoef, lifetime, lifetimeTempcoef);
         loadMaterials();
         selectByName(name);
     }
@@ -83,12 +86,12 @@ void VWindowResin::saveMaterial( )
 void VWindowResin::accept()
 {
     QString name;
-    float viscosity, tempcoef;
-    bool result = getInputs(name, viscosity, tempcoef);
+    float viscosity, viscTempcoef, lifetime, lifetimeTempcoef;
+    bool result = getInputs(name, viscosity, viscTempcoef, lifetime, lifetimeTempcoef);
     if (result)
     {
         hide();
-        emit gotMaterial(name, viscosity, tempcoef);
+        emit gotMaterial(name, viscosity, viscTempcoef, lifetime, lifetimeTempcoef);
         close();
     }
     else
@@ -108,7 +111,8 @@ VDatabaseInteractor* VWindowResin::databaseInteractor()
     return m_pDatabaseResin;
 }
 
-bool VWindowResin::getInputs(QString &name, float &viscosity, float &tempcoef)
+bool VWindowResin::getInputs(QString &name, float &viscosity, float &viscTempcoef, float &lifetime,
+                             float &lifetimeTempcoef)
 {
     name = ui->nameEdit->text();
     if (name.isEmpty())
@@ -117,6 +121,12 @@ bool VWindowResin::getInputs(QString &name, float &viscosity, float &tempcoef)
     viscosity = ui->viscosityEdit->text().replace(',', '.').toFloat(&ok);
     if (!ok)
         return false;
-    tempcoef = ui->tempcoefEdit->text().replace(',', '.').toFloat(&ok);
+    viscTempcoef = ui->viscTempcoefEdit->text().replace(',', '.').toFloat(&ok);
+    if (!ok)
+        return false;
+    lifetime = ui->lifetimeEdit->text().replace(',', '.').toFloat(&ok);
+    if (!ok)
+        return false;
+    lifetimeTempcoef = ui->lifetimeTempcoefEdit->text().replace(',', '.').toFloat(&ok);
     return ok;
 }

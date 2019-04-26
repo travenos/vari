@@ -21,8 +21,10 @@ private:
 
 public:
     VDatabaseResin();
-    void materialInfo(const QString &name, int &id, float &viscosity, float &tempcoef) const ;
-    void saveMaterial(const QString &name, int id, float viscosity, float tempcoef) ;
+    void materialInfo(const QString &name, int &id, float &viscosity, float &viscTempcoef,
+                      float &lifetime, float &lifetimeTempcoef) const ;
+    void saveMaterial(const QString &name, int id, float viscosity, float viscTempcoef,
+                      float lifetime, float lifetimeTempcoef) ;
 
     void loadFromFile(const QString &fileName) override;
 };

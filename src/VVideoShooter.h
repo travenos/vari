@@ -20,6 +20,7 @@ public:
     static const QString BASE_VIDEO_FILE_NAME;
     static const QString BASE_SLIDES_DIR_NAME;
     static const QString SLIDES_DIR_PATH;
+    static const int DEFAULT_FREQUENCY;
 
     VVideoShooter();
     VVideoShooter(const QWidget * widget, const QString &dirPath, int frequency);

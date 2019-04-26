@@ -1,7 +1,7 @@
 # Project VARI
 # @author Alexey Barashkov
 
-set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{GMSH_DIR})
+set(CMAKE_PREFIX_PATH $ENV{GMSH_DIR} ${CMAKE_PREFIX_PATH})
 
 find_package(GMSH 3.0.6 REQUIRED)
 find_package(Qt5Core    REQUIRED)

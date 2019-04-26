@@ -47,6 +47,7 @@ const VLayer::ptr& VLayerManualBuilder::build()
         throw VImportException();
     }
     VLayerFromGmeshBuilder gmshLoader(tempFileName, *m_pMaterial, M);
+    gmshLoader.setLayerId(m_layerId);
     gmshLoader.setNodeStartId(m_nodeStartId);
     gmshLoader.setTriangleStartId(m_triangleStartId);
     QFile tempFile(tempFileName);

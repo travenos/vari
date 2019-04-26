@@ -7,6 +7,8 @@
 #ifndef _VLAYERSPROCESSOR_H
 #define _VLAYERSPROCESSOR_H
 
+#include <deque>
+
 #include "VSimulationClass.h"
 #include "layer_builders/VLayerAbstractBuilder.h"
 #include "sim_elements/VLayer.h"
@@ -33,10 +35,14 @@ public:
 
     void setMaterial(uint layer, const VCloth &material) ;
 
+    void moveUp(uint layer);
+    void moveDown(uint layer);
+    void sort();
+
     void reset() ;
     void clear() ;    
 
-    void setLayers (const std::vector<VLayer::ptr> &layers) ;
+    void setLayers (const std::deque<VLayer::ptr> &layers) ;
 
     VCloth::const_ptr getMaterial(uint layer) const ;
 
@@ -54,12 +60,15 @@ public:
 
     bool areLayersConnected() const;
 
-    void setInjectionPoint(const QVector3D &point, double diameter);
-    void setVacuumPoint(const QVector3D &point, double diameter);
+    void setInjectionPoint(const QVector2D &point, double diameter);
+    void setVacuumPoint(const QVector2D &point, double diameter);
 
     void getActiveModelSize(QVector3D &size) const;
     size_t getActiveNodesNumber() const;
     size_t getActiveTrianglesNumber() const;
+
+    std::vector<std::vector<QPolygonF> > getAllActivePolygons() const;
+    const std::vector<QPolygonF> & getPolygons(uint layer);
 
     uint getNodeMinId(uint layer) const;
     uint getNodeMaxId(uint layer) const;
@@ -70,6 +79,9 @@ public:
     void transformateLayer(const std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > >
                         &nodesCoords, uint layer);
 
+    int getLayerNumberById(uint layerId) const;
+    uint getLayerId(uint layer) const;
+
     void createConnections() ;
     void removeConnections() ;
     void resetNodesVolumes() ;
@@ -78,18 +90,20 @@ private:
     void updateActiveElementsVectors() ;
     void updateNextIds();
 
-    std::vector<VLayer::ptr> m_layers;
+    std::deque<VLayer::ptr> m_layers;
     VSimNode::const_vector_ptr m_pActiveNodes;
     VSimTriangle::const_vector_ptr m_pActiveTriangles;
 
+    uint m_layerNextId;
     uint m_nodeNextId;
     uint m_triangleNextId;
 
     bool m_layersConnected;
 
     void putOnTop(uint layer) ;
+    void sortLayers(uint fromLayer);
 
-    void setPoint(const QVector3D &point, double diameter,
+    void setPoint(const QVector2D &point, double diameter,
                   VSimNode::VNodeRole setRole, VSimNode::VNodeRole anotherRole);
 signals:
     void layerVisibilityChanged(uint, bool);

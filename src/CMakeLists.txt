@@ -79,8 +79,8 @@ else()
 endif()
 
 #Find packages
-set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{QTDIR})
-set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{OPENCV_DIR})
+set(CMAKE_PREFIX_PATH $ENV{QTDIR} ${CMAKE_PREFIX_PATH})
+set(CMAKE_PREFIX_PATH $ENV{OPENCV_DIR} ${CMAKE_PREFIX_PATH})
 
 find_package(Qt5Core    REQUIRED)
 find_package(Qt5Gui     REQUIRED)
@@ -127,7 +127,7 @@ if(WIN32)
     endif()
 endif()
 
-find_package( OpenCV REQUIRED )
+find_package( OpenCV 3.2.0 REQUIRED )
 if (${OpenCV_FOUND})
     message(STATUS "Found OpenCV ${OpenCV_VERSION}")
     message(STATUS "OpenCV Directory: ${OpenCV_DIR}")
@@ -190,6 +190,7 @@ set(HEADER_FILES
     VSqlDatabase.h
     VScreenShooter.h
     VVideoShooter.h
+    VImageTextWriters.h
     )
 
 set(SOURCE_FILES
@@ -206,6 +207,7 @@ set(SOURCE_FILES
     VSqlDatabase.cpp
     VScreenShooter.cpp
     VVideoShooter.cpp
+    VImageTextWriters.cpp
     )
 
 #Create executable
@@ -229,32 +231,9 @@ target_link_libraries(${EXE_NAME} v_third_party)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
 
-# Converting databases encodings
+# Adding SQL files
 set(SQL_DIR "${PROJECT_SOURCE_DIR}/../share/vari/sql")
 set(SQL_SOURCE_FILES "${SQL_DIR}/create.sql" "${SQL_DIR}/remove.sql")
-if(NOT WIN32)
-    find_program(ICONV iconv)
-    if(ICONV)
-        message(STATUS "Found Iconv: ${ICONV}")
-        set(SQL_FILES "${CMAKE_CURRENT_BINARY_DIR}/create.sql" "${CMAKE_CURRENT_BINARY_DIR}/remove.sql")
-
-        add_custom_command(OUTPUT ${SQL_FILES}
-          COMMAND ${ICONV} -f CP1251 -t UTF-8 "${SQL_DIR}/create.sql" > "${CMAKE_CURRENT_BINARY_DIR}/create.sql"
-          COMMAND ${ICONV} -f CP1251 -t UTF-8 "${SQL_DIR}/remove.sql" > "${CMAKE_CURRENT_BINARY_DIR}/remove.sql"
-          WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-          DEPENDS ${SQL_SOURCE_FILES}
-          COMMENT "Converting encodings from CP1251 to UTF8"
-          VERBATIM
-        )
-        add_custom_target(
-            convert ALL
-            DEPENDS ${SQL_FILES}
-            )
-    else()
-        message(WARNING "Iconv not found. Encodings of materials names in the database will be not converted.")
-        set(SQL_FILES ${SQL_SOURCE_FILES})
-    endif()
-endif()
 
 #Setting library paths
 if(EXISTS "$ENV{QTDIR}")
@@ -312,7 +291,7 @@ if(APPLE)
 
     install(FILES ${QT_PLUGINS_SOURCE_DIR}/platforms/libqcocoa.dylib     DESTINATION ${QT_PLUGIN_DESTINAT_DIR}/platforms)
     install(FILES ${QT_PLUGINS_SOURCE_DIR}/platforms/libqminimal.dylib   DESTINATION ${QT_PLUGIN_DESTINAT_DIR}/platforms)
-    install(FILES ${QT_PLUGINS_SOURCE_DIR}/sqldrivers/libqsqlpsql.dylib  DESTINATION ${QT_PLUGIN_DESTINAT_DIR}/sqldrivers)
+    install(FILES ${QT_PLUGINS_SOURCE_DIR}/sqldrivers/libqsqlite.dylib  DESTINATION ${QT_PLUGIN_DESTINAT_DIR}/sqldrivers)
     install(FILES ${QT_PLUGINS_SOURCE_DIR}/printsupport/libcocoaprintersupport.dylib DESTINATION ${QT_PLUGIN_DESTINAT_DIR}/printsupport)
 
     install(CODE "

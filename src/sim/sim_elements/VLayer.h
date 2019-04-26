@@ -10,9 +10,8 @@
 #include <memory>
 #include <QColor>
 
-#include "VSimNode.h"
-#include "VSimTriangle.h"
 #include "VNodesVolume.h"
+#include "VLayerPolygon.h"
 
 class VLayer
 {
@@ -21,7 +20,7 @@ public:
     typedef std::shared_ptr<const VLayer> const_ptr;
 
     VLayer() = delete;
-    VLayer(const VSimNode::map_ptr &nodes, const VSimTriangle::list_ptr &triangles,
+    VLayer(uint id, const VSimNode::map_ptr &nodes, const VSimTriangle::list_ptr &triangles,
            const VCloth::ptr &material, bool createVolume=true);
     virtual ~VLayer();
     VLayer(const VLayer& ) = delete;
@@ -31,8 +30,10 @@ public:
 
     void resetNodesVolume();
     bool isNodesVolumeValid() const;
-    void getSize(QVector3D &size) const;
+    const QVector3D &getSize() const;
     void getConstrains(QVector3D &min, QVector3D &max) const;
+    float getMaxZ() const;
+    float getMinZ() const;
     void setVisible(bool visible) ;
     bool isVisible() const ;
     void markActive(bool active) ;
@@ -45,20 +46,26 @@ public:
     void reset() ;
     VCloth::const_ptr getMaterial() const ;
 
+    uint getId() const;
     void setMinMaxIds(uint nodeMinId, uint nodeMaxId, uint tiangleMinId, uint triangleMaxId);
     uint getNodeMinId() const;
     uint getNodeMaxId() const;
     uint getTriangleMinId() const;
     uint getTriangleMaxId() const;
+    const std::vector<QPolygonF> & getPolygons() const;
     void cut(const std::shared_ptr<const std::vector<uint> > &nodesIds);
     void transformate(const std::shared_ptr<const std::vector<std::pair<uint, QVector3D> > >
                         &nodesCoords);
-    void incrementVerticalPosition(float dz);
+    void setVerticalPosition(float z);
 
-    void connectWith(const VLayer::ptr &otherLayer);
+    bool pointIsInside(const QPointF &point) const;
+
+    bool connectWith(const VLayer::ptr &otherLayer);
+    bool connectWith(const std::list<VLayer::ptr> &layersList);
     void disconnect();
 
     static const float SEARCH_ZONE_PART;
+    static const float IMG_STEP_COEF;
 
 private: 
     void p_setVisible(bool visible) ;
@@ -70,12 +77,14 @@ private:
     bool m_wasVisible;
     bool m_active;
 
+    uint m_id;
     uint m_nodeMinId;
     uint m_nodeMaxId;
     uint m_triangleMinId;
     uint m_triangleMaxId;
 
     VNodesVolume m_nodesVolume;
+    VLayerPolygon m_layerPolygon;
 };
 
 #endif //_VLAYER_H

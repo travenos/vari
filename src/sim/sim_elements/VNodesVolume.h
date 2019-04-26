@@ -30,8 +30,12 @@ public:
 
     float getAverageDistance() const;
     float getStep() const;
-    void getSize(QVector3D &size) const;
+    const QVector3D & getSize() const;
+    const QVector3D & getMin() const;
+    const QVector3D & getMax() const;
     void getConstraints(QVector3D &min, QVector3D &max) const;
+    float getMaxZ() const;
+    float getMinZ() const;
 
     void getPointsInSphere(VSimNode::list_t &nodesList, const QVector3D &point, float radius,
                            bool strict=false) const;
@@ -44,8 +48,6 @@ public:
     VSimNode::ptr getNearestNode(const QVector3D &point) const;
 
     bool isEmpty() const;
-
-    static inline float projectionXYLength(const QVector3D &vect);
 
     static const float MIN_STEP;
     static const float STEP_COEF;

@@ -6,9 +6,6 @@
 #include <QApplication>
 #include <QTranslator>
 
-#include <iostream>
-#include <deque>
-
 #include "VDefinitions.h"
 #include "VWindowMain.h"
 

@@ -35,7 +35,7 @@ else (GMSH_LIBRARIES AND GMSH_INCLUDE_DIRS)
         )
 
     set(GMSH_INCLUDE_DIRS
-        ${GMSH_INCLUDE_DIR} CACHE PATH "Path to GMSH headers"
+        ${GMSH_INCLUDE_DIR}
         )
 
     set(LIB_PATHS "${GMSH_DIR_LIB}"

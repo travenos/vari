@@ -11,6 +11,7 @@
 #include <QColorDialog>
 #include <QSettings>
 #include <QTimeZone>
+#include <QCloseEvent>
 
 #include "VWindowMain.h"
 #include "ui_VWindowMain.h"
@@ -19,8 +20,10 @@
 #include "VWindowLayer.h"
 #include "VScreenShooter.h"
 #include "VVideoShooter.h"
+#include "VImageTextWriters.h"
 #include "sim/VSimulationFacade.h"
 #include "sim/structures/VExceptions.h"
+#include "sim/structures/VTable.h"
 
 const QString VWindowMain::ERROR_TITLE("Ошибка");
 const QString VWindowMain::INFO_TITLE("Информация");
@@ -35,17 +38,21 @@ const QString VWindowMain::CUT_TITLE("Обрезать?");
 const QString VWindowMain::ASK_FOR_CUT("Вы уверены, что хотите выполнить обрезку слоя?");
 const QString VWindowMain::TRANSFORM_TITLE("Переместить?");
 const QString VWindowMain::ASK_FOR_TRANSFORM("Вы уверены, что хотите изменть положение слоя?");
+const QString VWindowMain::EXIT_TITLE("Выйти?");
+const QString VWindowMain::ASK_FOR_EXIT_TEXT("Имеются несохранённые параметры. Вы уверены, что хотите выйти?");
 const QString VWindowMain::CLOTH_INFO_TEXT("<html><head/><body>"
-                                               "Материал: &quot;%1&quot;<br>"
-                                               "Толщина: %2 м<br>"
-                                               "Проницаемость: %3 м<span style=\" vertical-align:super;\">2</span><br>"
-                                               "Пористость: %4"
-                                               "</body></html>");
+                                           "Материал: &quot;%1&quot;<br>"
+                                           "Толщина: %2 м<br>"
+                                           "Проницаемость: %3 м<span style=\" vertical-align:super;\">2</span><br>"
+                                           "Пористость: %4"
+                                           "</body></html>");
 const QString VWindowMain::RESIN_INFO_TEXT("<html><head/><body>"
-                                               "Материал: &quot;%1&quot;<br>"
-                                               "Вязкость при 25 °C: %2 Па·с<br>"
-                                               "Температурный коэффициент: %3 Па·с"
-                                               "</body></html>");
+                                           "Материал: &quot;%1&quot;<br>"
+                                           "Вязкость при 25 °C: %2 Па·с<br>"
+                                           "Энергия активации вязкого течения: %3 Дж/моль<br>"
+                                           "Время жизни при 25 °C: %4 с<br>"
+                                           "Энергия активации процесса отвеждения: %5 Дж/моль<br>"
+                                           "</body></html>");
 const QString VWindowMain::MODEL_INFO_TEXT("Габариты: %1м x %2м x %3м;    "
                                            "Число узлов: %4;    "
                                            "Число треугольников: %5.");
@@ -76,24 +83,29 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_pPressureValidator(new QDoubleValidator),
     m_pDiameterValidator(new QDoubleValidator),
     m_pSlideshowShooter(new VScreenShooter),
-    m_pVideoShooter(new VVideoShooter)
+    m_pVideoShooter(new VVideoShooter),
+    m_isSaved(false)
 {
     ui->setupUi(this);
     ui->splitter->setStretchFactor(0,1);
     ui->splitter->setStretchFactor(1,0);
     ui->layerParamBox->setVisible(false);
     ui->modelInfoLabel->setVisible(false);
+    setContextMenuPolicy(Qt::NoContextMenu);
     m_pFacade.reset(new VSimulationFacade(ui->viewerWidget));
     connectSimulationSignals();
     setupValidators();
+    setupSpinboxesLocales();
     m_pFacade->loadSavedParameters();
     showCubeSide();
     loadSizes();
+    m_pImgTextWriter.reset(new VSimInfoImageTextWriter(m_pFacade));
     m_pSlideshowShooter->setWidget(m_pFacade->getGLWidget());
-    m_pVideoShooter->setWidget(m_pFacade->getGLWidget());
-
+    m_pSlideshowShooter->setImageTextWriter(m_pImgTextWriter);
+    configureVideoShooter();
     QDir(VVideoShooter::SLIDES_DIR_PATH).removeRecursively();
-    loadShootersSettings();
+    loadShootersSettings();    
+    this->setWindowTitle(QCoreApplication::applicationName());
 }
 
 void VWindowMain::connectSimulationSignals()
@@ -121,10 +133,10 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_resin_changed()));
     connect(m_pFacade.get(), SIGNAL(layerVisibilityChanged(uint, bool)),
             this, SLOT(m_on_layer_visibility_changed(uint, bool)));
-    connect(m_pFacade.get(), SIGNAL(injectionDiameterSet(double)),
-            this, SLOT(m_on_injection_diameter_set(double)));
-    connect(m_pFacade.get(), SIGNAL(vacuumDiameterSet(double)),
-            this, SLOT(m_on_vacuum_diameter_set(double)));
+    connect(m_pFacade.get(), SIGNAL(injectionDiameterSet(float)),
+            this, SLOT(m_on_injection_diameter_set(float)));
+    connect(m_pFacade.get(), SIGNAL(vacuumDiameterSet(float)),
+            this, SLOT(m_on_vacuum_diameter_set(float)));
     connect(m_pFacade.get(), SIGNAL(temperatureSet(double)),
             this, SLOT(m_on_temperature_set(double)));
     connect(m_pFacade.get(), SIGNAL(vacuumPressureSet(double)),
@@ -135,6 +147,8 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_time_limit_set(double)));
     connect(m_pFacade.get(), SIGNAL(timeLimitModeSwitched(bool)),
             this, SLOT(m_on_time_limit_mode_switched(bool)));
+    connect(m_pFacade.get(), SIGNAL(lifetimeConsiderationSwitched(bool)),
+            this, SLOT(m_on_lifetime_consideration_switched(bool)));
     connect(m_pFacade.get(), SIGNAL(canceledWaitingForInjectionPoint()),
             this, SLOT(m_on_canceled_waiting_for_injection_point()));
     connect(m_pFacade.get(), SIGNAL(canceledWaitingForVacuumPoint()),
@@ -143,6 +157,8 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_layers_cleared()));
     connect(m_pFacade.get(), SIGNAL(modelLoaded()),
             this, SLOT(m_on_model_loaded()));
+    connect(m_pFacade.get(), SIGNAL(modelSaved()),
+            this, SLOT(m_on_model_saved()));
     connect(m_pFacade.get(), SIGNAL(selectionMade()),
             this, SLOT(m_on_selection_made()));
     connect(m_pFacade.get(), SIGNAL(gotTransformation()),
@@ -153,19 +169,29 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_selection_enabled(bool)));
     connect(m_pFacade.get(), SIGNAL(cubeSideChanged(float)),
             this, SLOT(m_on_cube_side_changed(float)));
+    connect(m_pFacade.get(), SIGNAL(filenameChanged(const QString &)),
+            this, SLOT(m_on_filename_changed(const QString &)));
+    connect(m_pFacade.get(), SIGNAL(layersSwapped(uint, uint)),
+            this, SLOT(m_on_layers_swapped(uint, uint)));
+
+    connect(m_pFacade.get(), SIGNAL(tableSizeSet(float, float)),
+            this, SLOT(m_on_table_size_set(float, float)));
+    connect(m_pFacade.get(), SIGNAL(tableInjectionCoordsSet(float, float)),
+            this, SLOT(m_on_table_injection_coords_set(float, float)));
+    connect(m_pFacade.get(), SIGNAL(tableVacuumCoordsSet(float, float)),
+            this, SLOT(m_on_table_vacuum_coords_set(float, float)));
+    connect(m_pFacade.get(), SIGNAL(tableInjectionDiameterSet(float)),
+            this, SLOT(m_on_table_injection_diameter_set(float)));
+    connect(m_pFacade.get(), SIGNAL(tableVacuumDiameterSet(float)),
+            this, SLOT(m_on_table_vacuum_diameter_set(float)));
+    connect(m_pFacade.get(), SIGNAL(useTableParametersSet(bool)),
+            this, SLOT(m_on_use_table_parameters_set(bool)));
 
     connect(m_pSlideshowShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_slideshow_started()));
     connect(m_pSlideshowShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_slideshow_stopped()));
     connect(m_pSlideshowShooter.get(), SIGNAL(directoryChanged()), this, SLOT(m_on_slideshow_directory_changed()));
     connect(m_pSlideshowShooter.get(), SIGNAL(periodChanged()), this, SLOT(m_on_slideshow_period_changed()));
     connect(m_pSlideshowShooter.get(), SIGNAL(suffixDirNameChanged()), this, SLOT(m_on_slideshow_suffix_dirname_changed()));
-    connect(m_pVideoShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_video_started()));
-    connect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_video_stopped()));
-    connect(m_pVideoShooter.get(), SIGNAL(directoryChanged()), this, SLOT(m_on_video_directory_changed()));
-    connect(m_pVideoShooter.get(), SIGNAL(frequencyChanged()), this, SLOT(m_on_video_frequency_changed()));
-    connect(m_pVideoShooter.get(), SIGNAL(suffixFileNameChanged()), this, SLOT(m_on_video_suffix_filename_changed()));
-    connect(m_pVideoShooter.get(), SIGNAL(videoSavingStarted()), this, SLOT(m_on_video_saving_started()));
-    connect(m_pVideoShooter.get(), SIGNAL(videoSavingFinished(bool)), this, SLOT(m_on_video_saving_finished(bool)));
 }
 
 void VWindowMain::setupValidators()
@@ -181,6 +207,69 @@ void VWindowMain::setupValidators()
     ui->vacuumPressureEdit->setValidator(m_pPressureValidator);
     ui->injectionDiameterEdit->setValidator(m_pDiameterValidator);
     ui->vacuumDiameterEdit->setValidator(m_pDiameterValidator);
+}
+
+void VWindowMain::setupSpinboxesLocales()
+{
+    ui->tableXSpinBox->setLocale(QLocale::C);
+    ui->tableYSpinBox->setLocale(QLocale::C);
+    ui->tableInjectionXSpinBox->setLocale(QLocale::C);
+    ui->tableInjectionYSpinBox->setLocale(QLocale::C);
+    ui->tableInjectionDiameterSpinBox->setLocale(QLocale::C);
+    ui->tableVacuumXSpinBox->setLocale(QLocale::C);
+    ui->tableVacuumYSpinBox->setLocale(QLocale::C);
+    ui->tableVacuumDiameterSpinBox->setLocale(QLocale::C);
+    ui->slideshowPeriodSpinBox->setLocale(QLocale::C);
+    ui->videoFrequencySpinBox->setLocale(QLocale::C);
+}
+
+void VWindowMain::configureVideoShooter()
+{
+    m_pVideoShooter->setWidget(m_pFacade->getGLWidget());
+    m_pVideoShooter->setImageTextWriter(m_pImgTextWriter);
+
+    connect(m_pVideoShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_video_started()));
+    connect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_video_stopped()));
+    connect(m_pVideoShooter.get(), SIGNAL(directoryChanged()), this, SLOT(m_on_video_directory_changed()));
+    connect(m_pVideoShooter.get(), SIGNAL(frequencyChanged()), this, SLOT(m_on_video_frequency_changed()));
+    connect(m_pVideoShooter.get(), SIGNAL(suffixFileNameChanged()), this, SLOT(m_on_video_suffix_filename_changed()));
+    connect(m_pVideoShooter.get(), SIGNAL(videoSavingStarted()), this, SLOT(m_on_video_saving_started()));
+    connect(m_pVideoShooter.get(), SIGNAL(videoSavingFinished(bool)), this, SLOT(m_on_video_saving_finished(bool)));
+}
+
+void VWindowMain::addNewVideoShooter()
+{
+    std::shared_ptr<VVideoShooter> videoShooter(new VVideoShooter);
+
+    videoShooter->setDirPath(m_pVideoShooter->getDirPath());
+    videoShooter->setFrequency(m_pVideoShooter->getFrequency());
+    videoShooter->setSuffixFileName(m_pVideoShooter->getSuffixFileName());
+    m_oldVideoShootersList.push_back(m_pVideoShooter);
+
+    disconnect(m_pVideoShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_video_started()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_video_stopped()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(directoryChanged()), this, SLOT(m_on_video_directory_changed()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(frequencyChanged()), this, SLOT(m_on_video_frequency_changed()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(suffixFileNameChanged()), this, SLOT(m_on_video_suffix_filename_changed()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(videoSavingStarted()), this, SLOT(m_on_video_saving_started()));
+    disconnect(m_pVideoShooter.get(), SIGNAL(videoSavingFinished(bool)), this, SLOT(m_on_video_saving_finished(bool)));
+
+    m_pVideoShooter = videoShooter;
+    configureVideoShooter();
+}
+
+void VWindowMain::clearFinishedVideoShooters()
+{
+    auto it = m_oldVideoShootersList.begin();
+    while (it != m_oldVideoShootersList.end())
+    {
+        if (!(*it)->isSaving() && !(*it)->isWorking())
+        {
+            m_oldVideoShootersList.erase(it++);
+        }
+        else
+            ++it;
+    }
 }
 
 VWindowMain::~VWindowMain()
@@ -211,9 +300,17 @@ VWindowMain::~VWindowMain()
     #endif
 }
 
-void VWindowMain::closeEvent(QCloseEvent *)
+void VWindowMain::closeEvent(QCloseEvent * event)
 {
-    saveSizes();
+    if (!m_isSaved && QMessageBox::question(this, EXIT_TITLE,
+                      ASK_FOR_EXIT_TEXT, QMessageBox::Yes|QMessageBox::No )!=QMessageBox::Yes)
+    {
+        event->ignore();
+    }
+    else
+    {
+        saveSizes();
+    }
 }
 
 void VWindowMain::deleteWindowLayer()
@@ -281,7 +378,7 @@ void VWindowMain::showWindowLayer()
 {
     if (m_pWindowLayer == nullptr)
     {
-        m_pWindowLayer = new VWindowLayer(this);
+        m_pWindowLayer = new VWindowLayer(this, m_pFacade);
         connect(m_pWindowLayer,
                 SIGNAL(creationFromFileAvailable(const VCloth&,const QString&, VLayerAbstractBuilder::VUnit)),
                 this,
@@ -311,6 +408,8 @@ void VWindowMain::selectLayer()
         ui->layerInfoLabel->setText(CLOTH_INFO_TEXT.arg(cloth->name).arg(cloth->cavityHeight)
                                              .arg(cloth->permeability).arg(cloth->porosity));
         showColor(cloth->baseColor);
+        ui->layerUpButton->setEnabled(layer > 0 && m_pFacade->isSimulationStopped());
+        ui->layerDownButton->setEnabled(layer < m_pFacade->getLayersNumber() - 1u && m_pFacade->isSimulationStopped());
     }
     else
         ui->layerParamBox->setVisible(false);
@@ -331,8 +430,9 @@ void VWindowMain::enableLayer(bool enable)
 {
     if (ui->layersListWidget->currentIndex().isValid())
     {
-        uint layer = ui->layersListWidget->currentRow();
-        m_pFacade->enableLayer(layer, enable);
+        int layer = ui->layersListWidget->currentRow();
+        if (layer >= 0)
+            m_pFacade->enableLayer(static_cast<uint>(layer), enable);
     }
 }
 
@@ -340,8 +440,9 @@ void VWindowMain::setVisibleLayer(bool visible)
 {
     if (ui->layersListWidget->currentIndex().isValid())
     {
-        uint layer = ui->layersListWidget->currentRow();
-        m_pFacade->setVisible(layer, visible);
+        int layer = ui->layersListWidget->currentRow();
+        if (layer >= 0)
+            m_pFacade->setVisible(static_cast<uint>(layer), visible);
     }
 }
 
@@ -377,8 +478,8 @@ void VWindowMain::showWindowResin()
     if (m_pWindowResin == nullptr)
     {
         m_pWindowResin = new VWindowResin(this);
-        connect(m_pWindowResin, SIGNAL(gotMaterial(const QString &, float, float)),
-                this, SLOT(m_on_got_resin(const QString &, float, float)));
+        connect(m_pWindowResin, SIGNAL(gotMaterial(const QString &, float, float, float, float)),
+                this, SLOT(m_on_got_resin(const QString &, float, float, float, float)));
         connect(m_pWindowResin,SIGNAL(windowClosed()), this, SLOT(m_on_resin_window_closed()));
     }
     m_pWindowResin->show();
@@ -415,11 +516,14 @@ void VWindowMain::selectColor()
     }
 }
 
-void VWindowMain::setResin(const QString & name , float viscosity, float tempcoef)
+void VWindowMain::setResin(const QString & name , float viscosity, float viscTempcoef,
+                           float lifetime, float lifetimeTempcoef)
 {
     VResin resin;
     resin.defaultViscosity = viscosity;
-    resin.tempcoef = tempcoef;
+    resin.defaultLifetime = lifetime;
+    resin.viscTempcoef = viscTempcoef;
+    resin.lifetimeTempcoef = lifetimeTempcoef;
     resin.name = name;
     m_pFacade->setResin(resin);
 }
@@ -444,10 +548,10 @@ void VWindowMain::removeLayerFromList(int layer)
 
 void VWindowMain::updateLayerMaterialInfo(int layer)
 {
+    VCloth::const_ptr cloth = m_pFacade->getMaterial(layer);
+    ui->layersListWidget->item(layer)->setText(cloth->name);
     if ( layer == ui->layersListWidget->currentRow())
     {
-        VCloth::const_ptr cloth = m_pFacade->getMaterial(layer);
-        ui->layersListWidget->currentItem()->setText(cloth->name);
         ui->layerInfoLabel->setText(CLOTH_INFO_TEXT.arg(cloth->name).arg(cloth->cavityHeight)
                                              .arg(cloth->permeability).arg(cloth->porosity));
         showColor(cloth->baseColor);
@@ -458,7 +562,8 @@ void VWindowMain::updateResinInfo()
 {
     VResin resin = m_pFacade->getParameters().getResin();
     ui->resinInfoLabel->setText(RESIN_INFO_TEXT.arg(resin.name).arg(resin.defaultViscosity)
-                                         .arg(resin.tempcoef));
+                                .arg(resin.viscTempcoef).arg(resin.defaultLifetime)
+                                .arg(resin.lifetimeTempcoef));
 }
 
 void VWindowMain::markLayerAsEnabled(int layer, bool enable)
@@ -502,7 +607,7 @@ void VWindowMain::injectionPointSelectionResult()
 
 void VWindowMain::startInjectionPointSelection()
 {
-    double diameter;
+    float diameter;
     bool ok = readNumber(ui->injectionDiameterEdit, diameter);
     if (ok)
         m_pFacade->waitForInjectionPointSelection(diameter);
@@ -520,7 +625,7 @@ void VWindowMain::cancelInjectionPointSelection()
 
 void VWindowMain::startVacuumPointSelection()
 {
-    double diameter;
+    float diameter;
     bool ok = readNumber(ui->vacuumDiameterEdit, diameter);
     if (ok)
         m_pFacade->waitForVacuumPointSelection(diameter);
@@ -615,7 +720,7 @@ void VWindowMain::showInjectionPressure()
 
 void VWindowMain::showInjectionDiameter()
 {
-    double injectionDiameter = m_pFacade->getParameters().getInjectionDiameter();
+    float injectionDiameter = m_pFacade->getParameters().getInjectionDiameter();
     ui->injectionDiameterEdit->setText(QString::number(injectionDiameter));
     ui->resetInjectionDiameterButton->setEnabled(false);
 }
@@ -627,7 +732,7 @@ void VWindowMain::showInjectionPoint()
 
 void VWindowMain::showVacuumPressure()
 {
-    double vacuumPressure = m_pFacade->getParameters().getVacuumPressure();
+    float vacuumPressure = m_pFacade->getParameters().getVacuumPressure();
     ui->vacuumPressureEdit->setText(QString::number(vacuumPressure));
     ui->resetVacuumPressureButton->setEnabled(false);
 }
@@ -686,8 +791,27 @@ bool VWindowMain::readNumber(const QLineEdit * lineEdit, double &output) const
     return ok;
 }
 
+bool VWindowMain::readNumber(const QLineEdit * lineEdit, float &output) const
+{
+    bool ok;
+    QString numberStr = lineEdit->text().replace(',', '.');
+    int pos = 0;
+    QValidator::State state = lineEdit->validator()->validate(numberStr, pos);
+    if (state == QValidator::Acceptable)
+        output = numberStr.toFloat(&ok);
+    else
+        return false;
+    return ok;
+}
+
 void VWindowMain::simulationStartResult()
 {
+    if (ui->actionSlideshow->isChecked())
+        startSlideshow();
+    if (ui->actionVideo->isChecked())
+    {
+        startVideo();
+    }
     ui->actionStart->setEnabled(false);
     ui->actionPause->setEnabled(true);
     ui->actionStop->setEnabled(true);
@@ -704,6 +828,8 @@ void VWindowMain::simulationPauseResult()
 
 void VWindowMain::simulationStopResult()
 {
+    m_pSlideshowShooter->stop();
+    m_pVideoShooter->stop();
     ui->actionStart->setEnabled(true);
     ui->actionPause->setEnabled(false);
     ui->actionStop->setEnabled(false);
@@ -712,21 +838,30 @@ void VWindowMain::simulationStopResult()
 
 void VWindowMain::activateSimControls(bool enabled)
 {
+    bool useTableParam = m_pFacade->isUsingTableParameters();
+    ui->useTableParamCheckBox->setEnabled(enabled);
     ui->layerEnableCheckBox->setEnabled(enabled);
     ui->layerColorButton->setEnabled(enabled);
     ui->selectMaterialClothButton->setEnabled(enabled);
     ui->layerRemoveButton->setEnabled(enabled);
     ui->layerCutButton->setEnabled(enabled);
     ui->addLayerButton->setEnabled(enabled);
+    ui->sortLayersButton->setEnabled(enabled);
     ui->injectionPressureEdit->setEnabled(enabled);
     ui->saveInjectionPressureButton->setEnabled(enabled);
-    ui->injectionDiameterEdit->setEnabled(enabled);
-    ui->injectionPlaceButton->setEnabled(enabled);
+    ui->injectionDiameterEdit->setEnabled(enabled && !useTableParam);
+    ui->injectionPlaceButton->setEnabled(enabled && !useTableParam);
+    ui->resetInjectionDiameterButton->setEnabled(enabled && !useTableParam);
     ui->vacuumPressureEdit->setEnabled(enabled);
     ui->saveVacuumPressureButton->setEnabled(enabled);
-    ui->vacuumDiameterEdit->setEnabled(enabled);
-    ui->vacuumPlaceButton->setEnabled(enabled);
+    ui->vacuumDiameterEdit->setEnabled(enabled && !useTableParam);
+    ui->vacuumPlaceButton->setEnabled(enabled && !useTableParam);
+    ui->resetVacuumDiameterButton->setEnabled(enabled && !useTableParam);
     ui->selectMaterialResinButton->setEnabled(enabled);
+
+    int layer = ui->layersListWidget->currentRow();
+    ui->layerUpButton->setEnabled(enabled && layer > 0);
+    ui->layerDownButton->setEnabled(enabled && layer < static_cast<int>(m_pFacade->getLayersNumber()) - 1);
 }
 
 void VWindowMain::resetAllInputs()
@@ -740,10 +875,9 @@ void VWindowMain::resetAllInputs()
 
 void VWindowMain::showNewLayer()
 {
-    uint lastLayer = static_cast<uint>(m_pFacade->getLayersNumber()) - 1;
-    VCloth::const_ptr cloth = m_pFacade->getMaterial(lastLayer);
-    ui->layersListWidget->addItem(cloth->name);
-    ui->layersListWidget->setCurrentRow(ui->layersListWidget->count() - 1);
+    VCloth::const_ptr cloth = m_pFacade->getMaterial(0);
+    ui->layersListWidget->insertItem(0, cloth->name);
+    ui->layersListWidget->setCurrentRow(0);
 }
 
 void VWindowMain::reloadLayersList()
@@ -942,6 +1076,8 @@ int VWindowMain::getVideoFrequency() const
 
 void VWindowMain::startVideo()
 {
+    if (m_pVideoShooter->isSaving())
+        addNewVideoShooter();
     m_pVideoShooter->start();
 }
 
@@ -1009,6 +1145,49 @@ void VWindowMain::enableButtonsShootingWindows(bool enable)
     ui->actionSave->setEnabled(enable);
 }
 
+void VWindowMain::setSavedState(bool saved)
+{
+    m_isSaved = saved;
+    m_isSaved |= (m_pFacade->getNodesNumber() == 0);
+    QString title = this->windowTitle();
+    if (m_isSaved)
+    {
+        title.remove('*');
+    }
+    else if (!title.startsWith('*'))
+    {
+        title.insert(0, '*');
+    }
+    this->setWindowTitle(title);
+}
+
+void VWindowMain::showFilenameInTitle(const QString &filename)
+{
+    bool addStar = this->windowTitle().startsWith('*');
+    QString title;
+    if (addStar)
+        title += '*';
+    if (!filename.isEmpty())
+    {
+        QString baseFileName = QFileInfo(filename).fileName();
+        title += baseFileName;
+        title += QStringLiteral(" - ");
+    }
+    title += QCoreApplication::applicationName();
+    this->setWindowTitle(title);
+}
+
+void VWindowMain::swapLayersCaptions(uint layer1, uint layer2)
+{
+    QListWidgetItem *item1 = ui->layersListWidget->item(layer1);
+    QListWidgetItem *item2 = ui->layersListWidget->takeItem(layer2);
+    ui->layersListWidget->insertItem(layer1, item2);
+    int layer1Row = ui->layersListWidget->row(item1);
+    item1 = ui->layersListWidget->takeItem(layer1Row);
+    ui->layersListWidget->insertItem(layer2, item1);
+    ui->layersListWidget->setCurrentItem(item1);
+}
+
 /**
  * Slots
  */
@@ -1030,9 +1209,10 @@ void VWindowMain::m_on_got_cloth(const QString & name, float cavityheight, float
     setCloth(name, cavityheight, permeability, porosity);
 }
 
-void VWindowMain::m_on_got_resin(const QString & name , float viscosity, float tempcoef)
+void VWindowMain::m_on_got_resin(const QString & name , float viscosity, float viscTempcoef,
+                                 float lifetime, float lifetimeTempcoef)
 {
-    setResin(name, viscosity, tempcoef);
+    setResin(name, viscosity, viscTempcoef, lifetime, lifetimeTempcoef);
 }
 
 void VWindowMain::m_on_layer_window_closed()
@@ -1054,20 +1234,23 @@ void VWindowMain::m_on_layers_cleared()
 {
     reloadLayersList();
     showModelInfo();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_video_saving_started()
 {
-    ui->actionVideo->setEnabled(false);
 }
 
 void VWindowMain::m_on_video_saving_finished(bool result)
 {
-    ui->actionVideo->setEnabled(true);
-    if (result)
-        QMessageBox::information(this, INFO_TITLE, SAVING_VIDEO_INFO.arg(m_pVideoShooter->getVideoFilePath()));
-    else
-        QMessageBox::warning(this, ERROR_TITLE, SAVING_VIDEO_ERROR);
+    if (!m_pVideoShooter->isWorking() && !m_pSlideshowShooter->isWorking())
+    {
+        if (result)
+            QMessageBox::information(this, INFO_TITLE, SAVING_VIDEO_INFO.arg(m_pVideoShooter->getVideoFilePath()));
+        else
+            QMessageBox::warning(this, ERROR_TITLE, SAVING_VIDEO_ERROR);
+        clearFinishedVideoShooters();
+    }
 }
 
 void VWindowMain::on_addLayerButton_clicked()
@@ -1112,38 +1295,43 @@ void VWindowMain::on_selectMaterialResinButton_clicked()
 void VWindowMain::m_on_layer_removed(uint layer)
 {
     removeLayerFromList(layer);
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_material_changed(uint layer)
 {
     updateLayerMaterialInfo(layer);
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_layer_enabled(uint layer, bool enable)
 {
     markLayerAsEnabled(layer, enable);
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_layer_added()
 {
     showNewLayer();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_injection_point_set()
 {
     injectionPointSelectionResult();
-    showInjectionPoint();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_vacuum_point_set()
 {
     vacuumPointSelectionResult();
-    showVacuumPoint();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_simutation_started()
 {
     simulationStartResult();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_simutation_paused()
@@ -1154,46 +1342,60 @@ void VWindowMain::m_on_simutation_paused()
 void VWindowMain::m_on_simutation_stopped()
 {
     simulationStopResult();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_resin_changed()
 {
     updateResinInfo();
+    setSavedState(false);
 }
 
-void VWindowMain::m_on_injection_diameter_set(double)
+void VWindowMain::m_on_injection_diameter_set(float)
 {
     showInjectionDiameter();
+    setSavedState(false);
 }
 
-void VWindowMain::m_on_vacuum_diameter_set(double)
+void VWindowMain::m_on_vacuum_diameter_set(float)
 {
     showVacuumDiameter();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_temperature_set(double)
 {
     showTemperature();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_vacuum_pressure_set(double)
 {
     showVacuumPressure();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_injection_pressure_set(double)
 {
     showInjectionPressure();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_time_limit_set(double)
 {
     showTimeLimit();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_time_limit_mode_switched(bool on)
 {
     ui->timeLimitCheckBox->setChecked(on);
+    setSavedState(false);
+}
+
+void VWindowMain::m_on_lifetime_consideration_switched(bool on)
+{
+    ui->timeConsiderationCheckbox->setChecked(on);
 }
 
 void VWindowMain::m_on_canceled_waiting_for_injection_point()
@@ -1209,11 +1411,18 @@ void VWindowMain::m_on_canceled_waiing_for_vacuum_point()
 void VWindowMain::m_on_layer_visibility_changed(uint layer, bool visible)
 {
     markLayerAsVisible(layer, visible);
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_model_loaded()
 {
     reloadLayersList();
+    setSavedState(true);
+}
+
+void VWindowMain::m_on_model_saved()
+{
+    setSavedState(true);
 }
 
 void VWindowMain::m_on_selection_made()
@@ -1229,6 +1438,7 @@ void VWindowMain::m_on_got_transformation()
 void VWindowMain::m_on_model_config_updated()
 {
     showModelInfo();
+    setSavedState(false);
 }
 
 void VWindowMain::m_on_selection_enabled(bool checked)
@@ -1241,9 +1451,18 @@ void VWindowMain::m_on_cube_side_changed(float)
     showCubeSide();
 }
 
+void VWindowMain::m_on_filename_changed(const QString & filename)
+{
+    showFilenameInTitle(filename);
+}
+
+void VWindowMain::m_on_layers_swapped(uint layer1, uint layer2)
+{
+    swapLayersCaptions(layer1, layer2);
+}
+
 void VWindowMain::m_on_slideshow_started()
 {
-    ui->actionSlideshow->setChecked(true);
     ui->slideshowBox->setEnabled(false);
     setWindowFlags((windowFlags() & ~Qt::WindowStaysOnBottomHint) | ON_TOP_FLAGS);
     show();
@@ -1251,7 +1470,6 @@ void VWindowMain::m_on_slideshow_started()
 
 void VWindowMain::m_on_slideshow_stopped()
 {
-    ui->actionSlideshow->setChecked(false);
     ui->slideshowBox->setEnabled(true);
     if (!m_pVideoShooter->isWorking())
     {
@@ -1280,7 +1498,6 @@ void VWindowMain::m_on_slideshow_suffix_dirname_changed()
 
 void VWindowMain::m_on_video_started()
 {
-    ui->actionVideo->setChecked(true);
     ui->videoBox->setEnabled(false);
     setWindowFlags((windowFlags() & ~Qt::WindowStaysOnBottomHint) | ON_TOP_FLAGS);
     show();
@@ -1288,7 +1505,6 @@ void VWindowMain::m_on_video_started()
 
 void VWindowMain::m_on_video_stopped()
 {
-    ui->actionVideo->setChecked(false);
     ui->videoBox->setEnabled(true);
     if (!m_pSlideshowShooter->isWorking())
     {
@@ -1313,6 +1529,59 @@ void VWindowMain::m_on_video_suffix_filename_changed()
     const QString &filename = m_pVideoShooter->getSuffixFileName();
     ui->videoFileNameEdit->setText(filename);
     ui->resetVideoFileNameButton->setEnabled(false);
+}
+
+
+void VWindowMain::m_on_table_size_set(float width, float height)
+{
+    ui->tableXSpinBox->setValue(width);
+    ui->tableYSpinBox->setValue(height);
+    ui->resetTableSizeButton->setEnabled(false);
+    setSavedState(false);
+}
+
+void VWindowMain::m_on_table_injection_coords_set(float x, float y)
+{
+    ui->tableInjectionXSpinBox->setValue(x);
+    ui->tableInjectionYSpinBox->setValue(y);
+    ui->resetTableInjectionCoordsButton->setEnabled(false);
+    setSavedState(false);
+}
+
+void VWindowMain::m_on_table_vacuum_coords_set(float x, float y)
+{
+    ui->tableVacuumXSpinBox->setValue(x);
+    ui->tableVacuumYSpinBox->setValue(y);
+    ui->resetTableVacuumCoordsButton->setEnabled(false);
+    setSavedState(false);
+}
+
+void VWindowMain::m_on_table_injection_diameter_set(float diameter)
+{
+    ui->tableInjectionDiameterSpinBox->setValue(diameter);
+    ui->resetTableInjectionDiameterButton->setEnabled(false);
+    setSavedState(false);
+}
+
+void VWindowMain::m_on_table_vacuum_diameter_set(float diameter)
+{
+    ui->tableVacuumDiameterSpinBox->setValue(diameter);
+    ui->resetTableVacuumDiameterButton->setEnabled(false);
+    setSavedState(false);
+}
+
+void VWindowMain::m_on_use_table_parameters_set(bool use)
+{
+    if (ui->useTableParamCheckBox->isChecked() != use)
+        ui->useTableParamCheckBox->setChecked(use);
+    bool enabled = !(m_pFacade->isSimulationActive());
+    ui->injectionDiameterEdit->setEnabled(enabled && !use);
+    ui->injectionPlaceButton->setEnabled(enabled && !use);
+    ui->resetInjectionDiameterButton->setEnabled(enabled && !use);
+    ui->vacuumDiameterEdit->setEnabled(enabled && !use);
+    ui->vacuumPlaceButton->setEnabled(enabled && !use);
+    ui->resetVacuumDiameterButton->setEnabled(enabled && !use);
+    setSavedState(false);
 }
 
 void VWindowMain::on_injectionPlaceButton_clicked(bool checked)
@@ -1484,18 +1753,18 @@ void VWindowMain::on_cubeSideSlider_valueChanged(int value)
 
 void VWindowMain::on_actionSlideshow_triggered(bool checked)
 {
-    if(checked)
-        startSlideshow();
-    else
+    if(!checked)
         stopSlideshow();
+    else if (!m_pFacade->isSimulationStopped())
+        startSlideshow();
 }
 
 void VWindowMain::on_actionVideo_triggered(bool checked)
 {
-    if(checked)
-        startVideo();
-    else
+    if (!checked)
         stopVideo();
+    else if (!m_pFacade->isSimulationStopped())
+        startVideo();
 }
 
 void VWindowMain::on_chooseSlideshowDirButton_clicked()
@@ -1582,4 +1851,165 @@ void VWindowMain::on_resetVideoFileNameButton_clicked()
 void VWindowMain::on_saveVideoFileNameButton_clicked()
 {
     m_pVideoShooter->setSuffixFileName(ui->videoFileNameEdit->text());
+}
+
+void VWindowMain::on_layerUpButton_clicked()
+{
+    if (ui->layersListWidget->currentIndex().isValid()
+            && ui->layersListWidget->currentRow() < int(m_pFacade->getLayersNumber()))
+    {
+        uint layer = ui->layersListWidget->currentRow();
+        m_pFacade->moveLayerUp(layer);
+    }
+}
+
+void VWindowMain::on_layerDownButton_clicked()
+{
+    if (ui->layersListWidget->currentIndex().isValid()
+            && ui->layersListWidget->currentRow() < int(m_pFacade->getLayersNumber()))
+    {
+        uint layer = ui->layersListWidget->currentRow();
+        m_pFacade->moveLayerDown(layer);
+    }
+}
+
+void VWindowMain::on_sortLayersButton_clicked()
+{
+    m_pFacade->sortLayers();
+}
+
+void VWindowMain::on_useTableParamCheckBox_clicked(bool checked)
+{
+    m_pFacade->useTableParameters(checked);
+}
+
+void VWindowMain::on_tableXSpinBox_valueChanged(double)
+{
+    const QVector2D & size = m_pFacade->getTable()->getSize();
+    float x = static_cast<float>(ui->tableXSpinBox->value());
+    float y = static_cast<float>(ui->tableYSpinBox->value());
+    bool enable = (x != size.x() || y != size.y());
+    ui->resetTableSizeButton->setEnabled(enable);
+}
+
+void VWindowMain::on_tableYSpinBox_valueChanged(double)
+{
+    const QVector2D & size = m_pFacade->getTable()->getSize();
+    float x = static_cast<float>(ui->tableXSpinBox->value());
+    float y = static_cast<float>(ui->tableYSpinBox->value());
+    bool enable = (x != size.x() || y != size.y());
+    ui->resetTableSizeButton->setEnabled(enable);
+}
+
+void VWindowMain::on_tableInjectionXSpinBox_valueChanged(double)
+{
+    const QVector2D & coords = m_pFacade->getTable()->getInjectionCoords();
+    float x = static_cast<float>(ui->tableInjectionXSpinBox->value());
+    float y = static_cast<float>(ui->tableInjectionYSpinBox->value());
+    bool enable = (x != coords.x() || y != coords.y());
+    ui->resetTableInjectionCoordsButton->setEnabled(enable);
+}
+
+void VWindowMain::on_tableInjectionYSpinBox_valueChanged(double)
+{
+    const QVector2D & coords = m_pFacade->getTable()->getInjectionCoords();
+    float x = static_cast<float>(ui->tableInjectionXSpinBox->value());
+    float y = static_cast<float>(ui->tableInjectionYSpinBox->value());
+    bool enable = (x != coords.x() || y != coords.y());
+    ui->resetTableInjectionCoordsButton->setEnabled(enable);
+}
+
+void VWindowMain::on_tableInjectionDiameterSpinBox_valueChanged(double arg1)
+{
+    bool enable = (static_cast<float>(arg1) != m_pFacade->getTable()->getInjectionDiameter());
+    ui->resetTableInjectionDiameterButton->setEnabled(enable);
+}
+
+void VWindowMain::on_tableVacuumXSpinBox_valueChanged(double)
+{
+    const QVector2D & coords = m_pFacade->getTable()->getVacuumCoords();
+    float x = static_cast<float>(ui->tableVacuumXSpinBox->value());
+    float y = static_cast<float>(ui->tableVacuumYSpinBox->value());
+    bool enable = (x != coords.x() || y != coords.y());
+    ui->resetTableVacuumCoordsButton->setEnabled(enable);
+}
+
+void VWindowMain::on_tableVacuumYSpinBox_valueChanged(double)
+{
+    const QVector2D & coords = m_pFacade->getTable()->getVacuumCoords();
+    float x = static_cast<float>(ui->tableVacuumXSpinBox->value());
+    float y = static_cast<float>(ui->tableVacuumYSpinBox->value());
+    bool enable = (x != coords.x() || y != coords.y());
+    ui->resetTableVacuumCoordsButton->setEnabled(enable);
+}
+
+void VWindowMain::on_tableVacuumDiameterSpinBox_valueChanged(double arg1)
+{
+    bool enable = (static_cast<float>(arg1) != m_pFacade->getTable()->getVacuumDiameter());
+    ui->resetTableVacuumDiameterButton->setEnabled(enable);
+}
+
+void VWindowMain::on_resetTableSizeButton_clicked()
+{
+    const QVector2D & coords = m_pFacade->getTable()->getSize();
+    ui->tableXSpinBox->setValue(coords.x());
+    ui->tableYSpinBox->setValue(coords.y());
+}
+
+void VWindowMain::on_saveTableSizeButton_clicked()
+{
+    m_pFacade->setTableSize(ui->tableXSpinBox->value(), ui->tableYSpinBox->value());
+}
+
+void VWindowMain::on_resetTableInjectionCoordsButton_clicked()
+{
+    const QVector2D & coords = m_pFacade->getTable()->getInjectionCoords();
+    ui->tableInjectionXSpinBox->setValue(coords.x());
+    ui->tableInjectionYSpinBox->setValue(coords.y());
+}
+
+void VWindowMain::on_saveTableInjectionCoordsButton_clicked()
+{
+    m_pFacade->setTableInjectionCoords(ui->tableInjectionXSpinBox->value(),
+                                       ui->tableInjectionYSpinBox->value());
+}
+
+void VWindowMain::on_resetTableInjectionDiameterButton_clicked()
+{
+    float diameter = m_pFacade->getTable()->getInjectionDiameter();
+    ui->tableInjectionDiameterSpinBox->setValue(diameter);
+}
+
+void VWindowMain::on_saveTableInjectionDiameterButton_clicked()
+{
+    m_pFacade->setTableInjectionDiameter(ui->tableInjectionDiameterSpinBox->value());
+}
+
+void VWindowMain::on_resetTableVacuumCoordsButton_clicked()
+{
+    const QVector2D & coords = m_pFacade->getTable()->getVacuumCoords();
+    ui->tableVacuumXSpinBox->setValue(coords.x());
+    ui->tableVacuumYSpinBox->setValue(coords.y());
+}
+
+void VWindowMain::on_saveTableVacuumCoordsButton_clicked()
+{
+    m_pFacade->setTableVacuumCoords(ui->tableVacuumXSpinBox->value(),
+                                    ui->tableVacuumYSpinBox->value());
+}
+
+void VWindowMain::on_resetTableVacuumDiameterButton_clicked()
+{
+    float diameter = m_pFacade->getTable()->getVacuumDiameter();
+    ui->tableVacuumDiameterSpinBox->setValue(diameter);
+}
+
+void VWindowMain::on_saveTableVacuumDiameterButton_clicked()
+{
+    m_pFacade->setTableVacuumDiameter(ui->tableVacuumDiameterSpinBox->value());
+}
+
+void VWindowMain::on_timeConsiderationCheckbox_clicked(bool checked)
+{
+    m_pFacade->considerLifetime(checked);
 }

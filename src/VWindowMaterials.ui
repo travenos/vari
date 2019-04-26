@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>905</width>
-    <height>569</height>
+    <height>677</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -216,7 +216,7 @@
         <item>
          <widget class="QLabel" name="viscosityLabel">
           <property name="text">
-           <string>Вязкость при 25 °C (Па·с)</string>
+           <string>Вязкость при 25 °C (Па·с):</string>
           </property>
          </widget>
         </item>
@@ -228,18 +228,38 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="tempcoefLabel">
+         <widget class="QLabel" name="viscTempcoefLabel">
           <property name="text">
-           <string>Температурный коэффициент (Па·с)</string>
+           <string>Энергия активации вязкого течения (Дж/моль):</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="tempcoefEdit">
+         <widget class="QLineEdit" name="viscTempcoefEdit">
           <property name="inputMethodHints">
            <set>Qt::ImhFormattedNumbersOnly</set>
           </property>
          </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lifetimeLabel">
+          <property name="text">
+           <string>Время жизни при 25 °C (с):</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lifetimeEdit"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="lifetimeTempcoefLabel">
+          <property name="text">
+           <string>Энергия активации процесса отверждения (Дж/моль):</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lifetimeTempcoefEdit"/>
         </item>
         <item>
          <layout class="QHBoxLayout" name="saveRefreshHorizontalLayout">
@@ -314,6 +334,23 @@
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>newMaterialButton</tabstop>
+  <tabstop>importButton</tabstop>
+  <tabstop>exportButton</tabstop>
+  <tabstop>nameEdit</tabstop>
+  <tabstop>cavityHeightEdit</tabstop>
+  <tabstop>permeabilityEdit</tabstop>
+  <tabstop>porosityEdit</tabstop>
+  <tabstop>viscosityEdit</tabstop>
+  <tabstop>viscTempcoefEdit</tabstop>
+  <tabstop>lifetimeEdit</tabstop>
+  <tabstop>lifetimeTempcoefEdit</tabstop>
+  <tabstop>refreshButton</tabstop>
+  <tabstop>saveButton</tabstop>
+  <tabstop>removeButton</tabstop>
+  <tabstop>materialsListWidget</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
@@ -397,7 +434,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>tempcoefEdit</sender>
+   <sender>viscTempcoefEdit</sender>
    <signal>returnPressed()</signal>
    <receiver>saveButton</receiver>
    <slot>click()</slot>
@@ -409,6 +446,38 @@
     <hint type="destinationlabel">
      <x>287</x>
      <y>435</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lifetimeEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>saveButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>279</x>
+     <y>457</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>411</x>
+     <y>543</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lifetimeTempcoefEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>saveButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>279</x>
+     <y>511</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>411</x>
+     <y>543</y>
     </hint>
    </hints>
   </connection>

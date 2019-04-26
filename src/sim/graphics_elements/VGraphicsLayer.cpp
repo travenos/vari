@@ -16,9 +16,8 @@
 
 #include "VGraphicsTriangle.h"
 
-VGraphicsLayer::VGraphicsLayer(const VLayer::const_ptr &simLayer, uint number,
-                               float cubeSide) :
-    m_number(number),
+VGraphicsLayer::VGraphicsLayer(const VLayer::const_ptr &simLayer, float cubeSide) :
+    m_id(simLayer->getId()),
     m_visible(false),
     m_pTransform(new SoTransform)
 {
@@ -155,9 +154,9 @@ void VGraphicsLayer::resetTransform()
     }
 }
 
-uint VGraphicsLayer::getNumber() const
+uint VGraphicsLayer::getId() const
 {
-    return m_number;
+    return m_id;
 }
 
 bool VGraphicsLayer::isVisible() const

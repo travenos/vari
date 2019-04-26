@@ -21,15 +21,18 @@ public:
     VLayerAbstractBuilder& operator= (const VLayerAbstractBuilder& ) = delete;
     virtual const VLayer::ptr &build() = 0;
 
+    void setLayerId(uint id);
     void setNodeStartId(uint id);
     void setTriangleStartId(uint id);
 
+    uint getLayerId() const;
     uint getNodeMaxId() const;
     uint getTriangleMaxId() const;
 
 protected:
     VLayer::ptr m_pLayer;
     const VCloth::ptr m_pMaterial;
+    uint m_layerId;
     uint m_nodeStartId;
     uint m_triangleStartId;
     uint m_nodeMaxId;

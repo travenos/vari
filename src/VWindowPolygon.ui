@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>928</width>
-    <height>569</height>
+    <width>1135</width>
+    <height>668</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
@@ -35,7 +35,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Убрать последнюю точку</string>
+         <string>Убрать последнюю вершину</string>
         </property>
        </widget>
       </item>
@@ -81,13 +81,334 @@
      </layout>
     </item>
     <item>
-     <widget class="QCustomPlot" name="plotWidget" native="true">
+     <widget class="QSplitter" name="splitter">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QCustomPlot" name="plotWidget" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+      <widget class="QFrame" name="verticesFrame">
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <property name="spacing">
+         <number>4</number>
+        </property>
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
+        <item>
+         <widget class="QGroupBox" name="modeBox">
+          <property name="title">
+           <string>Тип слоя:</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <property name="leftMargin">
+            <number>3</number>
+           </property>
+           <property name="topMargin">
+            <number>3</number>
+           </property>
+           <property name="rightMargin">
+            <number>3</number>
+           </property>
+           <property name="bottomMargin">
+            <number>3</number>
+           </property>
+           <item row="0" column="2">
+            <widget class="QLabel" name="tubeWidthLabel">
+             <property name="text">
+              <string>Диаметр трубки, м:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QDoubleSpinBox" name="tubeWidthSpinBox">
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="minimum">
+              <double>0.001000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>0.030000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.010000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QRadioButton" name="mode2DRadioButton">
+             <property name="text">
+              <string>2D (плоский)</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QRadioButton" name="mode1DRadioButton">
+             <property name="text">
+              <string>1D (спиральная трубка)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="useTableCheckBox">
+          <property name="text">
+           <string>С учетом размеров рабочего поля стенда</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="newVertexBox">
+          <property name="title">
+           <string>Новая вершина</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <property name="spacing">
+            <number>4</number>
+           </property>
+           <property name="leftMargin">
+            <number>3</number>
+           </property>
+           <property name="topMargin">
+            <number>3</number>
+           </property>
+           <property name="rightMargin">
+            <number>3</number>
+           </property>
+           <property name="bottomMargin">
+            <number>3</number>
+           </property>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QDoubleSpinBox" name="addXSpinBox">
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>-20.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>20.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="addYSpinBox">
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>-20.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>20.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QPushButton" name="addVertexButton">
+             <property name="text">
+              <string>Добавить вершину</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="verticesEditBox">
+          <property name="title">
+           <string>Список вершин</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <property name="spacing">
+            <number>4</number>
+           </property>
+           <property name="leftMargin">
+            <number>3</number>
+           </property>
+           <property name="topMargin">
+            <number>3</number>
+           </property>
+           <property name="rightMargin">
+            <number>3</number>
+           </property>
+           <property name="bottomMargin">
+            <number>3</number>
+           </property>
+           <item>
+            <widget class="QListWidget" name="verticesListWidget"/>
+           </item>
+           <item>
+            <widget class="QFrame" name="vertexEditFrame">
+             <property name="frameShape">
+              <enum>QFrame::StyledPanel</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_6">
+              <property name="spacing">
+               <number>4</number>
+              </property>
+              <property name="leftMargin">
+               <number>3</number>
+              </property>
+              <property name="topMargin">
+               <number>3</number>
+              </property>
+              <property name="rightMargin">
+               <number>3</number>
+              </property>
+              <property name="bottomMargin">
+               <number>3</number>
+              </property>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_4">
+                <item>
+                 <widget class="QDoubleSpinBox" name="changeXSpinBox">
+                  <property name="decimals">
+                   <number>3</number>
+                  </property>
+                  <property name="minimum">
+                   <double>-20.000000000000000</double>
+                  </property>
+                  <property name="maximum">
+                   <double>20.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.010000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QDoubleSpinBox" name="changeYSpinBox">
+                  <property name="decimals">
+                   <number>3</number>
+                  </property>
+                  <property name="minimum">
+                   <double>-20.000000000000000</double>
+                  </property>
+                  <property name="maximum">
+                   <double>20.000000000000000</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.010000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_5">
+                <item>
+                 <widget class="QPushButton" name="restoreCoordsButton">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="text">
+                   <string>Отменить</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="changeCoordsButton">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
+                  <property name="text">
+                   <string>Изменить координаты</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QPushButton" name="removeVertexButton">
+                <property name="text">
+                 <string>Удалить вершину</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
     <item>
@@ -146,9 +467,6 @@
       </item>
      </layout>
     </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2"/>
-    </item>
    </layout>
   </widget>
  </widget>
@@ -166,6 +484,20 @@
   <tabstop>clearButton</tabstop>
   <tabstop>resetViewButton</tabstop>
   <tabstop>exportButton</tabstop>
+  <tabstop>mode2DRadioButton</tabstop>
+  <tabstop>mode1DRadioButton</tabstop>
+  <tabstop>tubeWidthSpinBox</tabstop>
+  <tabstop>useTableCheckBox</tabstop>
+  <tabstop>addXSpinBox</tabstop>
+  <tabstop>addYSpinBox</tabstop>
+  <tabstop>addVertexButton</tabstop>
+  <tabstop>verticesListWidget</tabstop>
+  <tabstop>changeXSpinBox</tabstop>
+  <tabstop>changeYSpinBox</tabstop>
+  <tabstop>restoreCoordsButton</tabstop>
+  <tabstop>changeCoordsButton</tabstop>
+  <tabstop>removeVertexButton</tabstop>
+  <tabstop>stepSpinBox</tabstop>
  </tabstops>
  <resources/>
  <connections/>

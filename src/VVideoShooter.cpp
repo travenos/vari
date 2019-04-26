@@ -13,7 +13,10 @@
 #include <QDir>
 #include <QPixmap>
 
-#include <opencv2/opencv.hpp>
+#include <opencv2/videoio.hpp>
+#include <opencv2/videoio/videoio_c.h>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
 
 #include "VVideoShooter.h"
 
@@ -28,13 +31,14 @@ const QString VVideoShooter::DEFAULT_SUFFIX_FILE_NAME("VARI_video");
 const QString VVideoShooter::BASE_VIDEO_FILE_NAME = QStringLiteral("%1%2.") + VVideoShooter::VIDEO_FORMAT;
 const QString VVideoShooter::BASE_SLIDES_DIR_NAME("_VARI_SLIDES_FOR_VIDEO_");
 const QString VVideoShooter::SLIDES_DIR_PATH = QDir::cleanPath(QDir::tempPath() + QDir::separator() + VVideoShooter::BASE_SLIDES_DIR_NAME);
+const int VVideoShooter::DEFAULT_FREQUENCY{25};
 
 VVideoShooter::VVideoShooter():
     VScreenShooter(),
     m_videoDirectory(QDir::homePath())
 {
     VScreenShooter::setDirPath(SLIDES_DIR_PATH);
-    setFrequency(10);
+    setFrequency(DEFAULT_FREQUENCY);
     constructorBody();
 }
 
@@ -121,7 +125,7 @@ void VVideoShooter::stop()
     {
         VScreenShooter::stop();
         waitForSaving();
-        m_pSavingThread.reset(new std::thread(std::bind(&VVideoShooter::saveVideoProcess, this)));
+        m_pSavingThread.reset(new std::thread(&VVideoShooter::saveVideoProcess, this));
     }
 }
 

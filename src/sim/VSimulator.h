@@ -58,6 +58,9 @@ public:
     * Check if time timit mode is on
     */
     bool isTimeLimitModeOn() const ;
+
+    bool isLifetimeConsidered() const;
+
     /**
      * Stop the simulation and reset all nodes states
      */
@@ -117,8 +120,8 @@ public:
                                  bool isPaused=false, bool isTimeLimited=false);
 
     void setResin(const VResin &resin) ;
-    void setInjectionDiameter(double diameter) ;
-    void setVacuumDiameter(double diameter) ;
+    void setInjectionDiameter(float diameter) ;
+    void setVacuumDiameter(float diameter) ;
     void setTemperature(double temperature) ;
     void setVacuumPressure(double pressure) ;
     void setInjectionPressure(double pressure) ;
@@ -127,6 +130,7 @@ public:
     void setS(double s) ;
     void setTimeLimit(double limit);
     void setTimeLimitMode(bool on);
+    void considerLifetime(bool on);
 
 private:
     typedef void(*nodeFunc)(VSimNode::ptr& node);
@@ -150,6 +154,8 @@ private:
      * Vector of pointers to all nodes which can be processed
      */
     VSimNode::const_vector_ptr m_pActiveNodes;
+
+    VSimNode::list_ptr m_pVacuumNodes;
     /**
      * Vector of all triangles which can be processed
      */
@@ -174,6 +180,8 @@ private:
     * Flag used for time limitation mode
     */
     std::atomic<bool> m_timeLimitFlag;
+
+    std::atomic<bool> m_lifetimeLimitFlag;
     /**
      * Vector used for storage of calculation threads
      */
@@ -261,8 +269,8 @@ signals:
     void simulationStopped();
 
     void resinChanged();
-    void injectionDiameterSet(double diameter) ;
-    void vacuumDiameterSet(double diameter) ;
+    void injectionDiameterSet(float diameter) ;
+    void vacuumDiameterSet(float diameter) ;
     void temperatureSet(double temperature) ;
     void vacuumPressureSet(double pressure) ;
     void injectionPressureSet(double pressure) ;
@@ -271,6 +279,7 @@ signals:
     void coefSSet(double s) ;
 
     void timeLimitModeSwitched(bool);
+    void lifetimeConsiderationSwitched(bool);
     void timeLimitSet(double);
 };
 

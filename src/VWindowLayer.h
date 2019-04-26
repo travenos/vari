@@ -15,6 +15,7 @@ class VWindowLayer;
 }
 class VWindowCloth;
 class VWindowPolygon;
+class VSimulationFacade;
 
 class VWindowLayer : public QMainWindow
 {
@@ -33,7 +34,8 @@ public:
 
     static const QColor DEFAULT_COLOR;
 
-    VWindowLayer(QWidget *parent = nullptr);
+    VWindowLayer(QWidget *parent = nullptr,
+                 std::shared_ptr<const VSimulationFacade> p_facade = nullptr);
     virtual ~VWindowLayer();
     void saveParameters() const;
     void loadSavedParameters();
@@ -80,6 +82,7 @@ private:
     VCloth m_material;
     QPolygonF m_polygon;
     double m_characteristicLength;
+    std::shared_ptr<const VSimulationFacade> m_pFacade;
 
 signals:
     void creationFromFileAvailable(const VCloth &material, const QString &fileName,

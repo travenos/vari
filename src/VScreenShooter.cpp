@@ -16,6 +16,8 @@
 #include <QWidget>
 #include <QDir>
 
+#include "VImageTextWriters.h"
+
 #if defined(Q_OS_WIN) || defined (WIN32) || defined(__WIN32__)
 #include <windows.h>
 #define SLEEP(period) Sleep(period)
@@ -85,7 +87,6 @@ inline void VScreenShooter::constructorBody()
     setPeriod(m_period);
     setDirPath(m_baseDirPath);
     m_isWorking.store(false);
-    connect(this, SIGNAL(shouldBeStopped()), this, SLOT(stop()));
 }
 
 VScreenShooter::~VScreenShooter()
@@ -107,7 +108,7 @@ void VScreenShooter::start()
             m_isWorking.store(true);
             m_pStopFlag.reset(new std::atomic<bool>(false));
             m_startTime = clock_t::now();
-            m_takePictureThread.reset(new std::thread(std::bind(&VScreenShooter::pictureCycle, this)));
+            m_takePictureThread.reset(new std::thread(&VScreenShooter::pictureCycle, this));
             emit processStarted();
         }
         else
@@ -203,6 +204,12 @@ const QString& VScreenShooter::getSuffixDirName() const
     return m_suffixDirName;
 }
 
+void VScreenShooter::setImageTextWriter(const std::shared_ptr<const VAbstractImageTextWriter>
+                                        &p_imageTextWriter)
+{
+    m_pImageTextWriter = p_imageTextWriter;
+}
+
 void VScreenShooter::pictureCycle()
 {
     std::shared_ptr< std::atomic<bool> > stopFlag = m_pStopFlag;
@@ -224,7 +231,7 @@ void VScreenShooter::pictureCycle()
 
 inline void VScreenShooter::takePictureWrapper(const std::shared_ptr< std::atomic<bool> > & stopFlag)
 {
-    bool result = true;
+    bool result{true};
     {        
         if(!stopFlag->load())
         {
@@ -234,9 +241,7 @@ inline void VScreenShooter::takePictureWrapper(const std::shared_ptr< std::atomi
                 if (areParametersCorrect())
                 {
                     double seconds = std::chrono::duration_cast<second_t>(clock_t::now() - m_startTime).count();
-                    QString secondsStr = QString::number(seconds, 'f', FILENAME_TIME_PRECISION);
-                    QString fileName = QDir::cleanPath(m_workDirPath + QDir::separator() + BASE_NAME.arg(secondsStr));
-                    result = takePicture(fileName);
+                    result = takePicture(seconds);
                 }
                 else
                     result = false;
@@ -247,7 +252,24 @@ inline void VScreenShooter::takePictureWrapper(const std::shared_ptr< std::atomi
         emit shouldBeStopped();
 }
 
-bool VScreenShooter::takePicture(const QString &fileName) const
+bool VScreenShooter::takePicture(double timeMoment) const
+{
+    QString secondsStr{QString::number(timeMoment, 'f', FILENAME_TIME_PRECISION)};
+    QString fileName{QDir::cleanPath(m_workDirPath + QDir::separator() + BASE_NAME.arg(secondsStr))};
+    QPixmap pixmap;
+    bool pixmapOk{createPixmap(pixmap)};
+    if (pixmapOk)
+    {
+        bool savingOk{pixmap.save(fileName, PICTURE_FORMAT_C)};
+        return savingOk;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+inline bool VScreenShooter::createPixmap(QPixmap &pixmap) const
 {
     QScreen *screen = m_pWidget->windowHandle()->screen();
     if (!screen)
@@ -261,14 +283,14 @@ bool VScreenShooter::takePicture(const QString &fileName) const
     screenRect.getCoords(&sx1, &sy1, &sx2, &sy2);
     if (wx1 < sx1 || wy1 < sy1 || wx2 > sx2 || wy2 > sy2)
         return false;
-    QPixmap originalPixmap;
 #if defined(Q_OS_WIN) || defined (WIN32) || defined(__WIN32__)
-    getWinAPIscreen(wx1, wy1, wx2, wy2, originalPixmap);
+    getWinAPIscreen(wx1, wy1, wx2, wy2, pixmap);
 #else
-    originalPixmap = screen->grabWindow(0, wx1, wy1, wx2-wx1-1, wy2-wy1-1);
+    pixmap = screen->grabWindow(0, wx1, wy1, wx2-wx1-1, wy2-wy1-1);
 #endif
-    bool ok = originalPixmap.save(fileName, PICTURE_FORMAT_C);
-    return ok;
+    if (m_pImageTextWriter)
+        m_pImageTextWriter->writeText(pixmap);
+    return true;
 }
 
 inline bool VScreenShooter::areParametersCorrect() const

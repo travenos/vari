@@ -36,12 +36,14 @@ const QString VWindowLayer::MATERIAL_INFO_TEXT("<html><head/><body>"
 
 const QColor VWindowLayer::DEFAULT_COLOR = QColor(255, 172, 172);
 
-VWindowLayer::VWindowLayer(QWidget *parent) :
+VWindowLayer::VWindowLayer(QWidget *parent,
+                           std::shared_ptr<const VSimulationFacade> p_facade) :
     QMainWindow(parent),
     ui(new Ui::VWindowLayer),
     m_selectedMaterial(false),
     m_selectedFile(false),
-    m_createdGeometry(false)
+    m_createdGeometry(false),
+    m_pFacade(p_facade)
 {
     ui->setupUi(this);
     reset();
@@ -145,7 +147,7 @@ void VWindowLayer::showWindowPolygon()
 {
     if(!m_pWindowPolygon)
     {
-        m_pWindowPolygon.reset(new VWindowPolygon(this));
+        m_pWindowPolygon.reset(new VWindowPolygon(this, m_pFacade));
         connect(m_pWindowPolygon.get(), SIGNAL(polygonAvailable(const QPolygonF &, double)),
                 this, SLOT(m_on_got_polygon(const QPolygonF &, double)));
     }
@@ -208,7 +210,7 @@ void VWindowLayer::m_on_got_polygon(const QPolygonF &polygon, double characteris
 {
     m_polygon = polygon;
     m_characteristicLength = characteristicLength;
-    if (polygon.size() >= VWindowPolygon::MIN_POLYGON_SIZE)
+    if (polygon.size() >= VWindowPolygon::MIN_2D_POLYGON_SIZE)
     {
         ui->geometryStatusLabel->setText(GEOMETRY_MANUAL_TEXT);
         ui->geometryStatusLabel->setStyleSheet(QStringLiteral("QLabel { color : black; }"));
