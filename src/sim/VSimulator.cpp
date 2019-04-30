@@ -482,17 +482,18 @@ inline double VSimulator::getAverageCellDistance() const
 
 inline double VSimulator::getTimeDelta() const
 {
+    static const double EMPIRIC_COEF{60};
     std::lock_guard<std::mutex> locker(*m_pNodesLock);
     if (m_pActiveNodes->size() > 0)
     {
         double n = m_param.getViscosity();                             //[N*s/m2]
         double _l = m_param.getAverageCellDistance();                   //[m]
-        double l_typ = (sqrt((double)m_param.getNumberOfFullNodes())*_l);   //[m]
+        double l_typ = (sqrt((double)m_param.getNumberOfFullNodes() / m_pActiveNodes->size())*_l);   //[m]
         double _K = m_param.getAveragePermeability();                   //[m^2]
         double p_inj = m_param.getInjectionPressure();          //[N/m2]
         double p_vac = m_param.getVacuumPressure();                    //[N/m2]
 
-        double time = n*l_typ*_l/(_K*(p_inj-p_vac));
+        double time = n*l_typ*_l/(_K*(p_inj-p_vac)) * EMPIRIC_COEF;
         return time;
     }
     else
