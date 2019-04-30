@@ -486,15 +486,19 @@ inline double VSimulator::getTimeDelta() const
     std::lock_guard<std::mutex> locker(*m_pNodesLock);
     if (m_pActiveNodes->size() > 0)
     {
-        double n = m_param.getViscosity();                             //[N*s/m2]
-        double _l = m_param.getAverageCellDistance();                   //[m]
-        double l_typ = (sqrt((double)m_param.getNumberOfFullNodes() / m_pActiveNodes->size())*_l);   //[m]
-        double _K = m_param.getAveragePermeability();                   //[m^2]
-        double p_inj = m_param.getInjectionPressure();          //[N/m2]
-        double p_vac = m_param.getVacuumPressure();                    //[N/m2]
+        double p_dif = m_param.getInjectionPressure() - m_param.getVacuumPressure();          //[N/m2]
+        if (p_dif > 0)
+        {
+            double n = m_param.getViscosity();                             //[N*s/m2]
+            double _l = m_param.getAverageCellDistance();                   //[m]
+            double l_typ = (sqrt((double)m_param.getNumberOfFullNodes() / m_pActiveNodes->size())*_l);   //[m]
+            double _K = m_param.getAveragePermeability();                   //[m^2]
 
-        double time = n*l_typ*_l/(_K*(p_inj-p_vac)) * EMPIRIC_COEF;
-        return time;
+            double time = n * l_typ * _l / (_K * p_dif) * EMPIRIC_COEF;
+            return time;
+        }
+        else
+            return 0;
     }
     else
         return 0;
