@@ -25,6 +25,8 @@ protected:
     static const int FONT_SIZE;
     static const int LINE_OFFSET;
     static const int STRING_LENGTH;
+    static const int UP_OFFSET;
+    static const int LEFT_OFFSET;
 
     virtual QString createString() const;
     virtual QFont getFont() const;

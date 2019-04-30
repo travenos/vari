@@ -79,6 +79,7 @@ protected:
     static const QString PICTURE_FORMAT;
     static const QString BASE_NAME;
     static const QString DEFAULT_SUFFIX_DIR_NAME;
+    static const QString DEFAULT_BASE_DIR;
     static const int FILENAME_TIME_PRECISION;
 signals:
     void processStarted();

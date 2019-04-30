@@ -1464,18 +1464,22 @@ void VWindowMain::m_on_layers_swapped(uint layer1, uint layer2)
 void VWindowMain::m_on_slideshow_started()
 {
     ui->slideshowBox->setEnabled(false);
+#ifndef __linux__
     setWindowFlags((windowFlags() & ~Qt::WindowStaysOnBottomHint) | ON_TOP_FLAGS);
     show();
+#endif
 }
 
 void VWindowMain::m_on_slideshow_stopped()
 {
     ui->slideshowBox->setEnabled(true);
+#ifndef __linux__
     if (!m_pVideoShooter->isWorking())
     {
         setWindowFlags((windowFlags() & ~ON_TOP_FLAGS) | Qt::WindowStaysOnBottomHint);
         show();
     }
+#endif
 }
 
 void VWindowMain::m_on_slideshow_directory_changed()
@@ -1499,18 +1503,22 @@ void VWindowMain::m_on_slideshow_suffix_dirname_changed()
 void VWindowMain::m_on_video_started()
 {
     ui->videoBox->setEnabled(false);
+#ifndef __linux__
     setWindowFlags((windowFlags() & ~Qt::WindowStaysOnBottomHint) | ON_TOP_FLAGS);
     show();
+#endif
 }
 
 void VWindowMain::m_on_video_stopped()
 {
     ui->videoBox->setEnabled(true);
+#ifndef __linux__
     if (!m_pSlideshowShooter->isWorking())
     {
         setWindowFlags((windowFlags() & ~ON_TOP_FLAGS) | Qt::WindowStaysOnBottomHint);
         show();
     }
+#endif
 }
 
 void VWindowMain::m_on_video_directory_changed()
