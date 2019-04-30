@@ -338,6 +338,8 @@ private slots:
     void on_resetTableVacuumDiameterButton_clicked();
     void on_saveTableVacuumDiameterButton_clicked();
     void on_timeConsiderationCheckbox_clicked(bool checked);
+    void on_actionFolderSlideshow_triggered();
+    void on_actionFolderVideo_triggered();
 };
 
 #endif // _VWINDOWMAIN_H

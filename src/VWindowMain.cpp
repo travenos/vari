@@ -12,6 +12,7 @@
 #include <QSettings>
 #include <QTimeZone>
 #include <QCloseEvent>
+#include <QDesktopServices>
 
 #include "VWindowMain.h"
 #include "ui_VWindowMain.h"
@@ -87,8 +88,10 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_isSaved(false)
 {
     ui->setupUi(this);
-    ui->splitter->setStretchFactor(0,1);
-    ui->splitter->setStretchFactor(1,0);
+    ui->splitter->setStretchFactor(0, 1);
+    ui->splitter->setStretchFactor(1, 0);
+    ui->simParamSplitter->setStretchFactor(0, 0);
+    ui->simParamSplitter->setStretchFactor(1, 1);
     ui->layerParamBox->setVisible(false);
     ui->modelInfoLabel->setVisible(false);
     setContextMenuPolicy(Qt::NoContextMenu);
@@ -104,7 +107,7 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_pSlideshowShooter->setImageTextWriter(m_pImgTextWriter);
     configureVideoShooter();
     QDir(VVideoShooter::SLIDES_DIR_PATH).removeRecursively();
-    loadShootersSettings();    
+    loadShootersSettings();
     this->setWindowTitle(QCoreApplication::applicationName());
 }
 
@@ -1008,6 +1011,8 @@ void VWindowMain::saveSizes()
     settings.setValue("window/windowState", saveState());
     settings.setValue("window/splitter", ui->splitter->saveGeometry());
     settings.setValue("window/splitterState", ui->splitter->saveState());
+    settings.setValue("window/simParamSplitter", ui->simParamSplitter->saveGeometry());
+    settings.setValue("window/simParamSplitterState", ui->simParamSplitter->saveState());
     settings.sync();
 }
 
@@ -1018,6 +1023,8 @@ void VWindowMain::loadSizes()
     restoreState(settings.value("window/windowState").toByteArray());
     ui->splitter->restoreGeometry(settings.value("window/splitter").toByteArray());
     ui->splitter->restoreState(settings.value("window/splitterState").toByteArray());
+    ui->simParamSplitter->restoreGeometry(settings.value("window/simParamSplitter").toByteArray());
+    ui->simParamSplitter->restoreState(settings.value("window/simParamSplitterState").toByteArray());
 }
 
 /**
@@ -2020,4 +2027,14 @@ void VWindowMain::on_saveTableVacuumDiameterButton_clicked()
 void VWindowMain::on_timeConsiderationCheckbox_clicked(bool checked)
 {
     m_pFacade->considerLifetime(checked);
+}
+
+void VWindowMain::on_actionFolderSlideshow_triggered()
+{
+    QDesktopServices::openUrl(QUrl::fromLocalFile(m_pSlideshowShooter->getDirPath()));
+}
+
+void VWindowMain::on_actionFolderVideo_triggered()
+{
+    QDesktopServices::openUrl(QUrl::fromLocalFile(m_pVideoShooter->getDirPath()));
 }
