@@ -11,8 +11,8 @@
 #include <QVariant>
 
 #include "VModelImport.h"
+#include "structures/VInjectionVacuum.h"
 #include "structures/VExceptions.h"
-#include "structures/VTable.h"
 
 #define READ_ELEMENTS(body) \
     while (!(xmlReader.isEndElement() && !xmlReader.name().compare(tags._NAME)) && !xmlReader.atEnd()) \
@@ -27,7 +27,6 @@
 VModelImport::VModelImport():
     m_pInfo(new VSimulationInfo),
     m_pParam(new VSimulationParameters),
-    m_pTable(new VTable),
     m_pInjectionVacuum(new VInjectionVacuum),
     m_pLayersProcessor(new VLayersProcessor),
     m_useTableParameters(true),
@@ -46,11 +45,6 @@ const std::shared_ptr<VSimulationInfo>& VModelImport::getInfo() const
 const std::shared_ptr<VSimulationParameters> &VModelImport::getSimulationParameters() const
 {
     return m_pParam;
-}
-
-const std::shared_ptr<VTable>& VModelImport::getTable() const
-{
-    return m_pTable;
 }
 
 const std::shared_ptr<VInjectionVacuum>& VModelImport::getInjectionVacuum() const
@@ -97,8 +91,6 @@ void VModelImport::loadFromFile(const QString &filename)
                 loadInfo(xmlReader);
             else if (!xmlReader.name().compare(_xPARAM_TAGS._NAME))
                 loadParameters(xmlReader);
-            else if (!xmlReader.name().compare(_xTABLE_TAGS._NAME))
-                loadTable(xmlReader);
             else if (!xmlReader.name().compare(_xUSE_INJECTION_VACUUM_TAGS._NAME))
                 loadUseInjectionVacuum(xmlReader);
             else if (!xmlReader.name().compare(_xPAUSED_TAGS._NAME))
@@ -197,29 +189,6 @@ void VModelImport::loadResin(QXmlStreamReader &xmlReader, VSimulationParameters 
             resin.name = attr.value().toString();
     }
     param.setResin(resin);
-}
-
-
-void VModelImport::loadTable(QXmlStreamReader& xmlReader)
-{
-    auto &tags = _xTABLE_TAGS;
-    READ_ELEMENTS
-    (
-        if (!xmlReader.name().compare(tags._xINJECTION_VACUUM_TAGS._NAME))
-        {
-            VInjectionVacuum injectionVacuum;
-            readInjectionVacuum(xmlReader, injectionVacuum);
-            m_pTable->setInjectionVacuum(injectionVacuum);
-        }
-        if (!xmlReader.name().compare(tags.SIZE))
-        {
-            QString tableSizeStr = xmlReader.readElementText();
-            std::vector<float> tableSizeVector;
-            makeVector(tableSizeStr, tableSizeVector);
-            if(tableSizeVector.size() > 1)
-                m_pTable->setSize(tableSizeVector.at(0), tableSizeVector.at(1));
-        }
-    );
 }
 
 void VModelImport::readInjectionVacuum(QXmlStreamReader& xmlReader, VInjectionVacuum &injectionVacuum)

@@ -15,7 +15,6 @@
 
 VModelExport::VModelExport(const VSimulationInfo &info,
                            const VSimulationParameters &param,
-                           const VTable &table,
                            const VInjectionVacuum &injectionVacuum,
                            const VLayersProcessor::const_ptr &layersProcessor,
                            bool useTableParameters,
@@ -23,7 +22,6 @@ VModelExport::VModelExport(const VSimulationInfo &info,
                            bool timeLimited):
     m_info(info),
     m_param(param),
-    m_table(table),
     m_injectionVacuum(injectionVacuum),
     m_pLayersProcessor(layersProcessor),
     m_useTableParameters(useTableParameters),
@@ -67,7 +65,6 @@ void VModelExport::saveToFile(const QString &filename)
     xmlWriter.writeStartElement(HEAD_TAG_NAME);
     saveInfo(xmlWriter);
     saveParameters(xmlWriter);
-    saveTable(xmlWriter);
     saveUseInjectionVacuum(xmlWriter);
     savePaused(xmlWriter);
     saveTimeLimit(xmlWriter);
@@ -119,19 +116,6 @@ void VModelExport::saveResin(QXmlStreamWriter &xmlWriter, const VResin &resin)
     xmlWriter.writeAttribute(tags.LIFETIME_TEMP_COEF, QString::number(resin.lifetimeTempcoef));
     xmlWriter.writeAttribute(tags.DEFAULT_LIFETIME, QString::number(resin.defaultLifetime));
     xmlWriter.writeAttribute(tags.MATERIAL_NAME, resin.name);
-    xmlWriter.writeEndElement();
-}
-
-void VModelExport::saveTable(QXmlStreamWriter& xmlWriter)
-{
-    auto &tags = _xTABLE_TAGS;
-    xmlWriter.writeStartElement(tags._NAME);
-
-    xmlWriter.writeStartElement(tags.SIZE);
-    xmlWriter.writeCharacters(createString(m_table.getSize()));
-    xmlWriter.writeEndElement();
-
-    writeInjectionVacuum(xmlWriter, m_table.getInjectionVacuum());
     xmlWriter.writeEndElement();
 }
 

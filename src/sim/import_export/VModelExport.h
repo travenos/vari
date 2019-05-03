@@ -8,7 +8,7 @@
 
 #include "VModelImportExport.h"
 #include "VLayersProcessor.h"
-#include "structures/VTable.h"
+#include "structures/VInjectionVacuum.h"
 
 class QXmlStreamWriter;
 
@@ -18,7 +18,6 @@ public:
     VModelExport() = delete;
     VModelExport(const VSimulationInfo &info,
                  const VSimulationParameters &param,
-                 const VTable &table,
                  const VInjectionVacuum &injectionVacuum,
                  const VLayersProcessor::const_ptr &layersProcessor,
                  bool useTableParameters = true,
@@ -26,7 +25,6 @@ public:
                  bool timeLimited = false);
     void setInfo(const VSimulationInfo &info);
     void setSimulationParameters(const VSimulationParameters &param);
-    void setTable(const VTable &table);
     void setInjectionVacuum(const VInjectionVacuum &injectionVacuum);
     void setLayersProcessor(const VLayersProcessor::const_ptr &layersProcesor);
     void setUseTableParameters(bool useTableParameters);
@@ -41,7 +39,6 @@ private:
 
     void saveResin(QXmlStreamWriter &xmlWriter, const VResin &resin);
 
-    void saveTable(QXmlStreamWriter& xmlWriter);
     void writeInjectionVacuum(QXmlStreamWriter& xmlWriter, const VInjectionVacuum &injectionVacuum);
     void saveUseInjectionVacuum(QXmlStreamWriter& xmlWriter);
 
@@ -86,7 +83,6 @@ private:
 
     VSimulationInfo m_info;
     VSimulationParameters m_param;
-    VTable m_table;
     VInjectionVacuum m_injectionVacuum;
     VLayersProcessor::const_ptr m_pLayersProcessor;
     bool m_useTableParameters;

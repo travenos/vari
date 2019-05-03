@@ -142,7 +142,8 @@ void VSimulationFacade::startSimulation()
 {
     if (!m_pLayersProcessor->areLayersConnected())
         m_pLayersProcessor->createConnections();
-    applyInjectionAndVacuumPoints();
+    if (!m_pSimulator->isPaused())
+        applyInjectionAndVacuumPoints();
     m_pSimulator->start();
 }
 
@@ -319,7 +320,6 @@ void VSimulationFacade::loadModel(const QString &filename)
                                           loader.getPaused(), loader.getTimeLimited());
     m_pInjectionVacuum = loader.getInjectionVacuum();
     useTableParameters(loader.getUseTableParameters());
-    setTable(loader.getTable());
     m_pGraphicsViewer->viewFromAbove();
     emit modelLoaded();
     emit filenameChanged(filename);
@@ -332,7 +332,7 @@ void VSimulationFacade::saveModel(const QString &filename)
     VSimulationParameters param = m_pSimulator->getSimulationParameters();
     bool paused = m_pSimulator->isPaused();
     bool timeLimited = m_pSimulator->isTimeLimitModeOn();
-    VModelExport saver(info, param, *m_pTable, *m_pInjectionVacuum,
+    VModelExport saver(info, param, *m_pInjectionVacuum,
                        m_pLayersProcessor, m_useTableParameters, paused, timeLimited);
     saver.saveToFile(filename);
     emit modelSaved();
@@ -560,7 +560,8 @@ void VSimulationFacade::showInjectionPoint()
     cancelDrag();
     cancelWaitingForVacuumPointSelection();
     cancelWaitingForInjectionPointSelection();
-    applyInjectionAndVacuumPoints();
+    if (isSimulationStopped())
+        applyInjectionAndVacuumPoints();
     m_pGraphicsViewer->showInjectionPoint();
 }
 
@@ -570,7 +571,8 @@ void VSimulationFacade::showVacuumPoint()
     cancelDrag();
     cancelWaitingForVacuumPointSelection();
     cancelWaitingForInjectionPointSelection();
-    applyInjectionAndVacuumPoints();
+    if (isSimulationStopped())
+        applyInjectionAndVacuumPoints();
     m_pGraphicsViewer->showVacuumPoint();
 }
 
