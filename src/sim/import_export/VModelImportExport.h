@@ -146,6 +146,7 @@ protected:
             const QString TRIANGLE_MAX_ID{QStringLiteral("maxTriangId")};
             const QString NUMBER_OF_NODES{QStringLiteral("nodesCount")};
             const QString NUMBER_OF_TRIANGLES{QStringLiteral("triangCount")};
+            const QString LAYER_NAME{QStringLiteral("name")};
 
             const VXmlClothTags _xCLOTH_TAGS;
             const VXmlNodesTags _xNODES_TAGS;

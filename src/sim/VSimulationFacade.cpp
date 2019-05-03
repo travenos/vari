@@ -130,6 +130,8 @@ void VSimulationFacade::initLayersProcessor()
             this, SIGNAL(layerRemoved(uint)));
     connect(m_pLayersProcessor.get(), SIGNAL(materialChanged(uint)),
             this, SIGNAL(materialChanged(uint)));
+    connect(m_pLayersProcessor.get(), SIGNAL(nameChanged(uint)),
+            this, SIGNAL(layerNameChanged(uint)));
     connect(m_pLayersProcessor.get(), SIGNAL(layerAdded()),
             this, SIGNAL(layerAdded()));
     connect(m_pLayersProcessor.get(), SIGNAL(layersCleared()),
@@ -358,6 +360,7 @@ bool VSimulationFacade::isLayerEnabled(uint layer) const
 }
 
 void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &filename,
+                                         const QString &layerName,
                                          VLayerAbstractBuilder::VUnit units)
 {
     QFile file(filename);
@@ -388,6 +391,7 @@ void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &
     {
         try
         {
+            p_layerBuilder->setLayerName(layerName);
             m_pLayersProcessor->addLayer(p_layerBuilder);
             delete p_layerBuilder;
             updateConfiguration();
@@ -404,10 +408,12 @@ void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &
 }
 
 void VSimulationFacade::newLayerFromPolygon(const VCloth &material, const QPolygonF &polygon,
-                                            double characteristicLength)
+                                            double characteristicLength,
+                                            const QString &layerName)
 {
     VLayerManualBuilder * p_layerBuilder;
     p_layerBuilder = new VLayerManualBuilder(polygon, material, characteristicLength);
+    p_layerBuilder->setLayerName(layerName);
     try
     {
         m_pLayersProcessor->addLayer(p_layerBuilder);
@@ -864,6 +870,17 @@ void VSimulationFacade::setTable(const std::shared_ptr<VTable> &p_table)
 std::vector<std::vector<QPolygonF> > VSimulationFacade::getAllActivePolygons() const
 {
     return m_pLayersProcessor->getAllActivePolygons();
+}
+
+const QString & VSimulationFacade::getLayerName(uint layer) const
+{
+    return m_pLayersProcessor->getLayerName(layer);
+}
+
+void VSimulationFacade::setLayerName(uint layer, const QString &name)
+{
+    m_pLayersProcessor->setLayerName(layer, name);
+    emit configUpdated();
 }
 
 void VSimulationFacade::m_on_got_point(const QVector3D &point)

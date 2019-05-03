@@ -53,3 +53,13 @@ uint VLayerAbstractBuilder::getTriangleMaxId() const
 {
     return m_triangleMaxId;
 }
+
+void VLayerAbstractBuilder::setLayerName(const QString &layerName)
+{
+    m_layerName = layerName;
+}
+
+const QString & VLayerAbstractBuilder::getLayerName() const
+{
+    return m_layerName;
+}

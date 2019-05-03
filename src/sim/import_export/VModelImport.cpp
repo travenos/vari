@@ -309,6 +309,7 @@ void VModelImport::loadLayer(QXmlStreamReader& xmlReader, std::deque<VLayer::ptr
     bool isEnabled=true, isVisible=true;
     uint nodeMinId=0, nodeMaxId=0, triangleMinId=0, triangleMaxId=0;
     uint nodesNumber=0, trianglesNumber=0;
+    QString layerName;
     VSimNode::map_ptr nodes(new VSimNode::map_t);
     VSimTriangle::list_ptr triangles(new VSimTriangle::list_t);
     std::vector<VTriangleInfo> trianglesInfos;
@@ -331,6 +332,8 @@ void VModelImport::loadLayer(QXmlStreamReader& xmlReader, std::deque<VLayer::ptr
             nodesNumber = attr.value().toUInt();
         else if (!attr.name().compare(tags.NUMBER_OF_TRIANGLES))
             trianglesNumber = attr.value().toUInt();
+        else if (!attr.name().compare(tags.LAYER_NAME))
+            layerName = attr.value().toString();
     }
     nodes->reserve(nodesNumber);
     m_allNodes.reserve(m_allNodes.size() + nodesNumber);
@@ -349,6 +352,7 @@ void VModelImport::loadLayer(QXmlStreamReader& xmlReader, std::deque<VLayer::ptr
     layer->markActive(isEnabled);
     layer->setVisible(isVisible);
     layer->setMinMaxIds(nodeMinId, nodeMaxId, triangleMinId, triangleMaxId);
+    layer->setName(layerName);
     layers.push_back(layer);
 }
 

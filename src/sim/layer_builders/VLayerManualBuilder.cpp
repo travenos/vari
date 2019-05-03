@@ -63,6 +63,7 @@ const VLayer::ptr& VLayerManualBuilder::build()
         throw e;
     }
     tempFile.remove();
+    m_pLayer->setName(m_layerName);
     return m_pLayer;
 }
 

@@ -77,9 +77,10 @@ public:
     void cancelWaitingForVacuumPointSelection();
 
     void newLayerFromFile(const VCloth &material, const QString &filename,
+                          const QString &layerName,
                           VLayerAbstractBuilder::VUnit units=VLayerAbstractBuilder::M);
     void newLayerFromPolygon(const VCloth &material, const QPolygonF &polygon,
-                             double characteristicLength);
+                             double characteristicLength, const QString &layerName);
 
     void showInjectionPoint();
     void showVacuumPoint();
@@ -124,6 +125,9 @@ public:
 
     std::vector<std::vector<QPolygonF> > getAllActivePolygons() const;
 
+    const QString & getLayerName(uint layer) const;
+    void setLayerName(uint layer, const QString &name);
+
 public slots:
     void updateGraphicsPositions();
 
@@ -159,6 +163,7 @@ signals:
     void layerRemoved(uint);
     void layerEnabled(uint, bool);
     void materialChanged(uint);
+    void layerNameChanged(uint);
     void layerAdded();
     void layersCleared();
     void injectionPointSet();

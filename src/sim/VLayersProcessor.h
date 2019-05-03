@@ -86,6 +86,9 @@ public:
     void removeConnections() ;
     void resetNodesVolumes() ;
 
+    const QString & getLayerName(uint layer) const;
+    void setLayerName(uint layer, const QString &name);
+
 private:
     void updateActiveElementsVectors() ;
     void updateNextIds();
@@ -110,6 +113,7 @@ signals:
     void layerRemoved(uint);
     void layerEnabled(uint, bool);
     void materialChanged(uint);
+    void nameChanged(uint);
     void layerAdded();
     void layersCleared();
     void layersLoaded();

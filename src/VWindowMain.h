@@ -65,6 +65,8 @@ public:
     static const QString SAVING_VIDEO_INFO;
     static const Qt::WindowFlags ON_TOP_FLAGS;
 
+    static const QStringList LAYERS_TABLE_LABELS;
+
     explicit VWindowMain(QWidget *parent = nullptr);
     ~VWindowMain();
 
@@ -81,10 +83,11 @@ private:
     void deleteWindowLayer();
     void deleteWindowCloth();
     void deleteWindowResin();
-    void addLayerFromFile(const VCloth& material,const QString& filename,
+    void addLayerFromFile(const VCloth& material, const QString& filename, const QString &layerName,
                           VLayerAbstractBuilder::VUnit units);
     void addLayerFromPolygon(const VCloth& material, const QPolygonF& polygon,
-                             double characteristicLength);
+                             double characteristicLength,
+                             const QString& layerName);
     void selectLayer();
     void enableLayer(bool enable);
     void setVisibleLayer(bool visible);
@@ -97,10 +100,11 @@ private:
 
     void removeLayerFromList(int layer);
     void updateLayerMaterialInfo(int layer);
+    void updateLayerName(int layer);
     void showColor(const QColor &color);
     void markLayerAsEnabled(int layer, bool enable);
     void markLayerAsVisible(int layer, bool visible);
-    void reloadLayersList();
+    void reloadLayersTable();
 
     void updateResinInfo();
 
@@ -207,12 +211,14 @@ private slots:
     void m_on_layers_cleared();
     void m_on_got_cloth(const QString & name, float cavityheight, float permeability, float porosity);
     void m_on_got_resin(const QString & name , float viscosity, float viscTempcoef, float lifetime, float lifetimeTempcoef);
-    void m_on_layer_creation_from_file_available(const VCloth& material, const QString& filename,
+    void m_on_layer_creation_from_file_available(const VCloth& material, const QString& filename,                                                 
+                                                 const QString& layerName,
                                                  VLayerAbstractBuilder::VUnit units);
     void m_on_layer_creation_manual_available(const VCloth& material, const QPolygonF& polygon,
-                                              double characteristicLength);
+                                              double characteristicLength, const QString &layerName);
     void m_on_layer_removed(uint layer);
     void m_on_material_changed(uint layer);
+    void m_on_layer_name_changed(uint layer);
     void m_on_layer_enabled(uint layer, bool enable);
     void m_on_layer_visibility_changed(uint layer, bool visible);
     void m_on_layer_added();
@@ -262,7 +268,6 @@ private slots:
     void m_on_use_table_parameters_set(bool use);
 
     void on_addLayerButton_clicked();
-    void on_layersListWidget_itemSelectionChanged();
     void on_layerEnableCheckBox_clicked(bool checked);
     void on_layerVisibleCheckBox_clicked(bool checked);
     void on_layerRemoveButton_clicked();
@@ -340,6 +345,10 @@ private slots:
     void on_timeConsiderationCheckbox_clicked(bool checked);
     void on_actionFolderSlideshow_triggered();
     void on_actionFolderVideo_triggered();
+    void on_layersTableWidget_itemSelectionChanged();
+    void on_layerNameEdit_textEdited(const QString &);
+    void on_resetLayerNameButton_clicked();
+    void on_saveLayerNameButton_clicked();
 };
 
 #endif // _VWINDOWMAIN_H

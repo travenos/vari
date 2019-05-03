@@ -369,6 +369,17 @@ void VLayersProcessor::resetNodesVolumes()
     }
 }
 
+const QString & VLayersProcessor::getLayerName(uint layer) const
+{
+    return m_layers.at(layer)->getName();
+}
+
+void VLayersProcessor::setLayerName(uint layer, const QString &name)
+{
+    m_layers.at(layer)->setName(name);
+    emit nameChanged(layer);
+}
+
 void VLayersProcessor::putOnTop(uint layer)
 {
     if (m_layers.size() > 1)

@@ -209,6 +209,7 @@ void VModelExport::saveLayer(QXmlStreamWriter &xmlWriter, uint layer)
                              QString::number(m_pLayersProcessor->getLayerNodesNumber(layer)));
     xmlWriter.writeAttribute(tags.NUMBER_OF_TRIANGLES,
                              QString::number(m_pLayersProcessor->getLayerTrianglesNumber(layer)));
+    xmlWriter.writeAttribute(tags.LAYER_NAME, m_pLayersProcessor->getLayerName(layer));
     saveCloth(xmlWriter, m_pLayersProcessor->getMaterial(layer));
     saveNodes(xmlWriter, m_pLayersProcessor->getLayerNodes(layer));
     saveTriangles(xmlWriter, m_pLayersProcessor->getLayerTriangles(layer));

@@ -332,3 +332,13 @@ void VLayer::disconnect()
         nd_ptr->clearNeighboursMutually(VSimNode::OTHER);
     }
 }
+
+void VLayer::setName(const QString &layerName)
+{
+    m_layerName = layerName;
+}
+
+const QString & VLayer::getName() const
+{
+    return m_layerName;
+}
