@@ -317,7 +317,20 @@ bool VLayer::connectWith(const std::list<VLayer::ptr> &layersList)
                         result = true;
                     }
                 }
-                break;
+
+                if (!candidatesList.empty())
+                    break;
+                else
+                {
+                    VSimNode::ptr bestNeighbour;
+                    bestNeighbour = otherLayer->m_nodesVolume.getNearestNode(nd_ptr->getPosition());
+                    if (bestNeighbour)
+                    {
+                        nd_ptr->addNeighbourMutually(bestNeighbour, VSimNode::OTHER);
+                        result = true;
+                        break;
+                    }
+                }
             }
         }
     }

@@ -393,11 +393,11 @@ VSimNode::ptr VNodesVolume::getNearestNode(const QVector3D &point) const
     while(true)
     {
         int r_sq = r * r;
-        for(int i = std::max(i0-r, 0); i <= std::min(i0+r, m_arrSizes[0] - 1); ++i)
+        for(int i{std::max(i0 - r, 0)}, endI{std::min(i0 + r, m_arrSizes[0] - 1)}; i <= endI; ++i)
         {
             int d_i_sq = (i - i0) * (i - i0);
             int r_j = static_cast<int>(sqrt(r_sq - d_i_sq) + 0.5);
-            for(int j = std::max(j0-r_j, 0); i <= std::min(j0+r_j, m_arrSizes[1] - 1); ++j)
+            for(int j{std::max(j0 - r_j, 0)}, endJ{std::min(j0 + r_j, m_arrSizes[1] - 1)}; j <= endJ; ++j)
             {
                 int d_j_sq = (j - j0) * (j - j0);
                 int k_base = static_cast<int>(sqrt(r_sq - d_i_sq - d_j_sq) + 0.5);
