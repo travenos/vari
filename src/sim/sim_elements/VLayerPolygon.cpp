@@ -20,7 +20,8 @@
  * VLayerPolygon implementation
  */
 
-const float VLayerPolygon::MIN_STEP{0.001f};
+const float VLayerPolygon::MIN_STEP{0.0001f};
+const double VLayerPolygon::APPROX_EPSILON{3.0};
 
 VLayerPolygon::VLayerPolygon()
 {
@@ -147,7 +148,7 @@ void VLayerPolygon::createPolygons(const VSimTriangle::const_list_ptr &triangles
             pts.at(0).at(vertexIndex).x = x;
             pts.at(0).at(vertexIndex).y = y;
         }
-        cv::drawContours(img, pts, 0, FILL_COLOR, -1, cv::LINE_4);
+        cv::drawContours(img, pts, 0, FILL_COLOR, -1, cv::LINE_8);
     }
 
     std::vector<std::vector<cv::Point> > contours;
@@ -161,11 +162,13 @@ void VLayerPolygon::createPolygons(const VSimTriangle::const_list_ptr &triangles
     for (size_t i{0}, size{std::min(contours.size(), hierarchy.size())}; i < size; ++i)
     {
         const std::vector<cv::Point> &currentContour = contours.at(i);
+        std::vector<cv::Point> approxContour;
+        cv::approxPolyDP(currentContour, approxContour, APPROX_EPSILON, false);
         m_polygons.push_back(QPolygonF());
         m_polygons.back().reserve(static_cast<int>(contours.size()));
-        for (size_t j{0}, contourSize{currentContour.size()}; j < contourSize; ++j)
+        for (size_t j{0}, contourSize{approxContour.size()}; j < contourSize; ++j)
         {
-            QPointF point{getPoint(currentContour.at(j).x, currentContour.at(j).y)};
+            QPointF point{getPoint(approxContour.at(j).x, approxContour.at(j).y)};
             m_polygons.back().append(point);
         }
         const cv::Vec4i &currentHierarch = hierarchy.at(i);

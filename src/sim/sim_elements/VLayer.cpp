@@ -9,7 +9,7 @@
 #include "VLayer.h"
 
 const float VLayer::SEARCH_ZONE_PART{0.1f};
-const float VLayer::IMG_STEP_COEF{0.1f};
+const float VLayer::IMG_STEP_COEF{0.05f};
 
 /**
  * VLayer implementation
