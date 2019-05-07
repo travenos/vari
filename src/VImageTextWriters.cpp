@@ -84,8 +84,7 @@ const QString VSimInfoImageTextWriter::INFO_STRING{"Время моделиро�
 
 const int VSimInfoImageTextWriter::PRECISION{6};
 
-VSimInfoImageTextWriter::VSimInfoImageTextWriter(const std::shared_ptr<const VSimulationFacade>
-                                                 p_facade):
+VSimInfoImageTextWriter::VSimInfoImageTextWriter(const std::shared_ptr<const VSimulationFacade> &p_facade):
     m_pFacade{p_facade}
 {
 }
