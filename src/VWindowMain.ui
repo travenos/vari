@@ -304,6 +304,13 @@
                     </widget>
                    </item>
                    <item>
+                    <widget class="QPushButton" name="layerEditButton">
+                     <property name="text">
+                      <string>Редактировать слой</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
                     <widget class="QPushButton" name="layerCutButton">
                      <property name="text">
                       <string>Обрезать слой</string>
@@ -1845,6 +1852,7 @@
   <tabstop>selectMaterialClothButton</tabstop>
   <tabstop>layerRemoveButton</tabstop>
   <tabstop>layerDuplicateButton</tabstop>
+  <tabstop>layerEditButton</tabstop>
   <tabstop>layerCutButton</tabstop>
   <tabstop>addLayerButton</tabstop>
   <tabstop>sortLayersButton</tabstop>

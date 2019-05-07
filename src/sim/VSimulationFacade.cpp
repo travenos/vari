@@ -910,6 +910,11 @@ std::vector<std::vector<QPolygonF> > VSimulationFacade::getAllActivePolygons() c
     return m_pLayersProcessor->getAllActivePolygons();
 }
 
+const std::vector<QPolygonF> & VSimulationFacade::getPolygons(uint layer) const
+{
+    return m_pLayersProcessor->getPolygons(layer);
+}
+
 const QString & VSimulationFacade::getLayerName(uint layer) const
 {
     return m_pLayersProcessor->getLayerName(layer);
@@ -919,6 +924,26 @@ void VSimulationFacade::setLayerName(uint layer, const QString &name)
 {
     m_pLayersProcessor->setLayerName(layer, name);
     emit configUpdated();
+}
+
+void VSimulationFacade::rebuildLayer(const QPolygonF &polygon, double characteristicLength,
+                                     uint layer)
+{
+    if(layer < getLayersNumber() && isSimulationStopped())
+    {
+        VLayerManualBuilder builder(polygon, *m_pLayersProcessor->getMaterial(layer), characteristicLength);
+        builder.setLayerName(m_pLayersProcessor->getLayerName(layer));
+        bool visible{m_pLayersProcessor->isLayerVisible(layer)};
+        bool enabled{m_pLayersProcessor->isLayerEnabled(layer)};
+        m_pLayersProcessor->addLayer(&builder);
+        m_pLayersProcessor->setVisibleLayer(0, visible);
+        m_pLayersProcessor->enableLayer(0, enabled);
+        m_pLayersProcessor->swapLayers(0, layer + 1);
+        m_pLayersProcessor->removeLayer(0);
+        updateConfiguration();
+    }
+    else
+        throw VImportException();
 }
 
 void VSimulationFacade::m_on_got_point(const QVector3D &point)

@@ -37,6 +37,7 @@ public:
 
     void moveUp(uint layer);
     void moveDown(uint layer);
+    void swapLayers(uint layer1, uint layer2);
     void sort();
 
     void reset() ;

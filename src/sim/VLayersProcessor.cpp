@@ -79,29 +79,35 @@ void VLayersProcessor::removeLayer(uint layer)
 
 void VLayersProcessor::setVisibleLayer(uint layer, bool visible) 
 {
-    m_layers.at(layer)->setVisible(visible);
-    emit layerVisibilityChanged(layer, visible);
+    if (m_layers.at(layer)->isVisible() != visible)
+    {
+        m_layers.at(layer)->setVisible(visible);
+        emit layerVisibilityChanged(layer, visible);
+    }
 }
 
 void VLayersProcessor::enableLayer(uint layer, bool enable) 
 {
-    if(enable)
+    if (enable != m_layers.at(layer)->isActive())
     {
-        if (!(m_layers.at(layer)->isActive()))
+        if(enable)
         {
-            m_layersConnected = false;
+            if (!(m_layers.at(layer)->isActive()))
+            {
+                m_layersConnected = false;
+            }
         }
+        else if (m_layers.at(layer)->isActive())
+        {
+            m_layers.at(layer)->disconnect();
+            m_layers.at(layer)->reset();
+        }
+        m_layers.at(layer)->markActive(enable);
+        sortLayers(layer);
+        updateActiveElementsVectors();
+        emit layerEnabled(layer, enable);
+        emit layerVisibilityChanged(layer, isLayerVisible(layer));
     }
-    else if (m_layers.at(layer)->isActive())
-    {
-        m_layers.at(layer)->disconnect();
-        m_layers.at(layer)->reset();
-    }
-    m_layers.at(layer)->markActive(enable);
-    sortLayers(layer);
-    updateActiveElementsVectors();
-    emit layerEnabled(layer, enable);
-    emit layerVisibilityChanged(layer, isLayerVisible(layer));
 }
 
 void VLayersProcessor::setMaterial(uint layer, const VCloth& material) 
@@ -182,6 +188,16 @@ void VLayersProcessor::moveDown(uint layer)
         m_layers.at(layer + 1u)->setVerticalPosition(otherLayerZ);
         std::swap(m_layers.at(layer), m_layers.at(layer + 1u));
         m_layersConnected = false;
+    }
+}
+
+void VLayersProcessor::swapLayers(uint layer1, uint layer2)
+{
+    if (layer1 < m_layers.size() && layer2 < m_layers.size() && layer1 != layer2)
+    {
+        std::lock_guard<std::mutex> lock(*m_pNodesLock);
+        std::swap(m_layers.at(layer1), m_layers.at(layer2));
+        sortLayers(std::max(layer1, layer2));
     }
 }
 

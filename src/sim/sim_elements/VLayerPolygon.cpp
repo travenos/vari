@@ -163,7 +163,7 @@ void VLayerPolygon::createPolygons(const VSimTriangle::const_list_ptr &triangles
     {
         const std::vector<cv::Point> &currentContour = contours.at(i);
         std::vector<cv::Point> approxContour;
-        cv::approxPolyDP(currentContour, approxContour, APPROX_EPSILON, false);
+        cv::approxPolyDP(currentContour, approxContour, APPROX_EPSILON, true);
         m_polygons.push_back(QPolygonF());
         m_polygons.back().reserve(static_cast<int>(contours.size()));
         for (size_t j{0}, contourSize{approxContour.size()}; j < contourSize; ++j)

@@ -19,6 +19,7 @@
 #include "VWindowCloth.h"
 #include "VWindowResin.h"
 #include "VWindowLayer.h"
+#include "VWindowPolygon.h"
 #include "VScreenShooter.h"
 #include "VVideoShooter.h"
 #include "VImageTextWriters.h"
@@ -84,6 +85,7 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_pWindowLayer(nullptr),
     m_pWindowCloth(nullptr),
     m_pWindowResin(nullptr),
+    m_pWindowPolygon(nullptr),
     m_pTemperatureValidator(new QDoubleValidator),
     m_pPressureValidator(new QDoubleValidator),
     m_pDiameterValidator(new QDoubleValidator),
@@ -312,6 +314,7 @@ VWindowMain::~VWindowMain()
     deleteWindowLayer();
     deleteWindowResin();
     deleteWindowCloth();
+    deleteWindowPolygon();
     VSqlDatabase::deleteInstance();
     delete m_pPressureValidator;
     delete m_pTemperatureValidator;
@@ -358,6 +361,15 @@ void VWindowMain::deleteWindowResin()
     {
         m_pWindowResin->deleteLater();
         m_pWindowResin = nullptr;
+    }
+}
+
+void VWindowMain::deleteWindowPolygon()
+{
+    if (m_pWindowPolygon != nullptr)
+    {
+        m_pWindowPolygon->deleteLater();
+        m_pWindowPolygon = nullptr;
     }
 }
 
@@ -884,6 +896,7 @@ void VWindowMain::activateSimControls(bool enabled)
     ui->layerRemoveButton->setEnabled(enabled);
     ui->layerCutButton->setEnabled(enabled);
     ui->layerDuplicateButton->setEnabled(enabled);
+    ui->layerEditButton->setEnabled(enabled);
     ui->addLayerButton->setEnabled(enabled);
     ui->sortLayersButton->setEnabled(enabled);
     ui->injectionPressureEdit->setEnabled(enabled);
@@ -1073,6 +1086,74 @@ void VWindowMain::loadWindowSettings()
     ui->simParamSplitter->restoreState(settings.value("window/simParamSplitterState").toByteArray());
 }
 
+
+void VWindowMain::setSavedState(bool saved)
+{
+    m_isSaved = saved;
+    m_isSaved |= (m_pFacade->getNodesNumber() == 0);
+    QString title = this->windowTitle();
+    if (m_isSaved)
+    {
+        title.remove('*');
+    }
+    else if (!title.startsWith('*'))
+    {
+        title.insert(0, '*');
+    }
+    this->setWindowTitle(title);
+}
+
+void VWindowMain::showFilenameInTitle(const QString &filename)
+{
+    bool addStar = this->windowTitle().startsWith('*');
+    QString title;
+    if (addStar)
+        title += '*';
+    if (!filename.isEmpty())
+    {
+        QString baseFileName = QFileInfo(filename).fileName();
+        title += baseFileName;
+        title += QStringLiteral(" - ");
+    }
+    title += QCoreApplication::applicationName();
+    this->setWindowTitle(title);
+}
+
+void VWindowMain::swapLayersCaptions(uint layer1, uint layer2)
+{
+    int columns{ui->layersTableWidget->columnCount()};
+    std::vector<QTableWidgetItem*> items1(columns);
+    std::vector<QTableWidgetItem*> items2(columns);
+    for (int i{0}; i < columns; ++i)
+    {
+        items1.at(i) = ui->layersTableWidget->takeItem(layer1, i);
+        items2.at(i) = ui->layersTableWidget->takeItem(layer2, i);
+    }
+    for (int i{0}; i < columns; ++i)
+    {
+        ui->layersTableWidget->setItem(layer2, i, items1.at(i));
+        ui->layersTableWidget->setItem(layer1, i, items2.at(i));
+    }
+    ui->layersTableWidget->selectRow(layer2);
+}
+
+void VWindowMain::editLayer(uint layer)
+{
+    if (m_pWindowPolygon == nullptr)
+    {
+        m_pWindowPolygon = new VWindowPolygon(this, m_pFacade);
+        connect(m_pWindowPolygon, SIGNAL(polygonAvailable(const QPolygonF &, double)),
+                this, SLOT(m_on_got_polygon(const QPolygonF &, double)));
+        connect(m_pWindowPolygon,SIGNAL(windowClosed()), this, SLOT(m_on_polygon_window_closed()));
+    }
+    m_pWindowPolygon->set1DMode(false);
+    const auto & polygons{m_pFacade->getPolygons(layer)};
+    if(polygons.size() > 0)
+        m_pWindowPolygon->setPolygon(polygons.at(0));
+    m_pWindowPolygon->show();
+    m_pWindowPolygon->activateWindow();
+}
+
 /**
   * Slideshow methods
   */
@@ -1198,56 +1279,6 @@ void VWindowMain::enableButtonsShootingWindows(bool enable)
     ui->actionSave->setEnabled(enable);
 }
 
-void VWindowMain::setSavedState(bool saved)
-{
-    m_isSaved = saved;
-    m_isSaved |= (m_pFacade->getNodesNumber() == 0);
-    QString title = this->windowTitle();
-    if (m_isSaved)
-    {
-        title.remove('*');
-    }
-    else if (!title.startsWith('*'))
-    {
-        title.insert(0, '*');
-    }
-    this->setWindowTitle(title);
-}
-
-void VWindowMain::showFilenameInTitle(const QString &filename)
-{
-    bool addStar = this->windowTitle().startsWith('*');
-    QString title;
-    if (addStar)
-        title += '*';
-    if (!filename.isEmpty())
-    {
-        QString baseFileName = QFileInfo(filename).fileName();
-        title += baseFileName;
-        title += QStringLiteral(" - ");
-    }
-    title += QCoreApplication::applicationName();
-    this->setWindowTitle(title);
-}
-
-void VWindowMain::swapLayersCaptions(uint layer1, uint layer2)
-{
-    int columns{ui->layersTableWidget->columnCount()};
-    std::vector<QTableWidgetItem*> items1(columns);
-    std::vector<QTableWidgetItem*> items2(columns);
-    for (int i{0}; i < columns; ++i)
-    {
-        items1.at(i) = ui->layersTableWidget->takeItem(layer1, i);
-        items2.at(i) = ui->layersTableWidget->takeItem(layer2, i);
-    }
-    for (int i{0}; i < columns; ++i)
-    {
-        ui->layersTableWidget->setItem(layer2, i, items1.at(i));
-        ui->layersTableWidget->setItem(layer1, i, items2.at(i));
-    }
-    ui->layersTableWidget->selectRow(layer2);
-}
-
 /**
  * Slots
  */
@@ -1277,6 +1308,23 @@ void VWindowMain::m_on_got_resin(const QString & name , float viscosity, float v
     setResin(name, viscosity, viscTempcoef, lifetime, lifetimeTempcoef);
 }
 
+void VWindowMain::m_on_got_polygon(const QPolygonF & polygon, double characteristicLength)
+{
+    if (ui->layersTableWidget->currentIndex().isValid()
+            && ui->layersTableWidget->currentRow() < int(m_pFacade->getLayersNumber()))
+    {
+        uint layer = ui->layersTableWidget->currentRow();
+        try
+        {
+            m_pFacade->rebuildLayer(polygon, characteristicLength, layer);
+        }
+        catch(VImportException &)
+        {
+            QMessageBox::warning(this, ERROR_TITLE, IMPORT_MANUAL_ERROR);
+        }
+    }
+}
+
 void VWindowMain::m_on_layer_window_closed()
 {
     deleteWindowLayer();
@@ -1290,6 +1338,11 @@ void VWindowMain::m_on_cloth_window_closed()
 void VWindowMain::m_on_resin_window_closed()
 {
     deleteWindowResin();
+}
+
+void VWindowMain::m_on_polygon_window_closed()
+{
+    deleteWindowPolygon();
 }
 
 void VWindowMain::m_on_layers_cleared()
@@ -2164,4 +2217,19 @@ void VWindowMain::on_layerDuplicateButton_clicked()
             QMessageBox::warning(this, ERROR_TITLE, IMPORT_MANUAL_ERROR);
         }
     }
+}
+
+void VWindowMain::on_layerEditButton_clicked()
+{
+    if (ui->layersTableWidget->currentIndex().isValid()
+            && ui->layersTableWidget->currentRow() < int(m_pFacade->getLayersNumber()))
+    {
+        uint layer = ui->layersTableWidget->currentRow();
+        editLayer(layer);
+    }
+}
+
+void VWindowMain::on_layersTableWidget_doubleClicked(const QModelIndex &index)
+{
+    editLayer(index.row());
 }

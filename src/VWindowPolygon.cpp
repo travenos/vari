@@ -270,10 +270,10 @@ void VWindowPolygon::removeVertex(int index)
         {
             m_pHighlightCurve->data()->clear();
         }
-        if (m_mode1D)
-            plot();
-        else
+        if (!m_mode1D)
             plotEnclosed();
+        else
+            plot();
         updateButtonsStates();
     }
 }
@@ -289,10 +289,10 @@ void VWindowPolygon::changeVertex(int index, double x, double y)
     {
         m_qvX.replace(index, x);
         m_qvY.replace(index, y);
-        if (m_mode1D)
-            plot();
-        else
+        if (!m_mode1D)
             plotEnclosed();
+        else
+            plot();
         updateVertexRecord(index);
     }
 }
@@ -873,14 +873,38 @@ void VWindowPolygon::drawOtherPolygons()
 
 void VWindowPolygon::set1DMode(bool set)
 {
-    ui->mode1DRadioButton->setChecked(set);
-    ui->mode2DRadioButton->setChecked(!set);
-    ui->tubeWidthSpinBox->setEnabled(set);
-    m_mode1D = set;
-    if (set)
-        plot();
-    else
+    if (m_mode1D != set)
+    {
+        ui->mode1DRadioButton->setChecked(set);
+        ui->mode2DRadioButton->setChecked(!set);
+        ui->tubeWidthSpinBox->setEnabled(set);
+        m_mode1D = set;
+        if (set)
+            plot();
+        else
+            plotEnclosed();
+        updateButtonsStates();
+    }
+}
+
+void VWindowPolygon::setPolygon(const QPolygonF & polygon)
+{
+    reset();
+    int polySize{polygon.size()};
+    if (polygon.isClosed())
+        --polySize;
+    for(int i{0}; i < polySize; ++i)
+    {
+        double t = (!m_qvT.empty()) ? m_qvT.last() + 1 : 0;
+        m_qvT.append(t);
+        m_qvX.append(polygon.at(i).x());
+        m_qvY.append(polygon.at(i).y());
+        addVertexToList(getPolygonSize() - 1);
+    }
+    if (!m_mode1D)
         plotEnclosed();
+    else
+        plot();
     updateButtonsStates();
 }
 

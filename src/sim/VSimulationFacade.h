@@ -128,9 +128,12 @@ public:
     void setTable(const std::shared_ptr<VTable> &p_table);
 
     std::vector<std::vector<QPolygonF> > getAllActivePolygons() const;
+    const std::vector<QPolygonF> & getPolygons(uint layer) const;
 
     const QString & getLayerName(uint layer) const;
     void setLayerName(uint layer, const QString &name);
+    void rebuildLayer(const QPolygonF &polygon, double characteristicLength,
+                      uint layer);
 
 public slots:
     void updateGraphicsPositions();

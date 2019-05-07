@@ -93,6 +93,10 @@ public:
 
     void drawOtherPolygons();
 
+    void set1DMode(bool set);
+
+    void setPolygon(const QPolygonF & polygon);
+
 private:
     Ui::VWindowPolygon *ui;
     QCPCurve * m_pPlotCurve;
@@ -144,8 +148,6 @@ private:
     void addVertexToList(int index);
     void removeVertexFromList(int index);
     void updateVertexRecord(int index);
-
-    void set1DMode(bool set);
 
 private slots:
     void on_buttonBox_rejected();

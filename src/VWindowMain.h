@@ -19,6 +19,7 @@ class VSimulationFacade;
 class VWindowLayer;
 class VWindowCloth;
 class VWindowResin;
+class VWindowPolygon;
 class VScreenShooter;
 class VVideoShooter;
 class VSimInfoImageTextWriter;
@@ -83,6 +84,7 @@ private:
     void deleteWindowLayer();
     void deleteWindowCloth();
     void deleteWindowResin();
+    void deleteWindowPolygon();
     void addLayerFromFile(const VCloth& material, const QString& filename, const QString &layerName,
                           VLayerAbstractBuilder::VUnit units);
     void addLayerFromPolygon(const VCloth& material, const QPolygonF& polygon,
@@ -184,6 +186,7 @@ private:
     void showFilenameInTitle(const QString &filename);
 
     void swapLayersCaptions(uint layer1, uint layer2);
+    void editLayer(uint layer);
 
     Ui::VWindowMain *ui;
     std::shared_ptr<VSimulationFacade> m_pFacade;
@@ -191,6 +194,7 @@ private:
     VWindowLayer * m_pWindowLayer;
     VWindowCloth * m_pWindowCloth;
     VWindowResin * m_pWindowResin;
+    VWindowPolygon * m_pWindowPolygon;
 
     QDoubleValidator * const m_pTemperatureValidator;
     QDoubleValidator * const m_pPressureValidator;
@@ -208,10 +212,12 @@ private slots:
     void m_on_layer_window_closed();
     void m_on_cloth_window_closed();
     void m_on_resin_window_closed();
+    void m_on_polygon_window_closed();
     void m_on_layers_cleared();
     void m_on_got_cloth(const QString & name, float cavityheight, float permeability, float porosity);
     void m_on_got_resin(const QString & name , float viscosity, float viscTempcoef, float lifetime, float lifetimeTempcoef);
-    void m_on_layer_creation_from_file_available(const VCloth& material, const QString& filename,                                                 
+    void m_on_got_polygon(const QPolygonF & polygon, double characteristicLength);
+    void m_on_layer_creation_from_file_available(const VCloth& material, const QString& filename,
                                                  const QString& layerName,
                                                  VLayerAbstractBuilder::VUnit units);
     void m_on_layer_creation_manual_available(const VCloth& material, const QPolygonF& polygon,
@@ -354,6 +360,8 @@ private slots:
     void on_vacuumFullLimitCheckBox_clicked(bool checked);
     void on_additionalOptionsCheckBox_clicked(bool checked);
     void on_layerDuplicateButton_clicked();
+    void on_layerEditButton_clicked();
+    void on_layersTableWidget_doubleClicked(const QModelIndex &index);
 };
 
 #endif // _VWINDOWMAIN_H
