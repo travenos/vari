@@ -353,6 +353,7 @@ private slots:
     void on_saveLayerNameButton_clicked();
     void on_vacuumFullLimitCheckBox_clicked(bool checked);
     void on_additionalOptionsCheckBox_clicked(bool checked);
+    void on_layerDuplicateButton_clicked();
 };
 
 #endif // _VWINDOWMAIN_H

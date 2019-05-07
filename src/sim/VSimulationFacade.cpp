@@ -14,6 +14,7 @@
 #include "layer_builders/VLayerFromGmeshBuilder.h"
 #include "layer_builders/VLayerFromAnsysBuilder.h"
 #include "layer_builders/VLayerManualBuilder.h"
+#include "layer_builders/VLayerFromLayerBuilder.h"
 #include "import_export/VModelExport.h"
 #include "import_export/VModelImport.h"
 #include "structures/VExceptions.h"
@@ -440,6 +441,20 @@ void VSimulationFacade::newLayerFromPolygon(const VCloth &material, const QPolyg
         delete p_layerBuilder;
         throw e;
     }
+}
+
+void VSimulationFacade::duplicateLayer(uint layer)
+{
+    VLayer::const_ptr sourceLayer{m_pLayersProcessor->getLayer(layer)};
+    if (sourceLayer && isSimulationStopped())
+    {
+        VLayerFromLayerBuilder layerBuilder(sourceLayer);
+        m_pLayersProcessor->addLayer(&layerBuilder);
+        updateConfiguration();
+        m_pGraphicsViewer->viewFromAbove();
+    }
+    else
+        throw VImportException();
 }
 
 void VSimulationFacade::updateConfiguration() 

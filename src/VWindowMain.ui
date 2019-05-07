@@ -130,9 +130,9 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>-104</y>
+               <y>0</y>
                <width>1221</width>
-               <height>914</height>
+               <height>916</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout">
@@ -295,14 +295,25 @@
                   </layout>
                  </item>
                  <item>
-                  <widget class="QPushButton" name="layerCutButton">
-                   <property name="text">
-                    <string>Обрезать слой</string>
-                   </property>
-                   <property name="checkable">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
+                  <layout class="QHBoxLayout" name="horizontalLayout_19">
+                   <item>
+                    <widget class="QPushButton" name="layerDuplicateButton">
+                     <property name="text">
+                      <string>Дублировать слой</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="layerCutButton">
+                     <property name="text">
+                      <string>Обрезать слой</string>
+                     </property>
+                     <property name="checkable">
+                      <bool>true</bool>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
                  </item>
                 </layout>
                </widget>
@@ -1833,6 +1844,7 @@
   <tabstop>layerDownButton</tabstop>
   <tabstop>selectMaterialClothButton</tabstop>
   <tabstop>layerRemoveButton</tabstop>
+  <tabstop>layerDuplicateButton</tabstop>
   <tabstop>layerCutButton</tabstop>
   <tabstop>addLayerButton</tabstop>
   <tabstop>sortLayersButton</tabstop>

@@ -73,6 +73,7 @@ void VLayersProcessor::removeLayer(uint layer)
         m_layers.erase(it);
     }
     m_layersConnected = false;
+    updateNextIds();
     emit layerRemoved(layer);
 }
 
@@ -489,6 +490,14 @@ std::vector<VLayer::const_ptr> VLayersProcessor::getLayers() const
     std::vector<VLayer::const_ptr> layers;
     layers.insert(layers.begin(), m_layers.begin(), m_layers.end());
     return layers;
+}
+
+VLayer::const_ptr VLayersProcessor::getLayer(uint layer) const
+{
+    if (layer < m_layers.size())
+        return m_layers.at(layer);
+    else
+        return VLayer::const_ptr();
 }
 
 void VLayersProcessor::cutLayer(const std::shared_ptr<const std::vector<uint> > &nodesIds, uint layer)

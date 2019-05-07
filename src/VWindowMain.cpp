@@ -369,11 +369,11 @@ void VWindowMain::addLayerFromFile(const VCloth& material, const QString& filena
     {
         m_pFacade->newLayerFromFile(material, filename, layerName, units);
     }
-    catch (VImportException)
+    catch (VImportException &)
     {
         QMessageBox::warning(this, ERROR_TITLE, IMPORT_FROM_FILE_ERROR);
     }
-    catch (VSimulatorException)
+    catch (VSimulatorException &)
     {
         QMessageBox::warning(this, ERROR_TITLE, IMPORT_WHEN_SIMULATING_ERROR);
     }
@@ -386,11 +386,11 @@ void VWindowMain::addLayerFromPolygon(const VCloth& material, const QPolygonF& p
     {
         m_pFacade->newLayerFromPolygon(material, polygon, characteristicLength, layerName);
     }
-    catch (VImportException)
+    catch (VImportException &)
     {
         QMessageBox::warning(this, ERROR_TITLE, IMPORT_MANUAL_ERROR);
     }
-    catch (VSimulatorException)
+    catch (VSimulatorException &)
     {
         QMessageBox::warning(this, ERROR_TITLE, IMPORT_WHEN_SIMULATING_ERROR);
     }
@@ -883,6 +883,7 @@ void VWindowMain::activateSimControls(bool enabled)
     ui->selectMaterialClothButton->setEnabled(enabled);
     ui->layerRemoveButton->setEnabled(enabled);
     ui->layerCutButton->setEnabled(enabled);
+    ui->layerDuplicateButton->setEnabled(enabled);
     ui->addLayerButton->setEnabled(enabled);
     ui->sortLayersButton->setEnabled(enabled);
     ui->injectionPressureEdit->setEnabled(enabled);
@@ -962,7 +963,7 @@ void VWindowMain::loadModel()
         {
             m_pFacade->loadModel(fileName);
         }
-        catch (VImportException)
+        catch (VImportException &)
         {
             QMessageBox::warning(this, ERROR_TITLE, IMPORT_FROM_FILE_ERROR);
         }
@@ -986,7 +987,7 @@ void VWindowMain::saveModel()
         {
             m_pFacade->saveModel(fileName);
         }
-        catch (VExportException)
+        catch (VExportException &)
         {
             QMessageBox::warning(this, ERROR_TITLE, EXPORT_TO_FILE_ERROR);
         }
@@ -2146,4 +2147,21 @@ void VWindowMain::on_vacuumFullLimitCheckBox_clicked(bool checked)
 void VWindowMain::on_additionalOptionsCheckBox_clicked(bool checked)
 {
     m_pFacade->enableAdditionalGraphicsControls(checked);
+}
+
+void VWindowMain::on_layerDuplicateButton_clicked()
+{
+    if (ui->layersTableWidget->currentIndex().isValid()
+            && ui->layersTableWidget->currentRow() < int(m_pFacade->getLayersNumber()))
+    {
+        uint layer = ui->layersTableWidget->currentRow();
+        try
+        {
+            m_pFacade->duplicateLayer(layer);
+        }
+        catch(VImportException &)
+        {
+            QMessageBox::warning(this, ERROR_TITLE, IMPORT_MANUAL_ERROR);
+        }
+    }
 }

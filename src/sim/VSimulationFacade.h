@@ -84,6 +84,7 @@ public:
                           VLayerAbstractBuilder::VUnit units=VLayerAbstractBuilder::M);
     void newLayerFromPolygon(const VCloth &material, const QPolygonF &polygon,
                              double characteristicLength, const QString &layerName);
+    void duplicateLayer(uint layer);
 
     void showInjectionPoint();
     void showVacuumPoint();

@@ -54,6 +54,7 @@ public:
     size_t getLayerNodesNumber(uint layer) const ;
     size_t getLayerTrianglesNumber(uint layer) const ;
     std::vector<VLayer::const_ptr> getLayers() const;
+    VLayer::const_ptr getLayer(uint layer) const;
 
     bool isLayerVisible(uint layer) const ;
     bool isLayerEnabled(uint layer) const ;

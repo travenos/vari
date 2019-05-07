@@ -16,6 +16,7 @@ public:
     static const float MM_IN_M;
 
     VLayerAbstractBuilder(const VCloth &material);
+    VLayerAbstractBuilder(const VCloth &material, const QString & layerName);
     virtual ~VLayerAbstractBuilder();
     VLayerAbstractBuilder(const VLayerAbstractBuilder& ) = delete;
     VLayerAbstractBuilder& operator= (const VLayerAbstractBuilder& ) = delete;

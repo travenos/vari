@@ -21,6 +21,13 @@ VLayerAbstractBuilder::VLayerAbstractBuilder(const VCloth &material) :
     m_triangleMaxId(0)
 {}
 
+VLayerAbstractBuilder::VLayerAbstractBuilder(const VCloth &material,
+                                             const QString & layerName) :
+    VLayerAbstractBuilder(material)
+{
+    m_layerName = layerName;
+}
+
 VLayerAbstractBuilder::~VLayerAbstractBuilder()
 {}
 

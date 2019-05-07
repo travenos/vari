@@ -44,7 +44,7 @@ public:
     virtual ~VSimTriangle();
 
     void getVertices(QVector3D vertices[VERTICES_NUMBER]) const ;
-    QVector3D getVerticesId() const ;
+    std::vector<uint> getVerticesId() const ;
     void updateColor() ;
     const QColor& getColor() const override;
     double getPressure() const override;
