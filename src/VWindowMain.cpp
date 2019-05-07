@@ -105,7 +105,7 @@ VWindowMain::VWindowMain(QWidget *parent) :
     setupSpinboxesLocales();
     m_pFacade->loadSavedParameters();
     showCubeSide();
-    loadSizes();
+    loadWindowSettings();
     m_pImgTextWriter.reset(new VSimInfoImageTextWriter(m_pFacade));
     m_pSlideshowShooter->setWidget(m_pFacade->getGLWidget());
     m_pSlideshowShooter->setImageTextWriter(m_pImgTextWriter);
@@ -202,6 +202,11 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_table_vacuum_diameter_set(float)));
     connect(m_pFacade.get(), SIGNAL(useTableParametersSet(bool)),
             this, SLOT(m_on_use_table_parameters_set(bool)));
+
+    connect(m_pFacade.get(), SIGNAL(stopOnVacuumFullSwitched(bool)),
+            this, SLOT(m_stop_on_vacuum_full_switched(bool)));
+    connect(m_pFacade.get(), SIGNAL(additionalControlsEnabled(bool)),
+            this, SLOT(m_on_additional_controls_enabled(bool)));
 
     connect(m_pSlideshowShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_slideshow_started()));
     connect(m_pSlideshowShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_slideshow_stopped()));
@@ -325,7 +330,7 @@ void VWindowMain::closeEvent(QCloseEvent * event)
     }
     else
     {
-        saveSizes();
+        saveWindowSettings();
     }
 }
 
@@ -933,6 +938,8 @@ void VWindowMain::reloadLayersTable()
     }
     if (ui->layersTableWidget->rowCount() > 0)
         ui->layersTableWidget->selectRow(ui->layersTableWidget->rowCount() - 1);
+    else
+        ui->layerParamBox->setVisible(false);
 }
 
 void VWindowMain::newModel()
@@ -1042,7 +1049,7 @@ void VWindowMain::showCubeSide()
         ui->cubeSideSlider->setValue(value);
 }
 
-void VWindowMain::saveSizes()
+void VWindowMain::saveWindowSettings()
 {
     QSettings settings;
     settings.setValue("window/geometry", saveGeometry());
@@ -1054,7 +1061,7 @@ void VWindowMain::saveSizes()
     settings.sync();
 }
 
-void VWindowMain::loadSizes()
+void VWindowMain::loadWindowSettings()
 {
     QSettings settings;
     restoreGeometry(settings.value("window/geometry").toByteArray());
@@ -1647,6 +1654,19 @@ void VWindowMain::m_on_use_table_parameters_set(bool use)
     setSavedState(false);
 }
 
+void VWindowMain::m_stop_on_vacuum_full_switched(bool enabled)
+{
+    if (ui->vacuumFullLimitCheckBox->isChecked() != enabled)
+        ui->vacuumFullLimitCheckBox->setChecked(enabled);
+}
+
+void VWindowMain::m_on_additional_controls_enabled(bool enabled)
+{
+    if (ui->additionalOptionsCheckBox->isChecked() != enabled)
+        ui->additionalOptionsCheckBox->setChecked(enabled);
+    ui->layerCutButton->setVisible(enabled);
+}
+
 void VWindowMain::on_injectionPlaceButton_clicked(bool checked)
 {
     if (checked)
@@ -2116,4 +2136,14 @@ void VWindowMain::on_saveLayerNameButton_clicked()
         uint layer = ui->layersTableWidget->currentRow();
         m_pFacade->setLayerName(layer, ui->layerNameEdit->text());
     }
+}
+
+void VWindowMain::on_vacuumFullLimitCheckBox_clicked(bool checked)
+{
+    m_pFacade->stopOnVacuumFull(checked);
+}
+
+void VWindowMain::on_additionalOptionsCheckBox_clicked(bool checked)
+{
+    m_pFacade->enableAdditionalGraphicsControls(checked);
 }

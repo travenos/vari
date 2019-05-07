@@ -76,7 +76,9 @@ VGraphicsViewer::VGraphicsViewer(QWidget *parent, const VSimulator::ptr &simulat
     m_dragCanceled(false),
     m_pSelectedNodesIds(new std::vector<uint>),
     m_pTransformedNodesCoords(new std::vector<std::pair<uint, QVector3D> >),
-    m_cubeSide(VGraphicsNode::DEFAULT_CUBE_SIDE)
+    m_cubeSide(VGraphicsNode::DEFAULT_CUBE_SIDE),
+    m_dragEnabled(true),
+    m_additionalGraphicsControlsEnabled(false)
 {
     m_pRoot->ref();
     m_pFigureRoot->ref();
@@ -636,27 +638,39 @@ void VGraphicsViewer::setDragMode(bool on)
 
 void VGraphicsViewer::enableSelection(bool enable)
 {
-    m_pSelectionButton->setVisible(enable);
-    if (!enable)
+    if (!enable || m_additionalGraphicsControlsEnabled)
     {
-        if (isSelectionOn())
-            setSelectionMode(false);
+        m_pSelectionButton->setVisible(enable);
+        if (!enable)
+        {
+            if (isSelectionOn())
+                setSelectionMode(false);
+        }
+        emit selectionEnabled(enable);
     }
-    emit selectionEnabled(enable);
 }
 
 void VGraphicsViewer::enableDrag(bool enable)
 {
-    m_pDragButton->setVisible(enable);
-    if (!enable)
+    m_dragEnabled = enable;
+    enableDragPrivate(enable);
+}
+
+void VGraphicsViewer::enableDragPrivate(bool enable)
+{
+    if (!enable || m_additionalGraphicsControlsEnabled)
     {
-        if (isDragOn())
+        m_pDragButton->setVisible(enable);
+        if (!enable)
         {
-            setDragMode(false);
+            if (isDragOn())
+            {
+                setDragMode(false);
+            }
+            clearDraggedNodes();
         }
-        clearDraggedNodes();
+        emit dragEnabled(enable);
     }
-    emit dragEnabled(enable);
 }
 
 const VGraphicsViewer::const_uint_vect_ptr &VGraphicsViewer::getSelectedNodesIds() const
@@ -726,6 +740,36 @@ void VGraphicsViewer::setCameraOrthographic(bool on)
             setCameraType(SoPerspectiveCamera::getClassTypeId());
     }
 }
+
+void VGraphicsViewer::enableAdditionalControls(bool enable)
+{
+    m_additionalGraphicsControlsEnabled = enable;
+    m_pYZButton->setVisible(enable);
+    if (!enable)
+    {
+        enableSelection(false);
+        if (isDragOn())
+        {
+            setDragMode(false);
+            updatePositions();
+        }
+        enableDragPrivate(false);
+    }
+    else
+    {
+        enableDragPrivate(m_dragEnabled);
+    }
+    emit additionalControlsEnabled(enable);
+}
+
+bool VGraphicsViewer::areAdditionalControlsEnabled() const
+{
+    return m_additionalGraphicsControlsEnabled;
+}
+
+/**
+ * Callbacks
+ */
 
 void VGraphicsViewer::event_cb(void * userdata, SoEventCallback * node)
 {

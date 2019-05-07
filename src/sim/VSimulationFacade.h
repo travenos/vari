@@ -62,6 +62,9 @@ public:
     void setTimeLimitMode(bool on);
     void considerLifetime(bool on);
 
+    void stopOnVacuumFull(bool on);
+    void enableAdditionalGraphicsControls(bool on);
+
     void newModel() ;
     void loadModel(const QString &filename) ;
     void saveModel(const QString &filename) ;
@@ -189,6 +192,7 @@ signals:
     void timeLimitSet(double);
     void timeLimitModeSwitched(bool);
     void lifetimeConsiderationSwitched(bool);
+    void stopOnVacuumFullSwitched(bool);
 
     void modelSaved();
     void modelLoaded();
@@ -213,6 +217,8 @@ signals:
     void tableVacuumDiameterSet(float);
 
     void useTableParametersSet(bool);
+
+    void additionalControlsEnabled(bool);
 };
 
 #endif //_VSIMULATIONFACADE_H

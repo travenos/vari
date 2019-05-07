@@ -158,8 +158,8 @@ private:
     void updateCubeSide(int value);
     void showCubeSide();
 
-    void saveSizes();
-    void loadSizes();
+    void saveWindowSettings();
+    void loadWindowSettings();
 
     inline void setSlideshowDir(const QString &dir);
     inline void setSlideshowPeriod(float period);
@@ -266,6 +266,8 @@ private slots:
     void m_on_table_injection_diameter_set(float diameter);
     void m_on_table_vacuum_diameter_set(float diameter);
     void m_on_use_table_parameters_set(bool use);
+    void m_stop_on_vacuum_full_switched(bool enabled);
+    void m_on_additional_controls_enabled(bool enabled);
 
     void on_addLayerButton_clicked();
     void on_layerEnableCheckBox_clicked(bool checked);
@@ -349,6 +351,8 @@ private slots:
     void on_layerNameEdit_textEdited(const QString &);
     void on_resetLayerNameButton_clicked();
     void on_saveLayerNameButton_clicked();
+    void on_vacuumFullLimitCheckBox_clicked(bool checked);
+    void on_additionalOptionsCheckBox_clicked(bool checked);
 };
 
 #endif // _VWINDOWMAIN_H

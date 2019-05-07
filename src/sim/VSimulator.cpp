@@ -31,6 +31,7 @@ VSimulator::VSimulator():
     m_pauseFlag(false),
     m_timeLimitFlag(false),
     m_lifetimeLimitFlag(true),
+    m_vacuumFullLimitFlag(true),
     m_simT_timeBeforePause(0),
     m_destroyed(false)
 {
@@ -103,6 +104,11 @@ bool VSimulator::isTimeLimitModeOn() const
 bool VSimulator::isLifetimeConsidered() const
 {
     return m_lifetimeLimitFlag.load();
+}
+
+bool VSimulator::isVacuumFullLimited() const
+{
+    return m_vacuumFullLimitFlag.load();
 }
 
 void VSimulator::reset() 
@@ -257,7 +263,7 @@ void VSimulator::simulationCycle()
         m_newDataNotifier.notifyAll();
         if (processIsFinished)
             break;
-        if (m_pVacuumNodes->size() > 0)
+        if (m_vacuumFullLimitFlag && m_pVacuumNodes->size() > 0)
         {
             size_t fullVacuumCounter{0};
             std::lock_guard<std::mutex> nodesLocker(*m_pNodesLock);
@@ -676,4 +682,10 @@ void VSimulator::considerLifetime(bool on)
 {
     m_lifetimeLimitFlag.store(on);
     emit lifetimeConsiderationSwitched(on);
+}
+
+void VSimulator::stopOnVacuumFull(bool on)
+{
+    m_vacuumFullLimitFlag.store(on);
+    emit stopOnVacuumFullSwitched(on);
 }

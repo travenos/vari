@@ -130,9 +130,9 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>0</y>
-               <width>1227</width>
-               <height>1041</height>
+               <y>-104</y>
+               <width>1221</width>
+               <height>914</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout">
@@ -319,7 +319,7 @@
                 <item>
                  <widget class="QPushButton" name="sortLayersButton">
                   <property name="text">
-                   <string>Пересортировать слои</string>
+                   <string>Восстановить сортировку</string>
                   </property>
                  </widget>
                 </item>
@@ -418,16 +418,6 @@
                        </widget>
                       </item>
                      </layout>
-                    </item>
-                    <item>
-                     <widget class="QCheckBox" name="timeConsiderationCheckbox">
-                      <property name="text">
-                       <string>Ограничить расчет временем жизни связующего</string>
-                      </property>
-                      <property name="checked">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
                     </item>
                     <item>
                      <widget class="QPushButton" name="selectMaterialResinButton">
@@ -704,8 +694,11 @@
                </widget>
               </item>
               <item>
-               <widget class="QWidget" name="timeLimitWidget" native="true">
-                <layout class="QVBoxLayout" name="verticalLayout_10">
+               <widget class="QGroupBox" name="timeLimitGroupBox">
+                <property name="title">
+                 <string>Ограничение времени</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_11">
                  <property name="spacing">
                   <number>4</number>
                  </property>
@@ -721,6 +714,33 @@
                  <property name="bottomMargin">
                   <number>3</number>
                  </property>
+                 <item>
+                  <widget class="QCheckBox" name="timeConsiderationCheckbox">
+                   <property name="text">
+                    <string>Ограничить расчет временем жизни связующего</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="vacuumFullLimitCheckBox">
+                   <property name="text">
+                    <string>Остановка при достижении порта вакуума</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="timeLimitCheckBox">
+                   <property name="text">
+                    <string>Пауза процесса по истечении времени:</string>
+                   </property>
+                  </widget>
+                 </item>
                  <item>
                   <layout class="QHBoxLayout" name="horizontalLayout_2">
                    <property name="spacing">
@@ -769,13 +789,27 @@
                    </item>
                   </layout>
                  </item>
-                 <item>
-                  <widget class="QCheckBox" name="timeLimitCheckBox">
-                   <property name="text">
-                    <string>Ограничивать время процесса</string>
-                   </property>
-                  </widget>
-                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QWidget" name="timeLimitWidget" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_10">
+                 <property name="spacing">
+                  <number>4</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>3</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>3</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>3</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>3</number>
+                 </property>
                 </layout>
                </widget>
               </item>
@@ -819,8 +853,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>1259</width>
-              <height>1207</height>
+              <width>1253</width>
+              <height>1216</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_13">
@@ -1595,6 +1629,13 @@
               </widget>
              </item>
              <item>
+              <widget class="QCheckBox" name="additionalOptionsCheckBox">
+               <property name="text">
+                <string>Включить обрезку/перемещение слоя</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <spacer name="verticalSpacer_2">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -1624,7 +1665,7 @@
      <x>0</x>
      <y>0</y>
      <width>1632</width>
-     <height>32</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
@@ -1798,7 +1839,6 @@
   <tabstop>temperatureEdit</tabstop>
   <tabstop>resetTemperatureButton</tabstop>
   <tabstop>saveTemperatureButton</tabstop>
-  <tabstop>timeConsiderationCheckbox</tabstop>
   <tabstop>selectMaterialResinButton</tabstop>
   <tabstop>injectionPressureEdit</tabstop>
   <tabstop>resetInjectionPressureButton</tabstop>
@@ -1815,10 +1855,12 @@
   <tabstop>vacuumPlaceButton</tabstop>
   <tabstop>showVacuumPlaceButton</tabstop>
   <tabstop>useTableParamCheckBox</tabstop>
+  <tabstop>timeConsiderationCheckbox</tabstop>
+  <tabstop>vacuumFullLimitCheckBox</tabstop>
+  <tabstop>timeLimitCheckBox</tabstop>
   <tabstop>timeEdit</tabstop>
   <tabstop>resetTimeLimitButton</tabstop>
   <tabstop>saveTimeLimitButton</tabstop>
-  <tabstop>timeLimitCheckBox</tabstop>
   <tabstop>scrollArea</tabstop>
   <tabstop>tableXSpinBox</tabstop>
   <tabstop>tableYSpinBox</tabstop>
@@ -1853,6 +1895,7 @@
   <tabstop>videoFrequencySpinBox</tabstop>
   <tabstop>resetVideoFrequencyButton</tabstop>
   <tabstop>saveVideoFrequencyButton</tabstop>
+  <tabstop>additionalOptionsCheckBox</tabstop>
  </tabstops>
  <resources>
   <include location="resources/resources.qrc"/>

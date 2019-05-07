@@ -61,6 +61,8 @@ public:
 
     bool isLifetimeConsidered() const;
 
+    bool isVacuumFullLimited() const;
+
     /**
      * Stop the simulation and reset all nodes states
      */
@@ -131,6 +133,7 @@ public:
     void setTimeLimit(double limit);
     void setTimeLimitMode(bool on);
     void considerLifetime(bool on);
+    void stopOnVacuumFull(bool on);
 
 private:
     typedef void(*nodeFunc)(VSimNode::ptr& node);
@@ -177,11 +180,13 @@ private:
     */
     std::atomic<bool> m_pauseFlag;
     /**
-    * Flag used for time limitation mode
+    * Flags used for time limitation modes
     */
     std::atomic<bool> m_timeLimitFlag;
 
     std::atomic<bool> m_lifetimeLimitFlag;
+
+    std::atomic<bool> m_vacuumFullLimitFlag;
     /**
      * Vector used for storage of calculation threads
      */
@@ -280,6 +285,7 @@ signals:
 
     void timeLimitModeSwitched(bool);
     void lifetimeConsiderationSwitched(bool);
+    void stopOnVacuumFullSwitched(bool);
     void timeLimitSet(double);
 };
 

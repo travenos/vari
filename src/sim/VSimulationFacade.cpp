@@ -69,6 +69,8 @@ void VSimulationFacade::connectMainSignals()
             this, SIGNAL(selectionEnabled(bool)));
     connect(m_pGraphicsViewer.get(), SIGNAL(canceledDrag()),
             this, SLOT(updateGraphicsPositions()));
+    connect(m_pGraphicsViewer.get(), SIGNAL(additionalControlsEnabled(bool)),
+            this, SIGNAL(additionalControlsEnabled(bool)));
 
     connect(m_pSimulator.get(), SIGNAL(simulationStarted()),
             this, SIGNAL(simulationStarted()));
@@ -102,6 +104,8 @@ void VSimulationFacade::connectMainSignals()
             this, SIGNAL(timeLimitModeSwitched(bool)));
     connect(m_pSimulator.get(), SIGNAL(lifetimeConsiderationSwitched(bool)),
             this, SIGNAL(lifetimeConsiderationSwitched(bool)));
+    connect(m_pSimulator.get(), SIGNAL(stopOnVacuumFullSwitched(bool)),
+            this, SIGNAL(stopOnVacuumFullSwitched(bool)));
 
     connect(m_pSimulator.get(), SIGNAL(simulationStarted()),
             this, SLOT(disableInteraction()));
@@ -298,6 +302,16 @@ void VSimulationFacade::setTimeLimitMode(bool on)
 void VSimulationFacade::considerLifetime(bool on)
 {
     m_pSimulator->considerLifetime(on);
+}
+
+void VSimulationFacade::stopOnVacuumFull(bool on)
+{
+    m_pSimulator->stopOnVacuumFull(on);
+}
+
+void VSimulationFacade::enableAdditionalGraphicsControls(bool on)
+{
+    m_pGraphicsViewer->enableAdditionalControls(on);
 }
 
 void VSimulationFacade::newModel() 
@@ -590,7 +604,7 @@ void VSimulationFacade::loadSavedParameters()
     VResin newResin;
     double temperature, injectionPressure, vacuumPressure, q, r, s, timeLimit;
     float simInjectionDiameter, simVacuumDiameter;
-    bool timeLimitMode, lifetimeConsidered;
+    bool timeLimitMode, lifetimeConsidered, stopOnVacuumFull;
 
     newResin.name = settings.value(QStringLiteral("sim/resinName"), resin.name).toString();
     newResin.defaultViscosity = settings.value(QStringLiteral("sim/defaultViscosity"), resin.defaultViscosity).toDouble();
@@ -613,6 +627,7 @@ void VSimulationFacade::loadSavedParameters()
     timeLimitMode = settings.value(QStringLiteral("sim/timeLimitMode"), m_pSimulator->isTimeLimitModeOn()).toBool();
 
     lifetimeConsidered = settings.value(QStringLiteral("sim/lifetimeConsidered"), m_pSimulator->isLifetimeConsidered()).toBool();
+    stopOnVacuumFull = settings.value(QStringLiteral("sim/stopOnVacuumFull"), m_pSimulator->isVacuumFullLimited()).toBool();
 
     m_pSimulator->setResin(newResin);
     m_pSimulator->setTemperature(temperature);
@@ -626,13 +641,18 @@ void VSimulationFacade::loadSavedParameters()
     m_pSimulator->setTimeLimit(timeLimit);
     m_pSimulator->setTimeLimitMode(timeLimitMode);
     m_pSimulator->considerLifetime(lifetimeConsidered);
+    m_pSimulator->stopOnVacuumFull(stopOnVacuumFull);
 
     bool isOrthographic;
     float cubeSide;
+    bool additionalControlsEnabled;
     isOrthographic = settings.value(QStringLiteral("graphics/cameraType"), m_pGraphicsViewer->isCameraOrthographic()).toBool();
     cubeSide = settings.value(QStringLiteral("graphics/cubeSide"), m_pGraphicsViewer->getCubeSide()).toFloat();
+    additionalControlsEnabled = settings.value(QStringLiteral("graphics/additionalControls"),
+                                               m_pGraphicsViewer->areAdditionalControlsEnabled()).toBool();
     m_pGraphicsViewer->setCameraOrthographic(isOrthographic);
     m_pGraphicsViewer->setCubeSide(cubeSide);
+    m_pGraphicsViewer->enableAdditionalControls(additionalControlsEnabled);
 
     bool useTableParam;
     QVector2D tableSize, tableInjectionCoords, tableVacuumCoords, injectionCoords, vacuumCoords;
@@ -687,11 +707,12 @@ void VSimulationFacade::saveParameters() const
 
     settings.setValue(QStringLiteral("sim/timeLimit"), param.getTimeLimit());
     settings.setValue(QStringLiteral("sim/timeLimitMode"), m_pSimulator->isTimeLimitModeOn());
-
     settings.setValue(QStringLiteral("sim/lifetimeConsidered"), m_pSimulator->isLifetimeConsidered());
+    settings.setValue(QStringLiteral("sim/stopOnVacuumFull"), m_pSimulator->isVacuumFullLimited());
 
     settings.setValue(QStringLiteral("graphics/cameraType"), m_pGraphicsViewer->isCameraOrthographic());
     settings.setValue(QStringLiteral("graphics/cubeSide"), m_pGraphicsViewer->getCubeSide());
+    settings.setValue(QStringLiteral("graphics/additionalControls"), m_pGraphicsViewer->areAdditionalControlsEnabled());
 
     settings.setValue(QStringLiteral("table/size"), m_pTable->getSize());
     settings.setValue(QStringLiteral("table/injectionDiameter"), m_pTable->getInjectionDiameter());
