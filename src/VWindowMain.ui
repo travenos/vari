@@ -1628,7 +1628,7 @@
              <item>
               <widget class="QCheckBox" name="additionalOptionsCheckBox">
                <property name="text">
-                <string>Включить обрезку/перемещение слоя</string>
+                <string>Дополнительные возможности (обрезка, перемещение слоёв)</string>
                </property>
               </widget>
              </item>
