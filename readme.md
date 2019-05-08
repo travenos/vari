@@ -1,6 +1,10 @@
 # VARI Project
 Software for simulating the VARI process
 
+## Database location
+Database is created on first launch of the application. Two tables are created from file *create.sql*. In the repository, it is located in the following path:  
+**share/vari/sql/create.sql**  
+
 ## Ubuntu build dependencies
 ```
 sudo apt install make g++ cmake fakeroot qt5-default qt5-qmake mercurial doxygen libc-bin  
