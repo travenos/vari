@@ -75,9 +75,9 @@ const QString VWindowMain::SAVING_VIDEO_ERROR("Ошибка записи вид�
 const QString VWindowMain::SAVING_VIDEO_INFO("Видео сохранено в файл %1");
 const Qt::WindowFlags VWindowMain::ON_TOP_FLAGS = (Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint | Qt::Dialog | Qt::WindowTitleHint);
 
-const QStringList VWindowMain::LAYERS_TABLE_LABELS({QStringLiteral("Имя"),
-                                                   QStringLiteral("Материал"),
-                                                   QStringLiteral("Цвет")});
+const QStringList VWindowMain::LAYERS_TABLE_LABELS({QString("Имя"),
+                                                   QString("Материал"),
+                                                   QString("Цвет")});
 
 VWindowMain::VWindowMain(QWidget *parent) :
     QMainWindow(parent),
