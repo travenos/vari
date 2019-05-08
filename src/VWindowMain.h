@@ -274,6 +274,7 @@ private slots:
     void m_on_use_table_parameters_set(bool use);
     void m_stop_on_vacuum_full_switched(bool enabled);
     void m_on_additional_controls_enabled(bool enabled);
+    void m_on_layer_rebuilt(uint layer);
 
     void on_addLayerButton_clicked();
     void on_layerEnableCheckBox_clicked(bool checked);

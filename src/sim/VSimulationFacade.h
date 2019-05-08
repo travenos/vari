@@ -171,6 +171,7 @@ signals:
     void layerEnabled(uint, bool);
     void materialChanged(uint);
     void layerNameChanged(uint);
+    void layerRebuilt(uint);
     void layerAdded();
     void layersCleared();
     void injectionPointSet();

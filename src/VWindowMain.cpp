@@ -210,6 +210,9 @@ void VWindowMain::connectSimulationSignals()
     connect(m_pFacade.get(), SIGNAL(additionalControlsEnabled(bool)),
             this, SLOT(m_on_additional_controls_enabled(bool)));
 
+    connect(m_pFacade.get(), SIGNAL(layerRebuilt(uint)),
+            this, SLOT(m_on_layer_rebuilt(uint)));
+
     connect(m_pSlideshowShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_slideshow_started()));
     connect(m_pSlideshowShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_slideshow_stopped()));
     connect(m_pSlideshowShooter.get(), SIGNAL(directoryChanged()), this, SLOT(m_on_slideshow_directory_changed()));
@@ -1147,7 +1150,7 @@ void VWindowMain::editLayer(uint layer)
         connect(m_pWindowPolygon,SIGNAL(windowClosed()), this, SLOT(m_on_polygon_window_closed()));
     }
     m_pWindowPolygon->set1DMode(false);
-    const auto & polygons{m_pFacade->getPolygons(layer)};
+    const auto & polygons = m_pFacade->getPolygons(layer);
     if(polygons.size() > 0)
         m_pWindowPolygon->setPolygon(polygons.at(0));
     m_pWindowPolygon->show();
@@ -1719,6 +1722,14 @@ void VWindowMain::m_on_additional_controls_enabled(bool enabled)
     if (ui->additionalOptionsCheckBox->isChecked() != enabled)
         ui->additionalOptionsCheckBox->setChecked(enabled);
     ui->layerCutButton->setVisible(enabled);
+}
+
+void VWindowMain::m_on_layer_rebuilt(uint layer)
+{
+    if (static_cast<int>(layer) < ui->layersTableWidget->rowCount())
+    {
+        ui->layersTableWidget->selectRow(layer);
+    }
 }
 
 void VWindowMain::on_injectionPlaceButton_clicked(bool checked)

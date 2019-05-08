@@ -941,6 +941,7 @@ void VSimulationFacade::rebuildLayer(const QPolygonF &polygon, double characteri
         m_pLayersProcessor->swapLayers(0, layer + 1);
         m_pLayersProcessor->removeLayer(0);
         updateConfiguration();
+        emit layerRebuilt(layer);
     }
     else
         throw VImportException();
