@@ -510,7 +510,7 @@ void VWindowPolygon::loadSavedParameters()
         m_characteristicLength = DEFAULT_CHARACTERISTIC_LENGTH;
     bool useTable, mode1D;
     double tubeWidth;
-    useTable = settings.value(QStringLiteral("mesh/useTable"), m_mode1D).toBool();
+    useTable = settings.value(QStringLiteral("mesh/useTable"), m_useTable).toBool();
     mode1D = settings.value(QStringLiteral("mesh/mode1D"), m_mode1D).toBool();
     tubeWidth = settings.value(QStringLiteral("mesh/tubeWidth"), ui->tubeWidthSpinBox->value()).toDouble();
     setUseTable(useTable);
@@ -873,11 +873,11 @@ void VWindowPolygon::drawOtherPolygons()
 
 void VWindowPolygon::set1DMode(bool set)
 {
+    ui->mode1DRadioButton->setChecked(set);
+    ui->mode2DRadioButton->setChecked(!set);
+    ui->tubeWidthSpinBox->setEnabled(set);
     if (m_mode1D != set)
     {
-        ui->mode1DRadioButton->setChecked(set);
-        ui->mode2DRadioButton->setChecked(!set);
-        ui->tubeWidthSpinBox->setEnabled(set);
         m_mode1D = set;
         if (set)
             plot();

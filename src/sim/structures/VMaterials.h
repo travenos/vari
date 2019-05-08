@@ -28,8 +28,8 @@ struct VCloth
 
 struct VResin
 {
-    double viscTempcoef{90000};
-    double lifetimeTempcoef{90000};
+    double viscTempcoef{9000};
+    double lifetimeTempcoef{6000};
     double defaultViscosity{0.1};
     double defaultLifetime{10800};
     QString name{QStringLiteral("")};

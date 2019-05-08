@@ -174,7 +174,7 @@ inline void VNodesVolume::calcSizes(const VSimNode::const_map_ptr &nodes)
     }
     for (size_t i{0}; i < m_arrSizes.size(); ++i)
     {
-        m_arrSizes[i] = static_cast<int>(m_size[i] / m_step + 1);
+        m_arrSizes[i] = static_cast<int>(m_size[static_cast<int>(i)] / m_step + 1);
     }
 }
 
