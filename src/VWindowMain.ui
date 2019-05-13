@@ -111,6 +111,24 @@
                </property>
               </widget>
              </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_9">
+               <item>
+                <widget class="QPushButton" name="addLayerButton">
+                 <property name="text">
+                  <string>Добавить слой</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="sortLayersButton">
+                 <property name="text">
+                  <string>Восстановить сортировку</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
             </layout>
            </widget>
            <widget class="QScrollArea" name="controlWidget">
@@ -130,9 +148,9 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>-134</y>
+               <y>0</y>
                <width>1221</width>
-               <height>904</height>
+               <height>871</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout">
@@ -324,24 +342,6 @@
                  </item>
                 </layout>
                </widget>
-              </item>
-              <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_9">
-                <item>
-                 <widget class="QPushButton" name="addLayerButton">
-                  <property name="text">
-                   <string>Добавить слой</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="sortLayersButton">
-                  <property name="text">
-                   <string>Восстановить сортировку</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
               </item>
               <item>
                <widget class="QGroupBox" name="resinBox">
@@ -1819,6 +1819,8 @@
  <tabstops>
   <tabstop>tabWidget</tabstop>
   <tabstop>layersTableWidget</tabstop>
+  <tabstop>addLayerButton</tabstop>
+  <tabstop>sortLayersButton</tabstop>
   <tabstop>controlWidget</tabstop>
   <tabstop>layerNameEdit</tabstop>
   <tabstop>resetLayerNameButton</tabstop>
@@ -1833,8 +1835,6 @@
   <tabstop>layerDuplicateButton</tabstop>
   <tabstop>layerEditButton</tabstop>
   <tabstop>layerCutButton</tabstop>
-  <tabstop>addLayerButton</tabstop>
-  <tabstop>sortLayersButton</tabstop>
   <tabstop>temperatureEdit</tabstop>
   <tabstop>resetTemperatureButton</tabstop>
   <tabstop>saveTemperatureButton</tabstop>
