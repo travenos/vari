@@ -11,8 +11,8 @@
 #include <QVariant>
 
 #include "VModelImport.h"
+#include "structures/VInjectionVacuum.h"
 #include "structures/VExceptions.h"
-#include "structures/VTable.h"
 
 #define READ_ELEMENTS(body) \
     while (!(xmlReader.isEndElement() && !xmlReader.name().compare(tags._NAME)) && !xmlReader.atEnd()) \
@@ -27,7 +27,6 @@
 VModelImport::VModelImport():
     m_pInfo(new VSimulationInfo),
     m_pParam(new VSimulationParameters),
-    m_pTable(new VTable),
     m_pInjectionVacuum(new VInjectionVacuum),
     m_pLayersProcessor(new VLayersProcessor),
     m_useTableParameters(true),
@@ -46,11 +45,6 @@ const std::shared_ptr<VSimulationInfo>& VModelImport::getInfo() const
 const std::shared_ptr<VSimulationParameters> &VModelImport::getSimulationParameters() const
 {
     return m_pParam;
-}
-
-const std::shared_ptr<VTable>& VModelImport::getTable() const
-{
-    return m_pTable;
 }
 
 const std::shared_ptr<VInjectionVacuum>& VModelImport::getInjectionVacuum() const
@@ -97,8 +91,6 @@ void VModelImport::loadFromFile(const QString &filename)
                 loadInfo(xmlReader);
             else if (!xmlReader.name().compare(_xPARAM_TAGS._NAME))
                 loadParameters(xmlReader);
-            else if (!xmlReader.name().compare(_xTABLE_TAGS._NAME))
-                loadTable(xmlReader);
             else if (!xmlReader.name().compare(_xUSE_INJECTION_VACUUM_TAGS._NAME))
                 loadUseInjectionVacuum(xmlReader);
             else if (!xmlReader.name().compare(_xPAUSED_TAGS._NAME))
@@ -199,29 +191,6 @@ void VModelImport::loadResin(QXmlStreamReader &xmlReader, VSimulationParameters 
     param.setResin(resin);
 }
 
-
-void VModelImport::loadTable(QXmlStreamReader& xmlReader)
-{
-    auto &tags = _xTABLE_TAGS;
-    READ_ELEMENTS
-    (
-        if (!xmlReader.name().compare(tags._xINJECTION_VACUUM_TAGS._NAME))
-        {
-            VInjectionVacuum injectionVacuum;
-            readInjectionVacuum(xmlReader, injectionVacuum);
-            m_pTable->setInjectionVacuum(injectionVacuum);
-        }
-        if (!xmlReader.name().compare(tags.SIZE))
-        {
-            QString tableSizeStr = xmlReader.readElementText();
-            std::vector<float> tableSizeVector;
-            makeVector(tableSizeStr, tableSizeVector);
-            if(tableSizeVector.size() > 1)
-                m_pTable->setSize(tableSizeVector.at(0), tableSizeVector.at(1));
-        }
-    );
-}
-
 void VModelImport::readInjectionVacuum(QXmlStreamReader& xmlReader, VInjectionVacuum &injectionVacuum)
 {
     auto &tags = _xINJECTION_VACUUM_TAGS;
@@ -309,6 +278,7 @@ void VModelImport::loadLayer(QXmlStreamReader& xmlReader, std::deque<VLayer::ptr
     bool isEnabled=true, isVisible=true;
     uint nodeMinId=0, nodeMaxId=0, triangleMinId=0, triangleMaxId=0;
     uint nodesNumber=0, trianglesNumber=0;
+    QString layerName;
     VSimNode::map_ptr nodes(new VSimNode::map_t);
     VSimTriangle::list_ptr triangles(new VSimTriangle::list_t);
     std::vector<VTriangleInfo> trianglesInfos;
@@ -331,6 +301,8 @@ void VModelImport::loadLayer(QXmlStreamReader& xmlReader, std::deque<VLayer::ptr
             nodesNumber = attr.value().toUInt();
         else if (!attr.name().compare(tags.NUMBER_OF_TRIANGLES))
             trianglesNumber = attr.value().toUInt();
+        else if (!attr.name().compare(tags.LAYER_NAME))
+            layerName = attr.value().toString();
     }
     nodes->reserve(nodesNumber);
     m_allNodes.reserve(m_allNodes.size() + nodesNumber);
@@ -349,6 +321,7 @@ void VModelImport::loadLayer(QXmlStreamReader& xmlReader, std::deque<VLayer::ptr
     layer->markActive(isEnabled);
     layer->setVisible(isVisible);
     layer->setMinMaxIds(nodeMinId, nodeMaxId, triangleMinId, triangleMaxId);
+    layer->setName(layerName);
     layers.push_back(layer);
 }
 

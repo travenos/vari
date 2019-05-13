@@ -64,6 +64,9 @@ public:
     bool connectWith(const std::list<VLayer::ptr> &layersList);
     void disconnect();
 
+    void setName(const QString &layerName);
+    const QString & getName() const;
+
     static const float SEARCH_ZONE_PART;
     static const float IMG_STEP_COEF;
 
@@ -82,6 +85,8 @@ private:
     uint m_nodeMaxId;
     uint m_triangleMinId;
     uint m_triangleMaxId;
+
+    QString m_layerName;
 
     VNodesVolume m_nodesVolume;
     VLayerPolygon m_layerPolygon;

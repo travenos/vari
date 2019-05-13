@@ -52,7 +52,7 @@ protected:
         const QString NUMBER_OF_FULL_NODES{QStringLiteral("numberOfFullNodes")};
 
         const VXmlResinTags _xRESIN_TAGS;
-    };  
+    };
     struct VXmlInjectionVacuumTags
     {
         VXmlInjectionVacuumTags() {}
@@ -61,14 +61,6 @@ protected:
         const QString VACUUM_COORDS{QStringLiteral("vacuumCoords")};
         const QString INJECTION_DIAMETER{QStringLiteral("injectionDiameter")};
         const QString VACUUM_DIAMETER{QStringLiteral("vacuumDiameter")};
-    };
-    struct VXmlTableTags
-    {
-        VXmlTableTags() {}
-        const QString _NAME{QStringLiteral("Table")};
-        const QString SIZE{QStringLiteral("size")};
-
-        const VXmlInjectionVacuumTags _xINJECTION_VACUUM_TAGS;
     };
     struct VXmlUseInjectionVacuumTags
     {
@@ -146,6 +138,7 @@ protected:
             const QString TRIANGLE_MAX_ID{QStringLiteral("maxTriangId")};
             const QString NUMBER_OF_NODES{QStringLiteral("nodesCount")};
             const QString NUMBER_OF_TRIANGLES{QStringLiteral("triangCount")};
+            const QString LAYER_NAME{QStringLiteral("name")};
 
             const VXmlClothTags _xCLOTH_TAGS;
             const VXmlNodesTags _xNODES_TAGS;
@@ -182,7 +175,6 @@ protected:
     const VXmlInfoTags _xINFO_TAGS;
     const VXmlParamTags _xPARAM_TAGS;
     const VXmlInjectionVacuumTags _xINJECTION_VACUUM_TAGS;
-    const VXmlTableTags _xTABLE_TAGS;
     const VXmlUseInjectionVacuumTags _xUSE_INJECTION_VACUUM_TAGS;
     const VXmlPausedTags _xPAUSED_TAGS;
     const VXmlTimeLimitTags _xTIMELIMIT_TAGS;

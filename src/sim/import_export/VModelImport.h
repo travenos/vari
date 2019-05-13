@@ -11,7 +11,6 @@
 #include "VModelImportExport.h"
 #include "VLayersProcessor.h"
 
-class VTable;
 struct VInjectionVacuum;
 
 class QXmlStreamReader;
@@ -22,7 +21,6 @@ public:
     VModelImport();
     const std::shared_ptr<VSimulationInfo>& getInfo() const;
     const std::shared_ptr<VSimulationParameters>& getSimulationParameters() const;
-    const std::shared_ptr<VTable>& getTable() const;
     const std::shared_ptr<VInjectionVacuum>& getInjectionVacuum() const;
     const VLayersProcessor::ptr& getLayersProcessor() const;
     bool getUseTableParameters() const;
@@ -48,7 +46,6 @@ private:
 
     void loadResin(QXmlStreamReader& xmlReader, VSimulationParameters &param);
 
-    void loadTable(QXmlStreamReader& xmlReader);
     void readInjectionVacuum(QXmlStreamReader& xmlReader, VInjectionVacuum &injectionVacuum);
     void loadUseInjectionVacuum(QXmlStreamReader& xmlReader);
 
@@ -73,7 +70,6 @@ private:
 
     std::shared_ptr<VSimulationInfo> m_pInfo;
     std::shared_ptr<VSimulationParameters> m_pParam;
-    std::shared_ptr<VTable> m_pTable;
     std::shared_ptr<VInjectionVacuum> m_pInjectionVacuum;
     VLayersProcessor::ptr m_pLayersProcessor;
     bool m_useTableParameters;

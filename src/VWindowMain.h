@@ -19,6 +19,7 @@ class VSimulationFacade;
 class VWindowLayer;
 class VWindowCloth;
 class VWindowResin;
+class VWindowPolygon;
 class VScreenShooter;
 class VVideoShooter;
 class VSimInfoImageTextWriter;
@@ -65,6 +66,8 @@ public:
     static const QString SAVING_VIDEO_INFO;
     static const Qt::WindowFlags ON_TOP_FLAGS;
 
+    static const QStringList LAYERS_TABLE_LABELS;
+
     explicit VWindowMain(QWidget *parent = nullptr);
     ~VWindowMain();
 
@@ -81,10 +84,12 @@ private:
     void deleteWindowLayer();
     void deleteWindowCloth();
     void deleteWindowResin();
-    void addLayerFromFile(const VCloth& material,const QString& filename,
+    void deleteWindowPolygon();
+    void addLayerFromFile(const VCloth& material, const QString& filename, const QString &layerName,
                           VLayerAbstractBuilder::VUnit units);
     void addLayerFromPolygon(const VCloth& material, const QPolygonF& polygon,
-                             double characteristicLength);
+                             double characteristicLength,
+                             const QString& layerName);
     void selectLayer();
     void enableLayer(bool enable);
     void setVisibleLayer(bool visible);
@@ -97,10 +102,11 @@ private:
 
     void removeLayerFromList(int layer);
     void updateLayerMaterialInfo(int layer);
+    void updateLayerName(int layer);
     void showColor(const QColor &color);
     void markLayerAsEnabled(int layer, bool enable);
     void markLayerAsVisible(int layer, bool visible);
-    void reloadLayersList();
+    void reloadLayersTable();
 
     void updateResinInfo();
 
@@ -154,8 +160,8 @@ private:
     void updateCubeSide(int value);
     void showCubeSide();
 
-    void saveSizes();
-    void loadSizes();
+    void saveWindowSettings();
+    void loadWindowSettings();
 
     inline void setSlideshowDir(const QString &dir);
     inline void setSlideshowPeriod(float period);
@@ -180,6 +186,7 @@ private:
     void showFilenameInTitle(const QString &filename);
 
     void swapLayersCaptions(uint layer1, uint layer2);
+    void editLayer(uint layer);
 
     Ui::VWindowMain *ui;
     std::shared_ptr<VSimulationFacade> m_pFacade;
@@ -187,6 +194,7 @@ private:
     VWindowLayer * m_pWindowLayer;
     VWindowCloth * m_pWindowCloth;
     VWindowResin * m_pWindowResin;
+    VWindowPolygon * m_pWindowPolygon;
 
     QDoubleValidator * const m_pTemperatureValidator;
     QDoubleValidator * const m_pPressureValidator;
@@ -204,15 +212,19 @@ private slots:
     void m_on_layer_window_closed();
     void m_on_cloth_window_closed();
     void m_on_resin_window_closed();
+    void m_on_polygon_window_closed();
     void m_on_layers_cleared();
     void m_on_got_cloth(const QString & name, float cavityheight, float permeability, float porosity);
     void m_on_got_resin(const QString & name , float viscosity, float viscTempcoef, float lifetime, float lifetimeTempcoef);
+    void m_on_got_polygon(const QPolygonF & polygon, double characteristicLength);
     void m_on_layer_creation_from_file_available(const VCloth& material, const QString& filename,
+                                                 const QString& layerName,
                                                  VLayerAbstractBuilder::VUnit units);
     void m_on_layer_creation_manual_available(const VCloth& material, const QPolygonF& polygon,
-                                              double characteristicLength);
+                                              double characteristicLength, const QString &layerName);
     void m_on_layer_removed(uint layer);
     void m_on_material_changed(uint layer);
+    void m_on_layer_name_changed(uint layer);
     void m_on_layer_enabled(uint layer, bool enable);
     void m_on_layer_visibility_changed(uint layer, bool visible);
     void m_on_layer_added();
@@ -260,9 +272,11 @@ private slots:
     void m_on_table_injection_diameter_set(float diameter);
     void m_on_table_vacuum_diameter_set(float diameter);
     void m_on_use_table_parameters_set(bool use);
+    void m_stop_on_vacuum_full_switched(bool enabled);
+    void m_on_additional_controls_enabled(bool enabled);
+    void m_on_layer_rebuilt(uint layer);
 
     void on_addLayerButton_clicked();
-    void on_layersListWidget_itemSelectionChanged();
     void on_layerEnableCheckBox_clicked(bool checked);
     void on_layerVisibleCheckBox_clicked(bool checked);
     void on_layerRemoveButton_clicked();
@@ -338,6 +352,17 @@ private slots:
     void on_resetTableVacuumDiameterButton_clicked();
     void on_saveTableVacuumDiameterButton_clicked();
     void on_timeConsiderationCheckbox_clicked(bool checked);
+    void on_actionFolderSlideshow_triggered();
+    void on_actionFolderVideo_triggered();
+    void on_layersTableWidget_itemSelectionChanged();
+    void on_layerNameEdit_textEdited(const QString &);
+    void on_resetLayerNameButton_clicked();
+    void on_saveLayerNameButton_clicked();
+    void on_vacuumFullLimitCheckBox_clicked(bool checked);
+    void on_additionalOptionsCheckBox_clicked(bool checked);
+    void on_layerDuplicateButton_clicked();
+    void on_layerEditButton_clicked();
+    void on_layersTableWidget_doubleClicked(const QModelIndex &index);
 };
 
 #endif // _VWINDOWMAIN_H

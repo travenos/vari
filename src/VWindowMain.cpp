@@ -12,12 +12,14 @@
 #include <QSettings>
 #include <QTimeZone>
 #include <QCloseEvent>
+#include <QDesktopServices>
 
 #include "VWindowMain.h"
 #include "ui_VWindowMain.h"
 #include "VWindowCloth.h"
 #include "VWindowResin.h"
 #include "VWindowLayer.h"
+#include "VWindowPolygon.h"
 #include "VScreenShooter.h"
 #include "VVideoShooter.h"
 #include "VImageTextWriters.h"
@@ -73,12 +75,17 @@ const QString VWindowMain::SAVING_VIDEO_ERROR("Ошибка записи вид�
 const QString VWindowMain::SAVING_VIDEO_INFO("Видео сохранено в файл %1");
 const Qt::WindowFlags VWindowMain::ON_TOP_FLAGS = (Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint | Qt::Dialog | Qt::WindowTitleHint);
 
+const QStringList VWindowMain::LAYERS_TABLE_LABELS({QString("Имя"),
+                                                   QString("Материал"),
+                                                   QString("Цвет")});
+
 VWindowMain::VWindowMain(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::VWindowMain),
     m_pWindowLayer(nullptr),
     m_pWindowCloth(nullptr),
     m_pWindowResin(nullptr),
+    m_pWindowPolygon(nullptr),
     m_pTemperatureValidator(new QDoubleValidator),
     m_pPressureValidator(new QDoubleValidator),
     m_pDiameterValidator(new QDoubleValidator),
@@ -87,8 +94,10 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_isSaved(false)
 {
     ui->setupUi(this);
-    ui->splitter->setStretchFactor(0,1);
-    ui->splitter->setStretchFactor(1,0);
+    ui->splitter->setStretchFactor(0, 1);
+    ui->splitter->setStretchFactor(1, 0);
+    ui->simParamSplitter->setStretchFactor(0, 0);
+    ui->simParamSplitter->setStretchFactor(1, 1);
     ui->layerParamBox->setVisible(false);
     ui->modelInfoLabel->setVisible(false);
     setContextMenuPolicy(Qt::NoContextMenu);
@@ -98,13 +107,20 @@ VWindowMain::VWindowMain(QWidget *parent) :
     setupSpinboxesLocales();
     m_pFacade->loadSavedParameters();
     showCubeSide();
-    loadSizes();
+    loadWindowSettings();
     m_pImgTextWriter.reset(new VSimInfoImageTextWriter(m_pFacade));
     m_pSlideshowShooter->setWidget(m_pFacade->getGLWidget());
     m_pSlideshowShooter->setImageTextWriter(m_pImgTextWriter);
     configureVideoShooter();
     QDir(VVideoShooter::SLIDES_DIR_PATH).removeRecursively();
-    loadShootersSettings();    
+    loadShootersSettings();
+
+    ui->layersTableWidget->setColumnCount(LAYERS_TABLE_LABELS.size());
+    ui->layersTableWidget->setHorizontalHeaderLabels(LAYERS_TABLE_LABELS);
+    ui->layersTableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->layersTableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    ui->layersTableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Fixed);
+
     this->setWindowTitle(QCoreApplication::applicationName());
 }
 
@@ -114,6 +130,8 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_layer_removed(uint)));
     connect(m_pFacade.get(), SIGNAL(materialChanged(uint)),
             this, SLOT(m_on_material_changed(uint)));
+    connect(m_pFacade.get(), SIGNAL(layerNameChanged(uint)),
+            this, SLOT(m_on_layer_name_changed(uint)));
     connect(m_pFacade.get(), SIGNAL(layerEnabled(uint, bool)),
             this, SLOT(m_on_layer_enabled(uint, bool)));
     connect(m_pFacade.get(), SIGNAL(layerAdded()),
@@ -186,6 +204,14 @@ void VWindowMain::connectSimulationSignals()
             this, SLOT(m_on_table_vacuum_diameter_set(float)));
     connect(m_pFacade.get(), SIGNAL(useTableParametersSet(bool)),
             this, SLOT(m_on_use_table_parameters_set(bool)));
+
+    connect(m_pFacade.get(), SIGNAL(stopOnVacuumFullSwitched(bool)),
+            this, SLOT(m_stop_on_vacuum_full_switched(bool)));
+    connect(m_pFacade.get(), SIGNAL(additionalControlsEnabled(bool)),
+            this, SLOT(m_on_additional_controls_enabled(bool)));
+
+    connect(m_pFacade.get(), SIGNAL(layerRebuilt(uint)),
+            this, SLOT(m_on_layer_rebuilt(uint)));
 
     connect(m_pSlideshowShooter.get(), SIGNAL(processStarted()), this, SLOT(m_on_slideshow_started()));
     connect(m_pSlideshowShooter.get(), SIGNAL(processStopped()), this, SLOT(m_on_slideshow_stopped()));
@@ -291,6 +317,7 @@ VWindowMain::~VWindowMain()
     deleteWindowLayer();
     deleteWindowResin();
     deleteWindowCloth();
+    deleteWindowPolygon();
     VSqlDatabase::deleteInstance();
     delete m_pPressureValidator;
     delete m_pTemperatureValidator;
@@ -309,7 +336,7 @@ void VWindowMain::closeEvent(QCloseEvent * event)
     }
     else
     {
-        saveSizes();
+        saveWindowSettings();
     }
 }
 
@@ -340,35 +367,45 @@ void VWindowMain::deleteWindowResin()
     }
 }
 
-void VWindowMain::addLayerFromFile(const VCloth& material,const QString& filename,
+void VWindowMain::deleteWindowPolygon()
+{
+    if (m_pWindowPolygon != nullptr)
+    {
+        m_pWindowPolygon->deleteLater();
+        m_pWindowPolygon = nullptr;
+    }
+}
+
+void VWindowMain::addLayerFromFile(const VCloth& material, const QString& filename,
+                                   const QString& layerName,
                                    VLayerAbstractBuilder::VUnit units)
 {
     try
     {
-        m_pFacade->newLayerFromFile(material, filename, units);
+        m_pFacade->newLayerFromFile(material, filename, layerName, units);
     }
-    catch (VImportException)
+    catch (VImportException &)
     {
         QMessageBox::warning(this, ERROR_TITLE, IMPORT_FROM_FILE_ERROR);
     }
-    catch (VSimulatorException)
+    catch (VSimulatorException &)
     {
         QMessageBox::warning(this, ERROR_TITLE, IMPORT_WHEN_SIMULATING_ERROR);
     }
 }
 
 void VWindowMain::addLayerFromPolygon(const VCloth& material, const QPolygonF& polygon,
-                                      double characteristicLength)
+                                      double characteristicLength, const QString &layerName)
 {
     try
     {
-        m_pFacade->newLayerFromPolygon(material, polygon, characteristicLength);
+        m_pFacade->newLayerFromPolygon(material, polygon, characteristicLength, layerName);
     }
-    catch (VImportException)
+    catch (VImportException &)
     {
         QMessageBox::warning(this, ERROR_TITLE, IMPORT_MANUAL_ERROR);
     }
-    catch (VSimulatorException)
+    catch (VSimulatorException &)
     {
         QMessageBox::warning(this, ERROR_TITLE, IMPORT_WHEN_SIMULATING_ERROR);
     }
@@ -380,13 +417,13 @@ void VWindowMain::showWindowLayer()
     {
         m_pWindowLayer = new VWindowLayer(this, m_pFacade);
         connect(m_pWindowLayer,
-                SIGNAL(creationFromFileAvailable(const VCloth&,const QString&, VLayerAbstractBuilder::VUnit)),
+                SIGNAL(creationFromFileAvailable(const VCloth&, const QString&, const QString&, VLayerAbstractBuilder::VUnit)),
                 this,
-                SLOT(m_on_layer_creation_from_file_available(const VCloth&,const QString&,VLayerAbstractBuilder::VUnit)));
+                SLOT(m_on_layer_creation_from_file_available(const VCloth&, const QString&, const QString&, VLayerAbstractBuilder::VUnit)));
         connect(m_pWindowLayer,
-                SIGNAL(creationManualAvailable(const VCloth&,const QPolygonF&, double)),
+                SIGNAL(creationManualAvailable(const VCloth&,const QPolygonF&, double, const QString&)),
                 this,
-                SLOT(m_on_layer_creation_manual_available(const VCloth&,const QPolygonF&, double)));
+                SLOT(m_on_layer_creation_manual_available(const VCloth&,const QPolygonF&, double, const QString&)));
         connect(m_pWindowLayer,SIGNAL(windowClosed()), this, SLOT(m_on_layer_window_closed()));
     }
     m_pWindowLayer->show();
@@ -395,13 +432,13 @@ void VWindowMain::showWindowLayer()
 
 void VWindowMain::selectLayer()
 {
-    if (ui->layersListWidget->currentIndex().isValid()
-            && ui->layersListWidget->currentRow() < int(m_pFacade->getLayersNumber()))
+    if (ui->layersTableWidget->currentIndex().isValid()
+            && ui->layersTableWidget->currentRow() < int(m_pFacade->getLayersNumber()))
     {
-        uint layer = ui->layersListWidget->currentRow();
+        uint layer = ui->layersTableWidget->currentRow();
         VCloth::const_ptr cloth = m_pFacade->getMaterial(layer);
         bool visible = m_pFacade->isLayerVisible(layer);
-        bool enabled = m_pFacade->isLayerEnabled(layer);        
+        bool enabled = m_pFacade->isLayerEnabled(layer);
         ui->layerParamBox->setVisible(true);
         ui->layerVisibleCheckBox->setChecked(visible);
         ui->layerEnableCheckBox->setChecked(enabled);
@@ -410,6 +447,8 @@ void VWindowMain::selectLayer()
         showColor(cloth->baseColor);
         ui->layerUpButton->setEnabled(layer > 0 && m_pFacade->isSimulationStopped());
         ui->layerDownButton->setEnabled(layer < m_pFacade->getLayersNumber() - 1u && m_pFacade->isSimulationStopped());
+        ui->layerNameEdit->setText(m_pFacade->getLayerName(layer));
+        ui->resetLayerNameButton->setEnabled(false);
     }
     else
         ui->layerParamBox->setVisible(false);
@@ -428,9 +467,9 @@ void VWindowMain::showColor(const QColor& color)
 
 void VWindowMain::enableLayer(bool enable)
 {
-    if (ui->layersListWidget->currentIndex().isValid())
+    if (ui->layersTableWidget->currentIndex().isValid())
     {
-        int layer = ui->layersListWidget->currentRow();
+        int layer = ui->layersTableWidget->currentRow();
         if (layer >= 0)
             m_pFacade->enableLayer(static_cast<uint>(layer), enable);
     }
@@ -438,9 +477,9 @@ void VWindowMain::enableLayer(bool enable)
 
 void VWindowMain::setVisibleLayer(bool visible)
 {
-    if (ui->layersListWidget->currentIndex().isValid())
+    if (ui->layersTableWidget->currentIndex().isValid())
     {
-        int layer = ui->layersListWidget->currentRow();
+        int layer = ui->layersTableWidget->currentRow();
         if (layer >= 0)
             m_pFacade->setVisible(static_cast<uint>(layer), visible);
     }
@@ -453,9 +492,9 @@ void VWindowMain::enableTimeLimitMode(bool checked)
 
 void VWindowMain::removeLayer()
 {
-    if (ui->layersListWidget->currentIndex().isValid())
+    if (ui->layersTableWidget->currentIndex().isValid())
     {
-        int layer = ui->layersListWidget->currentRow();
+        int layer = ui->layersTableWidget->currentRow();
         m_pFacade->removeLayer(layer);
     }
 }
@@ -488,9 +527,9 @@ void VWindowMain::showWindowResin()
 
 void VWindowMain::setCloth(const QString & name, float cavityheight, float permeability, float porosity)
 {
-    if (ui->layersListWidget->currentIndex().isValid())
+    if (ui->layersTableWidget->currentIndex().isValid())
     {
-        int layer = ui->layersListWidget->currentRow();
+        int layer = ui->layersTableWidget->currentRow();
         VCloth cloth = *(m_pFacade->getMaterial(layer));
         cloth.cavityHeight = cavityheight;
         cloth.permeability = permeability;
@@ -502,9 +541,9 @@ void VWindowMain::setCloth(const QString & name, float cavityheight, float perme
 
 void VWindowMain::selectColor()
 {
-    if (ui->layersListWidget->currentIndex().isValid())
+    if (ui->layersTableWidget->currentIndex().isValid())
     {
-        int layer = ui->layersListWidget->currentRow();
+        int layer = ui->layersTableWidget->currentRow();
         VCloth cloth = *(m_pFacade->getMaterial(layer));
         QColor color = QColorDialog::getColor(cloth.baseColor, this);
 
@@ -530,17 +569,17 @@ void VWindowMain::setResin(const QString & name , float viscosity, float viscTem
 
 void VWindowMain::removeLayerFromList(int layer)
 {
-    if(layer < ui->layersListWidget->count())
+    if(layer < ui->layersTableWidget->rowCount())
     {
         bool reselectFlag = false;
-        if (layer == ui->layersListWidget->currentRow())
+        if (layer == ui->layersTableWidget->currentRow())
         {
             if(layer > 0)
-                ui->layersListWidget->setCurrentRow(layer - 1);
+                ui->layersTableWidget->selectRow(layer - 1);
             else
                 reselectFlag = true;
         }
-        delete ui->layersListWidget->item(layer);
+        ui->layersTableWidget->removeRow(layer);
         if (reselectFlag)
             selectLayer();
     }
@@ -549,12 +588,24 @@ void VWindowMain::removeLayerFromList(int layer)
 void VWindowMain::updateLayerMaterialInfo(int layer)
 {
     VCloth::const_ptr cloth = m_pFacade->getMaterial(layer);
-    ui->layersListWidget->item(layer)->setText(cloth->name);
-    if ( layer == ui->layersListWidget->currentRow())
+    ui->layersTableWidget->item(layer, 1)->setText(cloth->name);
+    ui->layersTableWidget->item(layer, 2)->setBackgroundColor(cloth->baseColor);
+    if ( layer == ui->layersTableWidget->currentRow())
     {
         ui->layerInfoLabel->setText(CLOTH_INFO_TEXT.arg(cloth->name).arg(cloth->cavityHeight)
                                              .arg(cloth->permeability).arg(cloth->porosity));
         showColor(cloth->baseColor);
+    }
+}
+
+void VWindowMain::updateLayerName(int layer)
+{
+    const QString & layerName = m_pFacade->getLayerName(layer);
+    ui->layersTableWidget->item(layer, 0)->setText(layerName);
+    if ( layer == ui->layersTableWidget->currentRow())
+    {
+        ui->layerNameEdit->setText(layerName);
+        ui->resetLayerNameButton->setEnabled(false);
     }
 }
 
@@ -568,7 +619,7 @@ void VWindowMain::updateResinInfo()
 
 void VWindowMain::markLayerAsEnabled(int layer, bool enable)
 {
-    if(layer < ui->layersListWidget->count())
+    if(layer < ui->layersTableWidget->rowCount())
     {
         QColor textColor;
         if (!m_pFacade->isLayerEnabled(layer))
@@ -577,15 +628,16 @@ void VWindowMain::markLayerAsEnabled(int layer, bool enable)
             textColor = INVISIBLE_COLOR;
         else
             textColor = ACTIVE_COLOR;
-        ui->layersListWidget->item(layer)->setTextColor(textColor);
-        if (ui->layersListWidget->currentRow() == layer)
+        for (int i{0}; i < ui->layersTableWidget->columnCount(); ++i)
+            ui->layersTableWidget->item(layer, i)->setTextColor(textColor);
+        if (ui->layersTableWidget->currentRow() == layer)
             ui->layerEnableCheckBox->setChecked(enable);
     }
 }
 
 void VWindowMain::markLayerAsVisible(int layer, bool visible)
 {
-    if(layer < ui->layersListWidget->count())
+    if(layer < ui->layersTableWidget->rowCount())
     {
         QColor textColor;
         if (!m_pFacade->isLayerEnabled(layer))
@@ -594,8 +646,9 @@ void VWindowMain::markLayerAsVisible(int layer, bool visible)
             textColor = INVISIBLE_COLOR;
         else
             textColor = ACTIVE_COLOR;
-        ui->layersListWidget->item(layer)->setTextColor(textColor);
-        if (ui->layersListWidget->currentRow() == layer)
+        for (int i{0}; i < ui->layersTableWidget->columnCount(); ++i)
+            ui->layersTableWidget->item(layer, i)->setTextColor(textColor);
+        if (ui->layersTableWidget->currentRow() == layer)
             ui->layerVisibleCheckBox->setChecked(visible);
     }
 }
@@ -845,6 +898,8 @@ void VWindowMain::activateSimControls(bool enabled)
     ui->selectMaterialClothButton->setEnabled(enabled);
     ui->layerRemoveButton->setEnabled(enabled);
     ui->layerCutButton->setEnabled(enabled);
+    ui->layerDuplicateButton->setEnabled(enabled);
+    ui->layerEditButton->setEnabled(enabled);
     ui->addLayerButton->setEnabled(enabled);
     ui->sortLayersButton->setEnabled(enabled);
     ui->injectionPressureEdit->setEnabled(enabled);
@@ -859,7 +914,7 @@ void VWindowMain::activateSimControls(bool enabled)
     ui->resetVacuumDiameterButton->setEnabled(enabled && !useTableParam);
     ui->selectMaterialResinButton->setEnabled(enabled);
 
-    int layer = ui->layersListWidget->currentRow();
+    int layer = ui->layersTableWidget->currentRow();
     ui->layerUpButton->setEnabled(enabled && layer > 0);
     ui->layerDownButton->setEnabled(enabled && layer < static_cast<int>(m_pFacade->getLayersNumber()) - 1);
 }
@@ -876,22 +931,32 @@ void VWindowMain::resetAllInputs()
 void VWindowMain::showNewLayer()
 {
     VCloth::const_ptr cloth = m_pFacade->getMaterial(0);
-    ui->layersListWidget->insertItem(0, cloth->name);
-    ui->layersListWidget->setCurrentRow(0);
+    ui->layersTableWidget->insertRow(0);
+    ui->layersTableWidget->setItem(0, 0, new QTableWidgetItem(m_pFacade->getLayerName(0)));
+    ui->layersTableWidget->setItem(0, 1, new QTableWidgetItem(cloth->name));
+    ui->layersTableWidget->setItem(0, 2, new QTableWidgetItem());
+    ui->layersTableWidget->item(0, 2)->setBackgroundColor(cloth->baseColor);
+    ui->layersTableWidget->selectRow(0);
 }
 
-void VWindowMain::reloadLayersList()
+void VWindowMain::reloadLayersTable()
 {
-    ui->layersListWidget->clear();
+    ui->layersTableWidget->setRowCount(0);
     for (uint layer = 0; layer < m_pFacade->getLayersNumber(); ++layer)
     {
         VCloth::const_ptr cloth = m_pFacade->getMaterial(layer);
-        ui->layersListWidget->addItem(cloth->name);
+        ui->layersTableWidget->insertRow(layer);
+        ui->layersTableWidget->setItem(layer, 0, new QTableWidgetItem(m_pFacade->getLayerName(layer)));
+        ui->layersTableWidget->setItem(layer, 1, new QTableWidgetItem(cloth->name));
+        ui->layersTableWidget->setItem(layer, 2, new QTableWidgetItem());
+        ui->layersTableWidget->item(layer, 2)->setBackgroundColor(cloth->baseColor);
         markLayerAsEnabled(layer, m_pFacade->isLayerEnabled(layer));
         markLayerAsVisible(layer, m_pFacade->isLayerVisible(layer));
     }
-    if (ui->layersListWidget->count() > 0)
-        ui->layersListWidget->setCurrentRow(ui->layersListWidget->count() - 1);
+    if (ui->layersTableWidget->rowCount() > 0)
+        ui->layersTableWidget->selectRow(ui->layersTableWidget->rowCount() - 1);
+    else
+        ui->layerParamBox->setVisible(false);
 }
 
 void VWindowMain::newModel()
@@ -914,7 +979,7 @@ void VWindowMain::loadModel()
         {
             m_pFacade->loadModel(fileName);
         }
-        catch (VImportException)
+        catch (VImportException &)
         {
             QMessageBox::warning(this, ERROR_TITLE, IMPORT_FROM_FILE_ERROR);
         }
@@ -938,7 +1003,7 @@ void VWindowMain::saveModel()
         {
             m_pFacade->saveModel(fileName);
         }
-        catch (VExportException)
+        catch (VExportException &)
         {
             QMessageBox::warning(this, ERROR_TITLE, EXPORT_TO_FILE_ERROR);
         }
@@ -949,9 +1014,9 @@ void VWindowMain::saveModel()
 
 void VWindowMain::startCuttingLayer()
 {
-    if (ui->layersListWidget->currentIndex().isValid())
+    if (ui->layersTableWidget->currentIndex().isValid())
     {
-        uint layer = ui->layersListWidget->currentRow();
+        uint layer = ui->layersTableWidget->currentRow();
         m_pFacade->startCuttingLayer(layer);
     }
 }
@@ -1001,23 +1066,95 @@ void VWindowMain::showCubeSide()
         ui->cubeSideSlider->setValue(value);
 }
 
-void VWindowMain::saveSizes()
+void VWindowMain::saveWindowSettings()
 {
     QSettings settings;
     settings.setValue("window/geometry", saveGeometry());
     settings.setValue("window/windowState", saveState());
     settings.setValue("window/splitter", ui->splitter->saveGeometry());
     settings.setValue("window/splitterState", ui->splitter->saveState());
+    settings.setValue("window/simParamSplitter", ui->simParamSplitter->saveGeometry());
+    settings.setValue("window/simParamSplitterState", ui->simParamSplitter->saveState());
     settings.sync();
 }
 
-void VWindowMain::loadSizes()
+void VWindowMain::loadWindowSettings()
 {
     QSettings settings;
     restoreGeometry(settings.value("window/geometry").toByteArray());
     restoreState(settings.value("window/windowState").toByteArray());
     ui->splitter->restoreGeometry(settings.value("window/splitter").toByteArray());
     ui->splitter->restoreState(settings.value("window/splitterState").toByteArray());
+    ui->simParamSplitter->restoreGeometry(settings.value("window/simParamSplitter").toByteArray());
+    ui->simParamSplitter->restoreState(settings.value("window/simParamSplitterState").toByteArray());
+}
+
+
+void VWindowMain::setSavedState(bool saved)
+{
+    m_isSaved = saved;
+    m_isSaved |= (m_pFacade->getNodesNumber() == 0);
+    QString title = this->windowTitle();
+    if (m_isSaved)
+    {
+        title.remove('*');
+    }
+    else if (!title.startsWith('*'))
+    {
+        title.insert(0, '*');
+    }
+    this->setWindowTitle(title);
+}
+
+void VWindowMain::showFilenameInTitle(const QString &filename)
+{
+    bool addStar = this->windowTitle().startsWith('*');
+    QString title;
+    if (addStar)
+        title += '*';
+    if (!filename.isEmpty())
+    {
+        QString baseFileName = QFileInfo(filename).fileName();
+        title += baseFileName;
+        title += QStringLiteral(" - ");
+    }
+    title += QCoreApplication::applicationName();
+    this->setWindowTitle(title);
+}
+
+void VWindowMain::swapLayersCaptions(uint layer1, uint layer2)
+{
+    int columns{ui->layersTableWidget->columnCount()};
+    std::vector<QTableWidgetItem*> items1(columns);
+    std::vector<QTableWidgetItem*> items2(columns);
+    for (int i{0}; i < columns; ++i)
+    {
+        items1.at(i) = ui->layersTableWidget->takeItem(layer1, i);
+        items2.at(i) = ui->layersTableWidget->takeItem(layer2, i);
+    }
+    for (int i{0}; i < columns; ++i)
+    {
+        ui->layersTableWidget->setItem(layer2, i, items1.at(i));
+        ui->layersTableWidget->setItem(layer1, i, items2.at(i));
+    }
+    ui->layersTableWidget->selectRow(layer2);
+}
+
+void VWindowMain::editLayer(uint layer)
+{
+    if (m_pWindowPolygon == nullptr)
+    {
+        m_pWindowPolygon = new VWindowPolygon(this, m_pFacade);
+        connect(m_pWindowPolygon, SIGNAL(polygonAvailable(const QPolygonF &, double)),
+                this, SLOT(m_on_got_polygon(const QPolygonF &, double)));
+        connect(m_pWindowPolygon,SIGNAL(windowClosed()), this, SLOT(m_on_polygon_window_closed()));
+    }
+    m_pWindowPolygon->set1DMode(false);
+    const auto & polygons = m_pFacade->getPolygons(layer);
+    if(polygons.size() > 0)
+        m_pWindowPolygon->setPolygon(polygons.at(0));
+    m_pWindowPolygon->show();
+    m_pWindowPolygon->activateWindow();
 }
 
 /**
@@ -1145,63 +1282,22 @@ void VWindowMain::enableButtonsShootingWindows(bool enable)
     ui->actionSave->setEnabled(enable);
 }
 
-void VWindowMain::setSavedState(bool saved)
-{
-    m_isSaved = saved;
-    m_isSaved |= (m_pFacade->getNodesNumber() == 0);
-    QString title = this->windowTitle();
-    if (m_isSaved)
-    {
-        title.remove('*');
-    }
-    else if (!title.startsWith('*'))
-    {
-        title.insert(0, '*');
-    }
-    this->setWindowTitle(title);
-}
-
-void VWindowMain::showFilenameInTitle(const QString &filename)
-{
-    bool addStar = this->windowTitle().startsWith('*');
-    QString title;
-    if (addStar)
-        title += '*';
-    if (!filename.isEmpty())
-    {
-        QString baseFileName = QFileInfo(filename).fileName();
-        title += baseFileName;
-        title += QStringLiteral(" - ");
-    }
-    title += QCoreApplication::applicationName();
-    this->setWindowTitle(title);
-}
-
-void VWindowMain::swapLayersCaptions(uint layer1, uint layer2)
-{
-    QListWidgetItem *item1 = ui->layersListWidget->item(layer1);
-    QListWidgetItem *item2 = ui->layersListWidget->takeItem(layer2);
-    ui->layersListWidget->insertItem(layer1, item2);
-    int layer1Row = ui->layersListWidget->row(item1);
-    item1 = ui->layersListWidget->takeItem(layer1Row);
-    ui->layersListWidget->insertItem(layer2, item1);
-    ui->layersListWidget->setCurrentItem(item1);
-}
-
 /**
  * Slots
  */
 
 void VWindowMain::m_on_layer_creation_from_file_available(const VCloth& material, const QString& filename,
+                                                          const QString& layerName,
                                                           VLayerAbstractBuilder::VUnit units)
 {
-    addLayerFromFile(material, filename, units);
+    addLayerFromFile(material, filename, layerName, units);
 }
 
 void VWindowMain::m_on_layer_creation_manual_available(const VCloth& material,const QPolygonF& polygon,
-                                                       double characteristicLength)
+                                                       double characteristicLength,
+                                                       const QString& layerName)
 {
-    addLayerFromPolygon(material, polygon, characteristicLength);
+    addLayerFromPolygon(material, polygon, characteristicLength, layerName);
 }
 
 void VWindowMain::m_on_got_cloth(const QString & name, float cavityheight, float permeability, float porosity)
@@ -1213,6 +1309,23 @@ void VWindowMain::m_on_got_resin(const QString & name , float viscosity, float v
                                  float lifetime, float lifetimeTempcoef)
 {
     setResin(name, viscosity, viscTempcoef, lifetime, lifetimeTempcoef);
+}
+
+void VWindowMain::m_on_got_polygon(const QPolygonF & polygon, double characteristicLength)
+{
+    if (ui->layersTableWidget->currentIndex().isValid()
+            && ui->layersTableWidget->currentRow() < int(m_pFacade->getLayersNumber()))
+    {
+        uint layer = ui->layersTableWidget->currentRow();
+        try
+        {
+            m_pFacade->rebuildLayer(polygon, characteristicLength, layer);
+        }
+        catch(VImportException &)
+        {
+            QMessageBox::warning(this, ERROR_TITLE, IMPORT_MANUAL_ERROR);
+        }
+    }
 }
 
 void VWindowMain::m_on_layer_window_closed()
@@ -1230,9 +1343,14 @@ void VWindowMain::m_on_resin_window_closed()
     deleteWindowResin();
 }
 
+void VWindowMain::m_on_polygon_window_closed()
+{
+    deleteWindowPolygon();
+}
+
 void VWindowMain::m_on_layers_cleared()
 {
-    reloadLayersList();
+    reloadLayersTable();
     showModelInfo();
     setSavedState(false);
 }
@@ -1256,11 +1374,6 @@ void VWindowMain::m_on_video_saving_finished(bool result)
 void VWindowMain::on_addLayerButton_clicked()
 {
     showWindowLayer();
-}
-
-void VWindowMain::on_layersListWidget_itemSelectionChanged()
-{
-    selectLayer();
 }
 
 void VWindowMain::on_layerEnableCheckBox_clicked(bool checked)
@@ -1301,6 +1414,12 @@ void VWindowMain::m_on_layer_removed(uint layer)
 void VWindowMain::m_on_material_changed(uint layer)
 {
     updateLayerMaterialInfo(layer);
+    setSavedState(false);
+}
+
+void VWindowMain::m_on_layer_name_changed(uint layer)
+{
+    updateLayerName(layer);
     setSavedState(false);
 }
 
@@ -1416,7 +1535,7 @@ void VWindowMain::m_on_layer_visibility_changed(uint layer, bool visible)
 
 void VWindowMain::m_on_model_loaded()
 {
-    reloadLayersList();
+    reloadLayersTable();
     setSavedState(true);
 }
 
@@ -1464,18 +1583,22 @@ void VWindowMain::m_on_layers_swapped(uint layer1, uint layer2)
 void VWindowMain::m_on_slideshow_started()
 {
     ui->slideshowBox->setEnabled(false);
+#ifndef __linux__
     setWindowFlags((windowFlags() & ~Qt::WindowStaysOnBottomHint) | ON_TOP_FLAGS);
     show();
+#endif
 }
 
 void VWindowMain::m_on_slideshow_stopped()
 {
     ui->slideshowBox->setEnabled(true);
+#ifndef __linux__
     if (!m_pVideoShooter->isWorking())
     {
         setWindowFlags((windowFlags() & ~ON_TOP_FLAGS) | Qt::WindowStaysOnBottomHint);
         show();
     }
+#endif
 }
 
 void VWindowMain::m_on_slideshow_directory_changed()
@@ -1499,18 +1622,22 @@ void VWindowMain::m_on_slideshow_suffix_dirname_changed()
 void VWindowMain::m_on_video_started()
 {
     ui->videoBox->setEnabled(false);
+#ifndef __linux__
     setWindowFlags((windowFlags() & ~Qt::WindowStaysOnBottomHint) | ON_TOP_FLAGS);
     show();
+#endif
 }
 
 void VWindowMain::m_on_video_stopped()
 {
     ui->videoBox->setEnabled(true);
+#ifndef __linux__
     if (!m_pSlideshowShooter->isWorking())
     {
         setWindowFlags((windowFlags() & ~ON_TOP_FLAGS) | Qt::WindowStaysOnBottomHint);
         show();
     }
+#endif
 }
 
 void VWindowMain::m_on_video_directory_changed()
@@ -1582,6 +1709,27 @@ void VWindowMain::m_on_use_table_parameters_set(bool use)
     ui->vacuumPlaceButton->setEnabled(enabled && !use);
     ui->resetVacuumDiameterButton->setEnabled(enabled && !use);
     setSavedState(false);
+}
+
+void VWindowMain::m_stop_on_vacuum_full_switched(bool enabled)
+{
+    if (ui->vacuumFullLimitCheckBox->isChecked() != enabled)
+        ui->vacuumFullLimitCheckBox->setChecked(enabled);
+}
+
+void VWindowMain::m_on_additional_controls_enabled(bool enabled)
+{
+    if (ui->additionalOptionsCheckBox->isChecked() != enabled)
+        ui->additionalOptionsCheckBox->setChecked(enabled);
+    ui->layerCutButton->setVisible(enabled);
+}
+
+void VWindowMain::m_on_layer_rebuilt(uint layer)
+{
+    if (static_cast<int>(layer) < ui->layersTableWidget->rowCount())
+    {
+        ui->layersTableWidget->selectRow(layer);
+    }
 }
 
 void VWindowMain::on_injectionPlaceButton_clicked(bool checked)
@@ -1855,20 +2003,20 @@ void VWindowMain::on_saveVideoFileNameButton_clicked()
 
 void VWindowMain::on_layerUpButton_clicked()
 {
-    if (ui->layersListWidget->currentIndex().isValid()
-            && ui->layersListWidget->currentRow() < int(m_pFacade->getLayersNumber()))
+    if (ui->layersTableWidget->currentIndex().isValid()
+            && ui->layersTableWidget->currentRow() < int(m_pFacade->getLayersNumber()))
     {
-        uint layer = ui->layersListWidget->currentRow();
+        uint layer = ui->layersTableWidget->currentRow();
         m_pFacade->moveLayerUp(layer);
     }
 }
 
 void VWindowMain::on_layerDownButton_clicked()
 {
-    if (ui->layersListWidget->currentIndex().isValid()
-            && ui->layersListWidget->currentRow() < int(m_pFacade->getLayersNumber()))
+    if (ui->layersTableWidget->currentIndex().isValid()
+            && ui->layersTableWidget->currentRow() < int(m_pFacade->getLayersNumber()))
     {
-        uint layer = ui->layersListWidget->currentRow();
+        uint layer = ui->layersTableWidget->currentRow();
         m_pFacade->moveLayerDown(layer);
     }
 }
@@ -2012,4 +2160,87 @@ void VWindowMain::on_saveTableVacuumDiameterButton_clicked()
 void VWindowMain::on_timeConsiderationCheckbox_clicked(bool checked)
 {
     m_pFacade->considerLifetime(checked);
+}
+
+void VWindowMain::on_actionFolderSlideshow_triggered()
+{
+    QDesktopServices::openUrl(QUrl::fromLocalFile(m_pSlideshowShooter->getDirPath()));
+}
+
+void VWindowMain::on_actionFolderVideo_triggered()
+{
+    QDesktopServices::openUrl(QUrl::fromLocalFile(m_pVideoShooter->getDirPath()));
+}
+
+void VWindowMain::on_layersTableWidget_itemSelectionChanged()
+{
+    selectLayer();
+}
+
+void VWindowMain::on_layerNameEdit_textEdited(const QString &)
+{
+    ui->resetLayerNameButton->setEnabled(true);
+}
+
+void VWindowMain::on_resetLayerNameButton_clicked()
+{
+    if (ui->layersTableWidget->currentIndex().isValid()
+            && ui->layersTableWidget->currentRow() < int(m_pFacade->getLayersNumber()))
+    {
+        uint layer = ui->layersTableWidget->currentRow();
+        ui->layerNameEdit->setText(m_pFacade->getLayerName(layer));
+        ui->resetLayerNameButton->setEnabled(false);
+    }
+}
+
+void VWindowMain::on_saveLayerNameButton_clicked()
+{
+    if (ui->layersTableWidget->currentIndex().isValid()
+            && ui->layersTableWidget->currentRow() < int(m_pFacade->getLayersNumber()))
+    {
+        uint layer = ui->layersTableWidget->currentRow();
+        m_pFacade->setLayerName(layer, ui->layerNameEdit->text());
+    }
+}
+
+void VWindowMain::on_vacuumFullLimitCheckBox_clicked(bool checked)
+{
+    m_pFacade->stopOnVacuumFull(checked);
+}
+
+void VWindowMain::on_additionalOptionsCheckBox_clicked(bool checked)
+{
+    m_pFacade->enableAdditionalGraphicsControls(checked);
+}
+
+void VWindowMain::on_layerDuplicateButton_clicked()
+{
+    if (ui->layersTableWidget->currentIndex().isValid()
+            && ui->layersTableWidget->currentRow() < int(m_pFacade->getLayersNumber()))
+    {
+        uint layer = ui->layersTableWidget->currentRow();
+        try
+        {
+            m_pFacade->duplicateLayer(layer);
+        }
+        catch(VImportException &)
+        {
+            QMessageBox::warning(this, ERROR_TITLE, IMPORT_MANUAL_ERROR);
+        }
+    }
+}
+
+void VWindowMain::on_layerEditButton_clicked()
+{
+    if (ui->layersTableWidget->currentIndex().isValid()
+            && ui->layersTableWidget->currentRow() < int(m_pFacade->getLayersNumber()))
+    {
+        uint layer = ui->layersTableWidget->currentRow();
+        editLayer(layer);
+    }
+}
+
+void VWindowMain::on_layersTableWidget_doubleClicked(const QModelIndex &index)
+{
+    editLayer(index.row());
 }

@@ -105,9 +105,12 @@ void VWindowLayer::accept()
     else
         units = VLayerAbstractBuilder::M;
     if (m_selectedMaterial && m_selectedFile)
-        emit creationFromFileAvailable(m_material, m_filename, units);
+        emit creationFromFileAvailable(m_material, m_filename,
+                                       ui->layerNameEdit->text(),
+                                       units);
     else if (m_selectedMaterial && m_createdGeometry)
-        emit creationManualAvailable(m_material, m_polygon, m_characteristicLength);
+        emit creationManualAvailable(m_material, m_polygon, m_characteristicLength,
+                                     ui->layerNameEdit->text());
     reset();
     close();
 }

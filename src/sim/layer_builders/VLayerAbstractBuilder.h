@@ -16,6 +16,7 @@ public:
     static const float MM_IN_M;
 
     VLayerAbstractBuilder(const VCloth &material);
+    VLayerAbstractBuilder(const VCloth &material, const QString & layerName);
     virtual ~VLayerAbstractBuilder();
     VLayerAbstractBuilder(const VLayerAbstractBuilder& ) = delete;
     VLayerAbstractBuilder& operator= (const VLayerAbstractBuilder& ) = delete;
@@ -29,6 +30,9 @@ public:
     uint getNodeMaxId() const;
     uint getTriangleMaxId() const;
 
+    void setLayerName(const QString &layerName);
+    const QString & getLayerName() const;
+
 protected:
     VLayer::ptr m_pLayer;
     const VCloth::ptr m_pMaterial;
@@ -37,6 +41,7 @@ protected:
     uint m_triangleStartId;
     uint m_nodeMaxId;
     uint m_triangleMaxId;
+    QString m_layerName;
 };
 
 #endif //_VLAYERABSTRACTBUILDER_H

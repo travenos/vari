@@ -49,11 +49,12 @@ void VSimTriangle::getVertices(QVector3D vertices[VERTICES_NUMBER]) const
         vertices[i] = m_pNodes[i]->getPosition();
 }
 
-QVector3D VSimTriangle::getVerticesId() const
+std::vector<uint> VSimTriangle::getVerticesId() const
 {
-    QVector3D ids;
+    std::vector<uint> ids;
+    ids.reserve(VERTICES_NUMBER);
     for (uint i = 0; i < VERTICES_NUMBER; ++i)
-        ids[i] = m_pNodes[i]->getId();
+        ids.push_back(m_pNodes[i]->getId());
     return ids;
 }
 

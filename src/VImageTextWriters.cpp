@@ -15,9 +15,11 @@
  */
 
 const QString VAbstractImageTextWriter::FONT_NAME{QStringLiteral("Times New Roman")};
-const int VAbstractImageTextWriter::FONT_SIZE{12};
-const int VAbstractImageTextWriter::LINE_OFFSET{12};
+const int VAbstractImageTextWriter::FONT_SIZE{16};
+const int VAbstractImageTextWriter::LINE_OFFSET{18};
 const int VAbstractImageTextWriter::STRING_LENGTH{250};
+const int VAbstractImageTextWriter::UP_OFFSET{36};
+const int VAbstractImageTextWriter::LEFT_OFFSET{10};
 
 void VAbstractImageTextWriter::writeText(QPixmap &pixmap) const
 {
@@ -48,7 +50,9 @@ QString VAbstractImageTextWriter::createString() const
 
 QFont VAbstractImageTextWriter::getFont() const
 {
-    return QFont(FONT_NAME, FONT_SIZE);
+    QFont font(FONT_NAME);
+    font.setPixelSize(FONT_SIZE);
+    return font;
 }
 
 int VAbstractImageTextWriter::getLineOffset() const
@@ -63,8 +67,6 @@ int VAbstractImageTextWriter::getLineStringLength() const
 
 QPoint VAbstractImageTextWriter::getTextPosition(const QPixmap &pixmap) const
 {
-    const int UP_OFFSET{36};
-    const int LEFT_OFFSET{10};
     return QPoint(LEFT_OFFSET, pixmap.height() - UP_OFFSET);
 }
 
@@ -82,8 +84,7 @@ const QString VSimInfoImageTextWriter::INFO_STRING{"Время моделиро�
 
 const int VSimInfoImageTextWriter::PRECISION{6};
 
-VSimInfoImageTextWriter::VSimInfoImageTextWriter(const std::shared_ptr<const VSimulationFacade>
-                                                 p_facade):
+VSimInfoImageTextWriter::VSimInfoImageTextWriter(const std::shared_ptr<const VSimulationFacade> &p_facade):
     m_pFacade{p_facade}
 {
 }

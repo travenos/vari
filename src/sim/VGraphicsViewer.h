@@ -82,6 +82,9 @@ public:
     bool isCameraOrthographic() const;
     void setCameraOrthographic(bool on);
 
+    void enableAdditionalControls(bool enable);
+    bool areAdditionalControlsEnabled() const;
+
 public slots:
     void doRender() ;
     void displayInfo() ;
@@ -120,6 +123,8 @@ private:
 
     void stopRender() ;
     void process() ;
+
+    void enableDragPrivate(bool enable);
 
     static void event_cb(void * userdata, SoEventCallback * node);
     /**
@@ -172,6 +177,9 @@ private:
 
     float m_cubeSide;
 
+    bool m_dragEnabled;
+    bool m_additionalGraphicsControlsEnabled;
+
 private slots:
     /**
      * Slot that should be called when the left rotary wheel is pressed, to get ready for a movement.
@@ -223,6 +231,7 @@ signals:
     void gotNodesSelection(const VGraphicsViewer::const_uint_vect_ptr &p_selectedNodes);
     void gotTransformation();
     void cubeSideChanged(float side);
+    void additionalControlsEnabled(bool);
 };
 
 

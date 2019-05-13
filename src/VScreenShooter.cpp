@@ -15,8 +15,11 @@
 #include <QPixmap>
 #include <QWidget>
 #include <QDir>
+#include <QStandardPaths>
 
 #include "VImageTextWriters.h"
+
+#include "VScreenShooter.h"
 
 #if defined(Q_OS_WIN) || defined (WIN32) || defined(__WIN32__)
 #include <windows.h>
@@ -53,21 +56,20 @@ inline void getWinAPIscreen(int wx1, int wy1, int wx2, int wy2, QPixmap &pixmap)
 }
 #endif
 
-#include "VScreenShooter.h"
-
 /**
  * VScreenShooter implementation
  */
 
-const char * const VScreenShooter::PICTURE_FORMAT_C = "png";
-const QString VScreenShooter::PICTURE_FORMAT(VScreenShooter::PICTURE_FORMAT_C);
-const QString VScreenShooter::BASE_NAME = QStringLiteral("slide_%1.") + VScreenShooter::PICTURE_FORMAT;
-const QString VScreenShooter::DEFAULT_SUFFIX_DIR_NAME("VARI_slideshow");
-const int VScreenShooter::FILENAME_TIME_PRECISION = 3;
+const char * const VScreenShooter::PICTURE_FORMAT_C{"png"};
+const QString VScreenShooter::PICTURE_FORMAT{VScreenShooter::PICTURE_FORMAT_C};
+const QString VScreenShooter::BASE_NAME{QStringLiteral("slide_%1.") + VScreenShooter::PICTURE_FORMAT};
+const QString VScreenShooter::DEFAULT_SUFFIX_DIR_NAME{"VARI_slideshow"};
+const QString VScreenShooter::DEFAULT_BASE_DIR{QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)};
+const int VScreenShooter::FILENAME_TIME_PRECISION{3};
 
 VScreenShooter::VScreenShooter():
     m_pWidget(nullptr),
-    m_baseDirPath(QDir::homePath()),
+    m_baseDirPath(DEFAULT_BASE_DIR),
     m_period(1.0f)
 {
     constructorBody();

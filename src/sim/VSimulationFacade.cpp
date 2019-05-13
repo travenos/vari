@@ -14,6 +14,7 @@
 #include "layer_builders/VLayerFromGmeshBuilder.h"
 #include "layer_builders/VLayerFromAnsysBuilder.h"
 #include "layer_builders/VLayerManualBuilder.h"
+#include "layer_builders/VLayerFromLayerBuilder.h"
 #include "import_export/VModelExport.h"
 #include "import_export/VModelImport.h"
 #include "structures/VExceptions.h"
@@ -69,6 +70,8 @@ void VSimulationFacade::connectMainSignals()
             this, SIGNAL(selectionEnabled(bool)));
     connect(m_pGraphicsViewer.get(), SIGNAL(canceledDrag()),
             this, SLOT(updateGraphicsPositions()));
+    connect(m_pGraphicsViewer.get(), SIGNAL(additionalControlsEnabled(bool)),
+            this, SIGNAL(additionalControlsEnabled(bool)));
 
     connect(m_pSimulator.get(), SIGNAL(simulationStarted()),
             this, SIGNAL(simulationStarted()));
@@ -102,6 +105,8 @@ void VSimulationFacade::connectMainSignals()
             this, SIGNAL(timeLimitModeSwitched(bool)));
     connect(m_pSimulator.get(), SIGNAL(lifetimeConsiderationSwitched(bool)),
             this, SIGNAL(lifetimeConsiderationSwitched(bool)));
+    connect(m_pSimulator.get(), SIGNAL(stopOnVacuumFullSwitched(bool)),
+            this, SIGNAL(stopOnVacuumFullSwitched(bool)));
 
     connect(m_pSimulator.get(), SIGNAL(simulationStarted()),
             this, SLOT(disableInteraction()));
@@ -130,8 +135,12 @@ void VSimulationFacade::initLayersProcessor()
             this, SIGNAL(layerRemoved(uint)));
     connect(m_pLayersProcessor.get(), SIGNAL(materialChanged(uint)),
             this, SIGNAL(materialChanged(uint)));
+    connect(m_pLayersProcessor.get(), SIGNAL(nameChanged(uint)),
+            this, SIGNAL(layerNameChanged(uint)));
     connect(m_pLayersProcessor.get(), SIGNAL(layerAdded()),
             this, SIGNAL(layerAdded()));
+    connect(m_pLayersProcessor.get(), SIGNAL(layerRebuilt(uint)),
+            this, SIGNAL(layerRebuilt(uint)));
     connect(m_pLayersProcessor.get(), SIGNAL(layersCleared()),
             this, SIGNAL(layersCleared()));
 }
@@ -140,7 +149,8 @@ void VSimulationFacade::startSimulation()
 {
     if (!m_pLayersProcessor->areLayersConnected())
         m_pLayersProcessor->createConnections();
-    applyInjectionAndVacuumPoints();
+    if (!m_pSimulator->isPaused())
+        applyInjectionAndVacuumPoints();
     m_pSimulator->start();
 }
 
@@ -297,6 +307,16 @@ void VSimulationFacade::considerLifetime(bool on)
     m_pSimulator->considerLifetime(on);
 }
 
+void VSimulationFacade::stopOnVacuumFull(bool on)
+{
+    m_pSimulator->stopOnVacuumFull(on);
+}
+
+void VSimulationFacade::enableAdditionalGraphicsControls(bool on)
+{
+    m_pGraphicsViewer->enableAdditionalControls(on);
+}
+
 void VSimulationFacade::newModel() 
 {
     m_pSimulator->clear();
@@ -317,7 +337,6 @@ void VSimulationFacade::loadModel(const QString &filename)
                                           loader.getPaused(), loader.getTimeLimited());
     m_pInjectionVacuum = loader.getInjectionVacuum();
     useTableParameters(loader.getUseTableParameters());
-    setTable(loader.getTable());
     m_pGraphicsViewer->viewFromAbove();
     emit modelLoaded();
     emit filenameChanged(filename);
@@ -330,7 +349,7 @@ void VSimulationFacade::saveModel(const QString &filename)
     VSimulationParameters param = m_pSimulator->getSimulationParameters();
     bool paused = m_pSimulator->isPaused();
     bool timeLimited = m_pSimulator->isTimeLimitModeOn();
-    VModelExport saver(info, param, *m_pTable, *m_pInjectionVacuum,
+    VModelExport saver(info, param, *m_pInjectionVacuum,
                        m_pLayersProcessor, m_useTableParameters, paused, timeLimited);
     saver.saveToFile(filename);
     emit modelSaved();
@@ -358,6 +377,7 @@ bool VSimulationFacade::isLayerEnabled(uint layer) const
 }
 
 void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &filename,
+                                         const QString &layerName,
                                          VLayerAbstractBuilder::VUnit units)
 {
     QFile file(filename);
@@ -388,6 +408,7 @@ void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &
     {
         try
         {
+            p_layerBuilder->setLayerName(layerName);
             m_pLayersProcessor->addLayer(p_layerBuilder);
             delete p_layerBuilder;
             updateConfiguration();
@@ -404,22 +425,28 @@ void VSimulationFacade::newLayerFromFile(const VCloth &material, const QString &
 }
 
 void VSimulationFacade::newLayerFromPolygon(const VCloth &material, const QPolygonF &polygon,
-                                            double characteristicLength)
+                                            double characteristicLength,
+                                            const QString &layerName)
 {
-    VLayerManualBuilder * p_layerBuilder;
-    p_layerBuilder = new VLayerManualBuilder(polygon, material, characteristicLength);
-    try
+    VLayerManualBuilder layerBuilder(polygon, material, characteristicLength);
+    layerBuilder.setLayerName(layerName);
+    m_pLayersProcessor->addLayer(&layerBuilder);
+    updateConfiguration();
+    m_pGraphicsViewer->viewFromAbove();
+}
+
+void VSimulationFacade::duplicateLayer(uint layer)
+{
+    VLayer::const_ptr sourceLayer{m_pLayersProcessor->getLayer(layer)};
+    if (sourceLayer && isSimulationStopped())
     {
-        m_pLayersProcessor->addLayer(p_layerBuilder);
-        delete p_layerBuilder;
+        VLayerFromLayerBuilder layerBuilder(sourceLayer);
+        m_pLayersProcessor->addLayer(&layerBuilder);
         updateConfiguration();
         m_pGraphicsViewer->viewFromAbove();
     }
-    catch(VImportException &e)
-    {
-        delete p_layerBuilder;
-        throw e;
-    }
+    else
+        throw VImportException();
 }
 
 void VSimulationFacade::updateConfiguration() 
@@ -554,7 +581,8 @@ void VSimulationFacade::showInjectionPoint()
     cancelDrag();
     cancelWaitingForVacuumPointSelection();
     cancelWaitingForInjectionPointSelection();
-    applyInjectionAndVacuumPoints();
+    if (isSimulationStopped())
+        applyInjectionAndVacuumPoints();
     m_pGraphicsViewer->showInjectionPoint();
 }
 
@@ -564,7 +592,8 @@ void VSimulationFacade::showVacuumPoint()
     cancelDrag();
     cancelWaitingForVacuumPointSelection();
     cancelWaitingForInjectionPointSelection();
-    applyInjectionAndVacuumPoints();
+    if (isSimulationStopped())
+        applyInjectionAndVacuumPoints();
     m_pGraphicsViewer->showVacuumPoint();
 }
 
@@ -582,7 +611,7 @@ void VSimulationFacade::loadSavedParameters()
     VResin newResin;
     double temperature, injectionPressure, vacuumPressure, q, r, s, timeLimit;
     float simInjectionDiameter, simVacuumDiameter;
-    bool timeLimitMode, lifetimeConsidered;
+    bool timeLimitMode, lifetimeConsidered, stopOnVacuumFull;
 
     newResin.name = settings.value(QStringLiteral("sim/resinName"), resin.name).toString();
     newResin.defaultViscosity = settings.value(QStringLiteral("sim/defaultViscosity"), resin.defaultViscosity).toDouble();
@@ -605,6 +634,7 @@ void VSimulationFacade::loadSavedParameters()
     timeLimitMode = settings.value(QStringLiteral("sim/timeLimitMode"), m_pSimulator->isTimeLimitModeOn()).toBool();
 
     lifetimeConsidered = settings.value(QStringLiteral("sim/lifetimeConsidered"), m_pSimulator->isLifetimeConsidered()).toBool();
+    stopOnVacuumFull = settings.value(QStringLiteral("sim/stopOnVacuumFull"), m_pSimulator->isVacuumFullLimited()).toBool();
 
     m_pSimulator->setResin(newResin);
     m_pSimulator->setTemperature(temperature);
@@ -618,13 +648,18 @@ void VSimulationFacade::loadSavedParameters()
     m_pSimulator->setTimeLimit(timeLimit);
     m_pSimulator->setTimeLimitMode(timeLimitMode);
     m_pSimulator->considerLifetime(lifetimeConsidered);
+    m_pSimulator->stopOnVacuumFull(stopOnVacuumFull);
 
     bool isOrthographic;
     float cubeSide;
+    bool additionalControlsEnabled;
     isOrthographic = settings.value(QStringLiteral("graphics/cameraType"), m_pGraphicsViewer->isCameraOrthographic()).toBool();
     cubeSide = settings.value(QStringLiteral("graphics/cubeSide"), m_pGraphicsViewer->getCubeSide()).toFloat();
+    additionalControlsEnabled = settings.value(QStringLiteral("graphics/additionalControls"),
+                                               m_pGraphicsViewer->areAdditionalControlsEnabled()).toBool();
     m_pGraphicsViewer->setCameraOrthographic(isOrthographic);
     m_pGraphicsViewer->setCubeSide(cubeSide);
+    m_pGraphicsViewer->enableAdditionalControls(additionalControlsEnabled);
 
     bool useTableParam;
     QVector2D tableSize, tableInjectionCoords, tableVacuumCoords, injectionCoords, vacuumCoords;
@@ -679,11 +714,12 @@ void VSimulationFacade::saveParameters() const
 
     settings.setValue(QStringLiteral("sim/timeLimit"), param.getTimeLimit());
     settings.setValue(QStringLiteral("sim/timeLimitMode"), m_pSimulator->isTimeLimitModeOn());
-
     settings.setValue(QStringLiteral("sim/lifetimeConsidered"), m_pSimulator->isLifetimeConsidered());
+    settings.setValue(QStringLiteral("sim/stopOnVacuumFull"), m_pSimulator->isVacuumFullLimited());
 
     settings.setValue(QStringLiteral("graphics/cameraType"), m_pGraphicsViewer->isCameraOrthographic());
     settings.setValue(QStringLiteral("graphics/cubeSide"), m_pGraphicsViewer->getCubeSide());
+    settings.setValue(QStringLiteral("graphics/additionalControls"), m_pGraphicsViewer->areAdditionalControlsEnabled());
 
     settings.setValue(QStringLiteral("table/size"), m_pTable->getSize());
     settings.setValue(QStringLiteral("table/injectionDiameter"), m_pTable->getInjectionDiameter());
@@ -864,6 +900,35 @@ void VSimulationFacade::setTable(const std::shared_ptr<VTable> &p_table)
 std::vector<std::vector<QPolygonF> > VSimulationFacade::getAllActivePolygons() const
 {
     return m_pLayersProcessor->getAllActivePolygons();
+}
+
+const std::vector<QPolygonF> & VSimulationFacade::getPolygons(uint layer) const
+{
+    return m_pLayersProcessor->getPolygons(layer);
+}
+
+const QString & VSimulationFacade::getLayerName(uint layer) const
+{
+    return m_pLayersProcessor->getLayerName(layer);
+}
+
+void VSimulationFacade::setLayerName(uint layer, const QString &name)
+{
+    m_pLayersProcessor->setLayerName(layer, name);
+    emit configUpdated();
+}
+
+void VSimulationFacade::rebuildLayer(const QPolygonF &polygon, double characteristicLength,
+                                     uint layer)
+{
+    if(layer < getLayersNumber() && isSimulationStopped())
+    {
+        VLayerManualBuilder builder(polygon, *m_pLayersProcessor->getMaterial(layer), characteristicLength);
+        m_pLayersProcessor->rebuildLayer(layer, &builder);
+        updateConfiguration();
+    }
+    else
+        throw VImportException();
 }
 
 void VSimulationFacade::m_on_got_point(const QVector3D &point)

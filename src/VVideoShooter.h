@@ -16,7 +16,8 @@ public:
     static const char * const VIDEO_FORMAT_C;
     static const int VIDEO_CODEC;
     static const QString VIDEO_FORMAT;
-    static const QString DEFAULT_SUFFIX_FILE_NAME;
+    static const QString DEFAULT_PREFIX_FILE_NAME;
+    static const QString DEFAULT_VIDEO_DIRECTORY;
     static const QString BASE_VIDEO_FILE_NAME;
     static const QString BASE_SLIDES_DIR_NAME;
     static const QString SLIDES_DIR_PATH;

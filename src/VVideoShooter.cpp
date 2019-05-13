@@ -11,6 +11,7 @@
 #include <functional>
 
 #include <QDir>
+#include <QStandardPaths>
 #include <QPixmap>
 
 #include <opencv2/videoio.hpp>
@@ -24,18 +25,20 @@
  * VVideoShooter implementation
  */
 
-const char * const VVideoShooter::VIDEO_FORMAT_C = "avi";
-const int VVideoShooter::VIDEO_CODEC = CV_FOURCC('M', 'J', 'P', 'G');
-const QString VVideoShooter::VIDEO_FORMAT(VVideoShooter::VIDEO_FORMAT_C);
-const QString VVideoShooter::DEFAULT_SUFFIX_FILE_NAME("VARI_video");
-const QString VVideoShooter::BASE_VIDEO_FILE_NAME = QStringLiteral("%1%2.") + VVideoShooter::VIDEO_FORMAT;
-const QString VVideoShooter::BASE_SLIDES_DIR_NAME("_VARI_SLIDES_FOR_VIDEO_");
-const QString VVideoShooter::SLIDES_DIR_PATH = QDir::cleanPath(QDir::tempPath() + QDir::separator() + VVideoShooter::BASE_SLIDES_DIR_NAME);
+const char * const VVideoShooter::VIDEO_FORMAT_C{"avi"};
+const int VVideoShooter::VIDEO_CODEC{CV_FOURCC('M', 'J', 'P', 'G')};
+const QString VVideoShooter::VIDEO_FORMAT{VVideoShooter::VIDEO_FORMAT_C};
+const QString VVideoShooter::DEFAULT_PREFIX_FILE_NAME{"VARI_video"};
+const QString VVideoShooter::DEFAULT_VIDEO_DIRECTORY{QStandardPaths::writableLocation(QStandardPaths::MoviesLocation)};
+const QString VVideoShooter::BASE_VIDEO_FILE_NAME{QStringLiteral("%1%2.") + VVideoShooter::VIDEO_FORMAT};
+const QString VVideoShooter::BASE_SLIDES_DIR_NAME{"_VARI_SLIDES_FOR_VIDEO_"};
+const QString VVideoShooter::SLIDES_DIR_PATH{QDir::cleanPath(QDir::tempPath() + QDir::separator()
+                                                             + VVideoShooter::BASE_SLIDES_DIR_NAME)};
 const int VVideoShooter::DEFAULT_FREQUENCY{25};
 
 VVideoShooter::VVideoShooter():
     VScreenShooter(),
-    m_videoDirectory(QDir::homePath())
+    m_videoDirectory(DEFAULT_VIDEO_DIRECTORY)
 {
     VScreenShooter::setDirPath(SLIDES_DIR_PATH);
     setFrequency(DEFAULT_FREQUENCY);
@@ -53,7 +56,7 @@ VVideoShooter::VVideoShooter(const QWidget * widget, const QString &dirPath, int
 inline void VVideoShooter::constructorBody()
 {
     m_isSaving.store(false);
-    setSuffixFileName(DEFAULT_SUFFIX_FILE_NAME);
+    setSuffixFileName(DEFAULT_PREFIX_FILE_NAME);
 }
 
 VVideoShooter::~VVideoShooter()
@@ -90,7 +93,7 @@ void VVideoShooter::setSuffixFileName(const QString &name)
     if (!name.isEmpty())
         m_suffixFileName = name;
     else
-        m_suffixFileName = DEFAULT_SUFFIX_FILE_NAME;
+        m_suffixFileName = DEFAULT_PREFIX_FILE_NAME;
     emit suffixFileNameChanged();
 }
 
@@ -225,7 +228,7 @@ bool VVideoShooter::isSaving() const
 inline float VVideoShooter::floatFromStr(const QString &str)
 {
     const QRegExp FLOAT_REGEX(QStringLiteral("[0-9]+([.][0-9]*)?|[.][0-9]+"));
-    int start=str.indexOf(FLOAT_REGEX);
-    int finish=str.lastIndexOf(FLOAT_REGEX);
+    int start = str.indexOf(FLOAT_REGEX);
+    int finish = str.lastIndexOf(FLOAT_REGEX);
     return str.midRef(start, finish - start + 1).toFloat();
 }

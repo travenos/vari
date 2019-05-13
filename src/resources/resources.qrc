@@ -17,5 +17,7 @@
         <file>img/yzplane.png</file>
         <file>img/snapshot.png</file>
         <file>img/video.png</file>
+        <file>img/folder_pic.png</file>
+        <file>img/folder_video.png</file>
     </qresource>
 </RCC>

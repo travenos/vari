@@ -45,6 +45,7 @@ const VLayer::ptr &VLayerFromFileBuilder::build()
     m_file.close();
     m_pLayer.reset(new VLayer(m_layerId, m_pNodes, m_pTriangles, m_pMaterial));
     m_pLayer->setMinMaxIds(m_nodeStartId, m_nodeMaxId, m_triangleStartId, m_triangleMaxId);
+    m_pLayer->setName(m_layerName);
     return m_pLayer;
 }
 

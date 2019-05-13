@@ -63,6 +63,34 @@ void VLayersProcessor::addLayer(VLayerAbstractBuilder *builder)
     emit layerAdded();
 }
 
+void VLayersProcessor::rebuildLayer(uint layer, VLayerAbstractBuilder *builder)
+{
+    if (layer < getLayersNumber())
+    {
+        bool visible{isLayerVisible(layer)};
+        bool enabled{isLayerEnabled(layer)};
+        builder->setLayerName(getLayerName(layer));
+        builder->setLayerId(m_layerNextId);
+        builder->setNodeStartId(m_nodeNextId);
+        builder->setTriangleStartId(m_triangleNextId);
+        VLayer::ptr p_newLayer = builder->build();
+        p_newLayer->setVisible(visible);
+        p_newLayer->markActive(enabled);
+        m_layerNextId = builder->getLayerId() + 1u;
+        m_nodeNextId = builder->getNodeMaxId() + 1u;
+        m_triangleNextId = builder->getTriangleMaxId() + 1u;
+        m_layers.at(layer) = p_newLayer;
+        if (enabled)
+        {
+            std::lock_guard<std::mutex> lock(*m_pNodesLock);
+            sortLayers(layer);
+        }
+        updateActiveElementsVectors();
+        m_layersConnected = false;
+        emit layerRebuilt(layer);
+    }
+}
+
 void VLayersProcessor::removeLayer(uint layer) 
 {
     enableLayer(layer, false);
@@ -73,34 +101,41 @@ void VLayersProcessor::removeLayer(uint layer)
         m_layers.erase(it);
     }
     m_layersConnected = false;
+    updateNextIds();
     emit layerRemoved(layer);
 }
 
 void VLayersProcessor::setVisibleLayer(uint layer, bool visible) 
 {
-    m_layers.at(layer)->setVisible(visible);
-    emit layerVisibilityChanged(layer, visible);
+    if (m_layers.at(layer)->isVisible() != visible)
+    {
+        m_layers.at(layer)->setVisible(visible);
+        emit layerVisibilityChanged(layer, visible);
+    }
 }
 
 void VLayersProcessor::enableLayer(uint layer, bool enable) 
 {
-    if(enable)
+    if (enable != m_layers.at(layer)->isActive())
     {
-        if (!(m_layers.at(layer)->isActive()))
+        if(enable)
         {
-            m_layersConnected = false;
+            if (!(m_layers.at(layer)->isActive()))
+            {
+                m_layersConnected = false;
+            }
         }
+        else if (m_layers.at(layer)->isActive())
+        {
+            m_layers.at(layer)->disconnect();
+            m_layers.at(layer)->reset();
+        }
+        m_layers.at(layer)->markActive(enable);
+        sortLayers(layer);
+        updateActiveElementsVectors();
+        emit layerEnabled(layer, enable);
+        emit layerVisibilityChanged(layer, isLayerVisible(layer));
     }
-    else if (m_layers.at(layer)->isActive())
-    {
-        m_layers.at(layer)->disconnect();
-        m_layers.at(layer)->reset();
-    }
-    m_layers.at(layer)->markActive(enable);
-    sortLayers(layer);
-    updateActiveElementsVectors();
-    emit layerEnabled(layer, enable);
-    emit layerVisibilityChanged(layer, isLayerVisible(layer));
 }
 
 void VLayersProcessor::setMaterial(uint layer, const VCloth& material) 
@@ -181,6 +216,16 @@ void VLayersProcessor::moveDown(uint layer)
         m_layers.at(layer + 1u)->setVerticalPosition(otherLayerZ);
         std::swap(m_layers.at(layer), m_layers.at(layer + 1u));
         m_layersConnected = false;
+    }
+}
+
+void VLayersProcessor::swapLayers(uint layer1, uint layer2)
+{
+    if (layer1 < m_layers.size() && layer2 < m_layers.size() && layer1 != layer2)
+    {
+        std::lock_guard<std::mutex> lock(*m_pNodesLock);
+        std::swap(m_layers.at(layer1), m_layers.at(layer2));
+        sortLayers(std::max(layer1, layer2));
     }
 }
 
@@ -369,6 +414,17 @@ void VLayersProcessor::resetNodesVolumes()
     }
 }
 
+const QString & VLayersProcessor::getLayerName(uint layer) const
+{
+    return m_layers.at(layer)->getName();
+}
+
+void VLayersProcessor::setLayerName(uint layer, const QString &name)
+{
+    m_layers.at(layer)->setName(name);
+    emit nameChanged(layer);
+}
+
 void VLayersProcessor::putOnTop(uint layer)
 {
     if (m_layers.size() > 1)
@@ -478,6 +534,14 @@ std::vector<VLayer::const_ptr> VLayersProcessor::getLayers() const
     std::vector<VLayer::const_ptr> layers;
     layers.insert(layers.begin(), m_layers.begin(), m_layers.end());
     return layers;
+}
+
+VLayer::const_ptr VLayersProcessor::getLayer(uint layer) const
+{
+    if (layer < m_layers.size())
+        return m_layers.at(layer);
+    else
+        return VLayer::const_ptr();
 }
 
 void VLayersProcessor::cutLayer(const std::shared_ptr<const std::vector<uint> > &nodesIds, uint layer)

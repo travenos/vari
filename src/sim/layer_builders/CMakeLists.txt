@@ -26,6 +26,7 @@ set(HEADER_FILES
     VLayerFromFileBuilder.h
     VLayerFromGmeshBuilder.h
     VLayerManualBuilder.h
+    VLayerFromLayerBuilder.h
     )
 
 set(SOURCE_FILES
@@ -34,6 +35,7 @@ set(SOURCE_FILES
     VLayerFromFileBuilder.cpp
     VLayerFromGmeshBuilder.cpp
     VLayerManualBuilder.cpp
+    VLayerFromLayerBuilder.cpp
     )
 
 ADD_MODULE(v_layer_builders

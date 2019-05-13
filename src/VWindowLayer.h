@@ -86,9 +86,11 @@ private:
 
 signals:
     void creationFromFileAvailable(const VCloth &material, const QString &fileName,
+                                   const QString &layerName,
                                    VLayerAbstractBuilder::VUnit units);
     void creationManualAvailable(const VCloth &material, const QPolygonF &polygon,
-                                 double characteristicLength);
+                                 double characteristicLength,
+                                 const QString &layerName);
     void creationCanceled();
     void windowClosed();
 };

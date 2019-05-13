@@ -62,6 +62,9 @@ public:
     void setTimeLimitMode(bool on);
     void considerLifetime(bool on);
 
+    void stopOnVacuumFull(bool on);
+    void enableAdditionalGraphicsControls(bool on);
+
     void newModel() ;
     void loadModel(const QString &filename) ;
     void saveModel(const QString &filename) ;
@@ -77,9 +80,11 @@ public:
     void cancelWaitingForVacuumPointSelection();
 
     void newLayerFromFile(const VCloth &material, const QString &filename,
+                          const QString &layerName,
                           VLayerAbstractBuilder::VUnit units=VLayerAbstractBuilder::M);
     void newLayerFromPolygon(const VCloth &material, const QPolygonF &polygon,
-                             double characteristicLength);
+                             double characteristicLength, const QString &layerName);
+    void duplicateLayer(uint layer);
 
     void showInjectionPoint();
     void showVacuumPoint();
@@ -123,6 +128,12 @@ public:
     void setTable(const std::shared_ptr<VTable> &p_table);
 
     std::vector<std::vector<QPolygonF> > getAllActivePolygons() const;
+    const std::vector<QPolygonF> & getPolygons(uint layer) const;
+
+    const QString & getLayerName(uint layer) const;
+    void setLayerName(uint layer, const QString &name);
+    void rebuildLayer(const QPolygonF &polygon, double characteristicLength,
+                      uint layer);
 
 public slots:
     void updateGraphicsPositions();
@@ -159,6 +170,8 @@ signals:
     void layerRemoved(uint);
     void layerEnabled(uint, bool);
     void materialChanged(uint);
+    void layerNameChanged(uint);
+    void layerRebuilt(uint);
     void layerAdded();
     void layersCleared();
     void injectionPointSet();
@@ -184,6 +197,7 @@ signals:
     void timeLimitSet(double);
     void timeLimitModeSwitched(bool);
     void lifetimeConsiderationSwitched(bool);
+    void stopOnVacuumFullSwitched(bool);
 
     void modelSaved();
     void modelLoaded();
@@ -208,6 +222,8 @@ signals:
     void tableVacuumDiameterSet(float);
 
     void useTableParametersSet(bool);
+
+    void additionalControlsEnabled(bool);
 };
 
 #endif //_VSIMULATIONFACADE_H

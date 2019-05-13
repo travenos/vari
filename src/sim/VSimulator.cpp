@@ -31,6 +31,7 @@ VSimulator::VSimulator():
     m_pauseFlag(false),
     m_timeLimitFlag(false),
     m_lifetimeLimitFlag(true),
+    m_vacuumFullLimitFlag(true),
     m_simT_timeBeforePause(0),
     m_destroyed(false)
 {
@@ -103,6 +104,11 @@ bool VSimulator::isTimeLimitModeOn() const
 bool VSimulator::isLifetimeConsidered() const
 {
     return m_lifetimeLimitFlag.load();
+}
+
+bool VSimulator::isVacuumFullLimited() const
+{
+    return m_vacuumFullLimitFlag.load();
 }
 
 void VSimulator::reset() 
@@ -257,7 +263,7 @@ void VSimulator::simulationCycle()
         m_newDataNotifier.notifyAll();
         if (processIsFinished)
             break;
-        if (m_pVacuumNodes->size() > 0)
+        if (m_vacuumFullLimitFlag && m_pVacuumNodes->size() > 0)
         {
             size_t fullVacuumCounter{0};
             std::lock_guard<std::mutex> nodesLocker(*m_pNodesLock);
@@ -482,18 +488,23 @@ inline double VSimulator::getAverageCellDistance() const
 
 inline double VSimulator::getTimeDelta() const
 {
+    static const double EMPIRIC_COEF{60};
     std::lock_guard<std::mutex> locker(*m_pNodesLock);
     if (m_pActiveNodes->size() > 0)
     {
-        double n = m_param.getViscosity();                             //[N*s/m2]
-        double _l = m_param.getAverageCellDistance();                   //[m]
-        double l_typ = (sqrt((double)m_param.getNumberOfFullNodes())*_l);   //[m]
-        double _K = m_param.getAveragePermeability();                   //[m^2]
-        double p_inj = m_param.getInjectionPressure();          //[N/m2]
-        double p_vac = m_param.getVacuumPressure();                    //[N/m2]
+        double p_dif = m_param.getInjectionPressure() - m_param.getVacuumPressure();          //[N/m2]
+        if (p_dif > 0)
+        {
+            double n = m_param.getViscosity();                             //[N*s/m2]
+            double _l = m_param.getAverageCellDistance();                   //[m]
+            double l_typ = (sqrt((double)m_param.getNumberOfFullNodes() / m_pActiveNodes->size())*_l);   //[m]
+            double _K = m_param.getAveragePermeability();                   //[m^2]
 
-        double time = n*l_typ*_l/(_K*(p_inj-p_vac));
-        return time;
+            double time = n * l_typ * _l / (_K * p_dif) * EMPIRIC_COEF;
+            return time;
+        }
+        else
+            return 0;
     }
     else
         return 0;
@@ -671,4 +682,10 @@ void VSimulator::considerLifetime(bool on)
 {
     m_lifetimeLimitFlag.store(on);
     emit lifetimeConsiderationSwitched(on);
+}
+
+void VSimulator::stopOnVacuumFull(bool on)
+{
+    m_vacuumFullLimitFlag.store(on);
+    emit stopOnVacuumFullSwitched(on);
 }

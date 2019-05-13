@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1632</width>
-    <height>949</height>
+    <height>1328</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -69,221 +69,264 @@
         <attribute name="title">
          <string>Параметры моделирования</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_11">
-         <property name="spacing">
-          <number>0</number>
-         </property>
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_14">
          <item>
-          <widget class="QScrollArea" name="controlWidget">
-           <property name="minimumSize">
-            <size>
-             <width>530</width>
-             <height>0</height>
-            </size>
+          <widget class="QSplitter" name="simParamSplitter">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
            </property>
-           <property name="sizeAdjustPolicy">
-            <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
+           <property name="childrenCollapsible">
+            <bool>false</bool>
            </property>
-           <property name="widgetResizable">
-            <bool>true</bool>
-           </property>
-           <widget class="QWidget" name="scrollAreaWidgetContents">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>1231</width>
-              <height>919</height>
-             </rect>
+           <widget class="QGroupBox" name="layersGroupBox">
+            <property name="title">
+             <string>Слои</string>
             </property>
-            <layout class="QVBoxLayout" name="verticalLayout">
+            <layout class="QVBoxLayout" name="verticalLayout_5">
+             <property name="spacing">
+              <number>3</number>
+             </property>
+             <property name="leftMargin">
+              <number>3</number>
+             </property>
+             <property name="topMargin">
+              <number>3</number>
+             </property>
+             <property name="rightMargin">
+              <number>3</number>
+             </property>
+             <property name="bottomMargin">
+              <number>3</number>
+             </property>
              <item>
-              <widget class="QGroupBox" name="layersBox">
-               <property name="title">
-                <string>Слои</string>
+              <widget class="QTableWidget" name="layersTableWidget">
+               <property name="enabled">
+                <bool>true</bool>
                </property>
-               <layout class="QVBoxLayout" name="verticalLayout_5">
-                <property name="spacing">
-                 <number>4</number>
+               <property name="editTriggers">
+                <set>QAbstractItemView::NoEditTriggers</set>
+               </property>
+               <property name="selectionBehavior">
+                <enum>QAbstractItemView::SelectRows</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_9">
+               <item>
+                <widget class="QPushButton" name="addLayerButton">
+                 <property name="text">
+                  <string>Добавить слой</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="sortLayersButton">
+                 <property name="text">
+                  <string>Восстановить сортировку</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QScrollArea" name="controlWidget">
+            <property name="minimumSize">
+             <size>
+              <width>530</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
+            </property>
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="scrollAreaWidgetContents">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>-101</y>
+               <width>1221</width>
+               <height>877</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout">
+              <item>
+               <widget class="QGroupBox" name="layerParamBox">
+                <property name="title">
+                 <string>Выбранный слой</string>
                 </property>
-                <property name="leftMargin">
-                 <number>3</number>
-                </property>
-                <property name="topMargin">
-                 <number>3</number>
-                </property>
-                <property name="rightMargin">
-                 <number>3</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>3</number>
-                </property>
-                <item>
-                 <widget class="QListWidget" name="layersListWidget">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>0</width>
-                    <height>60</height>
-                   </size>
-                  </property>
-                  <property name="baseSize">
-                   <size>
-                    <width>0</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                  <property name="selectionBehavior">
-                   <enum>QAbstractItemView::SelectRows</enum>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QGroupBox" name="layerParamBox">
-                  <property name="title">
-                   <string>Выбранный слой</string>
-                  </property>
-                  <layout class="QVBoxLayout" name="verticalLayout_4">
-                   <property name="spacing">
-                    <number>3</number>
-                   </property>
+                <layout class="QVBoxLayout" name="verticalLayout_4">
+                 <property name="spacing">
+                  <number>3</number>
+                 </property>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_17">
                    <item>
-                    <layout class="QHBoxLayout" name="layerInfoLayout">
-                     <item>
-                      <widget class="QLabel" name="layerInfoLabel"/>
-                     </item>
-                     <item>
-                      <widget class="QPushButton" name="layerColorButton">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="minimumSize">
-                        <size>
-                         <width>0</width>
-                         <height>60</height>
-                        </size>
-                       </property>
-                       <property name="autoFillBackground">
-                        <bool>true</bool>
-                       </property>
-                       <property name="flat">
-                        <bool>true</bool>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
+                    <widget class="QLabel" name="layerNameLabel">
+                     <property name="text">
+                      <string>Имя слоя:</string>
+                     </property>
+                    </widget>
                    </item>
                    <item>
-                    <layout class="QHBoxLayout" name="horizontalLayout_10">
-                     <item>
-                      <widget class="QCheckBox" name="layerEnableCheckBox">
-                       <property name="text">
-                        <string>Учитывать при моделировании</string>
-                       </property>
-                       <property name="checked">
-                        <bool>true</bool>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <spacer name="horizontalSpacer_10">
-                       <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>40</width>
-                         <height>20</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                     <item>
-                      <widget class="QPushButton" name="layerUpButton">
-                       <property name="toolTip">
-                        <string>Переместить слой вверх</string>
-                       </property>
-                       <property name="text">
-                        <string>↑</string>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
+                    <widget class="QLineEdit" name="layerNameEdit"/>
                    </item>
                    <item>
-                    <layout class="QHBoxLayout" name="horizontalLayout_11">
-                     <item>
-                      <widget class="QCheckBox" name="layerVisibleCheckBox">
-                       <property name="text">
-                        <string>Отображать</string>
-                       </property>
-                       <property name="checked">
-                        <bool>true</bool>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <spacer name="horizontalSpacer_11">
-                       <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>40</width>
-                         <height>20</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                     <item>
-                      <widget class="QPushButton" name="layerDownButton">
-                       <property name="toolTip">
-                        <string>Переместить слой вниз</string>
-                       </property>
-                       <property name="text">
-                        <string>↓</string>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
+                    <widget class="QPushButton" name="resetLayerNameButton">
+                     <property name="text">
+                      <string>Отменить</string>
+                     </property>
+                    </widget>
                    </item>
                    <item>
-                    <layout class="QHBoxLayout" name="layerControlLayout">
-                     <item>
-                      <widget class="QPushButton" name="selectMaterialClothButton">
-                       <property name="text">
-                        <string>Выбрать материриал</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QPushButton" name="layerRemoveButton">
-                       <property name="text">
-                        <string>Удалить слой</string>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
+                    <widget class="QPushButton" name="saveLayerNameButton">
+                     <property name="text">
+                      <string>Сохранить</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="layerInfoLayout">
+                   <item>
+                    <widget class="QLabel" name="layerInfoLabel"/>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="layerColorButton">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>60</height>
+                      </size>
+                     </property>
+                     <property name="autoFillBackground">
+                      <bool>true</bool>
+                     </property>
+                     <property name="flat">
+                      <bool>true</bool>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_10">
+                   <item>
+                    <widget class="QCheckBox" name="layerEnableCheckBox">
+                     <property name="text">
+                      <string>Учитывать при моделировании</string>
+                     </property>
+                     <property name="checked">
+                      <bool>true</bool>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <spacer name="horizontalSpacer_10">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="layerUpButton">
+                     <property name="toolTip">
+                      <string>Переместить слой вверх</string>
+                     </property>
+                     <property name="text">
+                      <string>↑</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_11">
+                   <item>
+                    <widget class="QCheckBox" name="layerVisibleCheckBox">
+                     <property name="text">
+                      <string>Отображать</string>
+                     </property>
+                     <property name="checked">
+                      <bool>true</bool>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <spacer name="horizontalSpacer_11">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="layerDownButton">
+                     <property name="toolTip">
+                      <string>Переместить слой вниз</string>
+                     </property>
+                     <property name="text">
+                      <string>↓</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="layerControlLayout">
+                   <item>
+                    <widget class="QPushButton" name="selectMaterialClothButton">
+                     <property name="text">
+                      <string>Выбрать материриал</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="layerRemoveButton">
+                     <property name="text">
+                      <string>Удалить слой</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_19">
+                   <item>
+                    <widget class="QPushButton" name="layerDuplicateButton">
+                     <property name="text">
+                      <string>Дублировать слой</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="layerEditButton">
+                     <property name="text">
+                      <string>Редактировать слой</string>
+                     </property>
+                    </widget>
                    </item>
                    <item>
                     <widget class="QPushButton" name="layerCutButton">
@@ -296,497 +339,492 @@
                     </widget>
                    </item>
                   </layout>
-                 </widget>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_9">
-                  <item>
-                   <widget class="QPushButton" name="addLayerButton">
-                    <property name="text">
-                     <string>Добавить слой</string>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="resinBox">
+                <property name="title">
+                 <string>Связующее</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_3">
+                 <property name="spacing">
+                  <number>4</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>3</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>3</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>3</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>3</number>
+                 </property>
+                 <item>
+                  <widget class="QGroupBox" name="resinConfigBox">
+                   <property name="title">
+                    <string>Свойства связующего</string>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_7">
+                    <property name="spacing">
+                     <number>4</number>
                     </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="sortLayersButton">
-                    <property name="text">
-                     <string>Пересортировать слои</string>
+                    <property name="leftMargin">
+                     <number>3</number>
                     </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="resinBox">
-               <property name="title">
-                <string>Связующее</string>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_3">
-                <property name="spacing">
-                 <number>4</number>
-                </property>
-                <property name="leftMargin">
-                 <number>3</number>
-                </property>
-                <property name="topMargin">
-                 <number>3</number>
-                </property>
-                <property name="rightMargin">
-                 <number>3</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>3</number>
-                </property>
-                <item>
-                 <widget class="QGroupBox" name="resinConfigBox">
-                  <property name="title">
-                   <string>Свойства связующего</string>
-                  </property>
-                  <layout class="QVBoxLayout" name="verticalLayout_7">
-                   <property name="spacing">
-                    <number>4</number>
-                   </property>
-                   <property name="leftMargin">
-                    <number>3</number>
-                   </property>
-                   <property name="topMargin">
-                    <number>3</number>
-                   </property>
-                   <property name="rightMargin">
-                    <number>3</number>
-                   </property>
-                   <property name="bottomMargin">
-                    <number>3</number>
-                   </property>
-                   <item>
-                    <widget class="QLabel" name="resinInfoLabel">
-                     <property name="text">
-                      <string>Связующее не выбрано</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <layout class="QHBoxLayout" name="temeratureLayout">
-                     <item>
-                      <widget class="QLabel" name="temperatureLabel">
-                       <property name="text">
-                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Температура (°C):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <spacer name="horizontalSpacer">
-                       <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>40</width>
-                         <height>20</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                     <item>
-                      <widget class="QLineEdit" name="temperatureEdit">
-                       <property name="inputMethodHints">
-                        <set>Qt::ImhFormattedNumbersOnly</set>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QPushButton" name="resetTemperatureButton">
-                       <property name="text">
-                        <string>Отменить</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QPushButton" name="saveTemperatureButton">
-                       <property name="text">
-                        <string>Сохранить</string>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
-                   </item>
-                   <item>
-                    <widget class="QCheckBox" name="timeConsiderationCheckbox">
-                     <property name="text">
-                      <string>Ограничить расчет временем жизни связующего</string>
-                     </property>
-                     <property name="checked">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QPushButton" name="selectMaterialResinButton">
-                     <property name="text">
-                      <string>Выбрать материал</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QGroupBox" name="resinInOutBox">
-                  <property name="title">
-                   <string>Подвод и съём связующего  </string>
-                  </property>
-                  <layout class="QVBoxLayout" name="verticalLayout_6">
-                   <property name="spacing">
-                    <number>4</number>
-                   </property>
-                   <property name="leftMargin">
-                    <number>3</number>
-                   </property>
-                   <property name="topMargin">
-                    <number>3</number>
-                   </property>
-                   <property name="rightMargin">
-                    <number>3</number>
-                   </property>
-                   <property name="bottomMargin">
-                    <number>3</number>
-                   </property>
-                   <item>
-                    <widget class="QGroupBox" name="resinInjectonBox">
-                     <property name="title">
-                      <string>Точка подачи связующего</string>
-                     </property>
-                     <layout class="QVBoxLayout" name="verticalLayout_8">
-                      <property name="spacing">
-                       <number>4</number>
+                    <property name="topMargin">
+                     <number>3</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>3</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>3</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="resinInfoLabel">
+                      <property name="text">
+                       <string>Связующее не выбрано</string>
                       </property>
-                      <property name="leftMargin">
-                       <number>3</number>
-                      </property>
-                      <property name="topMargin">
-                       <number>3</number>
-                      </property>
-                      <property name="rightMargin">
-                       <number>3</number>
-                      </property>
-                      <property name="bottomMargin">
-                       <number>3</number>
-                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <layout class="QHBoxLayout" name="temeratureLayout">
                       <item>
-                       <layout class="QGridLayout" name="injectionLayout">
-                        <property name="verticalSpacing">
-                         <number>4</number>
+                       <widget class="QLabel" name="temperatureLabel">
+                        <property name="text">
+                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Температура (°C):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                         </property>
-                        <item row="1" column="1">
-                         <widget class="QLineEdit" name="injectionDiameterEdit">
-                          <property name="sizePolicy">
-                           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                           </sizepolicy>
-                          </property>
-                          <property name="minimumSize">
-                           <size>
-                            <width>40</width>
-                            <height>0</height>
-                           </size>
-                          </property>
-                          <property name="inputMethodHints">
-                           <set>Qt::ImhFormattedNumbersOnly</set>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="1" column="3">
-                         <widget class="QPushButton" name="injectionPlaceButton">
-                          <property name="text">
-                           <string>Задать источник</string>
-                          </property>
-                          <property name="checkable">
-                           <bool>true</bool>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="0" column="1">
-                         <widget class="QLineEdit" name="injectionPressureEdit">
-                          <property name="sizePolicy">
-                           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                           </sizepolicy>
-                          </property>
-                          <property name="minimumSize">
-                           <size>
-                            <width>40</width>
-                            <height>0</height>
-                           </size>
-                          </property>
-                          <property name="inputMethodHints">
-                           <set>Qt::ImhFormattedNumbersOnly</set>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="1" column="0">
-                         <widget class="QLabel" name="injectionDiameterLabel">
-                          <property name="text">
-                           <string>Диаметр источника (м):</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="0" column="0">
-                         <widget class="QLabel" name="injectionPressureLabel">
-                          <property name="text">
-                           <string>Давление (Па):</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="0" column="3">
-                         <widget class="QPushButton" name="saveInjectionPressureButton">
-                          <property name="text">
-                           <string>Сохранить</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="1" column="2">
-                         <widget class="QPushButton" name="resetInjectionDiameterButton">
-                          <property name="text">
-                           <string>Отменить</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="0" column="2">
-                         <widget class="QPushButton" name="resetInjectionPressureButton">
-                          <property name="text">
-                           <string>Отменить</string>
-                          </property>
-                         </widget>
-                        </item>
-                       </layout>
+                       </widget>
                       </item>
                       <item>
-                       <widget class="QPushButton" name="showInjectionPlace">
+                       <spacer name="horizontalSpacer">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <widget class="QLineEdit" name="temperatureEdit">
+                        <property name="inputMethodHints">
+                         <set>Qt::ImhFormattedNumbersOnly</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="resetTemperatureButton">
                         <property name="text">
-                         <string>Показать позицию источника</string>
+                         <string>Отменить</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="saveTemperatureButton">
+                        <property name="text">
+                         <string>Сохранить</string>
                         </property>
                        </widget>
                       </item>
                      </layout>
-                    </widget>
-                   </item>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="selectMaterialResinButton">
+                      <property name="text">
+                       <string>Выбрать материал</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QGroupBox" name="resinInOutBox">
+                   <property name="title">
+                    <string>Подвод и съём связующего  </string>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_6">
+                    <property name="spacing">
+                     <number>4</number>
+                    </property>
+                    <property name="leftMargin">
+                     <number>3</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>3</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>3</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>3</number>
+                    </property>
+                    <item>
+                     <widget class="QGroupBox" name="resinInjectonBox">
+                      <property name="title">
+                       <string>Точка подачи связующего</string>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_8">
+                       <property name="spacing">
+                        <number>4</number>
+                       </property>
+                       <property name="leftMargin">
+                        <number>3</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>3</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>3</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>3</number>
+                       </property>
+                       <item>
+                        <layout class="QGridLayout" name="injectionLayout">
+                         <property name="verticalSpacing">
+                          <number>4</number>
+                         </property>
+                         <item row="1" column="1">
+                          <widget class="QLineEdit" name="injectionDiameterEdit">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="minimumSize">
+                            <size>
+                             <width>40</width>
+                             <height>0</height>
+                            </size>
+                           </property>
+                           <property name="inputMethodHints">
+                            <set>Qt::ImhFormattedNumbersOnly</set>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="1" column="3">
+                          <widget class="QPushButton" name="injectionPlaceButton">
+                           <property name="text">
+                            <string>Задать источник</string>
+                           </property>
+                           <property name="checkable">
+                            <bool>true</bool>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="0" column="1">
+                          <widget class="QLineEdit" name="injectionPressureEdit">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="minimumSize">
+                            <size>
+                             <width>40</width>
+                             <height>0</height>
+                            </size>
+                           </property>
+                           <property name="inputMethodHints">
+                            <set>Qt::ImhFormattedNumbersOnly</set>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="1" column="0">
+                          <widget class="QLabel" name="injectionDiameterLabel">
+                           <property name="text">
+                            <string>Диаметр источника (м):</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="0" column="0">
+                          <widget class="QLabel" name="injectionPressureLabel">
+                           <property name="text">
+                            <string>Давление (Па):</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="0" column="3">
+                          <widget class="QPushButton" name="saveInjectionPressureButton">
+                           <property name="text">
+                            <string>Сохранить</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="1" column="2">
+                          <widget class="QPushButton" name="resetInjectionDiameterButton">
+                           <property name="text">
+                            <string>Отменить</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="0" column="2">
+                          <widget class="QPushButton" name="resetInjectionPressureButton">
+                           <property name="text">
+                            <string>Отменить</string>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <widget class="QPushButton" name="showInjectionPlace">
+                         <property name="text">
+                          <string>Показать позицию источника</string>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QGroupBox" name="resinVacuumBox">
+                      <property name="title">
+                       <string>Точка вакуумирования</string>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_9">
+                       <property name="spacing">
+                        <number>4</number>
+                       </property>
+                       <property name="leftMargin">
+                        <number>3</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>3</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>3</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>3</number>
+                       </property>
+                       <item>
+                        <layout class="QGridLayout" name="vacuumLayout">
+                         <property name="verticalSpacing">
+                          <number>4</number>
+                         </property>
+                         <item row="1" column="0">
+                          <widget class="QLabel" name="vacuumDiameterLabel">
+                           <property name="text">
+                            <string>Диаметр источника (м):</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="1" column="1">
+                          <widget class="QLineEdit" name="vacuumDiameterEdit">
+                           <property name="minimumSize">
+                            <size>
+                             <width>40</width>
+                             <height>0</height>
+                            </size>
+                           </property>
+                           <property name="inputMethodHints">
+                            <set>Qt::ImhFormattedNumbersOnly</set>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="0" column="1">
+                          <widget class="QLineEdit" name="vacuumPressureEdit">
+                           <property name="minimumSize">
+                            <size>
+                             <width>40</width>
+                             <height>0</height>
+                            </size>
+                           </property>
+                           <property name="inputMethodHints">
+                            <set>Qt::ImhFormattedNumbersOnly</set>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="0" column="0">
+                          <widget class="QLabel" name="vacuumPressureLabel">
+                           <property name="text">
+                            <string>Давление (Па):</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="0" column="2">
+                          <widget class="QPushButton" name="resetVacuumPressureButton">
+                           <property name="text">
+                            <string>Отменить</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="0" column="3">
+                          <widget class="QPushButton" name="saveVacuumPressureButton">
+                           <property name="text">
+                            <string>Сохранить</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="1" column="2">
+                          <widget class="QPushButton" name="resetVacuumDiameterButton">
+                           <property name="text">
+                            <string>Отменить</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="1" column="3">
+                          <widget class="QPushButton" name="vacuumPlaceButton">
+                           <property name="text">
+                            <string>Задать источник</string>
+                           </property>
+                           <property name="checkable">
+                            <bool>true</bool>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <widget class="QPushButton" name="showVacuumPlaceButton">
+                         <property name="text">
+                          <string>Показать позицию источника</string>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QCheckBox" name="useTableParamCheckBox">
+                      <property name="text">
+                       <string>Положения источников по умолчанию</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="timeLimitGroupBox">
+                <property name="title">
+                 <string>Окончание расчёта</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_11">
+                 <property name="spacing">
+                  <number>4</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>3</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>3</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>3</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>3</number>
+                 </property>
+                 <item>
+                  <widget class="QCheckBox" name="timeConsiderationCheckbox">
+                   <property name="text">
+                    <string>Ограничить расчет временем жизни связующего</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="vacuumFullLimitCheckBox">
+                   <property name="text">
+                    <string>Остановка при достижении порта вакуума</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="timeLimitCheckBox">
+                   <property name="text">
+                    <string>Пауза процесса по истечении времени:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_2">
+                   <property name="spacing">
+                    <number>4</number>
+                   </property>
                    <item>
-                    <widget class="QGroupBox" name="resinVacuumBox">
-                     <property name="title">
-                      <string>Точка вакуумирования</string>
-                     </property>
-                     <layout class="QVBoxLayout" name="verticalLayout_9">
-                      <property name="spacing">
-                       <number>4</number>
-                      </property>
-                      <property name="leftMargin">
-                       <number>3</number>
-                      </property>
-                      <property name="topMargin">
-                       <number>3</number>
-                      </property>
-                      <property name="rightMargin">
-                       <number>3</number>
-                      </property>
-                      <property name="bottomMargin">
-                       <number>3</number>
-                      </property>
-                      <item>
-                       <layout class="QGridLayout" name="vacuumLayout">
-                        <property name="verticalSpacing">
-                         <number>4</number>
-                        </property>
-                        <item row="1" column="0">
-                         <widget class="QLabel" name="vacuumDiameterLabel">
-                          <property name="text">
-                           <string>Диаметр источника (м):</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="1" column="1">
-                         <widget class="QLineEdit" name="vacuumDiameterEdit">
-                          <property name="minimumSize">
-                           <size>
-                            <width>40</width>
-                            <height>0</height>
-                           </size>
-                          </property>
-                          <property name="inputMethodHints">
-                           <set>Qt::ImhFormattedNumbersOnly</set>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="0" column="1">
-                         <widget class="QLineEdit" name="vacuumPressureEdit">
-                          <property name="minimumSize">
-                           <size>
-                            <width>40</width>
-                            <height>0</height>
-                           </size>
-                          </property>
-                          <property name="inputMethodHints">
-                           <set>Qt::ImhFormattedNumbersOnly</set>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="0" column="0">
-                         <widget class="QLabel" name="vacuumPressureLabel">
-                          <property name="text">
-                           <string>Давление (Па):</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="0" column="2">
-                         <widget class="QPushButton" name="resetVacuumPressureButton">
-                          <property name="text">
-                           <string>Отменить</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="0" column="3">
-                         <widget class="QPushButton" name="saveVacuumPressureButton">
-                          <property name="text">
-                           <string>Сохранить</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="1" column="2">
-                         <widget class="QPushButton" name="resetVacuumDiameterButton">
-                          <property name="text">
-                           <string>Отменить</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="1" column="3">
-                         <widget class="QPushButton" name="vacuumPlaceButton">
-                          <property name="text">
-                           <string>Задать источник</string>
-                          </property>
-                          <property name="checkable">
-                           <bool>true</bool>
-                          </property>
-                         </widget>
-                        </item>
-                       </layout>
-                      </item>
-                      <item>
-                       <widget class="QPushButton" name="showVacuumPlaceButton">
-                        <property name="text">
-                         <string>Показать позицию источника</string>
-                        </property>
-                       </widget>
-                      </item>
-                     </layout>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QCheckBox" name="useTableParamCheckBox">
+                    <widget class="QLabel" name="timeLimitLabel">
                      <property name="text">
-                      <string>Положения источников по умолчанию</string>
+                      <string>Макс. время процесса (чч:мм:сс):</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <spacer name="horizontalSpacer_2">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item>
+                    <widget class="QTimeEdit" name="timeEdit">
+                     <property name="displayFormat">
+                      <string>hh:mm:ss</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="resetTimeLimitButton">
+                     <property name="text">
+                      <string>Отменить</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="saveTimeLimitButton">
+                     <property name="text">
+                      <string>Сохранить</string>
                      </property>
                     </widget>
                    </item>
                   </layout>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QWidget" name="timeLimitWidget" native="true">
-               <layout class="QVBoxLayout" name="verticalLayout_10">
-                <property name="spacing">
-                 <number>4</number>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
                 </property>
-                <property name="leftMargin">
-                 <number>3</number>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
                 </property>
-                <property name="topMargin">
-                 <number>3</number>
-                </property>
-                <property name="rightMargin">
-                 <number>3</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>3</number>
-                </property>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_2">
-                  <property name="spacing">
-                   <number>4</number>
-                  </property>
-                  <item>
-                   <widget class="QLabel" name="timeLimitLabel">
-                    <property name="text">
-                     <string>Макс. время процесса (чч:мм:сс):</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <spacer name="horizontalSpacer_2">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>40</width>
-                      <height>20</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                  <item>
-                   <widget class="QTimeEdit" name="timeEdit">
-                    <property name="displayFormat">
-                     <string>hh:mm:ss</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="resetTimeLimitButton">
-                    <property name="text">
-                     <string>Отменить</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="saveTimeLimitButton">
-                    <property name="text">
-                     <string>Сохранить</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="timeLimitCheckBox">
-                  <property name="text">
-                   <string>Ограничивать время процесса</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <spacer name="verticalSpacer">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>40</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
            </widget>
           </widget>
          </item>
@@ -825,8 +863,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>1245</width>
-              <height>837</height>
+              <width>1253</width>
+              <height>1216</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_13">
@@ -967,7 +1005,7 @@
                         <number>3</number>
                        </property>
                        <property name="minimum">
-                        <double>0.040000000000000</double>
+                        <double>0.000000000000000</double>
                        </property>
                        <property name="maximum">
                         <double>40.000000000000000</double>
@@ -1601,6 +1639,13 @@
               </widget>
              </item>
              <item>
+              <widget class="QCheckBox" name="additionalOptionsCheckBox">
+               <property name="text">
+                <string>Дополнительные возможности (обрезка, перемещение слоёв)</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <spacer name="verticalSpacer_2">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -1652,6 +1697,9 @@
    <addaction name="separator"/>
    <addaction name="actionSlideshow"/>
    <addaction name="actionVideo"/>
+   <addaction name="separator"/>
+   <addaction name="actionFolderSlideshow"/>
+   <addaction name="actionFolderVideo"/>
   </widget>
   <action name="actionNew">
    <property name="icon">
@@ -1755,12 +1803,41 @@
     <string>Запись серии кадров</string>
    </property>
   </action>
+  <action name="actionFolderSlideshow">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/img/folder_pic.png</normaloff>:/img/folder_pic.png</iconset>
+   </property>
+   <property name="text">
+    <string>Открыть папку слайдшоу</string>
+   </property>
+   <property name="toolTip">
+    <string>Открыть папку слайдшоу</string>
+   </property>
+  </action>
+  <action name="actionFolderVideo">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/img/folder_video.png</normaloff>:/img/folder_video.png</iconset>
+   </property>
+   <property name="text">
+    <string>Открыть папку видео</string>
+   </property>
+   <property name="toolTip">
+    <string>Открыть папку видео</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
   <tabstop>tabWidget</tabstop>
+  <tabstop>layersTableWidget</tabstop>
+  <tabstop>addLayerButton</tabstop>
+  <tabstop>sortLayersButton</tabstop>
   <tabstop>controlWidget</tabstop>
-  <tabstop>layersListWidget</tabstop>
+  <tabstop>layerNameEdit</tabstop>
+  <tabstop>resetLayerNameButton</tabstop>
+  <tabstop>saveLayerNameButton</tabstop>
   <tabstop>layerColorButton</tabstop>
   <tabstop>layerEnableCheckBox</tabstop>
   <tabstop>layerVisibleCheckBox</tabstop>
@@ -1768,13 +1845,12 @@
   <tabstop>layerDownButton</tabstop>
   <tabstop>selectMaterialClothButton</tabstop>
   <tabstop>layerRemoveButton</tabstop>
+  <tabstop>layerDuplicateButton</tabstop>
+  <tabstop>layerEditButton</tabstop>
   <tabstop>layerCutButton</tabstop>
-  <tabstop>addLayerButton</tabstop>
-  <tabstop>sortLayersButton</tabstop>
   <tabstop>temperatureEdit</tabstop>
   <tabstop>resetTemperatureButton</tabstop>
   <tabstop>saveTemperatureButton</tabstop>
-  <tabstop>timeConsiderationCheckbox</tabstop>
   <tabstop>selectMaterialResinButton</tabstop>
   <tabstop>injectionPressureEdit</tabstop>
   <tabstop>resetInjectionPressureButton</tabstop>
@@ -1791,10 +1867,12 @@
   <tabstop>vacuumPlaceButton</tabstop>
   <tabstop>showVacuumPlaceButton</tabstop>
   <tabstop>useTableParamCheckBox</tabstop>
+  <tabstop>timeConsiderationCheckbox</tabstop>
+  <tabstop>vacuumFullLimitCheckBox</tabstop>
+  <tabstop>timeLimitCheckBox</tabstop>
   <tabstop>timeEdit</tabstop>
   <tabstop>resetTimeLimitButton</tabstop>
   <tabstop>saveTimeLimitButton</tabstop>
-  <tabstop>timeLimitCheckBox</tabstop>
   <tabstop>scrollArea</tabstop>
   <tabstop>tableXSpinBox</tabstop>
   <tabstop>tableYSpinBox</tabstop>
@@ -1829,11 +1907,44 @@
   <tabstop>videoFrequencySpinBox</tabstop>
   <tabstop>resetVideoFrequencyButton</tabstop>
   <tabstop>saveVideoFrequencyButton</tabstop>
+  <tabstop>additionalOptionsCheckBox</tabstop>
  </tabstops>
  <resources>
   <include location="resources/resources.qrc"/>
  </resources>
  <connections>
+  <connection>
+   <sender>slideshowDirNameEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>saveSlideshowDirNameButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1205</x>
+     <y>251</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1562</x>
+     <y>251</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>videoFileNameEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>saveVideoFileNameButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1203</x>
+     <y>400</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1562</x>
+     <y>400</y>
+    </hint>
+   </hints>
+  </connection>
   <connection>
    <sender>temperatureEdit</sender>
    <signal>returnPressed()</signal>
@@ -1915,34 +2026,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>slideshowDirNameEdit</sender>
+   <sender>layerNameEdit</sender>
    <signal>returnPressed()</signal>
-   <receiver>saveSlideshowDirNameButton</receiver>
+   <receiver>saveLayerNameButton</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1205</x>
-     <y>251</y>
+     <x>923</x>
+     <y>739</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1562</x>
-     <y>251</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>videoFileNameEdit</sender>
-   <signal>returnPressed()</signal>
-   <receiver>saveVideoFileNameButton</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>1203</x>
-     <y>400</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1562</x>
-     <y>400</y>
+     <x>1533</x>
+     <y>739</y>
     </hint>
    </hints>
   </connection>

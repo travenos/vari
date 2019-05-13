@@ -26,6 +26,7 @@ public:
     size_t getInactiveLayersNumber() const ;
 
     void addLayer(VLayerAbstractBuilder *builder) ;
+    void rebuildLayer(uint layer, VLayerAbstractBuilder *builder);
 
     void removeLayer(uint layer) ;
 
@@ -37,6 +38,7 @@ public:
 
     void moveUp(uint layer);
     void moveDown(uint layer);
+    void swapLayers(uint layer1, uint layer2);
     void sort();
 
     void reset() ;
@@ -54,6 +56,7 @@ public:
     size_t getLayerNodesNumber(uint layer) const ;
     size_t getLayerTrianglesNumber(uint layer) const ;
     std::vector<VLayer::const_ptr> getLayers() const;
+    VLayer::const_ptr getLayer(uint layer) const;
 
     bool isLayerVisible(uint layer) const ;
     bool isLayerEnabled(uint layer) const ;
@@ -86,6 +89,9 @@ public:
     void removeConnections() ;
     void resetNodesVolumes() ;
 
+    const QString & getLayerName(uint layer) const;
+    void setLayerName(uint layer, const QString &name);
+
 private:
     void updateActiveElementsVectors() ;
     void updateNextIds();
@@ -110,9 +116,11 @@ signals:
     void layerRemoved(uint);
     void layerEnabled(uint, bool);
     void materialChanged(uint);
+    void nameChanged(uint);
     void layerAdded();
     void layersCleared();
     void layersLoaded();
+    void layerRebuilt(uint);
 };
 
 #endif //_VLAYERSPROCESSOR_H

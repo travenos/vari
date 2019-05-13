@@ -9,7 +9,7 @@
 #include "VLayer.h"
 
 const float VLayer::SEARCH_ZONE_PART{0.1f};
-const float VLayer::IMG_STEP_COEF{0.1f};
+const float VLayer::IMG_STEP_COEF{0.05f};
 
 /**
  * VLayer implementation
@@ -317,7 +317,20 @@ bool VLayer::connectWith(const std::list<VLayer::ptr> &layersList)
                         result = true;
                     }
                 }
-                break;
+
+                if (!candidatesList.empty())
+                    break;
+                else
+                {
+                    VSimNode::ptr bestNeighbour;
+                    bestNeighbour = otherLayer->m_nodesVolume.getNearestNode(nd_ptr->getPosition());
+                    if (bestNeighbour)
+                    {
+                        nd_ptr->addNeighbourMutually(bestNeighbour, VSimNode::OTHER);
+                        result = true;
+                        break;
+                    }
+                }
             }
         }
     }
@@ -331,4 +344,14 @@ void VLayer::disconnect()
         VSimNode * nd_ptr = node.second.get();
         nd_ptr->clearNeighboursMutually(VSimNode::OTHER);
     }
+}
+
+void VLayer::setName(const QString &layerName)
+{
+    m_layerName = layerName;
+}
+
+const QString & VLayer::getName() const
+{
+    return m_layerName;
 }

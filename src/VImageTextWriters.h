@@ -25,6 +25,8 @@ protected:
     static const int FONT_SIZE;
     static const int LINE_OFFSET;
     static const int STRING_LENGTH;
+    static const int UP_OFFSET;
+    static const int LEFT_OFFSET;
 
     virtual QString createString() const;
     virtual QFont getFont() const;
@@ -36,7 +38,7 @@ protected:
 class VSimInfoImageTextWriter : public VAbstractImageTextWriter
 {
 public:
-    VSimInfoImageTextWriter(const std::shared_ptr<const VSimulationFacade> p_facade);
+    VSimInfoImageTextWriter(const std::shared_ptr<const VSimulationFacade> & p_facade);
 protected:
     virtual QString createString() const override;
 private:

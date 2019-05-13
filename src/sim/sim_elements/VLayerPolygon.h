@@ -34,6 +34,7 @@ public:
     bool pointIsInside(const QPointF & point) const;
 
     static const float MIN_STEP;
+    static const double APPROX_EPSILON;
 
 private:
     void createPolygons(const VSimTriangle::const_list_ptr &triangles);
