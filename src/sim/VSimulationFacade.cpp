@@ -139,6 +139,8 @@ void VSimulationFacade::initLayersProcessor()
             this, SIGNAL(layerNameChanged(uint)));
     connect(m_pLayersProcessor.get(), SIGNAL(layerAdded()),
             this, SIGNAL(layerAdded()));
+    connect(m_pLayersProcessor.get(), SIGNAL(layerRebuilt(uint)),
+            this, SIGNAL(layerRebuilt(uint)));
     connect(m_pLayersProcessor.get(), SIGNAL(layersCleared()),
             this, SIGNAL(layersCleared()));
 }
@@ -426,21 +428,11 @@ void VSimulationFacade::newLayerFromPolygon(const VCloth &material, const QPolyg
                                             double characteristicLength,
                                             const QString &layerName)
 {
-    VLayerManualBuilder * p_layerBuilder;
-    p_layerBuilder = new VLayerManualBuilder(polygon, material, characteristicLength);
-    p_layerBuilder->setLayerName(layerName);
-    try
-    {
-        m_pLayersProcessor->addLayer(p_layerBuilder);
-        delete p_layerBuilder;
-        updateConfiguration();
-        m_pGraphicsViewer->viewFromAbove();
-    }
-    catch(VImportException &e)
-    {
-        delete p_layerBuilder;
-        throw e;
-    }
+    VLayerManualBuilder layerBuilder(polygon, material, characteristicLength);
+    layerBuilder.setLayerName(layerName);
+    m_pLayersProcessor->addLayer(&layerBuilder);
+    updateConfiguration();
+    m_pGraphicsViewer->viewFromAbove();
 }
 
 void VSimulationFacade::duplicateLayer(uint layer)
@@ -932,16 +924,8 @@ void VSimulationFacade::rebuildLayer(const QPolygonF &polygon, double characteri
     if(layer < getLayersNumber() && isSimulationStopped())
     {
         VLayerManualBuilder builder(polygon, *m_pLayersProcessor->getMaterial(layer), characteristicLength);
-        builder.setLayerName(m_pLayersProcessor->getLayerName(layer));
-        bool visible{m_pLayersProcessor->isLayerVisible(layer)};
-        bool enabled{m_pLayersProcessor->isLayerEnabled(layer)};
-        m_pLayersProcessor->addLayer(&builder);
-        m_pLayersProcessor->setVisibleLayer(0, visible);
-        m_pLayersProcessor->enableLayer(0, enabled);
-        m_pLayersProcessor->swapLayers(0, layer + 1);
-        m_pLayersProcessor->removeLayer(0);
+        m_pLayersProcessor->rebuildLayer(layer, &builder);
         updateConfiguration();
-        emit layerRebuilt(layer);
     }
     else
         throw VImportException();

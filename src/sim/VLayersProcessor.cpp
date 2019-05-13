@@ -63,6 +63,34 @@ void VLayersProcessor::addLayer(VLayerAbstractBuilder *builder)
     emit layerAdded();
 }
 
+void VLayersProcessor::rebuildLayer(uint layer, VLayerAbstractBuilder *builder)
+{
+    if (layer < getLayersNumber())
+    {
+        bool visible{isLayerVisible(layer)};
+        bool enabled{isLayerEnabled(layer)};
+        builder->setLayerName(getLayerName(layer));
+        builder->setLayerId(m_layerNextId);
+        builder->setNodeStartId(m_nodeNextId);
+        builder->setTriangleStartId(m_triangleNextId);
+        VLayer::ptr p_newLayer = builder->build();
+        p_newLayer->setVisible(visible);
+        p_newLayer->markActive(enabled);
+        m_layerNextId = builder->getLayerId() + 1u;
+        m_nodeNextId = builder->getNodeMaxId() + 1u;
+        m_triangleNextId = builder->getTriangleMaxId() + 1u;
+        m_layers.at(layer) = p_newLayer;
+        if (enabled)
+        {
+            std::lock_guard<std::mutex> lock(*m_pNodesLock);
+            sortLayers(layer);
+        }
+        updateActiveElementsVectors();
+        m_layersConnected = false;
+        emit layerRebuilt(layer);
+    }
+}
+
 void VLayersProcessor::removeLayer(uint layer) 
 {
     enableLayer(layer, false);

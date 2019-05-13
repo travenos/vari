@@ -26,6 +26,7 @@ public:
     size_t getInactiveLayersNumber() const ;
 
     void addLayer(VLayerAbstractBuilder *builder) ;
+    void rebuildLayer(uint layer, VLayerAbstractBuilder *builder);
 
     void removeLayer(uint layer) ;
 
@@ -119,6 +120,7 @@ signals:
     void layerAdded();
     void layersCleared();
     void layersLoaded();
+    void layerRebuilt(uint);
 };
 
 #endif //_VLAYERSPROCESSOR_H
