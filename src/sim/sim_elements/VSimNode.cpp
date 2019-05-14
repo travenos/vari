@@ -31,7 +31,8 @@ VSimNode::VSimNode(uint id, const QVector3D& pos,
     m_newPressure(0),
     m_role(role),
     m_neighboursNumber(0),
-    m_removeMark(false)
+    m_removeMark(false)//,
+    //m_avgPerm(p_material->getDiagPermeability()) //TODO
 {
 }
 
@@ -128,6 +129,7 @@ void VSimNode::addNeighbour(VSimNode* node, VLayerSequence layer, float dist)
             return;
     }
     m_neighbours[layer].push_back(std::make_pair(dist, node));
+    //TODO update average K
     ++m_neighboursNumber;
 }
 
@@ -161,6 +163,7 @@ void VSimNode::removeNeighbour(uint id)
             {
                 m_neighbours[i].erase(it++);
                 --m_neighboursNumber;
+                //TODO update average K
             }
             else
                 ++it;
@@ -179,6 +182,7 @@ void VSimNode::removeNeighbour(const VSimNode* node)
             {
                 m_neighbours[i].erase(it++);
                 --m_neighboursNumber;
+                //TODO update average K
             }
             else
                 ++it;
@@ -195,6 +199,7 @@ void VSimNode::isolateNode()
             neighbour.second->removeNeighbour(this);
         }
         m_neighbours[i].clear();
+        //TODO update average K
     }
     m_neighboursNumber = 0;
 }
@@ -214,12 +219,14 @@ void VSimNode::clearAllNeighbours()
 {
     for (uint i = 0; i < LAYERS_NUMBER; ++i)
         m_neighbours[i].clear();
+    //TODO update average K
     m_neighboursNumber = 0;
 }
 
 void VSimNode::clearNeighbours(VLayerSequence layer) 
 {
     m_neighbours[layer].clear();
+    //TODO update average K
     m_neighboursNumber = calcNeighboursNumber();
 }
 
@@ -235,6 +242,7 @@ void VSimNode::clearNeighboursMutually(VLayerSequence layer)
         neighbour.second->removeNeighbour(this);
     }
     m_neighbours[layer].clear();
+    //TODO update average K
     m_neighboursNumber = calcNeighboursNumber();
 }
 
@@ -259,7 +267,7 @@ float VSimNode::getDistance(const QVector2D& point) const
     return xyPosition.distanceToPoint(point);
 }
 
-const QVector3D& VSimNode::getPosition() const 
+const QVector3D& VSimNode::getPosition() const
 {
     return m_position;
 }
@@ -278,6 +286,7 @@ void VSimNode::reset()
         pressure = m_injectionPressure;
     m_currentPressure = pressure;
     m_newPressure = pressure;
+    //TODO update average K
 }
 
 void VSimNode::setBoundaryPressures(double injectionPressure, double vacuumPressure)
@@ -360,19 +369,40 @@ size_t VSimNode::getNeighboursNumber(VLayerSequence layer) const
     return m_neighbours[layer].size();
 }
 
-double VSimNode::getCavityHeight() const 
+double VSimNode::getCavityHeight() const
 {
-    return m_pMaterial->cavityHeight;
+    return m_pMaterial->getCavityHeight();
 }
 
-double VSimNode::getPorosity() const 
+double VSimNode::getPorosity() const
 {
-    return m_pMaterial->porosity;
+    return m_pMaterial->getPorosity();
 }
 
-double VSimNode::getPermeability() const 
+double VSimNode::getAvgPermeability() const
 {
-    return m_pMaterial->permeability;
+    return m_pMaterial->getAvgPermeability();
+    //return m_avgPerm; //TODO
+}
+
+double VSimNode::getXPermeability() const
+{
+    return m_pMaterial->getXPermeability();
+}
+
+double VSimNode::getYPermeability() const
+{
+    return m_pMaterial->getYPermeability();
+}
+
+double VSimNode::getAngleRad() const
+{
+    return m_pMaterial->getAngleRad();
+}
+
+double VSimNode::getAngleDeg() const
+{
+    return m_pMaterial->getAngleDeg();
 }
 
 bool VSimNode::isInjection() const
@@ -388,6 +418,11 @@ bool VSimNode::isVacuum() const
 bool VSimNode::isNormal() const
 {
     return (m_role == NORMAL);
+}
+
+bool VSimNode::isIsotropic() const
+{
+    return (m_pMaterial->getXPermeability() == m_pMaterial->getYPermeability());
 }
 
 inline size_t VSimNode::calcNeighboursNumber() const

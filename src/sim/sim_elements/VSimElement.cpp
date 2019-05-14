@@ -45,7 +45,12 @@ uint VSimElement::getId() const
     return m_id;
 }
 
+const VCloth::const_ptr & VSimElement::getMaterial() const
+{
+    return m_pMaterial;
+}
+
 const QColor &VSimElement::getColor() const  
 {
-    return m_pMaterial->baseColor;
+    return m_pMaterial->getBaseColor();
 }

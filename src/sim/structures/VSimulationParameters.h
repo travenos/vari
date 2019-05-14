@@ -66,6 +66,7 @@ public:
     void setS(double s) ;
 
     double getAverageCellDistance() const ;
+    double getHalfAverageCellDistance() const;
     void setAverageCellDistance(double averageCellDistance) ;
 
     double getAveragePermeability() const ;
@@ -95,6 +96,7 @@ private:
     double m_s{2};
 
     double m_averageCellDistance{1};
+    double m_halfAverageCellDistance{0.5};
     double m_averagePermeability{1};
 
     double m_timeLimit{7200};

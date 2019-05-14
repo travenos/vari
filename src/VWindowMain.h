@@ -23,7 +23,7 @@ class VWindowPolygon;
 class VScreenShooter;
 class VVideoShooter;
 class VSimInfoImageTextWriter;
-struct VCloth;
+class VCloth;
 struct VSimulationInfo;
 
 class VWindowMain : public QMainWindow
@@ -96,7 +96,7 @@ private:
     void removeLayer();
     void showWindowCloth();
     void showWindowResin();
-    void setCloth(const QString & name, float cavityheight, float permeability, float porosity);
+    void setCloth(const QString & name, float cavityheight, float xpermeability, float ypermeability, float porosity);
     void setResin(const QString & name , float viscosity, float viscTempcoef, float lifetime, float lifetimeTempcoef);
     void selectColor();
 
@@ -107,6 +107,9 @@ private:
     void markLayerAsEnabled(int layer, bool enable);
     void markLayerAsVisible(int layer, bool visible);
     void reloadLayersTable();
+
+    void showAngle();
+    void saveAngle();
 
     void updateResinInfo();
 
@@ -199,6 +202,7 @@ private:
     QDoubleValidator * const m_pTemperatureValidator;
     QDoubleValidator * const m_pPressureValidator;
     QDoubleValidator * const m_pDiameterValidator;
+    QDoubleValidator * const m_pAngleValidator;
 
     std::shared_ptr<VScreenShooter> m_pSlideshowShooter;
     std::shared_ptr<VVideoShooter> m_pVideoShooter;
@@ -214,7 +218,7 @@ private slots:
     void m_on_resin_window_closed();
     void m_on_polygon_window_closed();
     void m_on_layers_cleared();
-    void m_on_got_cloth(const QString & name, float cavityheight, float permeability, float porosity);
+    void m_on_got_cloth(const QString & name, float cavityheight, float xpermeability, float ypermeability, float porosity);
     void m_on_got_resin(const QString & name , float viscosity, float viscTempcoef, float lifetime, float lifetimeTempcoef);
     void m_on_got_polygon(const QPolygonF & polygon, double characteristicLength);
     void m_on_layer_creation_from_file_available(const VCloth& material, const QString& filename,
@@ -363,6 +367,9 @@ private slots:
     void on_layerDuplicateButton_clicked();
     void on_layerEditButton_clicked();
     void on_layersTableWidget_doubleClicked(const QModelIndex &index);
+    void on_layerAngleEdit_textChanged(const QString &arg1);
+    void on_saveLayerAngleButton_clicked();
+    void on_resetLayerAngleButton_clicked();
 };
 
 #endif // _VWINDOWMAIN_H

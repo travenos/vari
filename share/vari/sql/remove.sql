@@ -1,2 +1,2 @@
-DROP TABLE cloth;
+DROP TABLE cloth_a;
 DROP TABLE resin;

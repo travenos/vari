@@ -28,7 +28,7 @@
      <widget class="QWidget" name="buttonsWidget" native="true">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
+        <layout class="QHBoxLayout" name="layerNameLayout">
          <item>
           <widget class="QLabel" name="layerNameLabel">
            <property name="text">
@@ -38,6 +38,27 @@
          </item>
          <item>
           <widget class="QLineEdit" name="layerNameEdit"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="angleLayout">
+         <item>
+          <widget class="QLabel" name="angleLabel">
+           <property name="text">
+            <string>Угол укладки волокна (°):</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="angleSpinBox">
+           <property name="minimum">
+            <double>-90.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>90.000000000000000</double>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -208,6 +229,7 @@
  <layoutdefault spacing="6" margin="11"/>
  <tabstops>
   <tabstop>layerNameEdit</tabstop>
+  <tabstop>angleSpinBox</tabstop>
   <tabstop>chooseMaterialButton</tabstop>
   <tabstop>createManualButton</tabstop>
   <tabstop>createFromFileButton</tabstop>

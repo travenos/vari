@@ -21,8 +21,8 @@ private:
 
 public:
     VDatabaseCloth();
-    void materialInfo(const QString &name, int &id, float &cavityheight, float &permability, float &porosity) const ;
-    void saveMaterial(const QString &name, int id, float cavityheight, float permability, float porosity) ;
+    void materialInfo(const QString &name, int &id, float &cavityheight, float &xpermeability, float &ypermeability, float &porosity) const ;
+    void saveMaterial(const QString &name, int id, float cavityheight, float xpermeability, float ypermeability, float porosity) ;
 
     void loadFromFile(const QString &fileName) override;
 };

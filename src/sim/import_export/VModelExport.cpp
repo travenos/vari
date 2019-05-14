@@ -204,11 +204,14 @@ void VModelExport::saveCloth(QXmlStreamWriter &xmlWriter, const VCloth::const_pt
 {
     auto &tags = _xLAYERS_TAGS._xLAYER_TAGS._xCLOTH_TAGS;
     xmlWriter.writeStartElement(tags._NAME);
-    xmlWriter.writeAttribute(tags.CAVITY_HEIGHT, QString::number(cloth->cavityHeight));
-    xmlWriter.writeAttribute(tags.PERMEABILITY, QString::number(cloth->permeability));
-    xmlWriter.writeAttribute(tags.POROSITY, QString::number(cloth->porosity));
-    xmlWriter.writeAttribute(tags.BASE_COLOR, cloth->baseColor.name());
-    xmlWriter.writeAttribute(tags.MATERIAL_NAME, cloth->name);
+    xmlWriter.writeAttribute(tags.CAVITY_HEIGHT, QString::number(cloth->getCavityHeight()));
+    xmlWriter.writeAttribute(tags.DIAG_PERMEABILITY, QString::number(cloth->getAvgPermeability()));
+    xmlWriter.writeAttribute(tags.X_PERMEABILITY, QString::number(cloth->getXPermeability()));
+    xmlWriter.writeAttribute(tags.Y_PERMEABILITY, QString::number(cloth->getYPermeability()));
+    xmlWriter.writeAttribute(tags.POROSITY, QString::number(cloth->getPorosity()));
+    xmlWriter.writeAttribute(tags.ANGLE, QString::number(cloth->getAngleDeg()));
+    xmlWriter.writeAttribute(tags.BASE_COLOR, cloth->getBaseColor().name());
+    xmlWriter.writeAttribute(tags.MATERIAL_NAME, cloth->getName());
     xmlWriter.writeEndElement();
 }
 

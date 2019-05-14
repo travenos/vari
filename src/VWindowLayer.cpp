@@ -30,8 +30,9 @@ const QString VWindowLayer::MATERIAL_NAME_TEXT("Выбран материал: %
 const QString VWindowLayer::MATERIAL_INFO_TEXT("<html><head/><body>"
                                                "Материал: &quot;%1&quot;<br>"
                                                "Толщина: %2 м<br>"
-                                               "Проницаемость: %3 м<span style=\" vertical-align:super;\">2</span><br>"
-                                               "Пористость: %4"
+                                               "Продольная проницаемость: %3 м<span style=\" vertical-align:super;\">2</span><br>"
+                                               "Поперечная проницаемость: %4 м<span style=\" vertical-align:super;\">2</span><br>"
+                                               "Пористость: %5"
                                                "</body></html>");
 
 const QColor VWindowLayer::DEFAULT_COLOR = QColor(255, 172, 172);
@@ -46,6 +47,7 @@ VWindowLayer::VWindowLayer(QWidget *parent,
     m_pFacade(p_facade)
 {
     ui->setupUi(this);
+    ui->angleSpinBox->setLocale(QLocale::C);
     reset();
     loadSavedParameters();
     showColor();
@@ -70,6 +72,8 @@ void VWindowLayer::reset()
     ui->geometryStatusLabel->setText(NO_GEOMETRY_TEXT);
     ui->buttonBox->button(QDialogButtonBox::StandardButton::Ok)->setEnabled(false);
     ui->mmCheckBox->setEnabled(false);
+    ui->layerNameEdit->clear();
+    ui->angleSpinBox->setValue(0.0);
     m_selectedMaterial = false;
     m_selectedFile = false;
     m_createdGeometry = false;
@@ -83,7 +87,7 @@ void VWindowLayer::loadSavedParameters()
     m_lastDir = settings.value(QStringLiteral("import/lastDir"), QDir::homePath()).toString();
     ui->mmCheckBox->setChecked(mm_selected);
     QVariant color = settings.value(QStringLiteral("import/color"), DEFAULT_COLOR);
-    m_material.baseColor = color.value<QColor>();
+    m_material.setBaseColor(color.value<QColor>());
 }
 
 void VWindowLayer::saveParameters() const
@@ -92,7 +96,7 @@ void VWindowLayer::saveParameters() const
     bool mm_selected = ui->mmCheckBox->isChecked();
     settings.setValue(QStringLiteral("import/sizeInMM"), mm_selected);
     settings.setValue(QStringLiteral("import/lastDir"), m_lastDir);
-    settings.setValue(QStringLiteral("import/color"), m_material.baseColor);
+    settings.setValue(QStringLiteral("import/color"), m_material.getBaseColor());
     settings.sync();
 }
 
@@ -104,6 +108,7 @@ void VWindowLayer::accept()
         units = VLayerAbstractBuilder::MM;
     else
         units = VLayerAbstractBuilder::M;
+    m_material.setAngleDeg(ui->angleSpinBox->value());
     if (m_selectedMaterial && m_selectedFile)
         emit creationFromFileAvailable(m_material, m_filename,
                                        ui->layerNameEdit->text(),
@@ -163,8 +168,8 @@ void VWindowLayer::showWindowCloth()
     if(!m_pWindowCloth)
     {
         m_pWindowCloth.reset(new VWindowCloth(this));
-        connect(m_pWindowCloth.get(), SIGNAL(gotMaterial(const QString &, float, float, float)),
-                this, SLOT(m_on_got_material(const QString &, float, float, float)));
+        connect(m_pWindowCloth.get(), SIGNAL(gotMaterial(const QString &, float, float, float, float)),
+                this, SLOT(m_on_got_material(const QString &, float, float, float, float)));
     }
     m_pWindowCloth->show();
     m_pWindowCloth->activateWindow();
@@ -176,14 +181,14 @@ void VWindowLayer::selectColor()
 
     if (color.isValid())
     {
-        m_material.baseColor = color;
+        m_material.setBaseColor(color);
         showColor();
     }
 }
 
 void VWindowLayer::showColor()
 {
-    QColor color = m_material.baseColor;
+    const QColor & color = m_material.getBaseColor();
     QPalette palette = ui->colorButton->palette();
     palette.setColor(QPalette::Button, color);
     palette.setColor(QPalette::Light, color);
@@ -196,14 +201,16 @@ void VWindowLayer::closeEvent(QCloseEvent *)
     emit windowClosed();
 }
 
-void VWindowLayer::m_on_got_material(const QString &name, float cavityheight, float permeability, float porosity)
+void VWindowLayer::m_on_got_material(const QString &name, float cavityheight,
+                                     float xPermeability, float yPermeability, float porosity)
 {
-    m_material.name = name;
-    m_material.cavityHeight = cavityheight;
-    m_material.permeability = permeability;
-    m_material.porosity = porosity;
+    m_material.setName(name);
+    m_material.setCavityHeight(cavityheight);
+    m_material.setXPermeability(xPermeability);
+    m_material.setYPermeability(yPermeability);
+    m_material.setPorosity(porosity);
     ui->materialStatusLabel->setText(MATERIAL_INFO_TEXT.arg(name).arg(cavityheight)
-                                         .arg(permeability).arg(porosity));
+                                         .arg(xPermeability).arg(yPermeability).arg(porosity));
     ui->materialStatusLabel->setStyleSheet(QStringLiteral("QLabel { color : black; }"));
     m_selectedMaterial = true;
     updateButtonsStates();

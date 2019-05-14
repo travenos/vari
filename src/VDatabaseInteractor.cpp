@@ -149,11 +149,11 @@ bool VDatabaseInteractor::findSQLfile(const QString &name, QString *foundPath) c
     QString exeDir;
     exeDir = QFileInfo(QCoreApplication::applicationFilePath()).absoluteDir().absolutePath();
     QStringList directories = {
+        QDir::cleanPath(exeDir),
         QDir::cleanPath(exeDir + QStringLiteral("/sql")),
+        QDir::cleanPath(exeDir + QStringLiteral("/../share/vari/sql")),
         QDir::cleanPath(exeDir + QStringLiteral("/../Resources")),
         QDir::cleanPath(QStringLiteral("/usr/share/vari/sql")),
-        QDir::cleanPath(exeDir),
-        QDir::cleanPath(exeDir + QStringLiteral("/../share/vari/sql")),
     };
     foreach(const QString &dirpath, directories)
     {

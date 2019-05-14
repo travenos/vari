@@ -151,9 +151,15 @@ double VSimulationParameters::getAverageCellDistance() const
     return m_averageCellDistance;
 }
 
+double VSimulationParameters::getHalfAverageCellDistance() const
+{
+    return m_halfAverageCellDistance;
+}
+
 void VSimulationParameters::setAverageCellDistance(double averageCellDistance)
 {
     m_averageCellDistance = averageCellDistance;
+    m_halfAverageCellDistance = averageCellDistance / 2;
 }
 
 int VSimulationParameters::getNumberOfFullNodes() const

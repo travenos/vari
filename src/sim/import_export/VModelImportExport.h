@@ -92,8 +92,11 @@ protected:
                 VXmlClothTags() {}
                 const QString _NAME{QStringLiteral("Cloth")};
                 const QString CAVITY_HEIGHT{QStringLiteral("cavityHeight")};
-                const QString PERMEABILITY{QStringLiteral("permeability")};
+                const QString DIAG_PERMEABILITY{QStringLiteral("permeability")};
+                const QString X_PERMEABILITY{QStringLiteral("xPermeability")};
+                const QString Y_PERMEABILITY{QStringLiteral("yPermeability")};
                 const QString POROSITY{QStringLiteral("porosity")};
+                const QString ANGLE{QStringLiteral("angle")};
                 const QString BASE_COLOR{QStringLiteral("baseColor")};
                 const QString MATERIAL_NAME{QStringLiteral("name")};
             };

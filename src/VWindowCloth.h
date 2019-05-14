@@ -11,12 +11,19 @@
 
 class VDatabaseCloth;
 class QDoubleValidator;
+class QLabel;
+class QLineEdit;
 
 class VWindowCloth : public VWindowMaterials
 {
     Q_OBJECT
 public:
     static const QString TITLE;
+
+    static const QString PARAM1_LABEL;
+    static const QString PARAM2_LABEL;
+    static const QString PARAM3_LABEL;
+    static const QString PARAM4_LABEL;
 
     explicit VWindowCloth(QWidget *parent=nullptr);
     virtual ~VWindowCloth();
@@ -28,14 +35,36 @@ protected:
 
 private:
     virtual VDatabaseInteractor* databaseInteractor();
-    bool getInputs(QString &name, float &cavityheight, float &permeability, float &porosity);
+    bool getInputs(QString &name, float &cavityheight,
+                   float &xpermeability, float &ypermeability, float &porosity);
+
+    void setTitles();
+    void assignUiPointers();
 
     VDatabaseCloth* const m_pDatabaseCloth;
-    QDoubleValidator * const m_pValidator;
     QDoubleValidator * const m_pPartValidator;
 
+    /**
+      * Widgets
+      */
+    struct UiControls
+    {
+        QLineEdit * cavityHeightEdit;
+        QLineEdit * xPermeabilityEdit;
+        QLineEdit * yPermeabilityEdit;
+        QLineEdit * porosityEdit;
+
+        QLabel * cavityHeightLabel;
+        QLabel * xPermeabilityLabel;
+        QLabel * yPermeabilityLabel;
+        QLabel * porosityLabel;
+    };
+
+    UiControls m_ui;
+
 signals:
-    void gotMaterial(const QString &name, float cavityheight, float permeability, float porosity);
+    void gotMaterial(const QString &name, float cavityheight,
+                     float xpermeability,float ypermeability, float porosity);
 };
 
 #endif // _VWINDOWCLOTH_H

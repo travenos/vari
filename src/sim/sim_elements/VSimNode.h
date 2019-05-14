@@ -94,7 +94,11 @@ public:
     size_t getNeighboursNumber(VLayerSequence layer) const ;
     double getCavityHeight() const ;
     double getPorosity() const ;
-    double getPermeability() const ;
+    double getAvgPermeability() const ;
+    double getXPermeability() const;
+    double getYPermeability() const;
+    double getAngleRad() const;
+    double getAngleDeg() const;
 
     void removeNeighbour(uint id);
     void removeNeighbour(const VSimNode* node);
@@ -105,6 +109,8 @@ public:
     bool isInjection() const override;
     bool isVacuum() const override;
     bool isNormal() const override;
+
+    bool isIsotropic() const;
 
 private:
     inline size_t calcNeighboursNumber() const;
@@ -118,6 +124,7 @@ private:
     VNodeRole m_role;
     size_t m_neighboursNumber;
     bool m_removeMark;
+    //double m_avgPerm; //TODO
 };
 
 #endif //_VSIMNODE_H
