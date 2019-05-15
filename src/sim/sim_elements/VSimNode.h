@@ -52,9 +52,9 @@ public:
 
     virtual ~VSimNode();
 
-    void setRole(VNodeRole role) ;
-    VNodeRole getRole() const ;
-    void setNewPressure(double newPressure) ;
+    void setRole(VNodeRole role) {m_role = role;}
+    inline VNodeRole getRole() const {return m_role;}
+    inline void setNewPressure(double newPressure) {m_newPressure = newPressure;}
     void commit(bool *p_madeChanges=nullptr, bool *p_isFull=nullptr) ;
     double getPressure() const override;
     double getFilledPart() const override;
@@ -73,11 +73,12 @@ public:
     void clearAllNeighboursMutually() ;
     void clearNeighboursMutually(VLayerSequence layer) ;
 
-    float getDistance(const VSimNode* node) const ;
-    float getDistance(const VSimNode::const_ptr &node) const;
-    float getDistance(const QVector3D& point) const;
+    inline float getDistance(const VSimNode* node) const {return m_position.distanceToPoint(node->getPosition());}
+    inline float getDistance(const VSimNode::const_ptr &node) const {return m_position.distanceToPoint(node->getPosition());}
+    inline float getDistance(const QVector3D& point) const {return m_position.distanceToPoint(point);}
     float getDistance(const QVector2D &point) const;
-    const QVector3D &getPosition() const ;
+    inline const QVector3D &getPosition() const {return m_position;}
+
     void setPosition(const QVector3D& pos);
     void reset() override;
     void setBoundaryPressures(double injectionPressure, double vacuumPressure);
@@ -90,15 +91,16 @@ public:
     const neighbours_list_t &getNeighbours(VLayerSequence layer) const;
     void getNeighboursId(std::vector<uint> &neighbourId) const ;
     void getNeighboursId(std::vector<uint> &neighbourId, VLayerSequence layer) const;
-    size_t getNeighboursNumber() const ;
-    size_t getNeighboursNumber(VLayerSequence layer) const ;
-    double getCavityHeight() const ;
-    double getPorosity() const ;
-    double getAvgPermeability() const ;
-    double getXPermeability() const;
-    double getYPermeability() const;
-    double getAngleRad() const;
-    double getAngleDeg() const;
+
+    inline size_t getNeighboursNumber() const {return m_neighboursNumber;}
+    inline size_t getNeighboursNumber(VLayerSequence layer) const {return m_neighbours[layer].size();}
+
+    inline double getCavityHeight() const {return m_pMaterial->getCavityHeight();}
+    inline double getPorosity() const {return m_pMaterial->getPorosity();}
+    inline double getAvgPermeability() const {return m_pMaterial->getAvgPermeability();}
+    inline double getXPermeability() const {return m_pMaterial->getXPermeability();}
+    inline double getYPermeability() const {return m_pMaterial->getYPermeability();}
+    inline double getAngleDeg() const {return m_pMaterial->getAngleDeg();}
 
     void removeNeighbour(uint id);
     void removeNeighbour(const VSimNode* node);
@@ -124,7 +126,6 @@ private:
     VNodeRole m_role;
     size_t m_neighboursNumber;
     bool m_removeMark;
-    //double m_avgPerm; //TODO
 };
 
 #endif //_VSIMNODE_H

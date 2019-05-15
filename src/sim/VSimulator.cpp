@@ -550,7 +550,9 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
                         double brace2 = pow(_l/distance,s);
                         double p_it = neighbour->getPressure();
                         double brace3 = p_it-p_t;
-                        double brace4 = K_i / K; //std::min(K_i / K, 1.0); //TODO
+                        double brace4 = K_i / K;
+                        if (layer != VSimNode::CURRENT)
+                            brace4 = std::min(brace4, 1.0);
                         sum += brace1 * brace2 * brace3 * brace4;
                         if(p_it > highestNeighborPressure)
                             highestNeighborPressure = p_it;
@@ -603,10 +605,22 @@ inline double VSimulator::getRelativePermeability(const VSimNode* node, const VS
         QVector2D nbConnect(node->getPosition().toVector2D() - neighbour->getPosition().toVector2D());
         float projX = fabs(QVector2D::dotProduct(vectX, nbConnect));
         float projY = fabs(QVector2D::dotProduct(vectY, nbConnect));
-        float sumProj = projX + projY;
-        float aX = projX / sumProj;
-        float aY = projY / sumProj;
-        return sqrt(mf_pow(KX, 1.0 + aX - aY) * mf_pow(KY, 1.0 + aY - aX));
+        if (insideX && insideY)
+        {
+            if (projX > projY)
+                return KX;
+            else if (projX < projY)
+                return KY;
+            else
+                return nbMaterial->getAvgPermeability();
+        }
+        else
+        {
+            float sumProj = projX + projY;
+            float aX = projX / sumProj;
+            float aY = projY / sumProj;
+            return sqrt(mf_pow(KX, 1.0 + aX - aY) * mf_pow(KY, 1.0 + aY - aX));
+        }
     }
 }
 

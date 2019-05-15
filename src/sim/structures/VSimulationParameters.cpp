@@ -17,49 +17,16 @@ const double VSimulationParameters::KELVINS_IN_0_CELSIUS{273.15};
 const double VSimulationParameters::UNIVERSAL_GAS_CONSTANT{8.314};
 const double VSimulationParameters::MIN_PRESSURE{1};
 
-float VSimulationParameters::getInjectionDiameter() const
-{
-    return m_injectionDiameter;
-}
-
 void VSimulationParameters::setInjectionDiameter(float diameter)
 {
     m_injectionDiameter = std::max(diameter, 0.0f);
 }
 
-float VSimulationParameters::getVacuumDiameter() const
-{
-    return m_vacuumDiameter;
-}
 void VSimulationParameters::setVacuumDiameter(float diameter)
 {
     m_vacuumDiameter = std::max(diameter, 0.0f);
 }
 
-double VSimulationParameters::getViscosity() const
-{
-    return m_viscosity;
-}
-
-double VSimulationParameters::getDefaultViscosity() const
-{
-    return m_resin.defaultViscosity;
-}
-
-double VSimulationParameters::getLifetime() const
-{
-    return m_lifetime;
-}
-
-double VSimulationParameters::getDefaultLifetime() const
-{
-    return m_resin.defaultLifetime;
-}
-
-double VSimulationParameters::getTemperature() const
-{
-    return m_temperature;
-}
 void VSimulationParameters::setTemperature(double temperature)
 {
     if (temperature <= - KELVINS_IN_0_CELSIUS)
@@ -69,16 +36,6 @@ void VSimulationParameters::setTemperature(double temperature)
     m_lifetime = calculateLifetime();
 }
 
-double VSimulationParameters::getViscTempcoef() const
-{
-    return m_resin.viscTempcoef;
-}
-
-double VSimulationParameters::getLifetimeTempcoef() const
-{
-    return m_resin.lifetimeTempcoef;
-}
-
 void VSimulationParameters::setResin(const VResin &resin)
 {
     m_resin = resin;
@@ -86,74 +43,34 @@ void VSimulationParameters::setResin(const VResin &resin)
     m_lifetime = calculateLifetime();
 }
 
-VResin VSimulationParameters::getResin() const
-{
-    return m_resin;
-}
-
-double VSimulationParameters::getInjectionPressure() const
-{
-    return m_injectionPressure;
-}
 void VSimulationParameters::setInjectionPressure(double pressure)
 {
     m_injectionPressure = std::max(pressure, MIN_PRESSURE);
 }
 
-double VSimulationParameters::getVacuumPressure() const
-{
-    return m_vacuumPressure;
-}
 void VSimulationParameters::setVacuumPressure(double pressure)
 {
     m_vacuumPressure = std::max(pressure, MIN_PRESSURE);
 }
 
-double VSimulationParameters::getQ() const
-{
-    return m_q;
-}
 void VSimulationParameters::setQ(double q)
 {
     m_q = std::max(q, 0.0);
 }
 
-double VSimulationParameters::getR() const
-{
-    return m_r;
-}
 void VSimulationParameters::setR(double r)
 {
     m_r = std::max(r, 0.0);
 }
 
-double VSimulationParameters::getS() const
-{
-    return m_s;
-}
 void VSimulationParameters::setS(double s)
 {
     m_s = std::max(s, 0.0);
 }
 
-double VSimulationParameters::getAveragePermeability() const
-{
-    return m_averagePermeability;
-}
-
 void VSimulationParameters::setAveragePermeability(double averagePermeability)
 {
     m_averagePermeability = averagePermeability;
-}
-
-double VSimulationParameters::getAverageCellDistance() const
-{
-    return m_averageCellDistance;
-}
-
-double VSimulationParameters::getHalfAverageCellDistance() const
-{
-    return m_halfAverageCellDistance;
 }
 
 void VSimulationParameters::setAverageCellDistance(double averageCellDistance)
@@ -162,19 +79,9 @@ void VSimulationParameters::setAverageCellDistance(double averageCellDistance)
     m_halfAverageCellDistance = averageCellDistance / 2;
 }
 
-int VSimulationParameters::getNumberOfFullNodes() const
-{
-    return m_numberOfFullNodes;
-}
-
 void VSimulationParameters::setNumberOfFullNodes(int numberOfNodes)
 {
     m_numberOfFullNodes = numberOfNodes;
-}
-
-double VSimulationParameters::getTimeLimit() const
-{
-    return m_timeLimit;
 }
 
 void VSimulationParameters::setTimeLimit(double limit)

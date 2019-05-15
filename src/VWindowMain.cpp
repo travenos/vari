@@ -231,8 +231,6 @@ void VWindowMain::setupValidators()
     m_pTemperatureValidator->setBottom(-VSimulationParameters::KELVINS_IN_0_CELSIUS);
     m_pPressureValidator->setBottom(0);
     m_pDiameterValidator->setBottom(0);
-    //m_pAngleValidator->setBottom(-90.0); //TODO
-    //m_pAngleValidator->setTop(90.0);
     ui->temperatureEdit->setValidator(m_pTemperatureValidator);
     ui->injectionPressureEdit->setValidator(m_pPressureValidator);
     ui->vacuumPressureEdit->setValidator(m_pPressureValidator);
