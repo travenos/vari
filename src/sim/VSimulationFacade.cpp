@@ -854,7 +854,7 @@ void VSimulationFacade::applyInjectionAndVacuumPoints()
         injectionVacuum = m_pInjectionVacuum.get();
     }
     m_pSimulator->setInjectionDiameter(injectionVacuum->injectionDiameter);
-    m_pSimulator->setVacuumDiameter(injectionVacuum->injectionDiameter);
+    m_pSimulator->setVacuumDiameter(injectionVacuum->vacuumDiameter);
     m_pLayersProcessor->setInjectionPoint(injectionVacuum->injectionCoords,
                                           injectionVacuum->injectionDiameter);
     emit injectionPointSet();
