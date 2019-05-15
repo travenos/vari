@@ -77,8 +77,9 @@ const QString VWindowMain::SAVING_VIDEO_INFO("Видео сохранено в �
 const Qt::WindowFlags VWindowMain::ON_TOP_FLAGS = (Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint | Qt::Dialog | Qt::WindowTitleHint);
 
 const QStringList VWindowMain::LAYERS_TABLE_LABELS({QString("Имя"),
-                                                   QString("Материал"),
-                                                   QString("Цвет")});
+                                                    QString("Материал"),
+                                                    QString("Угол"),
+                                                    QString("Цвет")});
 
 VWindowMain::VWindowMain(QWidget *parent) :
     QMainWindow(parent),
@@ -122,6 +123,7 @@ VWindowMain::VWindowMain(QWidget *parent) :
     ui->layersTableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     ui->layersTableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
     ui->layersTableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Fixed);
+    ui->layersTableWidget->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Fixed);
 
     this->setWindowTitle(QCoreApplication::applicationName());
 }
@@ -597,7 +599,8 @@ void VWindowMain::updateLayerMaterialInfo(int layer)
 {
     VCloth::const_ptr cloth = m_pFacade->getMaterial(layer);
     ui->layersTableWidget->item(layer, 1)->setText(cloth->getName());
-    ui->layersTableWidget->item(layer, 2)->setBackgroundColor(cloth->getBaseColor());
+    ui->layersTableWidget->item(layer, 2)->setText(QString::number(cloth->getAngleDeg()));
+    ui->layersTableWidget->item(layer, 3)->setBackgroundColor(cloth->getBaseColor());
     if ( layer == ui->layersTableWidget->currentRow())
     {
         ui->layerInfoLabel->setText(CLOTH_INFO_TEXT.arg(cloth->getName())
@@ -984,8 +987,9 @@ void VWindowMain::showNewLayer()
     ui->layersTableWidget->insertRow(0);
     ui->layersTableWidget->setItem(0, 0, new QTableWidgetItem(m_pFacade->getLayerName(0)));
     ui->layersTableWidget->setItem(0, 1, new QTableWidgetItem(cloth->getName()));
-    ui->layersTableWidget->setItem(0, 2, new QTableWidgetItem());
-    ui->layersTableWidget->item(0, 2)->setBackgroundColor(cloth->getBaseColor());
+    ui->layersTableWidget->setItem(0, 2, new QTableWidgetItem(QString::number(cloth->getAngleDeg())));
+    ui->layersTableWidget->setItem(0, 3, new QTableWidgetItem());
+    ui->layersTableWidget->item(0, 3)->setBackgroundColor(cloth->getBaseColor());
     ui->layersTableWidget->selectRow(0);
 }
 
@@ -998,8 +1002,9 @@ void VWindowMain::reloadLayersTable()
         ui->layersTableWidget->insertRow(layer);
         ui->layersTableWidget->setItem(layer, 0, new QTableWidgetItem(m_pFacade->getLayerName(layer)));
         ui->layersTableWidget->setItem(layer, 1, new QTableWidgetItem(cloth->getName()));
-        ui->layersTableWidget->setItem(layer, 2, new QTableWidgetItem());
-        ui->layersTableWidget->item(layer, 2)->setBackgroundColor(cloth->getBaseColor());
+        ui->layersTableWidget->setItem(layer, 2, new QTableWidgetItem(QString::number(cloth->getAngleDeg())));
+        ui->layersTableWidget->setItem(layer, 3, new QTableWidgetItem());
+        ui->layersTableWidget->item(layer, 3)->setBackgroundColor(cloth->getBaseColor());
         markLayerAsEnabled(layer, m_pFacade->isLayerEnabled(layer));
         markLayerAsVisible(layer, m_pFacade->isLayerVisible(layer));
     }
