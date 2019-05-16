@@ -918,12 +918,27 @@ void VSimulationFacade::setLayerName(uint layer, const QString &name)
     emit configUpdated();
 }
 
-void VSimulationFacade::rebuildLayer(const QPolygonF &polygon, double characteristicLength,
-                                     uint layer)
+void VSimulationFacade::rebuildLayer(uint layer, const QPolygonF &polygon,
+                                     double characteristicLength)
 {
     if(layer < getLayersNumber() && isSimulationStopped())
     {
         VLayerManualBuilder builder(polygon, *m_pLayersProcessor->getMaterial(layer), characteristicLength);
+        m_pLayersProcessor->rebuildLayer(layer, &builder);
+        updateConfiguration();
+    }
+    else
+        throw VImportException();
+}
+
+void VSimulationFacade::rebuildLayer(uint layer, double angle, const QPolygonF &polygon,
+                                     double characteristicLength)
+{
+    if(layer < getLayersNumber() && isSimulationStopped())
+    {
+        VCloth cloth = *m_pLayersProcessor->getMaterial(layer);
+        cloth.setAngleDeg(angle);
+        VLayerManualBuilder builder(polygon, cloth, characteristicLength);
         m_pLayersProcessor->rebuildLayer(layer, &builder);
         updateConfiguration();
     }

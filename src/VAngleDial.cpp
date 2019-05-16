@@ -114,7 +114,7 @@ void VAngleDial::paintEvent(QPaintEvent *)
 
 void VAngleDial::mouseMoveEvent(QMouseEvent *event)
 {
-    if (_isInsideCircle(event->x(), event->y()))
+    if (_isInsideCircle(event->x(), event->y()) && m_mousePressed)
     {
         double angle{_getCorrectAngle(event->x(), event->y())};
         setAngle(angle);

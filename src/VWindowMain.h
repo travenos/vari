@@ -220,7 +220,7 @@ private slots:
     void m_on_layers_cleared();
     void m_on_got_cloth(const QString & name, float cavityheight, float xpermeability, float ypermeability, float porosity);
     void m_on_got_resin(const QString & name , float viscosity, float viscTempcoef, float lifetime, float lifetimeTempcoef);
-    void m_on_got_polygon(const QPolygonF & polygon, double characteristicLength);
+    void m_on_got_polygon(const QPolygonF & polygon, double angle, double characteristicLength);
     void m_on_layer_creation_from_file_available(const VCloth& material, const QString& filename,
                                                  const QString& layerName,
                                                  VLayerAbstractBuilder::VUnit units);

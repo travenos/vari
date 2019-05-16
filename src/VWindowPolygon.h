@@ -97,6 +97,10 @@ public:
 
     void setPolygon(const QPolygonF & polygon);
 
+    void setAngle(double angle);
+
+    double getAngle() const;
+
 private:
     Ui::VWindowPolygon *ui;
     QCPCurve * m_pPlotCurve;
@@ -158,6 +162,8 @@ private slots:
     void pl_on_mouse_press(QMouseEvent* event);
     void pl_on_mouse_move(QMouseEvent* event);
 
+    void a_on_angle_changed(double angle);
+
     void on_undoButton_clicked();
 
     void on_clearButton_clicked();
@@ -186,12 +192,14 @@ private slots:
 
     void on_mode1DRadioButton_toggled(bool checked);
 
+    void on_angleSpinBox_valueChanged(double arg1);
+
 protected:
 
     virtual void closeEvent(QCloseEvent *) override;
 
 signals:
-    void polygonAvailable(const QPolygonF &polygon, double characteristicLength);
+    void polygonAvailable(const QPolygonF &polygon, double angle, double characteristicLength);
     void creationCanceled();
     void windowClosed();
 };

@@ -1202,11 +1202,12 @@ void VWindowMain::editLayer(uint layer)
         if (m_pWindowPolygon == nullptr)
         {
             m_pWindowPolygon = new VWindowPolygon(this, m_pFacade);
-            connect(m_pWindowPolygon, SIGNAL(polygonAvailable(const QPolygonF &, double)),
-                    this, SLOT(m_on_got_polygon(const QPolygonF &, double)));
+            connect(m_pWindowPolygon, SIGNAL(polygonAvailable(const QPolygonF &, double, double)),
+                    this, SLOT(m_on_got_polygon(const QPolygonF &, double, double)));
             connect(m_pWindowPolygon,SIGNAL(windowClosed()), this, SLOT(m_on_polygon_window_closed()));
         }
         m_pWindowPolygon->set1DMode(false);
+        m_pWindowPolygon->setAngle(m_pFacade->getMaterial(layer)->getAngleDeg());
         const auto & polygons = m_pFacade->getPolygons(layer);
         if(polygons.size() > 0)
             m_pWindowPolygon->setPolygon(polygons.at(0));
@@ -1369,7 +1370,7 @@ void VWindowMain::m_on_got_resin(const QString & name , float viscosity, float v
     setResin(name, viscosity, viscTempcoef, lifetime, lifetimeTempcoef);
 }
 
-void VWindowMain::m_on_got_polygon(const QPolygonF & polygon, double characteristicLength)
+void VWindowMain::m_on_got_polygon(const QPolygonF & polygon, double angle, double characteristicLength)
 {
     if (ui->layersTableWidget->currentIndex().isValid()
             && ui->layersTableWidget->currentRow() < int(m_pFacade->getLayersNumber()))
@@ -1377,7 +1378,7 @@ void VWindowMain::m_on_got_polygon(const QPolygonF & polygon, double characteris
         uint layer = ui->layersTableWidget->currentRow();
         try
         {
-            m_pFacade->rebuildLayer(polygon, characteristicLength, layer);
+            m_pFacade->rebuildLayer(layer, angle, polygon, characteristicLength);
         }
         catch(VImportException &)
         {
@@ -1787,6 +1788,7 @@ void VWindowMain::m_on_layer_rebuilt(uint layer)
     if (static_cast<int>(layer) < ui->layersTableWidget->rowCount())
     {
         ui->layersTableWidget->selectRow(layer);
+        updateLayerMaterialInfo(layer);
     }
 }
 

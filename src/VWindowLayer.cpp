@@ -156,9 +156,10 @@ void VWindowLayer::showWindowPolygon()
     if(!m_pWindowPolygon)
     {
         m_pWindowPolygon.reset(new VWindowPolygon(this, m_pFacade));
-        connect(m_pWindowPolygon.get(), SIGNAL(polygonAvailable(const QPolygonF &, double)),
-                this, SLOT(m_on_got_polygon(const QPolygonF &, double)));
+        connect(m_pWindowPolygon.get(), SIGNAL(polygonAvailable(const QPolygonF &, double, double)),
+                this, SLOT(m_on_got_polygon(const QPolygonF &, double, double)));
     }
+    m_pWindowPolygon->setAngle(ui->angleSpinBox->value());
     m_pWindowPolygon->show();
     m_pWindowPolygon->activateWindow();
 }
@@ -216,10 +217,11 @@ void VWindowLayer::m_on_got_material(const QString &name, float cavityheight,
     updateButtonsStates();
 }
 
-void VWindowLayer::m_on_got_polygon(const QPolygonF &polygon, double characteristicLength)
+void VWindowLayer::m_on_got_polygon(const QPolygonF &polygon, double angle, double characteristicLength)
 {
     m_polygon = polygon;
     m_characteristicLength = characteristicLength;
+    ui->angleSpinBox->setValue(angle);
     if (polygon.size() >= VWindowPolygon::MIN_2D_POLYGON_SIZE)
     {
         ui->geometryStatusLabel->setText(GEOMETRY_MANUAL_TEXT);
