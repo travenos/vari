@@ -583,7 +583,7 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
     }
 }
 
-inline double VSimulator::getRelativePermeability(const VSimNode* node, const VSimNode* neighbour)
+inline double VSimulator::getRelativePermeability(const VSimNode* node, const VSimNode* neighbour) const
 {
     if (neighbour->isIsotropic())
         return neighbour->getAvgPermeability();
@@ -625,7 +625,7 @@ inline double VSimulator::getRelativePermeability(const VSimNode* node, const VS
 }
 
 
-inline bool VSimulator::isInsideLongitudinal(const VSimNode* node, const VSimNode* neighbour)
+inline bool VSimulator::isInsideLongitudinal(const VSimNode* node, const VSimNode* neighbour) const
 {
     const VCloth::const_ptr & nbMaterial = neighbour->getMaterial();
     double x{neighbour->getPosition().x()};
@@ -652,7 +652,7 @@ inline bool VSimulator::isInsideLongitudinal(const VSimNode* node, const VSimNod
     }
 }
 
-inline bool VSimulator::isInsideTraversal(const VSimNode* node, const VSimNode* neighbour)
+inline bool VSimulator::isInsideTraversal(const VSimNode* node, const VSimNode* neighbour) const
 {
     const VCloth::const_ptr & nbMaterial = neighbour->getMaterial();
     double x{neighbour->getPosition().x()};
@@ -681,7 +681,7 @@ inline bool VSimulator::isInsideTraversal(const VSimNode* node, const VSimNode* 
     }
 }
 
-inline double VSimulator::mf_pow(double x, double y)
+inline double VSimulator::mf_pow(double x, double y) const
 {
     if (x != 0 || y != 0)
         return pow(x, y);
