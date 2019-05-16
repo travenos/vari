@@ -191,6 +191,7 @@ set(HEADER_FILES
     VScreenShooter.h
     VVideoShooter.h
     VImageTextWriters.h
+    VAngleDial.h
     )
 
 set(SOURCE_FILES
@@ -208,6 +209,7 @@ set(SOURCE_FILES
     VScreenShooter.cpp
     VVideoShooter.cpp
     VImageTextWriters.cpp
+    VAngleDial.cpp
     )
 
 #Create executable
