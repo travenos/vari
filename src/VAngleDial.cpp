@@ -10,6 +10,13 @@
 
 #include "VAngleDial.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif /* !M_PI */
+#ifndef M_PI_2
+#define M_PI_2 1.57079632679489661923
+#endif /* !M_PI_2 */
+
 VAngleDial::VAngleDial(QWidget *parent) :
     QWidget(parent)
 {
@@ -152,7 +159,7 @@ inline bool VAngleDial::_isInsideCircle(double x, double y) const
     return (_square(x - m_center.x()) + _square(y - m_center.y()) <= _square(m_radius));
 }
 
-constexpr inline double VAngleDial::_square(double x)
+inline double VAngleDial::_square(double x)
 {
     return x * x;
 }

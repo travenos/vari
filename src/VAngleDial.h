@@ -39,7 +39,7 @@ protected:
 private:
     double _getCorrectAngle(double x, double y) const;
     bool _isInsideCircle(double x, double y) const;
-    static constexpr double _square(double x);
+    static double _square(double x);
     static double _normalizeAngle(double angle);
 
     double m_angle{0.0};
