@@ -260,6 +260,10 @@ private:
     inline void updateColors();
 
     void calculateNewPressure(const VSimNode::ptr &node);
+    inline double getRelativePermeability(const VSimNode* node, const VSimNode* neighbor) const;
+    inline bool isInsideLongitudinal(const VSimNode* node, const VSimNode* neighbour) const;
+    inline bool isInsideTraversal(const VSimNode* node, const VSimNode* neighbour) const;
+    inline double mf_pow(double x, double y) const;
 
     inline double getTimeDelta() const ;
     inline double getAveragePermeability() const ;

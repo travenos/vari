@@ -27,54 +27,40 @@ public:
     VSimulationParameters(const VSimulationParameters &other) = default;
     VSimulationParameters& operator= (const VSimulationParameters& other) = default;
 
-    float getInjectionDiameter() const ;
+    inline float getInjectionDiameter() const {return m_injectionDiameter;}
+    inline float getVacuumDiameter() const {return m_vacuumDiameter;}
+    inline VResin getResin() const {return m_resin;}
+    inline double getViscosity() const {return m_viscosity;}
+    inline double getLifetime() const {return m_lifetime;}
+    inline double getDefaultViscosity() const {return m_resin.defaultViscosity;}
+    inline double getDefaultLifetime() const {return m_resin.defaultLifetime;}
+    inline double getTemperature() const {return m_temperature;}
+    inline double getViscTempcoef() const {return m_resin.viscTempcoef;}
+    inline double getLifetimeTempcoef() const {return m_resin.lifetimeTempcoef;}
+    inline double getInjectionPressure() const {return m_injectionPressure;}
+    inline double getVacuumPressure() const {return m_vacuumPressure;}
+    inline double getQ() const {return m_q;}
+    inline double getR() const {return m_r;}
+    inline double getS() const {return m_s;}
+    inline double getAverageCellDistance() const {return m_averageCellDistance;}
+    inline double getHalfAverageCellDistance() const {return m_halfAverageCellDistance;}
+    inline double getAveragePermeability() const {return m_averagePermeability;}
+    inline double getTimeLimit() const {return m_timeLimit;}
+    inline int getNumberOfFullNodes() const {return m_numberOfFullNodes;}
+
+
     void setInjectionDiameter(float diameter) ;
-
-    float getVacuumDiameter() const ;
     void setVacuumDiameter(float diameter) ;
-
     void setResin(const VResin &resin);
-    VResin getResin() const;
-
-    double getViscosity() const ;
-
-    double getDefaultViscosity() const ;
-
-    double getLifetime() const;
-
-    double getDefaultLifetime() const ;
-
-    double getTemperature() const ;
     void setTemperature(double temperature) ;
-
-    double getViscTempcoef() const ;
-    double getLifetimeTempcoef() const;
-
-    double getInjectionPressure() const ;
     void setInjectionPressure(double pressure) ;
-
-    double getVacuumPressure() const ;
     void setVacuumPressure(double pressure) ;
-
-    double getQ() const ;
     void setQ(double q) ;
-
-    double getR() const ;
     void setR(double r) ;
-
-    double getS() const ;
     void setS(double s) ;
-
-    double getAverageCellDistance() const ;
     void setAverageCellDistance(double averageCellDistance) ;
-
-    double getAveragePermeability() const ;
     void setAveragePermeability(double averagePermeability) ;
-
-    double getTimeLimit() const ;
     void setTimeLimit(double limit) ;
-
-    int getNumberOfFullNodes() const ;
     void setNumberOfFullNodes(int numberOfNodes) ;
 
 private:
@@ -95,6 +81,7 @@ private:
     double m_s{2};
 
     double m_averageCellDistance{1};
+    double m_halfAverageCellDistance{0.5};
     double m_averagePermeability{1};
 
     double m_timeLimit{7200};

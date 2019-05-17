@@ -33,6 +33,7 @@ public:
     void setVisible(bool visible) ;
     bool isVisible() const ;
     uint getId() const;
+    inline const VCloth::const_ptr &getMaterial() const {return m_pMaterial;}
     virtual const QColor& getColor() const ;
     virtual void reset()  = 0;
     virtual bool isMarkedForRemove() const = 0;

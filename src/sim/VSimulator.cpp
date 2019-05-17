@@ -9,6 +9,7 @@
 #include <cstring>
 #include <cmath>
 #include <QTime>
+#include <QVector2D>
 
 #include "VSimulator.h"
 #include "structures/VExceptions.h"
@@ -460,7 +461,7 @@ inline double VSimulator::getAveragePermeability() const
 {
     auto permeabilityFunc = [] (const VSimNode::ptr& node) -> double
     {
-        return node->getPermeability();
+        return node->getAvgPermeability();
     };
     return calcAverage(permeabilityFunc);
 }
@@ -516,7 +517,7 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
     if(!node->isInjection() && m > 0)
     {
         double _K = m_param.getAveragePermeability();
-        double K = node->getPermeability();
+        double K = node->getAvgPermeability();
         double phi = node->getPorosity();
         double d = node->getCavityHeight();
         double _l = m_param.getAverageCellDistance();
@@ -541,15 +542,17 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
                     double distance = it.first;
                     if (distance > 0)
                     {
-                        const VSimNode* neighbor = it.second;
-                        double K_i = neighbor->getPermeability();
-                        double d_i = neighbor->getCavityHeight();
-                        double phi_i = neighbor->getPorosity();
+                        const VSimNode* neighbour = it.second;
+                        double K_i = getRelativePermeability(node.get(), neighbour);
+                        double d_i = neighbour->getCavityHeight();
+                        double phi_i = neighbour->getPorosity();
                         double brace1 = pow(((d_i*phi_i)/den_brace1),r);
                         double brace2 = pow(_l/distance,s);
-                        double p_it = neighbor->getPressure();
+                        double p_it = neighbour->getPressure();
                         double brace3 = p_it-p_t;
-                        double brace4 = std::min(K_i / K, 1.0);
+                        double brace4 = K_i / K;
+                        if (layer != VSimNode::CURRENT)
+                            brace4 = std::min(brace4, 1.0);
                         sum += brace1 * brace2 * brace3 * brace4;
                         if(p_it > highestNeighborPressure)
                             highestNeighborPressure = p_it;
@@ -580,7 +583,111 @@ void VSimulator::calculateNewPressure(const VSimNode::ptr &node)
     }
 }
 
+inline double VSimulator::getRelativePermeability(const VSimNode* node, const VSimNode* neighbour) const
+{
+    if (neighbour->isIsotropic())
+        return neighbour->getAvgPermeability();
+    bool insideX{isInsideLongitudinal(node, neighbour)};
+    bool insideY{isInsideTraversal(node, neighbour)};
+    if (insideX && !insideY)
+        return neighbour->getXPermeability();
+    else if (!insideX && insideY)
+        return neighbour->getYPermeability();
+    else
+    {
+        const VCloth::const_ptr & nbMaterial = neighbour->getMaterial();
+        double sinA{nbMaterial->getAngleSin()};
+        double cosA{nbMaterial->getAngleCos()};
+        double KX{nbMaterial->getXPermeability()};
+        double KY{nbMaterial->getYPermeability()};
+        QVector2D vectX(cosA, sinA);
+        QVector2D vectY(-sinA, cosA);
+        QVector2D nbConnect(node->getPosition().toVector2D() - neighbour->getPosition().toVector2D());
+        float projX = fabs(QVector2D::dotProduct(vectX, nbConnect));
+        float projY = fabs(QVector2D::dotProduct(vectY, nbConnect));
+        if (insideX && insideY)
+        {
+            if (projX > projY)
+                return KX;
+            else if (projX < projY)
+                return KY;
+            else
+                return nbMaterial->getAvgPermeability();
+        }
+        else
+        {
+            float sumProj = projX + projY;
+            float aX = projX / sumProj;
+            float aY = projY / sumProj;
+            return sqrt(mf_pow(KX, 1.0 + aX - aY) * mf_pow(KY, 1.0 + aY - aX));
+        }
+    }
+}
 
+
+inline bool VSimulator::isInsideLongitudinal(const VSimNode* node, const VSimNode* neighbour) const
+{
+    const VCloth::const_ptr & nbMaterial = neighbour->getMaterial();
+    double x{neighbour->getPosition().x()};
+    double y{neighbour->getPosition().y()};
+    double x0{node->getPosition().x()};
+    double y0{node->getPosition().y()};
+    double d{m_param.getHalfAverageCellDistance()};
+    if (!nbMaterial->isTanInf())
+    {
+        double doubleD{m_param.getAverageCellDistance()};
+        double k{nbMaterial->getAngleTan()};
+        double sinA{nbMaterial->getAngleSin()};
+        double cosA{nbMaterial->getAngleCos()};
+        double upX = x0 - d * sinA;
+        double upY = y0 + d * cosA;
+        double upB = upY - k * upX;
+        double downB = upB - doubleD / cosA;
+        double kx = k * x;
+        return (y >= kx + downB && y <= kx + upB);
+    }
+    else
+    {
+        return (x >= x0 - d && x <= x0 + d);
+    }
+}
+
+inline bool VSimulator::isInsideTraversal(const VSimNode* node, const VSimNode* neighbour) const
+{
+    const VCloth::const_ptr & nbMaterial = neighbour->getMaterial();
+    double x{neighbour->getPosition().x()};
+    double y{neighbour->getPosition().y()};
+    double x0{node->getPosition().x()};
+    double y0{node->getPosition().y()};
+    double d{m_param.getHalfAverageCellDistance()};
+    double k{nbMaterial->getAngleOrthogTan()};
+    if (!nbMaterial->isOrthogTanInf() && k != 0)
+    {
+        double doubleD{m_param.getAverageCellDistance()};
+        double sinA{nbMaterial->getAngleSin()};
+        double cosA{nbMaterial->getAngleCos()};
+        double leftX = x0 - d * cosA;
+        double leftY = y0 - d * sinA;
+        double leftB = leftY - k * leftX;
+        double rightB = leftB + doubleD / sinA;
+        return (x >= (y - leftB) / k && x <= (y - rightB) / k);
+    }
+    else
+    {
+        if (k != 0)
+            return (x >= x0 - d && x <= x0 + d);
+        else
+            return (y >= y0 - d && y <= y0 + d);
+    }
+}
+
+inline double VSimulator::mf_pow(double x, double y) const
+{
+    if (x != 0 || y != 0)
+        return pow(x, y);
+    else
+        return 1.0;
+}
 
 void VSimulator::setResin(const VResin& resin)
 {

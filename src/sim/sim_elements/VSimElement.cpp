@@ -47,5 +47,5 @@ uint VSimElement::getId() const
 
 const QColor &VSimElement::getColor() const  
 {
-    return m_pMaterial->baseColor;
+    return m_pMaterial->getBaseColor();
 }

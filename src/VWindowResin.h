@@ -10,13 +10,19 @@
 #include "VWindowMaterials.h"
 
 class VDatabaseResin;
-class QDoubleValidator;
+class QLineEdit;
+class QLabel;
 
 class VWindowResin : public VWindowMaterials
 {
     Q_OBJECT
 public:
     static const QString TITLE;
+
+    static const QString PARAM1_LABEL;
+    static const QString PARAM2_LABEL;
+    static const QString PARAM3_LABEL;
+    static const QString PARAM4_LABEL;
 
     explicit VWindowResin(QWidget *parent=nullptr);
     virtual ~VWindowResin();
@@ -30,8 +36,28 @@ private:
     virtual VDatabaseInteractor* databaseInteractor();
     bool getInputs(QString &name, float &viscosity, float &viscTempcoef, float &lifetime, float &lifetimeTempcoef);
 
+    void setTitles();
+    void assignUiPointers();
+
     VDatabaseResin* const m_pDatabaseResin;
-    QDoubleValidator * const m_pValidator;
+
+    /**
+      * Widgets
+      */
+    struct UiControls
+    {
+        QLineEdit * viscosityEdit;
+        QLineEdit * viscTempcoefEdit;
+        QLineEdit * lifetimeEdit;
+        QLineEdit * lifetimeTempcoefEdit;
+
+        QLabel * viscosityLabel;
+        QLabel * viscTempcoefLabel;
+        QLabel * lifetimeLabel;
+        QLabel * lifetimeTempcoefLabel;
+    };
+
+    UiControls m_ui;
 
 signals:
     void gotMaterial(const QString &name, float viscosity, float viscTempcoef, float lifetime, float lifetimeTempcoef);

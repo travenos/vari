@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>905</width>
-    <height>677</height>
+    <height>525</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -136,7 +136,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="cavityHeightLabel">
+         <widget class="QLabel" name="param1Label">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -144,12 +144,12 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Толщина (м):</string>
+           <string>Параметр 1</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="cavityHeightEdit">
+         <widget class="QLineEdit" name="param1Edit">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -162,7 +162,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="permeabilityLabel">
+         <widget class="QLabel" name="param2Label">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -170,12 +170,12 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Проницаемость (м&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt;):&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>Параметр 2</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="permeabilityEdit">
+         <widget class="QLineEdit" name="param2Edit">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -188,7 +188,21 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="porosityLabel">
+         <widget class="QLabel" name="param3Label">
+          <property name="text">
+           <string>Параметр 3</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="param3Edit">
+          <property name="inputMethodHints">
+           <set>Qt::ImhFormattedNumbersOnly</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="param4Label">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -196,12 +210,12 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Пористость (от 0 до 1):</string>
+           <string>Параметр 4</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="porosityEdit">
+         <widget class="QLineEdit" name="param4Edit">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -212,54 +226,6 @@
            <set>Qt::ImhFormattedNumbersOnly</set>
           </property>
          </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="viscosityLabel">
-          <property name="text">
-           <string>Вязкость при 25 °C (Па·с):</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="viscosityEdit">
-          <property name="inputMethodHints">
-           <set>Qt::ImhFormattedNumbersOnly</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="viscTempcoefLabel">
-          <property name="text">
-           <string>Энергия активации вязкого течения (Дж/моль):</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="viscTempcoefEdit">
-          <property name="inputMethodHints">
-           <set>Qt::ImhFormattedNumbersOnly</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lifetimeLabel">
-          <property name="text">
-           <string>Время жизни при 25 °C (с):</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="lifetimeEdit"/>
-        </item>
-        <item>
-         <widget class="QLabel" name="lifetimeTempcoefLabel">
-          <property name="text">
-           <string>Энергия активации процесса отверждения (Дж/моль):</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="lifetimeTempcoefEdit"/>
         </item>
         <item>
          <layout class="QHBoxLayout" name="saveRefreshHorizontalLayout">
@@ -339,13 +305,10 @@
   <tabstop>importButton</tabstop>
   <tabstop>exportButton</tabstop>
   <tabstop>nameEdit</tabstop>
-  <tabstop>cavityHeightEdit</tabstop>
-  <tabstop>permeabilityEdit</tabstop>
-  <tabstop>porosityEdit</tabstop>
-  <tabstop>viscosityEdit</tabstop>
-  <tabstop>viscTempcoefEdit</tabstop>
-  <tabstop>lifetimeEdit</tabstop>
-  <tabstop>lifetimeTempcoefEdit</tabstop>
+  <tabstop>param1Edit</tabstop>
+  <tabstop>param2Edit</tabstop>
+  <tabstop>param3Edit</tabstop>
+  <tabstop>param4Edit</tabstop>
   <tabstop>refreshButton</tabstop>
   <tabstop>saveButton</tabstop>
   <tabstop>removeButton</tabstop>
@@ -360,124 +323,76 @@
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>110</x>
-     <y>100</y>
+     <x>129</x>
+     <y>145</y>
     </hint>
     <hint type="destinationlabel">
-     <x>157</x>
-     <y>325</y>
+     <x>358</x>
+     <y>393</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>cavityHeightEdit</sender>
+   <sender>param1Edit</sender>
    <signal>returnPressed()</signal>
    <receiver>saveButton</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>110</x>
-     <y>154</y>
+     <x>129</x>
+     <y>199</y>
     </hint>
     <hint type="destinationlabel">
-     <x>157</x>
-     <y>325</y>
+     <x>358</x>
+     <y>393</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>permeabilityEdit</sender>
+   <sender>param2Edit</sender>
    <signal>returnPressed()</signal>
    <receiver>saveButton</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>110</x>
-     <y>208</y>
+     <x>129</x>
+     <y>253</y>
     </hint>
     <hint type="destinationlabel">
-     <x>157</x>
-     <y>325</y>
+     <x>358</x>
+     <y>393</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>porosityEdit</sender>
+   <sender>param4Edit</sender>
    <signal>returnPressed()</signal>
    <receiver>saveButton</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>110</x>
-     <y>262</y>
+     <x>129</x>
+     <y>361</y>
     </hint>
     <hint type="destinationlabel">
-     <x>157</x>
-     <y>325</y>
+     <x>358</x>
+     <y>393</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>viscosityEdit</sender>
+   <sender>param3Edit</sender>
    <signal>returnPressed()</signal>
    <receiver>saveButton</receiver>
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>197</x>
-     <y>346</y>
+     <x>216</x>
+     <y>307</y>
     </hint>
     <hint type="destinationlabel">
      <x>287</x>
      <y>376</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>viscTempcoefEdit</sender>
-   <signal>returnPressed()</signal>
-   <receiver>saveButton</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>197</x>
-     <y>403</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>287</x>
-     <y>435</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>lifetimeEdit</sender>
-   <signal>returnPressed()</signal>
-   <receiver>saveButton</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>279</x>
-     <y>457</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>411</x>
-     <y>543</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>lifetimeTempcoefEdit</sender>
-   <signal>returnPressed()</signal>
-   <receiver>saveButton</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>279</x>
-     <y>511</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>411</x>
-     <y>543</y>
     </hint>
    </hints>
   </connection>

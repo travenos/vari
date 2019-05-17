@@ -328,19 +328,51 @@ void VModelImport::loadLayer(QXmlStreamReader& xmlReader, std::deque<VLayer::ptr
 void VModelImport::loadCloth(QXmlStreamReader& xmlReader, VCloth::ptr &material)
 {
     auto &tags = _xLAYERS_TAGS._xLAYER_TAGS._xCLOTH_TAGS;
+    double xPerm{-1}, yPerm{-1};
+    double diagPerm{material->getAvgPermeability()};
     foreach(const QXmlStreamAttribute &attr, xmlReader.attributes())
     {
         if (!attr.name().compare(tags.BASE_COLOR))
-            material->baseColor.setNamedColor(attr.value().toString());
+        {
+            QColor color;
+            color.setNamedColor(attr.value().toString());
+            material->setBaseColor(color);
+        }
         else if (!attr.name().compare(tags.CAVITY_HEIGHT))
-            material->cavityHeight = attr.value().toDouble();
+        {
+            material->setCavityHeight(attr.value().toDouble());
+        }
         else if (!attr.name().compare(tags.MATERIAL_NAME))
-            material->name = attr.value().toString();
-        else if (!attr.name().compare(tags.PERMEABILITY))
-            material->permeability = attr.value().toDouble();
+        {
+            material->setName(attr.value().toString());
+        }
+        else if (!attr.name().compare(tags.DIAG_PERMEABILITY))
+        {
+            diagPerm = attr.value().toDouble();
+        }
+        else if (!attr.name().compare(tags.X_PERMEABILITY))
+        {
+            xPerm = attr.value().toDouble();
+        }
+        else if (!attr.name().compare(tags.Y_PERMEABILITY))
+        {
+            yPerm = attr.value().toDouble();
+        }
         else if (!attr.name().compare(tags.POROSITY))
-            material->porosity = attr.value().toDouble();
+        {
+            material->setPorosity(attr.value().toDouble());
+        }
+        else if (!attr.name().compare(tags.ANGLE))
+        {
+            material->setAngleDeg(attr.value().toDouble());
+        }
     }
+    if (xPerm < 0)
+        xPerm = diagPerm;
+    if (yPerm < 0)
+        yPerm = diagPerm;
+    material->setXPermeability(xPerm);
+    material->setYPermeability(yPerm);
 }
 
 void VModelImport::loadNodes(QXmlStreamReader& xmlReader,

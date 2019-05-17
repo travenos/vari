@@ -42,24 +42,6 @@ VSimNode::~VSimNode()
     #endif
 }
 
-/**
- * @param role
- */
-void VSimNode::setRole(VNodeRole role) 
-{
-    m_role = role;
-}
-
-VSimNode::VNodeRole VSimNode::getRole() const
-{
-    return m_role;
-}
-
-void VSimNode::setNewPressure(double newPressure)
-{
-    m_newPressure = newPressure;
-}
-
 void VSimNode::commit(bool *p_madeChanges, bool *p_isFull)
 {
     if (p_isFull != nullptr)
@@ -238,30 +220,10 @@ void VSimNode::clearNeighboursMutually(VLayerSequence layer)
     m_neighboursNumber = calcNeighboursNumber();
 }
 
-float VSimNode::getDistance(const VSimNode * node) const
-{
-    return m_position.distanceToPoint(node->getPosition());
-}
-
-float VSimNode::getDistance(const VSimNode::const_ptr &node) const
-{
-    return m_position.distanceToPoint(node->getPosition());
-}
-
-float VSimNode::getDistance(const QVector3D& point) const
-{
-    return m_position.distanceToPoint(point);
-}
-
-float VSimNode::getDistance(const QVector2D& point) const
+float VSimNode::getDistance(const QVector2D &point) const
 {
     QVector2D xyPosition = m_position.toVector2D();
     return xyPosition.distanceToPoint(point);
-}
-
-const QVector3D& VSimNode::getPosition() const 
-{
-    return m_position;
 }
 
 void VSimNode::setPosition(const QVector3D& pos)
@@ -350,31 +312,6 @@ void VSimNode::getNeighboursId(std::vector<uint> &neighbourId, VLayerSequence la
         neighbourId.push_back(neighbour.second->getId());
 }
 
-size_t VSimNode::getNeighboursNumber() const
-{
-    return m_neighboursNumber;
-}
-
-size_t VSimNode::getNeighboursNumber(VLayerSequence layer) const
-{
-    return m_neighbours[layer].size();
-}
-
-double VSimNode::getCavityHeight() const 
-{
-    return m_pMaterial->cavityHeight;
-}
-
-double VSimNode::getPorosity() const 
-{
-    return m_pMaterial->porosity;
-}
-
-double VSimNode::getPermeability() const 
-{
-    return m_pMaterial->permeability;
-}
-
 bool VSimNode::isInjection() const
 {
     return (m_role == INJECTION);
@@ -388,6 +325,11 @@ bool VSimNode::isVacuum() const
 bool VSimNode::isNormal() const
 {
     return (m_role == NORMAL);
+}
+
+bool VSimNode::isIsotropic() const
+{
+    return (m_pMaterial->getXPermeability() == m_pMaterial->getYPermeability());
 }
 
 inline size_t VSimNode::calcNeighboursNumber() const

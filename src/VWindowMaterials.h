@@ -9,6 +9,8 @@
 #include <QMainWindow>
 #include "VDatabaseInteractor.h"
 
+class QDoubleValidator;
+
 namespace Ui {
 class VWindowMaterials;
 }
@@ -54,7 +56,8 @@ private slots:
 
 protected:
     Ui::VWindowMaterials *ui;
-    int m_currentId;
+    int m_currentId;    
+    QDoubleValidator * const m_pValidator;
 
     virtual void selectMaterial( ) = 0;
     virtual void saveMaterial( ) = 0;

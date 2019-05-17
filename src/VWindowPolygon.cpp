@@ -68,6 +68,12 @@ VWindowPolygon::VWindowPolygon(QWidget *parent,
     ui->changeXSpinBox->setLocale(QLocale::C);
     ui->changeYSpinBox->setLocale(QLocale::C);
 
+    ui->angleSpinBox->setLocale(QLocale::C);
+    const double minA{-90}, maxA{90};
+    ui->angleSpinBox->setRange(minA, maxA);
+    ui->angleDial->setRange(minA, maxA);
+    connect(ui->angleDial, SIGNAL(angleChanged(double)), this, SLOT(a_on_angle_changed(double)));
+
     ui->plotWidget->xAxis->setLabel(QStringLiteral("x, m"));
     ui->plotWidget->yAxis->setLabel(QStringLiteral("y, m"));
     ui->plotWidget->setInteraction(QCP::iRangeDrag, true);
@@ -152,7 +158,7 @@ void VWindowPolygon::accept2DProcedure()
             hide();
             QPolygonF polygon;
             getPolygon(polygon);
-            emit polygonAvailable(polygon, m_characteristicLength);
+            emit polygonAvailable(polygon, getAngle(), m_characteristicLength);
             close();
         }
         else
@@ -176,7 +182,7 @@ void VWindowPolygon::accept1DProcedure()
         return;
     }
     hide();;
-    emit polygonAvailable(polygon, m_characteristicLength);
+    emit polygonAvailable(polygon, getAngle(), m_characteristicLength);
     close();
 }
 
@@ -908,6 +914,16 @@ void VWindowPolygon::setPolygon(const QPolygonF & polygon)
     updateButtonsStates();
 }
 
+void VWindowPolygon::setAngle(double angle)
+{
+    ui->angleDial->setAngle(angle);
+}
+
+double VWindowPolygon::getAngle() const
+{
+    return ui->angleDial->getAngle();
+}
+
 /**
  * Slots
  */
@@ -1125,4 +1141,15 @@ void VWindowPolygon::on_useTableCheckBox_clicked(bool checked)
 void VWindowPolygon::on_mode1DRadioButton_toggled(bool checked)
 {
     set1DMode(checked);
+}
+
+void VWindowPolygon::on_angleSpinBox_valueChanged(double arg1)
+{
+    ui->angleDial->setAngle(arg1);
+}
+
+void VWindowPolygon::a_on_angle_changed(double angle)
+{
+    if (ui->angleSpinBox->value() != angle)
+        ui->angleSpinBox->setValue(angle);
 }

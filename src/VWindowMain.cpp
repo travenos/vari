@@ -45,8 +45,9 @@ const QString VWindowMain::ASK_FOR_EXIT_TEXT("Имеются несохранё�
 const QString VWindowMain::CLOTH_INFO_TEXT("<html><head/><body>"
                                            "Материал: &quot;%1&quot;<br>"
                                            "Толщина: %2 м<br>"
-                                           "Проницаемость: %3 м<span style=\" vertical-align:super;\">2</span><br>"
-                                           "Пористость: %4"
+                                           "Продольная проницаемость: %3 м<span style=\" vertical-align:super;\">2</span><br>"
+                                           "Поперечная проницаемость: %4 м<span style=\" vertical-align:super;\">2</span><br>"
+                                           "Пористость: %5"
                                            "</body></html>");
 const QString VWindowMain::RESIN_INFO_TEXT("<html><head/><body>"
                                            "Материал: &quot;%1&quot;<br>"
@@ -76,8 +77,9 @@ const QString VWindowMain::SAVING_VIDEO_INFO("Видео сохранено в �
 const Qt::WindowFlags VWindowMain::ON_TOP_FLAGS = (Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint | Qt::Dialog | Qt::WindowTitleHint);
 
 const QStringList VWindowMain::LAYERS_TABLE_LABELS({QString("Имя"),
-                                                   QString("Материал"),
-                                                   QString("Цвет")});
+                                                    QString("Материал"),
+                                                    QString("Угол"),
+                                                    QString("Цвет")});
 
 VWindowMain::VWindowMain(QWidget *parent) :
     QMainWindow(parent),
@@ -89,6 +91,7 @@ VWindowMain::VWindowMain(QWidget *parent) :
     m_pTemperatureValidator(new QDoubleValidator),
     m_pPressureValidator(new QDoubleValidator),
     m_pDiameterValidator(new QDoubleValidator),
+    m_pAngleValidator(new QDoubleValidator),
     m_pSlideshowShooter(new VScreenShooter),
     m_pVideoShooter(new VVideoShooter),
     m_isSaved(false)
@@ -120,6 +123,7 @@ VWindowMain::VWindowMain(QWidget *parent) :
     ui->layersTableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     ui->layersTableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
     ui->layersTableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Fixed);
+    ui->layersTableWidget->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Fixed);
 
     this->setWindowTitle(QCoreApplication::applicationName());
 }
@@ -225,6 +229,7 @@ void VWindowMain::setupValidators()
     m_pTemperatureValidator->setLocale(QLocale::C);
     m_pPressureValidator->setLocale(QLocale::C);
     m_pDiameterValidator->setLocale(QLocale::C);
+    m_pAngleValidator->setLocale(QLocale::C);
     m_pTemperatureValidator->setBottom(-VSimulationParameters::KELVINS_IN_0_CELSIUS);
     m_pPressureValidator->setBottom(0);
     m_pDiameterValidator->setBottom(0);
@@ -233,6 +238,7 @@ void VWindowMain::setupValidators()
     ui->vacuumPressureEdit->setValidator(m_pPressureValidator);
     ui->injectionDiameterEdit->setValidator(m_pDiameterValidator);
     ui->vacuumDiameterEdit->setValidator(m_pDiameterValidator);
+    ui->layerAngleEdit->setValidator(m_pAngleValidator);
 }
 
 void VWindowMain::setupSpinboxesLocales()
@@ -322,6 +328,7 @@ VWindowMain::~VWindowMain()
     delete m_pPressureValidator;
     delete m_pTemperatureValidator;
     delete m_pDiameterValidator;
+    delete m_pAngleValidator;
     #ifdef DEBUG_MODE
         qInfo() << "VWindowMain destroyed";
     #endif
@@ -442,9 +449,11 @@ void VWindowMain::selectLayer()
         ui->layerParamBox->setVisible(true);
         ui->layerVisibleCheckBox->setChecked(visible);
         ui->layerEnableCheckBox->setChecked(enabled);
-        ui->layerInfoLabel->setText(CLOTH_INFO_TEXT.arg(cloth->name).arg(cloth->cavityHeight)
-                                             .arg(cloth->permeability).arg(cloth->porosity));
-        showColor(cloth->baseColor);
+        ui->layerInfoLabel->setText(CLOTH_INFO_TEXT.arg(cloth->getName()).arg(cloth->getCavityHeight())
+                                             .arg(cloth->getXPermeability()).arg(cloth->getYPermeability()).arg(cloth->getPorosity()));
+        showColor(cloth->getBaseColor());
+        ui->layerAngleEdit->setText(QString::number(cloth->getAngleDeg()));
+        ui->resetLayerAngleButton->setEnabled(false);
         ui->layerUpButton->setEnabled(layer > 0 && m_pFacade->isSimulationStopped());
         ui->layerDownButton->setEnabled(layer < m_pFacade->getLayersNumber() - 1u && m_pFacade->isSimulationStopped());
         ui->layerNameEdit->setText(m_pFacade->getLayerName(layer));
@@ -504,8 +513,8 @@ void VWindowMain::showWindowCloth()
     if (m_pWindowCloth == nullptr)
     {
         m_pWindowCloth = new VWindowCloth(this);
-        connect(m_pWindowCloth, SIGNAL(gotMaterial(const QString &, float, float, float)),
-                this, SLOT(m_on_got_cloth(const QString &, float, float, float)));
+        connect(m_pWindowCloth, SIGNAL(gotMaterial(const QString &, float, float, float, float)),
+                this, SLOT(m_on_got_cloth(const QString &, float, float, float, float)));
         connect(m_pWindowCloth,SIGNAL(windowClosed()), this, SLOT(m_on_cloth_window_closed()));
     }
     m_pWindowCloth->show();
@@ -525,16 +534,17 @@ void VWindowMain::showWindowResin()
     m_pWindowResin->activateWindow();
 }
 
-void VWindowMain::setCloth(const QString & name, float cavityheight, float permeability, float porosity)
+void VWindowMain::setCloth(const QString & name, float cavityheight, float xpermeability, float ypermeability, float porosity)
 {
     if (ui->layersTableWidget->currentIndex().isValid())
     {
         int layer = ui->layersTableWidget->currentRow();
         VCloth cloth = *(m_pFacade->getMaterial(layer));
-        cloth.cavityHeight = cavityheight;
-        cloth.permeability = permeability;
-        cloth.porosity = porosity;
-        cloth.name = name;
+        cloth.setCavityHeight(cavityheight);
+        cloth.setXPermeability(xpermeability);
+        cloth.setYPermeability(ypermeability);
+        cloth.setPorosity(porosity);
+        cloth.setName(name);
         m_pFacade->setMaterial(layer, cloth);
     }
 }
@@ -545,11 +555,11 @@ void VWindowMain::selectColor()
     {
         int layer = ui->layersTableWidget->currentRow();
         VCloth cloth = *(m_pFacade->getMaterial(layer));
-        QColor color = QColorDialog::getColor(cloth.baseColor, this);
+        QColor color = QColorDialog::getColor(cloth.getBaseColor(), this);
 
         if (color.isValid())
         {
-            cloth.baseColor = color;
+            cloth.setBaseColor(color);
             m_pFacade->setMaterial(layer, cloth);
         }
     }
@@ -588,13 +598,19 @@ void VWindowMain::removeLayerFromList(int layer)
 void VWindowMain::updateLayerMaterialInfo(int layer)
 {
     VCloth::const_ptr cloth = m_pFacade->getMaterial(layer);
-    ui->layersTableWidget->item(layer, 1)->setText(cloth->name);
-    ui->layersTableWidget->item(layer, 2)->setBackgroundColor(cloth->baseColor);
+    ui->layersTableWidget->item(layer, 1)->setText(cloth->getName());
+    ui->layersTableWidget->item(layer, 2)->setText(QString::number(cloth->getAngleDeg()));
+    ui->layersTableWidget->item(layer, 3)->setBackgroundColor(cloth->getBaseColor());
     if ( layer == ui->layersTableWidget->currentRow())
     {
-        ui->layerInfoLabel->setText(CLOTH_INFO_TEXT.arg(cloth->name).arg(cloth->cavityHeight)
-                                             .arg(cloth->permeability).arg(cloth->porosity));
-        showColor(cloth->baseColor);
+        ui->layerInfoLabel->setText(CLOTH_INFO_TEXT.arg(cloth->getName())
+                                    .arg(cloth->getCavityHeight())
+                                    .arg(cloth->getXPermeability())
+                                    .arg(cloth->getYPermeability())
+                                    .arg(cloth->getPorosity()));
+        showColor(cloth->getBaseColor());
+        ui->layerAngleEdit->setText(QString::number(cloth->getAngleDeg()));
+        ui->resetLayerAngleButton->setEnabled(false);
     }
 }
 
@@ -606,6 +622,41 @@ void VWindowMain::updateLayerName(int layer)
     {
         ui->layerNameEdit->setText(layerName);
         ui->resetLayerNameButton->setEnabled(false);
+    }
+}
+
+
+void VWindowMain::showAngle()
+{
+    if (ui->layersTableWidget->currentIndex().isValid())
+    {
+        int layer = ui->layersTableWidget->currentRow();
+        if (layer >= 0 && layer < int(m_pFacade->getLayersNumber()))
+        {
+            VCloth::const_ptr cloth = m_pFacade->getMaterial(layer);
+            ui->layerAngleEdit->setText(QString::number(cloth->getAngleDeg()));
+            ui->resetLayerAngleButton->setEnabled(false);
+        }
+    }
+}
+
+void VWindowMain::saveAngle()
+{
+    if (ui->layersTableWidget->currentIndex().isValid())
+    {
+        int layer = ui->layersTableWidget->currentRow();
+        if (layer >= 0 && layer < int(m_pFacade->getLayersNumber()))
+        {
+            bool result;
+            double angle = ui->layerAngleEdit->text().toDouble(&result);
+            if (result)
+            {
+                VCloth cloth = *(m_pFacade->getMaterial(layer));
+                cloth.setAngleDeg(angle);
+                m_pFacade->setMaterial(layer, cloth);
+            }
+
+        }
     }
 }
 
@@ -902,6 +953,8 @@ void VWindowMain::activateSimControls(bool enabled)
     ui->layerEditButton->setEnabled(enabled);
     ui->addLayerButton->setEnabled(enabled);
     ui->sortLayersButton->setEnabled(enabled);
+    ui->layerAngleEdit->setEnabled(enabled);
+    ui->saveLayerAngleButton->setEnabled(enabled);
     ui->injectionPressureEdit->setEnabled(enabled);
     ui->saveInjectionPressureButton->setEnabled(enabled);
     ui->injectionDiameterEdit->setEnabled(enabled && !useTableParam);
@@ -933,9 +986,10 @@ void VWindowMain::showNewLayer()
     VCloth::const_ptr cloth = m_pFacade->getMaterial(0);
     ui->layersTableWidget->insertRow(0);
     ui->layersTableWidget->setItem(0, 0, new QTableWidgetItem(m_pFacade->getLayerName(0)));
-    ui->layersTableWidget->setItem(0, 1, new QTableWidgetItem(cloth->name));
-    ui->layersTableWidget->setItem(0, 2, new QTableWidgetItem());
-    ui->layersTableWidget->item(0, 2)->setBackgroundColor(cloth->baseColor);
+    ui->layersTableWidget->setItem(0, 1, new QTableWidgetItem(cloth->getName()));
+    ui->layersTableWidget->setItem(0, 2, new QTableWidgetItem(QString::number(cloth->getAngleDeg())));
+    ui->layersTableWidget->setItem(0, 3, new QTableWidgetItem());
+    ui->layersTableWidget->item(0, 3)->setBackgroundColor(cloth->getBaseColor());
     ui->layersTableWidget->selectRow(0);
 }
 
@@ -947,9 +1001,10 @@ void VWindowMain::reloadLayersTable()
         VCloth::const_ptr cloth = m_pFacade->getMaterial(layer);
         ui->layersTableWidget->insertRow(layer);
         ui->layersTableWidget->setItem(layer, 0, new QTableWidgetItem(m_pFacade->getLayerName(layer)));
-        ui->layersTableWidget->setItem(layer, 1, new QTableWidgetItem(cloth->name));
-        ui->layersTableWidget->setItem(layer, 2, new QTableWidgetItem());
-        ui->layersTableWidget->item(layer, 2)->setBackgroundColor(cloth->baseColor);
+        ui->layersTableWidget->setItem(layer, 1, new QTableWidgetItem(cloth->getName()));
+        ui->layersTableWidget->setItem(layer, 2, new QTableWidgetItem(QString::number(cloth->getAngleDeg())));
+        ui->layersTableWidget->setItem(layer, 3, new QTableWidgetItem());
+        ui->layersTableWidget->item(layer, 3)->setBackgroundColor(cloth->getBaseColor());
         markLayerAsEnabled(layer, m_pFacade->isLayerEnabled(layer));
         markLayerAsVisible(layer, m_pFacade->isLayerVisible(layer));
     }
@@ -1142,19 +1197,23 @@ void VWindowMain::swapLayersCaptions(uint layer1, uint layer2)
 
 void VWindowMain::editLayer(uint layer)
 {
-    if (m_pWindowPolygon == nullptr)
+    if (m_pFacade->isSimulationStopped())
     {
-        m_pWindowPolygon = new VWindowPolygon(this, m_pFacade);
-        connect(m_pWindowPolygon, SIGNAL(polygonAvailable(const QPolygonF &, double)),
-                this, SLOT(m_on_got_polygon(const QPolygonF &, double)));
-        connect(m_pWindowPolygon,SIGNAL(windowClosed()), this, SLOT(m_on_polygon_window_closed()));
+        if (m_pWindowPolygon == nullptr)
+        {
+            m_pWindowPolygon = new VWindowPolygon(this, m_pFacade);
+            connect(m_pWindowPolygon, SIGNAL(polygonAvailable(const QPolygonF &, double, double)),
+                    this, SLOT(m_on_got_polygon(const QPolygonF &, double, double)));
+            connect(m_pWindowPolygon,SIGNAL(windowClosed()), this, SLOT(m_on_polygon_window_closed()));
+        }
+        m_pWindowPolygon->set1DMode(false);
+        m_pWindowPolygon->setAngle(m_pFacade->getMaterial(layer)->getAngleDeg());
+        const auto & polygons = m_pFacade->getPolygons(layer);
+        if(polygons.size() > 0)
+            m_pWindowPolygon->setPolygon(polygons.at(0));
+        m_pWindowPolygon->show();
+        m_pWindowPolygon->activateWindow();
     }
-    m_pWindowPolygon->set1DMode(false);
-    const auto & polygons = m_pFacade->getPolygons(layer);
-    if(polygons.size() > 0)
-        m_pWindowPolygon->setPolygon(polygons.at(0));
-    m_pWindowPolygon->show();
-    m_pWindowPolygon->activateWindow();
 }
 
 /**
@@ -1300,9 +1359,9 @@ void VWindowMain::m_on_layer_creation_manual_available(const VCloth& material,co
     addLayerFromPolygon(material, polygon, characteristicLength, layerName);
 }
 
-void VWindowMain::m_on_got_cloth(const QString & name, float cavityheight, float permeability, float porosity)
+void VWindowMain::m_on_got_cloth(const QString & name, float cavityheight, float xpermeability, float ypermeability, float porosity)
 {
-    setCloth(name, cavityheight, permeability, porosity);
+    setCloth(name, cavityheight, xpermeability, ypermeability, porosity);
 }
 
 void VWindowMain::m_on_got_resin(const QString & name , float viscosity, float viscTempcoef,
@@ -1311,7 +1370,7 @@ void VWindowMain::m_on_got_resin(const QString & name , float viscosity, float v
     setResin(name, viscosity, viscTempcoef, lifetime, lifetimeTempcoef);
 }
 
-void VWindowMain::m_on_got_polygon(const QPolygonF & polygon, double characteristicLength)
+void VWindowMain::m_on_got_polygon(const QPolygonF & polygon, double angle, double characteristicLength)
 {
     if (ui->layersTableWidget->currentIndex().isValid()
             && ui->layersTableWidget->currentRow() < int(m_pFacade->getLayersNumber()))
@@ -1319,7 +1378,7 @@ void VWindowMain::m_on_got_polygon(const QPolygonF & polygon, double characteris
         uint layer = ui->layersTableWidget->currentRow();
         try
         {
-            m_pFacade->rebuildLayer(polygon, characteristicLength, layer);
+            m_pFacade->rebuildLayer(layer, angle, polygon, characteristicLength);
         }
         catch(VImportException &)
         {
@@ -1729,6 +1788,7 @@ void VWindowMain::m_on_layer_rebuilt(uint layer)
     if (static_cast<int>(layer) < ui->layersTableWidget->rowCount())
     {
         ui->layersTableWidget->selectRow(layer);
+        updateLayerMaterialInfo(layer);
     }
 }
 
@@ -2243,4 +2303,19 @@ void VWindowMain::on_layerEditButton_clicked()
 void VWindowMain::on_layersTableWidget_doubleClicked(const QModelIndex &index)
 {
     editLayer(index.row());
+}
+
+void VWindowMain::on_layerAngleEdit_textChanged(const QString &)
+{
+    ui->resetLayerAngleButton->setEnabled(true);
+}
+
+void VWindowMain::on_saveLayerAngleButton_clicked()
+{
+    saveAngle();
+}
+
+void VWindowMain::on_resetLayerAngleButton_clicked()
+{
+    showAngle();
 }

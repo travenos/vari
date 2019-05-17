@@ -18,7 +18,7 @@ VSimTriangle::VSimTriangle(uint id, const VCloth::const_ptr &p_material,
                            const VSimNode::const_ptr &p_node1,
                            const VSimNode::const_ptr &p_node2) :
     VSimElement(id, p_material),
-    m_color(p_material->baseColor),
+    m_color(p_material->getBaseColor()),
     m_pNodes({p_node0.get(), p_node1.get(), p_node2.get()})
 {
 
@@ -87,7 +87,7 @@ double VSimTriangle::getFilledPart() const
 
 void VSimTriangle::reset() 
 {
-    m_color = m_pMaterial->baseColor;
+    m_color = m_pMaterial->getBaseColor();
 }
 
 bool VSimTriangle::isMarkedForRemove() const

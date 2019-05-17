@@ -43,9 +43,10 @@ public:
 public slots:
 
 private slots:
-    void m_on_got_material(const QString &name, float cavityheight, float permeability, float porosity);
+    void m_on_got_material(const QString &name, float cavityheight,
+                           float xPermeability, float yPermeability, float porosity);
 
-    void m_on_got_polygon(const QPolygonF &polygon, double characteristicLength);
+    void m_on_got_polygon(const QPolygonF &polygon, double angle, double characteristicLength);
 
     void on_buttonBox_rejected();
 

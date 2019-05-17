@@ -132,8 +132,9 @@ public:
 
     const QString & getLayerName(uint layer) const;
     void setLayerName(uint layer, const QString &name);
-    void rebuildLayer(const QPolygonF &polygon, double characteristicLength,
-                      uint layer);
+    void rebuildLayer(uint layer, const QPolygonF &polygon, double characteristicLength);
+    void rebuildLayer(uint layer, double angle, const QPolygonF &polygon,
+                                         double characteristicLength);
 
 public slots:
     void updateGraphicsPositions();

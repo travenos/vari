@@ -109,6 +109,12 @@
                <property name="selectionBehavior">
                 <enum>QAbstractItemView::SelectRows</enum>
                </property>
+               <attribute name="horizontalHeaderDefaultSectionSize">
+                <number>60</number>
+               </attribute>
+               <attribute name="verticalHeaderDefaultSectionSize">
+                <number>25</number>
+               </attribute>
               </widget>
              </item>
              <item>
@@ -148,9 +154,9 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>-101</y>
+               <y>0</y>
                <width>1221</width>
-               <height>877</height>
+               <height>906</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout">
@@ -164,26 +170,57 @@
                   <number>3</number>
                  </property>
                  <item>
-                  <layout class="QHBoxLayout" name="horizontalLayout_17">
-                   <item>
-                    <widget class="QLabel" name="layerNameLabel">
-                     <property name="text">
-                      <string>Имя слоя:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
+                  <layout class="QGridLayout" name="layerParamLayout">
+                   <property name="verticalSpacing">
+                    <number>4</number>
+                   </property>
+                   <item row="0" column="1">
                     <widget class="QLineEdit" name="layerNameEdit"/>
                    </item>
-                   <item>
+                   <item row="0" column="2">
                     <widget class="QPushButton" name="resetLayerNameButton">
                      <property name="text">
                       <string>Отменить</string>
                      </property>
                     </widget>
                    </item>
-                   <item>
+                   <item row="0" column="0">
+                    <widget class="QLabel" name="layerNameLabel">
+                     <property name="text">
+                      <string>Имя слоя:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="3">
                     <widget class="QPushButton" name="saveLayerNameButton">
+                     <property name="text">
+                      <string>Сохранить</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="0">
+                    <widget class="QLabel" name="layerAngleLabel">
+                     <property name="text">
+                      <string>Угол укладки волокна (°):</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="1">
+                    <widget class="QLineEdit" name="layerAngleEdit">
+                     <property name="inputMethodHints">
+                      <set>Qt::ImhFormattedNumbersOnly</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="2">
+                    <widget class="QPushButton" name="resetLayerAngleButton">
+                     <property name="text">
+                      <string>Отменить</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="3">
+                    <widget class="QPushButton" name="saveLayerAngleButton">
                      <property name="text">
                       <string>Сохранить</string>
                      </property>
@@ -1838,6 +1875,9 @@
   <tabstop>layerNameEdit</tabstop>
   <tabstop>resetLayerNameButton</tabstop>
   <tabstop>saveLayerNameButton</tabstop>
+  <tabstop>layerAngleEdit</tabstop>
+  <tabstop>resetLayerAngleButton</tabstop>
+  <tabstop>saveLayerAngleButton</tabstop>
   <tabstop>layerColorButton</tabstop>
   <tabstop>layerEnableCheckBox</tabstop>
   <tabstop>layerVisibleCheckBox</tabstop>
@@ -2038,6 +2078,22 @@
     <hint type="destinationlabel">
      <x>1533</x>
      <y>739</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>layerAngleEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>saveLayerAngleButton</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>991</x>
+     <y>655</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1533</x>
+     <y>655</y>
     </hint>
    </hints>
   </connection>

@@ -6,13 +6,16 @@
 #ifdef DEBUG_MODE
 #include <QDebug>
 #endif
-#include "VWindowMaterials.h"
-#include "ui_VWindowMaterials.h"
-#include "VDatabaseInteractor.h"
+
+#include <deque>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QInputDialog>
-#include <deque>
+#include <QDoubleValidator>
+
+#include "VDatabaseInteractor.h"
+#include "VWindowMaterials.h"
+#include "ui_VWindowMaterials.h"
 
 const QString VWindowMaterials::ERROR_TITLE("Ошибка");
 const QString VWindowMaterials::REMOVE_TITLE("Удалить?");
@@ -28,9 +31,16 @@ const QString VWindowMaterials::FILE_DIALOG_FORMATS("Табличные данн
 VWindowMaterials::VWindowMaterials(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::VWindowMaterials),
-    m_currentId(-1)
+    m_currentId(-1),
+    m_pValidator(new QDoubleValidator())
 {
     ui->setupUi(this);
+    m_pValidator->setBottom(0);
+    m_pValidator->setLocale(QLocale::C);
+    ui->param1Edit->setValidator( m_pValidator );
+    ui->param2Edit->setValidator( m_pValidator );
+    ui->param3Edit->setValidator( m_pValidator );
+    ui->param4Edit->setValidator( m_pValidator );
 }
 
 void VWindowMaterials::loadMaterials( )
@@ -132,13 +142,10 @@ void VWindowMaterials::newMaterial( )
 {
     ui->materialsListWidget->clearSelection();
     ui->nameEdit->clear();
-    ui->cavityHeightEdit->clear();
-    ui->permeabilityEdit->clear();
-    ui->porosityEdit->clear();
-    ui->viscosityEdit->clear();
-    ui->viscTempcoefEdit->clear();
-    ui->lifetimeEdit->clear();
-    ui->lifetimeTempcoefEdit->clear();
+    ui->param1Edit->clear();
+    ui->param2Edit->clear();
+    ui->param3Edit->clear();
+    ui->param4Edit->clear();
     ui->idLabel->clear();
     m_currentId = -1;
 }
@@ -153,6 +160,7 @@ void VWindowMaterials::cancelSelection()
 VWindowMaterials::~VWindowMaterials()
 {
     delete ui;
+    m_pValidator->deleteLater();
     #ifdef DEBUG_MODE
         qInfo() << "VWindowMaterials destroyed";
     #endif
