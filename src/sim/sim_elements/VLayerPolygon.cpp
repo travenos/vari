@@ -122,7 +122,7 @@ bool VLayerPolygon::pointIsInsideRecursion(const QPointF & point, int fromContou
     if(fromContour >= 0 && fromContour < static_cast<int>(m_polygons.size()))
     {
         if (m_polygons.at(fromContour).containsPoint(point, Qt::OddEvenFill))
-            return pointIsInsideRecursion(point, m_hierarchy.at(fromContour).at(3), !even);
+            return pointIsInsideRecursion(point, m_hierarchy.at(fromContour).at(2), !even);
         else
             return pointIsInsideRecursion(point, m_hierarchy.at(fromContour).at(0), even);
     }
