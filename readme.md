@@ -1,5 +1,6 @@
 # VARI Project
-Software for simulating the VARI process
+Software for simulating the VARI process  
+![Screenshot](screen.png)  
 
 ## Database location
 Database is created on first launch of the application. Two tables are created from file *create.sql*. In the repository, it is located in the following path:  
