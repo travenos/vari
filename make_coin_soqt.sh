@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Copyright (c) 2018 Alexey Barashkov <barasher@yandex.ru>
 
-COIN_REPO_URL="https://bitbucket.org/Coin3D/coin"
-SOQT_REPO_URL="https://bitbucket.org/Coin3D/soqt"
-COIN_CHANGESET_HASH="11932:acee8063042f"
-SOQT_CHANGESET_HASH="2021:fd7ae3be0e28"
+COIN_REPO_URL="https://github.com/coin3d/coin.git"
+SOQT_REPO_URL="https://github.com/coin3d/soqt.git"
+COIN_CHANGESET_HASH="SoQt-1.6.0"
+SOQT_CHANGESET_HASH="Coin-4.0.0"
 
 THREADS_ARG=-j
 WORK_DIR_ARG=-w
@@ -114,14 +114,15 @@ cd "$WORK_DIR" || exit
 # Building Coin3D
 COIN_REPO_PATH=coin
 if [ ! -d "$COIN_REPO_PATH" ]; then
-	hg clone $COIN_REPO_URL || exit
+	git clone $COIN_REPO_URL || exit
 	cd $COIN_REPO_PATH || exit
 else
 	cd "$COIN_REPO_PATH"
-	hg pull
+	git pull
 fi
-#hg update default
-hg checkout $COIN_CHANGESET_HASH
+#git update default
+git checkout $COIN_CHANGESET_HASH
+git submodule update --init --recursive
 
 echo "Starting to build Coin3D. Making build in directory $WORK_DIR. It will be installed to directory $INSTALL_DIR. Using $THREADS_NUMBER threads."
 mkdir -p my_build
@@ -138,14 +139,15 @@ export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:"${QTDIR}/lib":"${INSTALL_DIR}/lib"
 export CPLUS_INCLUDE_PATH=${CPLUS_INCLUDE_PATH}:"${QTDIR}/include"
 SOQT_REPO_PATH=soqt
 if [ ! -d "$SOQT_REPO_PATH" ]; then
-	hg clone $SOQT_REPO_URL || exit
+	git clone $SOQT_REPO_URL || exit
 	cd $SOQT_REPO_PATH || exit
 else
 	cd "$SOQT_REPO_PATH"
-	hg pull
+	git pull
 fi
-#hg update default
-hg checkout $SOQT_CHANGESET_HASH
+#git update default
+git checkout $SOQT_CHANGESET_HASH
+git submodule update --init --recursive
 
 echo "Starting to build SoQt. Making build in directory $WORK_DIR. It will be installed to directory $INSTALL_DIR. Using $THREADS_NUMBER threads."
 mkdir -p my_build

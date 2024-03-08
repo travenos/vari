@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2019 Alexey Barashkov <barasher@yandex.ru>
 OPENCV_REPO_URL="https://github.com/opencv/opencv.git"
-OPENCV_TAG="3.2.0"
+OPENCV_TAG="3.4.0"
 
 THREADS_ARG=-j
 WORK_DIR_ARG=-w
@@ -118,11 +118,12 @@ else
 	git pull
 fi
 git checkout $OPENCV_TAG
+git submodule update --init --recursive
 
 echo "Starting to build OpenCV. Making build in directory $WORK_DIR. It will be installed to directory $INSTALL_DIR. Using $THREADS_NUMBER threads."
 mkdir -p my_build
 cd my_build || exit
-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_DOCS=OFF -DWITH_FFMPEG=OFF  -DWITH_OPENCLAMDBLAS=OFF -DWITH_OPENCLAMDFFT=OFF -DWITH_CUDA=OFF -DWITH_GPHOTO2=OFF -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" .. || exit
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_DOCS=OFF -DWITH_FFMPEG=OFF -DWITH_OPENCLAMDBLAS=OFF -DWITH_OPENCLAMDFFT=OFF -DWITH_CUDA=OFF -DWITH_GPHOTO2=OFF -DWITH_VTK=OFF -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DCMAKE_OSX_SYSROOT="$OSX_SYSROOT" .. || exit
 make -j $THREADS_NUMBER || exit
 $FAKEROOT make install -j $THREADS_NUMBER || exit
 

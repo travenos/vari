@@ -1,14 +1,14 @@
 $GENERATOR_NAME="Visual Studio 12 2013 Win64"
 $BUILD_TYPE="Release"
 
-$COIN_REPO_URL="https://bitbucket.org/Coin3D/coin"
-$SOQT_REPO_URL="https://bitbucket.org/Coin3D/soqt"
-$GMSH_REPO_URL="https://gitlab.onelab.info/gmsh/gmsh.git"
+$COIN_REPO_URL="https://github.com/coin3d/coin.git"
+$SOQT_REPO_URL="https://github.com/coin3d/soqt.git"
+$GMSH_REPO_URL="https://github.com/sasobadovinac/gmsh.git"
 $OPENCV_REPO_URL="https://github.com/opencv/opencv.git"
-$COIN_CHANGESET_HASH="11932:acee8063042f"
-$SOQT_CHANGESET_HASH="2021:fd7ae3be0e28"
+$COIN_CHANGESET_HASH="SoQt-1.6.0"
+$SOQT_CHANGESET_HASH="Coin-4.0.0"
 $GMSH_TAG="gmsh_3_0_6"
-$OPENCV_TAG="3.2.0"
+$OPENCV_TAG="3.4.0"
 
 $env:COINDIR="C:\coin3d"
 $env:GMSH_DIR="C:\gmsh"
@@ -27,17 +27,18 @@ cd coin3d
 $COIN_REPO_PATH="coin"
 if (!(test-path "$COIN_REPO_PATH"))
 {
-	hg clone $COIN_REPO_URL
+	git clone $COIN_REPO_URL
 	cd "$COIN_REPO_PATH"
 	check_exit_code($LASTEXITCODE)
 }
 else
 {
 	cd "$COIN_REPO_PATH"
-	hg pull
+	git pull
 }
 #hg update default
-hg checkout $COIN_CHANGESET_HASH
+git checkout $COIN_CHANGESET_HASH
+git submodule update --init --recursive
 if (!(test-path coin_build)) {mkdir coin_build}
 cd coin_build
 $CMAKE_INST_PREFIX_ARG="CMAKE_INSTALL_PREFIX=$env:COINDIR"
@@ -53,17 +54,18 @@ cd ../..
 $SOQT_REPO_PATH="soqt"
 if (!(test-path "$SOQT_REPO_PATH"))
 {
-	hg clone $SOQT_REPO_URL
+	git clone $SOQT_REPO_URL
 	cd "$SOQT_REPO_PATH"
 	check_exit_code($LASTEXITCODE)
 }
 else
 {
 	cd "$SOQT_REPO_PATH"
-	hg pull
+	git pull
 }
 #hg update default
-hg checkout $SOQT_CHANGESET_HASH
+git checkout $SOQT_CHANGESET_HASH
+git submodule update --init --recursive
 if (!(test-path soqt_build)) {mkdir soqt_build}
 cd soqt_build
 $CMAKE_INST_PREFIX_ARG="CMAKE_INSTALL_PREFIX=$env:COINDIR"
@@ -122,7 +124,7 @@ if (!(test-path build)) {mkdir build}
 cd build
 $CMAKE_BUILD_ARG="CMAKE_BUILD_TYPE=$BUILD_TYPE"
 $CMAKE_INST_PREFIX_ARG="CMAKE_INSTALL_PREFIX=$env:OPENCV_DIR"
-cmake "-D$CMAKE_INST_PREFIX_ARG" "-D$CMAKE_BUILD_ARG" -DBUILD_SHARED_LIBS=OFF -DBUILD_WITH_STATIC_CRT=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_DOCS=OFF -DWITH_FFMPEG=OFF -G $GENERATOR_NAME ..
+cmake "-D$CMAKE_INST_PREFIX_ARG" "-D$CMAKE_BUILD_ARG" -DBUILD_SHARED_LIBS=OFF -DBUILD_WITH_STATIC_CRT=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_DOCS=OFF -DWITH_FFMPEG=OFF -DWITH_VTK=OFF -G $GENERATOR_NAME ..
 check_exit_code($LASTEXITCODE)
 $SLN_NAME="OpenCV.sln"
 devenv $SLN_NAME /Build $BUILD_TYPE /Project INSTALL
