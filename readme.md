@@ -7,7 +7,7 @@ Database is created on first launch of the application. Two tables are created f
 
 ## Ubuntu build dependencies
 ```
-sudo apt install make g++ cmake fakeroot qt5-default qt5-qmake mercurial doxygen libc-bin  
+sudo apt install make g++ cmake fakeroot qt5-default qt5-qmake doxygen libc-bin  
 ```
 For Ubuntu 18.04 or higher, for building with OpenCV from package manager (with *\-\-system_opencv* flag):  
 ```
@@ -37,7 +37,6 @@ A directory containing *devenv* should be added to a *PATH* environment variable
 - [CMake (>= 3.1)](https://cmake.org/download/)  
 - [Git](https://git-scm.com/download/win)  
 - [Doxygen](http://doxygen.nl/files/doxygen-1.8.15-setup.exe)  
-- [TortoiseHG](https://tortoisehg.bitbucket.io/download/index.html)  
 - [Sed](http://sourceforge.net/projects/gnuwin32/files//sed/4.2.1/sed-4.2.1-setup.exe/download)  
 - [Inno Setup Compiler](http://www.jrsoftware.org/isdl.php)  
   
@@ -60,13 +59,12 @@ Dependencies:
 - Qt 5.9.5  
 - cmake  
 - git  
-- mercurial  
 - coreutils  
 - doxygen  
 
 Some dependencies can be installed with [Homebrew](https://brew.sh/):  
 ```
-brew install mercurial coreutils cmake doxygen  
+brew install coreutils cmake doxygen  
 ```
   
 For building a macOS app, run script **make_mac.sh**.  
@@ -84,19 +82,19 @@ App will be placed to directory Applications in build directory.
 ## Building from scratch:
 1. Install dependencies for your platform.  
 2. Set environment variable *QTDIR* to directory with Qt files.  
-3. Get Coin3D sources using Mercurial:  
+3. Get Coin3D sources using Git:  
     ```
-    hg clone https://bitbucket.org/Coin3D/coin
+    git clone https://github.com/coin3d/coin.git
     ```  
 4. Build and install it. Set environment variable *COINDIR* pointing to the installation path.  
-5. Get SoQt sources using Mercurial:  
+5. Get SoQt sources using Git:  
     ```
-    hg clone https://bitbucket.org/Coin3D/soqt
+    git clone https://github.com/coin3d/soqt.git
     ```
 6. Build and install it to *COINDIR*. When building, variables *COINDIR* and *QTDIR* should be added to CMAKE\_PREFIX\_PATH.  
 7. Get GMSH sources using Git:  
     ```
-    git clone https://gitlab.onelab.info/gmsh/gmsh.git
+    git clone https://github.com/sasobadovinac/gmsh.git
     ```  
     Checkout to tag *gmsh_3_0_6*.  
 8. Build and install it. Use flags: *-DENABLE_BUILD_LIB=ON -DENABLE_BLAS_LAPACK=OFF -DENABLE_GMP=OFF* . Set environment variable *GMSH_DIR* pointing to the installation path.  
@@ -104,7 +102,7 @@ App will be placed to directory Applications in build directory.
     ```
     git clone https://github.com/opencv/opencv.git
     ```  
-    Checkout to tag *3.2.0*.  
+    Checkout to tag *3.4.0*.  
 10. Build and install it. Better use static linking, but it is necessary to use dynamic CRT when building with MSVC. Use flags *-DBUILD_SHARED_LIBS=OFF -DBUILD_WITH_STATIC_CRT=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_DOCS=OFF -DWITH_FFMPEG=OFF -DWITH_OPENCLAMDBLAS=OFF -DWITH_OPENCLAMDFFT=OFF -DWITH_CUDA=OFF -DWITH_GPHOTO2=OFF*. Set environment variable *OPENCV_DIR* pointing to the installation path.  
 11. Build VARI. Main *CMakeLists.txt* file is placed in *src* directory.  
 

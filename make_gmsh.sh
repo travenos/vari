@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Copyright (c) 2019 Alexey Barashkov <barasher@yandex.ru>
 
-GMSH_REPO_URL="https://gitlab.onelab.info/gmsh/gmsh.git"
+GMSH_REPO_URL="https://github.com/sasobadovinac/gmsh.git"
 GMSH_TAG="gmsh_3_0_6"
 
 THREADS_ARG=-j
